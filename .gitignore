@@ -1,0 +1,93 @@
+# IntelliJ
+out/
+*.ipr
+*.iml
+modules.xml
+/.idea
+# Custom dictionaries
+!/.idea/dictionaries/
+
+
+# Mongo Explorer plugin
+.idea/**/mongoSettings.xml
+
+# File-based project format
+*.iws
+
+# mpeltonen/sbt-idea plugin
+.idea_modules/
+
+# JIRA plugin
+atlassian-ide-plugin.xml
+
+
+# Crashlytics plugin (for Android Studio and IntelliJ)
+com_crashlytics_export_strings.xml
+crashlytics.properties
+crashlytics-build.properties
+fabric.properties
+
+
+
+# Sonarlint plugin
+.idea/sonarlint
+
+### Linux ###
+*~
+
+# temporary files which can be created if a process still has a handle open of a deleted file
+.fuse_hidden*
+
+# KDE directory preferences
+.directory
+
+# Linux trash folder which might appear on any partition or disk
+.Trash-*
+
+# .nfs files are created when an open file is removed but is still being accessed
+.nfs*
+
+### VisualStudioCode ###
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+### VisualStudioCode Patch ###
+# Ignore all local history of files
+.history
+
+# End of https://www.gitignore.io/api/linux,intellij+all,visualstudiocode
+
+**/target/
+/.settings/
+/.classpath
+/.project
+/bin/
+/resources/
+/doc/
+**/dependency-reduced-pom.xml
+
+# Ignore deploy-key just in case
+deploy-key
+
+### Eclipse ###
+**/bin/
+**/.settings/
+**/build/
+.classpath
+.project
+
+### VirtualEnv
+.Python
+[Bb]in
+[Ii]nclude
+[Ll]ib
+[Ll]ib64
+[Ll]ocal
+[Ss]cripts
+pyvenv.cfg
+.venv
+pip-selfcheck.json
+

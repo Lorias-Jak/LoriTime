@@ -1,5 +1,6 @@
 package com.jannik_kuehn.loritime.common.config;
 
+import com.jannik_kuehn.loritime.common.LoriTimePlugin;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 
@@ -9,6 +10,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -31,6 +33,11 @@ public class YamlKeyValueStore implements KeyValueStore {
         saveToFile();
     }
 
+    public void setAll(final Map<String, ?> dataMap) {
+        data.putAll(dataMap);
+        saveToFile();
+    }
+
     @Override
     public Object get(String key) {
         return data.get(key);
@@ -46,6 +53,11 @@ public class YamlKeyValueStore implements KeyValueStore {
     }
 
     @Override
+    public Map<String, ?> getAll() {
+        return data;
+    }
+
+    @Override
     public List<String> getKeys() {
         return new ArrayList<>(data.keySet());
     }
@@ -55,7 +67,12 @@ public class YamlKeyValueStore implements KeyValueStore {
             FileInputStream input = new FileInputStream(filePath);
             Yaml yaml = new Yaml();
             Map<String, Object> loadedData = yaml.load(input);
-            data.putAll(loadedData);
+            if (loadedData == null) {
+                loaded = true;
+                LoriTimePlugin.getInstance().getLogger().warning("Your file '" + filePath + "' seems to be empty. Is this right?");
+                return;
+            }
+            data.putAll(readRecursive(loadedData, ""));
             loaded = true;
         } catch (FileNotFoundException e) {
             loaded = false;
@@ -63,9 +80,24 @@ public class YamlKeyValueStore implements KeyValueStore {
         }
     }
 
+    private Map<String, ?> readRecursive(Map<String, ?> map, String keyChain) {
+        String subPathPrefix = keyChain == null || keyChain.isEmpty() ? "" : keyChain + ".";
+        Map<String, Object> dataMap = new HashMap<>();
+        for (String key : map.keySet()) {
+            Object data = map.get(key);
+            if (data instanceof LinkedHashMap<?,?>) {
+                dataMap.putAll(readRecursive((Map<String, ?>) data, subPathPrefix + key));
+            } else {
+                dataMap.put(subPathPrefix + key, data);
+            }
+        }
+        return dataMap;
+    }
+
     private void saveToFile() {
         DumperOptions options = new DumperOptions();
         options.setPrettyFlow(true);
+        options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
 
         Yaml yaml = new Yaml(options);
 

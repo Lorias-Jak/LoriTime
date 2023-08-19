@@ -1,0 +1,54 @@
+unit:
+  second:
+    singular: 'second'
+    plural: 'seconds'
+    identifier: 's'
+  minute:
+    singular: 'minute'
+    plural: 'minutes'
+    identifier: 'min'
+  hour:
+    singular: 'hour'
+    plural: 'hours'
+    identifier: 'h'
+  day:
+    singular: 'day'
+    plural: 'days'
+    identifier: 'd'
+  week:
+    singular: 'week'
+    plural: 'weeks'
+    identifier: 'w'
+  month:
+    singular: 'month'
+    plural: 'months'
+    identifier: 'mo'
+  year:
+    singular: 'year'
+    plural: 'years'
+    identifier: 'y'
+
+message:
+  nopermission: '&gray&You don''t have the required permissions to do that.'
+  command:
+    onlinetime:
+      usage: '&gray&Use [/onlinetime [player]](dark_aqua) to see a players onlinetime.'
+      notfound: '&gray&The player [%player%](dark_aqua) has not played on %server% yet.'
+      timeseen:
+        self: '&gray&You have played for [%time%](dark_aqua) on %server%.'
+        other: '&gray&The player [%player%](dark_aqua) has already played for [%time%](dark_aqua) on %server%.'
+    onlinetimeadmin:
+      usage: '&gray&Use [/onlinetimeadmin (set|mod|reset) [player] [time]](dark_aqua) to edit a players onlinetime.'
+      missinguuid: '&gray&The player [%player%](dark_aqua) is unknown.'
+      nottime: '&gray&The given time argument [%argument%](dark_aqua) is not valid.'
+      set:
+        usage: '&gray&Use [/onlinetimeadmin set [player] [time]](dark_aqua) to set a players onlinetime.'
+        success: '&gray&The onlinetime of player [%player%](dark_aqua) got successfully set to [%time%](dark_aqua).'
+        negativetime: '&gray&The given time [%time%](dark_aqua) is negative, but must at least be zero.'
+      modify:
+        usage: '&gray&Use [/onlinetimeadmin mod [player] [time]](dark_aqua) to modify a players onlinetime.'
+        success: '&gray&The onlinetime of player [%player%](dark_aqua) got successfully modified by [%time%](dark_aqua).'
+        negativetimesum: '&gray&The given time [%time%](dark_aqua) would cause a negative onlinetime, but must at least be zero.'
+      reset:
+        usage: '&gray&Use [/onlinetimeadmin reset [player]](dark_aqua) to reset a players onlinetime.'
+        success: '&gray&The onlinetime of player [%player%](dark_aqua) got successfully reset.'

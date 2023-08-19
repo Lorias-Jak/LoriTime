@@ -1,8 +1,8 @@
 package com.jannik_kuehn.loritime.common.config;
 
 public class YamlConfiguration extends Configuration {
-    public YamlConfiguration(final String path) {
-        super(new YamlKeyValueStore(path));
+    public YamlConfiguration(final String name) {
+        super(new YamlKeyValueStore(name));
     }
     @Override
     public void setValue(final String key, final Object value) {

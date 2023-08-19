@@ -1,0 +1,23 @@
+###########
+# General #
+###########
+general:
+  language: 'en'
+  storage: 'file'
+  saveInterval: 30
+
+###########
+#  Mysql  #
+###########
+mysql:
+  user: 'user'
+  password: 'pw'
+  database: 'test'
+  port: 3306
+  host: '127.0.0.1'
+  table: 'loritime_'
+
+###################
+#  Do not touch!  #
+##################
+configVersion: 1

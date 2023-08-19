@@ -1,6 +1,7 @@
 package com.jannik_kuehn.loritime.common.config;
 
 import java.util.List;
+import java.util.Map;
 
 public abstract class Configuration {
     protected KeyValueStore keyValueStore;
@@ -21,5 +22,9 @@ public abstract class Configuration {
 
     public boolean isLoaded() {
         return keyValueStore.isLoaded();
+    }
+
+    public Map<String, ?> getAll() {
+        return keyValueStore.getAll();
     }
 }

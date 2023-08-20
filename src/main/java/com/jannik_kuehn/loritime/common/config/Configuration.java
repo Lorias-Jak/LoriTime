@@ -27,4 +27,8 @@ public abstract class Configuration {
     public Map<String, ?> getAll() {
         return keyValueStore.getAll();
     }
+
+    public void reload() {
+        keyValueStore.reload();
+    }
 }

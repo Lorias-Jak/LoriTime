@@ -10,4 +10,5 @@ public interface KeyValueStore {
     Map<String, ?> getAll();
     List<String> getKeys();
     boolean isLoaded();
+    void reload();
 }

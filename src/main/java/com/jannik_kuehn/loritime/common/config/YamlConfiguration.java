@@ -18,4 +18,6 @@ public class YamlConfiguration extends Configuration {
     public Object getObject(String key, Object def) {
         return keyValueStore.get(key, def);
     }
+
+
 }

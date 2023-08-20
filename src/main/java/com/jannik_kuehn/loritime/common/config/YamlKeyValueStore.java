@@ -72,6 +72,7 @@ public class YamlKeyValueStore implements KeyValueStore {
                 LoriTimePlugin.getInstance().getLogger().warning("Your file '" + filePath + "' seems to be empty. Is this right?");
                 return;
             }
+            data.clear();
             data.putAll(readRecursive(loadedData, ""));
             loaded = true;
         } catch (FileNotFoundException e) {
@@ -110,5 +111,9 @@ public class YamlKeyValueStore implements KeyValueStore {
 
     public boolean isLoaded() {
         return loaded;
+    }
+
+    public void reload() {
+        loadFromFile();
     }
 }

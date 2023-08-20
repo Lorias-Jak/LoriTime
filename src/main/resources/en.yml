@@ -29,26 +29,30 @@ unit:
     identifier: 'y'
 
 message:
-  nopermission: '&gray&You don''t have the required permissions to do that.'
+  nopermission: '<#FF3232>You don''t have the required permissions to do that.'
   command:
-    onlinetime:
-      usage: '&gray&Use [/onlinetime [player]](dark_aqua) to see a players onlinetime.'
-      notfound: '&gray&The player [%player%](dark_aqua) has not played on %server% yet.'
+    loritime:
+      usage: '<#A4A4A4>Use <red>/loritime [player] <#A4A4A4>to see a players online time.'
+      notfound: '<#A4A4A4>The player <#50CBAB>[player] <#A4A4A4>has not played on the server yet.'
+      consoleself: '<#FF3232>You''re the console. You can not lookup your online time!'
       timeseen:
-        self: '&gray&You have played for [%time%](dark_aqua) on %server%.'
-        other: '&gray&The player [%player%](dark_aqua) has already played for [%time%](dark_aqua) on %server%.'
-    onlinetimeadmin:
-      usage: '&gray&Use [/onlinetimeadmin (set|mod|reset) [player] [time]](dark_aqua) to edit a players onlinetime.'
-      missinguuid: '&gray&The player [%player%](dark_aqua) is unknown.'
-      nottime: '&gray&The given time argument [%argument%](dark_aqua) is not valid.'
+        self: '<#A4A4A4>You have played for <#50CBAB>[time] <#A4A4A4>on the server.'
+        other: '<#A4A4A4>The player <#50CBAB>[player] <#A4A4A4>has already played for <#50CBAB>[time] <#A4A4A4>on the server.'
+    loritimeadmin:
+      usage: '<#A4A4A4>Use <red>/loritimeadmin [set | mod | reset] [player] [time] <#A4A4A4>to edit a players online time.'
+      missinguuid: '<#A4A4A4>The player <#50CBAB>[player] <#A4A4A4>is unknown.'
+      nottime: '<#A4A4A4>The given time argument <red>[argument] <#FF3232>is not valid.'
       set:
-        usage: '&gray&Use [/onlinetimeadmin set [player] [time]](dark_aqua) to set a players onlinetime.'
-        success: '&gray&The onlinetime of player [%player%](dark_aqua) got successfully set to [%time%](dark_aqua).'
-        negativetime: '&gray&The given time [%time%](dark_aqua) is negative, but must at least be zero.'
+        usage: '<#A4A4A4>Use <red>/loritimeadmin set [player] [time] <#A4A4A4>to set a players online time.'
+        success: '<#A4A4A4>The online time of player <#50CBAB>[player] <#A4A4A4>got successfully set to <#50CBAB>[time].'
+        negativetime: '<red>The given time <#50CBAB>[time] <red>is negative, but must at least be zero.'
       modify:
-        usage: '&gray&Use [/onlinetimeadmin mod [player] [time]](dark_aqua) to modify a players onlinetime.'
-        success: '&gray&The onlinetime of player [%player%](dark_aqua) got successfully modified by [%time%](dark_aqua).'
-        negativetimesum: '&gray&The given time [%time%](dark_aqua) would cause a negative onlinetime, but must at least be zero.'
+        usage: '<#A4A4A4>Use <red>/onlinetimeadmin mod [player] [time] <#A4A4A4>to modify a players online time.'
+        success: '<#A4A4A4>The online time of player <#50CBAB>[player] <#A4A4A4>got successfully modified by <#50CBAB>[time].'
+        negativetimesum: '<red>The given time <#50CBAB>[time] <red>would cause a negative online time, but must at least be zero.'
       reset:
-        usage: '&gray&Use [/onlinetimeadmin reset [player]](dark_aqua) to reset a players onlinetime.'
-        success: '&gray&The onlinetime of player [%player%](dark_aqua) got successfully reset.'
+        usage: '<#A4A4A4>Use <red>/onlinetimeadmin reset [player] <#A4A4A4>to reset a players online time.'
+        success: '<#A4A4A4>The online time of player <#50CBAB>[player] <#A4A4A4>got successfully reset.'
+      reload:
+        usage: '<#A4A4A4> Use <red>/onlinetimeadmin reload <#A4A4A4>to reload the plugin.'
+        success: '<#A4A4A4>You have <#1AFA29>successfully <#A4A4A4>reloaded the plugin.'

@@ -1,0 +1,59 @@
+unit:
+  second:
+    singular: 'second'
+    plural: 'seconds'
+    identifier: 's'
+  minute:
+    singular: 'minute'
+    plural: 'minutes'
+    identifier: 'min'
+  hour:
+    singular: 'hour'
+    plural: 'hours'
+    identifier: 'h'
+  day:
+    singular: 'day'
+    plural: 'days'
+    identifier: 'd'
+  week:
+    singular: 'week'
+    plural: 'weeks'
+    identifier: 'w'
+  month:
+    singular: 'month'
+    plural: 'months'
+    identifier: 'mo'
+  year:
+    singular: 'year'
+    plural: 'years'
+    identifier: 'y'
+
+
+message:
+  nopermission: '<#FF3232>Dazu fehlen dir die Rechte.'
+  command:
+    loritime:
+      usage: '<#A4A4A4>Benutze <red>/onlinetime [Spieler] <#A4A4A4>um die Spielzeit anzuzeigen.'
+      notfound: '<#A4A4A4>Der Spieler <#50CBAB>[player] <#A4A4A4>war noch nie auf dem Server.'
+      consoleself: '<#FF3232>Du bist die Konsole, deine eigene Online Zeit kannst du nicht anschauen!'
+      timeseen:
+        self: '<#A4A4A4>Du hast <#50CBAB>[time] <#A4A4A4>auf dem Server gespielt.'
+        other: '<#A4A4A4>Der Spieler <#50CBAB>[player] <#A4A4A4>hat <#50CBAB>[time] <#A4A4A4>auf dem Server gespielt.'
+    loritimeadmin:
+      usage: '<#A4A4A4>Benutze <red>/onlinetimeadmin [set | mod | reset] [player] [time] <#A4A4A4>um die Spielzeit zu ändern.'
+      missinguuid: '<#A4A4A4>Der Spieler <#50CBAB>[player] <#A4A4A4>ist unbekannt.'
+      nottime: '<#A4A4A4>Das gegebene Zeitargument <#50CBAB>[argument] <#FF3232>hat ein ungültiges Format.'
+      set:
+        usage: '<#A4A4A4>Benutze <red>/onlinetimeadmin set [player] [time] <#A4A4A4>um die Spielzeit zu setzen.'
+        success: '<#A4A4A4>Die Spielzeit von <#50CBAB>[player] <#A4A4A4>wurde auf <#50CBAB>[time] <#A4A4A4>gesetzt.'
+        negativetime: '<#A4A4A4>Die gegebene Zeit <#50CBAB>[time] <#A4A4A4>ist negativ, muss aber mindestens Null sein.'
+      modify:
+        usage: '<#A4A4A4>Benutze <red>/onlinetimeadmin mod [player] <#50CBAB>[time] <#A4A4A4>um die Spielzeit zu modifizieren.'
+        success: '<#A4A4A4>Die Spielzeit von <#50CBAB>[player] <#A4A4A4>wurde um <#50CBAB>[time] geändert.'
+        negativetimesum: '<#A4A4A4>Die gegebene Zeit <#50CBAB>[time] <#A4A4A4>würde in negativer Spielzeit resultieren, diese muss aber mindestens Null sein.'
+      reset:
+        usage: '<#A4A4A4>Benutze <red>/onlinetimeadmin reset [player] [time] um die Spielzeit zu zurückzusetzen.'
+        success: '<#A4A4A4>Die Spielzeit von <#50CBAB>[player] wurde zurückgesetzt.'
+      reload:
+        usage: '<#A4A4A4> Benutze <red>/onlinetimeadmin reload <#A4A4A4>um das Plugin neu zu laden.'
+        success: '<#A4A4A4>Du hast <#1AFA29>erfolgreich <#A4A4A4>das Plugin neu geladen.'

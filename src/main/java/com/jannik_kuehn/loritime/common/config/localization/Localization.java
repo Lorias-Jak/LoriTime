@@ -10,13 +10,12 @@ import java.util.Map;
 import java.util.Objects;
 
 public class Localization {
+    private static final String PLUGINPREFIX = "<#808080>[<#08A51D>LoriTime<#808080>]<reset> ";
     private final Configuration langFile;
     private final Map<String, String> cachedTranslations;
     private final MiniMessage miniMessage;
 
     public Localization(Configuration langFile) {
-        // ToDo gegen richtiges Schema austauschen mit "en"
-
         this.langFile = Objects.requireNonNullElseGet(langFile, () -> new YamlConfiguration("en"));
         cachedTranslations = new HashMap<>();
         miniMessage = MiniMessage.builder().build();
@@ -33,8 +32,13 @@ public class Localization {
         cachedTranslations.putAll(dataMap);
     }
 
+    public void reloadTranslation() {
+        langFile.reload();
+        loadTranslations();
+    }
+
     public TextComponent formatMiniMessage(String message) {
-        return (TextComponent) miniMessage.deserialize(message);
+        return (TextComponent) miniMessage.deserialize(PLUGINPREFIX + message);
     }
 
     public String getRawMessage(String key) {

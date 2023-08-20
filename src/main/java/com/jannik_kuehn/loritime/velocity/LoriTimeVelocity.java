@@ -1,20 +1,27 @@
 package com.jannik_kuehn.loritime.velocity;
 
+import com.jannik_kuehn.loritime.common.LoriTimePlugin;
+import com.jannik_kuehn.loritime.common.command.LoriTimeAdminCommand;
+import com.jannik_kuehn.loritime.common.command.LoriTimeCommand;
+import com.jannik_kuehn.loritime.velocity.module.command.VelocityCommand;
+import com.jannik_kuehn.loritime.velocity.module.listener.TimeAccumulatorVelocityListener;
+import com.jannik_kuehn.loritime.velocity.module.listener.PlayerNameVelocityListener;
+import com.jannik_kuehn.loritime.velocity.module.schedule.VelocityScheduleAdapter;
+import com.jannik_kuehn.loritime.velocity.util.VelocityLogger;
+import com.jannik_kuehn.loritime.velocity.util.VelocityServer;
+import com.velocitypowered.api.event.EventManager;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
 import com.velocitypowered.api.event.proxy.ProxyShutdownEvent;
 import com.velocitypowered.api.plugin.Plugin;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.ProxyServer;
+import org.slf4j.Logger;
 
 import javax.inject.Inject;
 import java.nio.file.Path;
-import java.util.logging.Logger;
+import java.util.ArrayList;
 
-/**
- * The {@link LoriTimeVelocity} class is the main-class of the Plugin for the Velocity Handling.
- * It starts the plugin correctly up and shuts it down.
- */
 @Plugin(id = "loritime",
         name = "LoriTime",
         version ="1.0.0-SNAPSHOT",
@@ -23,55 +30,65 @@ import java.util.logging.Logger;
         authors = {"Lorias-Jak"}
 )
 public class LoriTimeVelocity {
-
-    /**
-     * The {@link ProxyServer} instance.
-     */
+    private final Path dataDirectory;
+    private final VelocityLogger logger;
     private final ProxyServer proxyServer;
+    private LoriTimePlugin loriTimePlugin;
+    private final ArrayList<VelocityCommand> commands;
 
-    /**
-     * The {@link Logger} instance.
-     */
-    private final Logger logger;
-
-    /**
-     * The Plugin directory as {@link Path}.
-     */
-    private final Path pluginDirectory;
-
-    /**
-     * The starting instance for Velocity to hookl in.
-     *
-     * @param server the {@link ProxyServer}.
-     * @param logger the {@link Logger}.
-     * @param dataDirectory the plugins directory as {@link Path}.
-     */
     @Inject
-    public LoriTimeVelocity(final ProxyServer server, final Logger logger, final @DataDirectory Path dataDirectory) {
+    public LoriTimeVelocity(ProxyServer server, Logger logger, @DataDirectory Path dataDirectory) {
+        this.dataDirectory = dataDirectory;
+        this.logger = new VelocityLogger(logger);
         this.proxyServer = server;
-        this.logger = logger;
-        this.pluginDirectory = dataDirectory;
+        this.commands = new ArrayList<>();
     }
 
-    /**
-     * The method is executed in the startup of velocity.
-     *
-     * @param event is the {@link ProxyInitializeEvent} from velocity.
-     */
     @Subscribe
-    public void onProxyInitialize(final ProxyInitializeEvent event) {
-        // Empty
+    public void onInitialize(ProxyInitializeEvent event) {
+        VelocityServer velocityServer = new VelocityServer();
+        this.loriTimePlugin = new LoriTimePlugin(logger, dataDirectory.toFile(), new VelocityScheduleAdapter(this, proxyServer.getScheduler()), velocityServer);
+        velocityServer.enable(loriTimePlugin, proxyServer);
+
+        try {
+            loriTimePlugin.enable();
+        } catch (Exception e) {
+            loriTimePlugin.disable();
+            throw new RuntimeException(e);
+        }
+
+        enableListener();
+        enableCommands();
     }
 
-    /**
-     * The event when the proxy is shutdown.
-     *
-     * @param event is the {@link ProxyShutdownEvent} from Velocity.
-     */
+    private void enableListener() {
+        EventManager eventManager = proxyServer.getEventManager();
+        eventManager.register(this, new PlayerNameVelocityListener(loriTimePlugin, loriTimePlugin.getNameStorage()));
+        eventManager.register(this, new TimeAccumulatorVelocityListener(loriTimePlugin, loriTimePlugin.getTimeStorage()));
+    }
+
+    private void enableCommands() {
+        commands.add(new VelocityCommand(this, new LoriTimeAdminCommand(loriTimePlugin, loriTimePlugin.getLocalization(),
+                loriTimePlugin.getParser(), getLoriTimePlugin().getTimeStorage())));
+        commands.add(new VelocityCommand(this, new LoriTimeCommand(loriTimePlugin, loriTimePlugin.getLocalization(),
+                loriTimePlugin.getTimeStorage(), loriTimePlugin.getNameStorage())));
+    }
+
     @Subscribe
-    public void onShutDown(final ProxyShutdownEvent event) {
-        // Empty
+    public void onShutDown(ProxyShutdownEvent event) {
+        for (VelocityCommand command : commands) {
+            command.unregisterCommand();
+        }
+        proxyServer.getEventManager().unregisterListeners(this);
+        loriTimePlugin.disable();
     }
 
+    public ProxyServer getProxyServer() {
+        return proxyServer;
+    }
+
+    public LoriTimePlugin getLoriTimePlugin() {
+        return loriTimePlugin;
+    }
 
 }

@@ -5,31 +5,40 @@ unit:
   second:
     singular: 'second'
     plural: 'seconds'
-    identifier: 's'
+    identifier:
+      - 's'
+      - 'sec'
   minute:
     singular: 'minute'
     plural: 'minutes'
-    identifier: 'min'
+    identifier:
+      - 'min'
   hour:
     singular: 'hour'
     plural: 'hours'
-    identifier: 'h'
+    identifier:
+      - 'h'
   day:
     singular: 'day'
     plural: 'days'
-    identifier: 'd'
+    identifier:
+      - 'd'
   week:
     singular: 'week'
     plural: 'weeks'
-    identifier: 'w'
+    identifier:
+      - 'w'
   month:
     singular: 'month'
     plural: 'months'
-    identifier: 'mo'
+    identifier:
+      - 'm'
   year:
     singular: 'year'
     plural: 'years'
-    identifier: 'y'
+    identifier:
+      - 'y'
+      - 'yhr'
 
 message:
   nopermission: '<#FF3232>You don''t have the required permissions to do that.'

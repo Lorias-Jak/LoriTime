@@ -28,7 +28,7 @@ public class FileNameStorage implements NameStorage {
         if (null == uuid) {
             return Optional.empty();
         } else {
-            return UuidUtil.fromString(uuid.toString());
+            return Optional.of(UUID.fromString(uuid.toString()));
         }
     }
 

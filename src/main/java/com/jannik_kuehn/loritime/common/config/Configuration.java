@@ -1,5 +1,6 @@
 package com.jannik_kuehn.loritime.common.config;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -12,23 +13,30 @@ public abstract class Configuration {
 
     public abstract void setValue(String key, Object value);
 
+    public abstract String getString(String key);
+
+    public abstract String getString(String key, String def);
+
+    public abstract int getInt(String key);
+
+    public abstract int getInt(String key, int def);
+
+    public abstract long getLong(String key);
+
+    public abstract long getLong(String key, long def);
+
+    public abstract ArrayList<?> getArrayList(String key);
+
     public abstract Object getObject(String key);
 
     public abstract Object getObject(String key, Object def);
 
-    public List<String> getKeys() {
-        return keyValueStore.getKeys();
-    }
+    public abstract List<String> getKeys();
 
-    public boolean isLoaded() {
-        return keyValueStore.isLoaded();
-    }
+    public abstract boolean isLoaded();
 
-    public Map<String, ?> getAll() {
-        return keyValueStore.getAll();
-    }
+    public abstract Map<String, ?> getAll();
 
-    public void reload() {
-        keyValueStore.reload();
-    }
+    public abstract void reload();
+
 }

@@ -3,33 +3,47 @@
 # If you translate the messages to your language, feel free to create a pull request to add them by default.
 unit:
   second:
-    singular: 'second'
-    plural: 'seconds'
-    identifier: 's'
+    singular: 'Sekunde'
+    plural: 'Sekunden'
+    identifier:
+      - 's'
+      - 'sec'
+      - 'sek'
   minute:
-    singular: 'minute'
-    plural: 'minutes'
-    identifier: 'min'
+    singular: 'Minute'
+    plural: 'Minuten'
+    identifier:
+      - 'min'
   hour:
-    singular: 'hour'
-    plural: 'hours'
-    identifier: 'h'
+    singular: 'Stunde'
+    plural: 'Stunden'
+    identifier:
+      - 'h'
+      - 'std'
   day:
-    singular: 'day'
-    plural: 'days'
-    identifier: 'd'
+    singular: 'Tag'
+    plural: 'Tage'
+    identifier:
+      - 't'
+      - 'd'
   week:
-    singular: 'week'
-    plural: 'weeks'
-    identifier: 'w'
+    singular: 'Woche'
+    plural: 'Wochen'
+    identifier:
+      - 'w'
+      - 'wo'
   month:
-    singular: 'month'
-    plural: 'months'
-    identifier: 'mo'
+    singular: 'Monat'
+    plural: 'Monate'
+    identifier:
+      - 'm'
   year:
-    singular: 'year'
-    plural: 'years'
-    identifier: 'y'
+    singular: 'Jahr'
+    plural: 'Jahre'
+    identifier:
+      - 'j'
+      - 'y'
+      - 'yhr'
 
 
 message:

@@ -21,6 +21,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
@@ -95,7 +96,7 @@ public class LoriTimePlugin {
         }
 
         this.config = getOrCreateFile(dataFolder.toString(),"config.yml", true);
-        Configuration localizationFile = getOrCreateFile(dataFolder.toString(), (String) config.getObject("general.language", "en") + ".yml", true);
+        Configuration localizationFile = getOrCreateFile(dataFolder.toString(), config.getString("general.language", "en") + ".yml", true);
         this.localization = new Localization(localizationFile);
 
         if (!config.isLoaded() || !localization.getLangFile().isLoaded()) {
@@ -103,7 +104,7 @@ public class LoriTimePlugin {
             errorDisable = true;
         }
         try {
-            parser = TimeParser.builder()
+            parser = new TimeParser.Builder()
                     .addUnit(1, getUnits(localization, "second"))
                     .addUnit(60, getUnits(localization, "minute"))
                     .addUnit(60 * 60, getUnits(localization, "hour"))
@@ -116,7 +117,7 @@ public class LoriTimePlugin {
             logger.error("Could not create time parser.", ex);
         }
 
-        saveInterval = (int) config.getObject("general.saveInterval");
+        saveInterval = config.getInt("general.saveInterval");
     }
 
     private Configuration getOrCreateFile(String folder, String fileName, boolean needCopy) {
@@ -150,16 +151,23 @@ public class LoriTimePlugin {
     private String[] getUnits(Localization langConfig, String unit) {
         String singular = langConfig.getRawMessage("unit." + unit + ".singular");
         String plural = langConfig.getRawMessage("unit." + unit + ".plural");
-        String identifier = langConfig.getRawMessage("unit." + unit + ".identifier");
+        List<?> identifier = langConfig.getLangArray("unit." + unit + ".identifier");
         Set<String> units = new HashSet<>();
         units.add(singular);
         units.add(plural);
-        units.add(identifier);
+        for (Object content : identifier) {
+            if (content instanceof String) {
+                units.add((String) content);
+            } else {
+                logger.warning("dangerous identifier definition in language file. Path: " + "unit." + unit + "identifier: " + content.toString());
+                units.add(content.toString());
+            }
+        }
         return units.toArray(new String[0]);
     }
 
     private void loadStorage() {
-        String storageMethod = (String) config.getObject("general.storage", "file");
+        String storageMethod = config.getString("general.storage", "file");
         switch (storageMethod.toLowerCase(Locale.ROOT)) {
             case "file" -> {
                 loadFileStorage();
@@ -170,7 +178,7 @@ public class LoriTimePlugin {
             default -> {
                 logger.severe("illegal storage method " + storageMethod);
             }
-        };
+        }
     }
 
     public NameStorage getNameStorage() {
@@ -205,10 +213,6 @@ public class LoriTimePlugin {
         return logger;
     }
 
-    public File getDataFolder() {
-        return dataFolder;
-    }
-
     public PluginScheduler getScheduler() {
         return scheduler;
     }
@@ -227,9 +231,5 @@ public class LoriTimePlugin {
 
     public TimeParser getParser() {
         return parser;
-    }
-
-    public int getSaveInterval() {
-        return saveInterval;
     }
 }

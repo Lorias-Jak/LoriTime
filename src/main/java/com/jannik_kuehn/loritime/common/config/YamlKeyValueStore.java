@@ -73,7 +73,8 @@ public class YamlKeyValueStore implements KeyValueStore {
                 return;
             }
             data.clear();
-            data.putAll(readRecursive(loadedData, ""));
+            Map<String, ?> test= readRecursive(loadedData, "");
+            data.putAll(test);
             loaded = true;
         } catch (FileNotFoundException e) {
             loaded = false;
@@ -88,6 +89,8 @@ public class YamlKeyValueStore implements KeyValueStore {
             Object data = map.get(key);
             if (data instanceof LinkedHashMap<?,?>) {
                 dataMap.putAll(readRecursive((Map<String, ?>) data, subPathPrefix + key));
+            } else if (data instanceof ArrayList<?>) {
+                dataMap.put(subPathPrefix + key,data);
             } else {
                 dataMap.put(subPathPrefix + key, data);
             }

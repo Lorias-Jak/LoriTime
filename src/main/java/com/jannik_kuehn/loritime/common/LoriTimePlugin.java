@@ -4,6 +4,7 @@ import com.jannik_kuehn.loritime.api.PluginTask;
 import com.jannik_kuehn.loritime.common.config.YamlConfiguration;
 import com.jannik_kuehn.loritime.common.exception.StorageException;
 import com.jannik_kuehn.loritime.common.storage.AccumulatingTimeStorage;
+import com.jannik_kuehn.loritime.common.storage.database.DatabaseStorage;
 import com.jannik_kuehn.loritime.common.storage.file.FileTimeStorage;
 import com.jannik_kuehn.loritime.common.storage.file.FileNameStorage;
 import com.jannik_kuehn.loritime.common.storage.NameStorage;
@@ -60,7 +61,12 @@ public class LoriTimePlugin {
 
     public void enable() {
         loadOrCreateConfigs();
-        loadStorage();
+        try {
+            loadStorage();
+        } catch (StorageException e) {
+            logger.error("An error occurred while enabling the storage", e);
+            errorDisable = true;
+        }
         flushCacheTask = scheduler.scheduleAsync(saveInterval / 2L, saveInterval, this::flushOnlineTimeCache);
 
         if (errorDisable) {
@@ -166,27 +172,19 @@ public class LoriTimePlugin {
         return units.toArray(new String[0]);
     }
 
-    private void loadStorage() {
+    private void loadStorage() throws StorageException {
         String storageMethod = config.getString("general.storage", "file");
         switch (storageMethod.toLowerCase(Locale.ROOT)) {
             case "file" -> {
                 loadFileStorage();
             }
-            case "db", "database" -> {
-                // loadDatabaseStorage();
+            case "db", "database", "mysql" -> {
+                loadDatabaseStorage();
             }
             default -> {
                 logger.severe("illegal storage method " + storageMethod);
             }
         }
-    }
-
-    public NameStorage getNameStorage() {
-        return nameStorage;
-    }
-
-    public AccumulatingTimeStorage getTimeStorage() {
-        return timeStorage;
     }
 
     private void loadFileStorage() {
@@ -199,6 +197,12 @@ public class LoriTimePlugin {
         Configuration timeFile = getOrCreateFile(dataFolder + "\\data\\","time.yml", false);
         this.nameStorage = new FileNameStorage(new FileStorageProvider(this, nameFile));
         this.timeStorage = new AccumulatingTimeStorage(new FileTimeStorage(new FileStorageProvider(this, timeFile)));
+    }
+
+    private void loadDatabaseStorage() throws StorageException {
+        DatabaseStorage storage = new DatabaseStorage(config, this);
+        this.nameStorage = storage;
+        this.timeStorage = new AccumulatingTimeStorage(storage);
     }
 
     public void flushOnlineTimeCache() {
@@ -231,5 +235,13 @@ public class LoriTimePlugin {
 
     public TimeParser getParser() {
         return parser;
+    }
+
+    public NameStorage getNameStorage() {
+        return nameStorage;
+    }
+
+    public AccumulatingTimeStorage getTimeStorage() {
+        return timeStorage;
     }
 }

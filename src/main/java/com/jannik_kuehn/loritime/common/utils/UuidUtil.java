@@ -39,15 +39,4 @@ public final class UuidUtil {
         }
         return new UUID(msb, lsb);
     }
-
-    public static Optional<UUID> fromString(String string) {
-        Matcher uuidMatcher = UuidUtil.UUID_PATTERN.matcher(string);
-        if (uuidMatcher.matches()) {
-            return Optional.of(UUID.fromString(uuidMatcher.group(1) + "-" + uuidMatcher.group(2) + "-" + uuidMatcher.group(3) + "-" + uuidMatcher.group(4) + "-" + uuidMatcher.group(5)));
-        } else {
-            return Optional.empty();
-        }
-    }
-
-    private UuidUtil() {}
 }

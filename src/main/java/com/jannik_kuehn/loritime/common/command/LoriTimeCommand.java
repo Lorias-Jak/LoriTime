@@ -33,7 +33,7 @@ public class LoriTimeCommand implements CommonCommand {
 
     @Override
     public void execute(CommonSender sender, String... args) {
-        if (!sender.hasPermission("onlinetime.see")) {
+        if (!sender.hasPermission("loritime.see")) {
             printUtilityMessage(sender, "message.nopermission");
             return;
         }

@@ -1,6 +1,7 @@
 package com.jannik_kuehn.loritime.common.command;
 
 import com.jannik_kuehn.loritime.common.LoriTimePlugin;
+import com.jannik_kuehn.loritime.common.storage.NameStorage;
 import com.jannik_kuehn.loritime.common.storage.TimeStorage;
 import com.jannik_kuehn.loritime.common.utils.CommonSender;
 import com.jannik_kuehn.loritime.common.utils.TimeParser;
@@ -60,6 +61,15 @@ public class LoriTimeAdminCommand implements CommonCommand {
         if (!source.hasPermission("loritime.admin")) {
             return new ArrayList<>();
         }
+        if (args.length == 0) {
+            ArrayList<String> completions = new ArrayList<>();
+            completions.add("set");
+            completions.add("modify");
+            completions.add("add");
+            completions.add("delete");
+            completions.add("reload");
+            return completions;
+        }
         if (args.length == 1) {
             ArrayList<String> completions = new ArrayList<>();
             completions.add("set");
@@ -68,6 +78,15 @@ public class LoriTimeAdminCommand implements CommonCommand {
             completions.add("delete");
             completions.add("reload");
             return filterCompletion(completions, args[0]);
+        }
+        if (args.length == 2 && !args[0].equalsIgnoreCase("reload")) {
+            ArrayList<String> completions = new ArrayList<>();
+            try {
+                completions.addAll(plugin.getNameStorage().getEntries().stream().toList());
+            } catch (StorageException e) {
+                plugin.getLogger().error("Could not load entries from NameStorage for tab completion in LoriTimeAdminCommand!", e);
+            }
+            return filterCompletion(completions, args[1]);
         }
         return new ArrayList<>();
     }

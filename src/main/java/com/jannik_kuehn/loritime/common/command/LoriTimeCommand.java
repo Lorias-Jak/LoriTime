@@ -21,13 +21,11 @@ public class LoriTimeCommand implements CommonCommand {
 
     private final LoriTimePlugin plugin;
     private final Localization localization;
-    private final TimeStorage timeStorage;
     private final NameStorage nameStorage;
 
-    public LoriTimeCommand(LoriTimePlugin plugin, Localization localization, TimeStorage timeStorage, NameStorage nameStorage) {
+    public LoriTimeCommand(LoriTimePlugin plugin, Localization localization, NameStorage nameStorage) {
         this.plugin = plugin;
         this.localization = localization;
-        this.timeStorage = timeStorage;
         this.nameStorage = nameStorage;
     }
 
@@ -66,14 +64,14 @@ public class LoriTimeCommand implements CommonCommand {
                 }
 
                 boolean isTargetSender = targetPlayer != null && targetPlayer.equals(senderInstance.getUniqueId());
-                if (!isTargetSender && !sender.hasPermission("onlinetime.see.other")) {
+                if (!isTargetSender && !sender.hasPermission("loritime.see.other")) {
                     printUtilityMessage(sender, "message.nopermission");
                     return;
                 }
 
                 final long time;
                 try {
-                    OptionalLong optionalTime = timeStorage.getTime(targetPlayer);
+                    OptionalLong optionalTime = plugin.getTimeStorage().getTime(targetPlayer);
                     if (optionalTime.isPresent()) {
                         time = optionalTime.getAsLong();
                     } else {
@@ -110,16 +108,23 @@ public class LoriTimeCommand implements CommonCommand {
 
     @Override
     public List<String> handleTabComplete(CommandSource source, String... args) {
-        if (!source.hasPermission("onlinetime.see")) {
+        if (!source.hasPermission("loritime.see.other")) {
             return new ArrayList<>();
         }
+
+        List<String> namesList;
+        try {
+            namesList = new ArrayList<>(nameStorage.getEntries().stream().toList());
+            return namesList;
+        } catch (StorageException e) {
+            namesList = new ArrayList<>();
+            plugin.getLogger().error("Could not load entries from NameStorage for tab completion in LoriTimeAdminCommand!", e);
+        }
+        if (args.length == 0) {
+            return namesList;
+        }
         if (args.length == 1) {
-            try {
-                List<String> namesList = new ArrayList<>(nameStorage.getEntries().stream().toList());
-                return filterCompletion(namesList, args[0]);
-            } catch (StorageException e) {
-                throw new RuntimeException(e);
-            }
+            return filterCompletion(namesList, args[0]);
         }
         return new ArrayList<>();
     }

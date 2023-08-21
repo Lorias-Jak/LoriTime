@@ -2,8 +2,17 @@
 # General #
 ###########
 general:
+
+  # Default Language of the unit-modifier and the command responses for the player.
+  # To see all available options see: https://github.com/Lorias-Jak/LoriTime/tree/main/src/main/resources/localization
   language: 'en'
+
+  # You can decide how the player data will be stored.
+  # The two options are 'file' or 'mysql'.
   storage: 'file'
+
+  # The save interval specifies how often the player's online time is saved.
+  # The unit is seconds.
   saveInterval: 30
 
 ###########

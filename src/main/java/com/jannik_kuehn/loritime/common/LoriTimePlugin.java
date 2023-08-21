@@ -44,6 +44,7 @@ public class LoriTimePlugin {
     private PluginTask flushCacheTask;
 
     private boolean errorDisable;
+    private String pluginVersion;
 
     public static LoriTimePlugin getInstance() {
         return instance;
@@ -57,6 +58,7 @@ public class LoriTimePlugin {
         this.scheduler = scheduler;
         this.server = server;
         this.errorDisable = false;
+        this.pluginVersion = "LoriTime-1.0.0";
     }
 
     public void enable() {
@@ -261,5 +263,9 @@ public class LoriTimePlugin {
 
     public AccumulatingTimeStorage getTimeStorage() {
         return timeStorage;
+    }
+
+    public String getPluginVersion() {
+        return pluginVersion;
     }
 }

@@ -58,6 +58,11 @@ public class VelocityServer implements CommonServer {
         return true;
     }
 
+    @Override
+    public String getServerVersion() {
+        return server.getVersion().getName() + " -> " + server.getVersion().getVersion();
+    }
+
     public CommandManager getCommandManager() {
         return server.getCommandManager();
     }

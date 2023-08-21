@@ -79,6 +79,24 @@ public class LoriTimePlugin {
         flushCacheTask.cancel();
         flushOnlineTimeCache();
 
+        closeStorages();
+    }
+
+    public void reload() throws StorageException {
+        flushCacheTask.cancel();
+        flushOnlineTimeCache();
+
+        config.reload();
+        localization.reloadTranslation();
+
+        closeStorages();
+        loadStorage();
+
+        flushCacheTask = null;
+        flushCacheTask = scheduler.scheduleAsync(saveInterval / 2L, saveInterval, this::flushOnlineTimeCache);
+    }
+
+    private void closeStorages() {
         if (nameStorage != null) {
             try {
                 nameStorage.close();
@@ -178,7 +196,7 @@ public class LoriTimePlugin {
             case "file" -> {
                 loadFileStorage();
             }
-            case "db", "database", "mysql" -> {
+            case "db", "database", "sql", "mysql" -> {
                 loadDatabaseStorage();
             }
             default -> {
@@ -200,9 +218,9 @@ public class LoriTimePlugin {
     }
 
     private void loadDatabaseStorage() throws StorageException {
-        DatabaseStorage storage = new DatabaseStorage(config, this);
-        this.nameStorage = storage;
-        this.timeStorage = new AccumulatingTimeStorage(storage);
+        DatabaseStorage databaseStorage = new DatabaseStorage(config, this);
+        this.nameStorage = databaseStorage;
+        this.timeStorage = new AccumulatingTimeStorage(databaseStorage);
     }
 
     public void flushOnlineTimeCache() {

@@ -68,3 +68,4 @@ message:
       reload:
         usage: '<#A4A4A4> Use <red>/onlinetimeadmin reload <#A4A4A4>to reload the plugin.'
         success: '<#A4A4A4>You have <#1AFA29>successfully <#A4A4A4>reloaded the plugin.'
+        issue: '<#FF3232>An issue occurred during plugin reload, the plugin will stop counting!'

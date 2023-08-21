@@ -74,3 +74,4 @@ message:
       reload:
         usage: '<#A4A4A4> Benutze <red>/onlinetimeadmin reload <#A4A4A4>um das Plugin neu zu laden.'
         success: '<#A4A4A4>Du hast <#1AFA29>erfolgreich <#A4A4A4>das Plugin neu geladen.'
+        issue: '<#FF3232>Es ist ein Fehler beim neuladen des Plugins aufgetreten. Die Zeit wird nicht weiter gezählt!'

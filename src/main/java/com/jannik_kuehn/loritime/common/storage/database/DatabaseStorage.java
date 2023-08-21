@@ -280,13 +280,15 @@ public class DatabaseStorage implements NameStorage, TimeStorage {
     }
 
     @Override
-    public Set<String> getEntries() throws StorageException {
+    public Set<String> getEntries() {
         return null;
     }
 
     @Override
     public void close() throws StorageException {
-        mySQL.close();
+        if (!mySQL.isClosed()) {
+            mySQL.close();
+        }
     }
 
     private void setEntries(Connection connection, Map<UUID, String> entries) throws SQLException {

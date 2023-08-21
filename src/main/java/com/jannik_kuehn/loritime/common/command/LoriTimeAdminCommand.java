@@ -23,13 +23,11 @@ public class LoriTimeAdminCommand implements CommonCommand {
     private final LoriTimePlugin plugin;
     private final Localization localization;
     private final TimeParser parser;
-    private final TimeStorage timeStorage;
 
-    public LoriTimeAdminCommand(LoriTimePlugin plugin, Localization localization, TimeParser parser, TimeStorage timeStorage) {
+    public LoriTimeAdminCommand(LoriTimePlugin plugin, Localization localization, TimeParser parser) {
         this.plugin = plugin;
         this.localization = localization;
         this.parser = parser;
-        this.timeStorage = timeStorage;
     }
 
     @Override
@@ -135,7 +133,7 @@ public class LoriTimeAdminCommand implements CommonCommand {
 
         long currentTime;
         try {
-            OptionalLong optionalCurrentTime = timeStorage.getTime(player.getUniqueId());
+            OptionalLong optionalCurrentTime = plugin.getTimeStorage().getTime(player.getUniqueId());
             if (optionalCurrentTime.isPresent()) {
                 currentTime = optionalCurrentTime.getAsLong();
             } else {
@@ -180,7 +178,7 @@ public class LoriTimeAdminCommand implements CommonCommand {
         long time = optionalTime.getAsLong();
         long currentTime;
         try {
-            OptionalLong optionalCurrentTime = timeStorage.getTime(player.getUniqueId());
+            OptionalLong optionalCurrentTime = plugin.getTimeStorage().getTime(player.getUniqueId());
             if (optionalCurrentTime.isPresent()) {
                 currentTime = optionalCurrentTime.getAsLong();
             } else {
@@ -220,7 +218,7 @@ public class LoriTimeAdminCommand implements CommonCommand {
         CommonSender player = optionalPlayer.get();
         long currentTime;
         try {
-            OptionalLong optionalCurrentTime = timeStorage.getTime(player.getUniqueId());
+            OptionalLong optionalCurrentTime = plugin.getTimeStorage().getTime(player.getUniqueId());
             if (optionalCurrentTime.isPresent()) {
                 currentTime = optionalCurrentTime.getAsLong();
             } else {
@@ -246,12 +244,20 @@ public class LoriTimeAdminCommand implements CommonCommand {
             return;
         }
         plugin.getLocalization().reloadTranslation();
+
+        try {
+            plugin.reload();
+        } catch (StorageException e) {
+            plugin.getLogger().error("Could not reload the plugin!", e);
+            printUtilityMessage(sender, "message.command.loritimeadmin.reload.issue");
+            return;
+        }
         printUtilityMessage(sender, "message.command.loritimeadmin.reload.success");
     }
 
     public void modifyOnlineTime(UUID uuid, final long modifyBy) {
         try {
-            timeStorage.addTime(uuid, modifyBy);
+            plugin.getTimeStorage().addTime(uuid, modifyBy);
         } catch (StorageException ex) {
             plugin.getLogger().error("could not modify online time of " + uuid.toString(), ex);
         }

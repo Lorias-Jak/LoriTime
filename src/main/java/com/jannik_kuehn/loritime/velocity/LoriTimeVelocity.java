@@ -69,9 +69,8 @@ public class LoriTimeVelocity {
 
     private void enableCommands() {
         commands.add(new VelocityCommand(this, new LoriTimeAdminCommand(loriTimePlugin, loriTimePlugin.getLocalization(),
-                loriTimePlugin.getParser(), getLoriTimePlugin().getTimeStorage())));
-        commands.add(new VelocityCommand(this, new LoriTimeCommand(loriTimePlugin, loriTimePlugin.getLocalization(),
-                loriTimePlugin.getNameStorage())));
+                loriTimePlugin.getParser())));
+        commands.add(new VelocityCommand(this, new LoriTimeCommand(loriTimePlugin, loriTimePlugin.getLocalization())));
     }
 
     @Subscribe

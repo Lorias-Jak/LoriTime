@@ -62,15 +62,6 @@ public class MySQL implements Closeable, AutoCloseable {
         return hikari == null || hikari.isClosed();
     }
 
-    public boolean hasConnection() throws SQLException {
-        if (!isClosed()) {
-            try (Connection con = getConnection()) {
-                return con != null;
-            }
-        }
-        return false;
-    }
-
     public boolean open() {
         if (!loadedJDBCDriver) {
             plugin.getLogger().severe("JDBC Driver was not loaded!");

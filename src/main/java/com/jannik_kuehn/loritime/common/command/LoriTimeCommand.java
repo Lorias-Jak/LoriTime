@@ -21,12 +21,10 @@ public class LoriTimeCommand implements CommonCommand {
 
     private final LoriTimePlugin plugin;
     private final Localization localization;
-    private final NameStorage nameStorage;
 
-    public LoriTimeCommand(LoriTimePlugin plugin, Localization localization, NameStorage nameStorage) {
+    public LoriTimeCommand(LoriTimePlugin plugin, Localization localization) {
         this.plugin = plugin;
         this.localization = localization;
-        this.nameStorage = nameStorage;
     }
 
     @Override
@@ -43,7 +41,7 @@ public class LoriTimeCommand implements CommonCommand {
                 if (args.length == 1) {
                     Optional<UUID> optionalPlayer;
                     try {
-                        optionalPlayer = nameStorage.getUuid(args[0]);
+                        optionalPlayer = plugin.getNameStorage().getUuid(args[0]);
                     } catch (StorageException e) {
                         throw new RuntimeException(e);
                     }
@@ -76,7 +74,7 @@ public class LoriTimeCommand implements CommonCommand {
                         time = optionalTime.getAsLong();
                     } else {
                         sender.sendMessage(localization.formatMiniMessage(localization.getRawMessage("message.command.loritime.notfound")
-                                .replace("[player]", nameStorage.getName(targetPlayer).get())));
+                                .replace("[player]", plugin.getNameStorage().getName(targetPlayer).get())));
                         return;
                     }
                 } catch (StorageException ex) {
@@ -90,7 +88,7 @@ public class LoriTimeCommand implements CommonCommand {
                 } else {
                     try {
                         sender.sendMessage(localization.formatMiniMessage(localization.getRawMessage("message.command.loritime.timeseen.other")
-                                .replace("[player]", nameStorage.getName(targetPlayer).get())
+                                .replace("[player]", plugin.getNameStorage().getName(targetPlayer).get())
                                 .replace("[time]", TimeUtil.formatTime(time, localization))));
                     } catch (StorageException e) {
                         throw new RuntimeException(e);
@@ -114,7 +112,7 @@ public class LoriTimeCommand implements CommonCommand {
 
         List<String> namesList;
         try {
-            namesList = new ArrayList<>(nameStorage.getEntries().stream().toList());
+            namesList = new ArrayList<>(plugin.getNameStorage().getEntries().stream().toList());
             return namesList;
         } catch (StorageException e) {
             namesList = new ArrayList<>();

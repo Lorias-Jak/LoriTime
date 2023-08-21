@@ -188,13 +188,13 @@ public class LoriTimePlugin {
     }
 
     private void loadFileStorage() {
-        File directory = new File(dataFolder.toString() + "\\data\\");
+        File directory = new File(dataFolder.toString() + "/data/");
         if (!directory.exists()) {
             directory.mkdir();
         }
 
-        Configuration nameFile = getOrCreateFile(dataFolder + "\\data\\","names.yml", false);
-        Configuration timeFile = getOrCreateFile(dataFolder + "\\data\\","time.yml", false);
+        Configuration nameFile = getOrCreateFile(dataFolder + "/data/","names.yml", false);
+        Configuration timeFile = getOrCreateFile(dataFolder + "/data/","time.yml", false);
         this.nameStorage = new FileNameStorage(new FileStorageProvider(this, nameFile));
         this.timeStorage = new AccumulatingTimeStorage(new FileTimeStorage(new FileStorageProvider(this, timeFile)));
     }

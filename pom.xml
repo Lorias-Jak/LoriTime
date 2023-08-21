@@ -83,6 +83,11 @@
 
         <!-- only dependencies from maven central that are no MC Plugins -->
         <dependency>
+            <groupId>joda-time</groupId>
+            <artifactId>joda-time</artifactId>
+            <version>2.12.5</version>
+        </dependency>
+        <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
             <version>8.0.33</version>
@@ -205,10 +210,14 @@
                 <targetPath>.</targetPath>
                 <filtering>false</filtering>
                 <excludes>
-                    <exclude>plugin.yml</exclude>
-                    <exclude>bungee.yml</exclude>
-                    <exclude>database.properties</exclude>
+                    <exclude>localization/**</exclude>
+                    <!-- Add any other excludes you might have -->
                 </excludes>
+            </resource>
+            <resource>
+                <directory>src/main/resources/localization</directory>
+                <targetPath>.</targetPath>
+                <filtering>true</filtering>
             </resource>
             <resource>
                 <directory>src/main/resources</directory>
@@ -217,34 +226,38 @@
                 <includes>
                     <include>plugin.yml</include>
                     <include>bungee.yml</include>
-                    <include>database.properties</include>
                 </includes>
             </resource>
         </resources>
+
         <plugins>
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-enforcer-plugin</artifactId>
-                <version>3.3.0</version>
-                <configuration>
-                    <rules>
-                        <requireMavenVersion>
-                            <version>3.0.5</version>
-                        </requireMavenVersion>
-                    </rules>
-                </configuration>
                 <executions>
                     <execution>
-                        <id>enforce-maven</id>
+                        <id>enforce-banned-dependencies</id>
                         <goals>
                             <goal>enforce</goal>
                         </goals>
+                        <configuration>
+                            <rules>
+                                <bannedDependencies>
+                                    <excludes>
+                                        <exclude>com.google.code.findbugs</exclude>
+                                        <exclude>junit</exclude>
+                                        <exclude>org.spigotmc</exclude>
+                                        <exclude>org.bukkit</exclude>
+                                    </excludes>
+                                    <includes>
+                                        <include>com.google.code.findbugs:jsr305</include>
+                                    </includes>
+                                </bannedDependencies>
+                            </rules>
+                            <fail>true</fail>
+                        </configuration>
                     </execution>
                 </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>versions-maven-plugin</artifactId>
-                <version>2.16.0</version>
             </plugin>
             <plugin>
                 <artifactId>maven-clean-plugin</artifactId>

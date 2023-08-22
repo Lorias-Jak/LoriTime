@@ -18,7 +18,7 @@
     <version>${version}</version>
     <groupId>com.jannik_kuehn</groupId>
     <artifactId>LoriTime</artifactId>
-    <description>Measure your users online time!</description>
+    <description>A plugin to capture the time that a player spends on your server network</description>
 
     <licenses>
         <license>
@@ -226,6 +226,7 @@
                 <includes>
                     <include>plugin.yml</include>
                     <include>bungee.yml</include>
+                    <include>velocity-plugin.json</include>
                 </includes>
             </resource>
         </resources>

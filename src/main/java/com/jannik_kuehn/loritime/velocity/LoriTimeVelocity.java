@@ -24,13 +24,6 @@ import javax.inject.Inject;
 import java.nio.file.Path;
 import java.util.ArrayList;
 
-@Plugin(id = "loritime",
-        name = "LoriTime",
-        version ="1.0.0-SNAPSHOT",
-        url = "https://github.com/Lorias-Jak/LoriTime",
-        description = "A plugin to capture the time that a player spends on your server network",
-        authors = {"Lorias-Jak"}
-)
 public class LoriTimeVelocity {
     private final Path dataDirectory;
     private final VelocityLogger logger;

@@ -2,7 +2,6 @@ package com.jannik_kuehn.loritime.common.storage;
 
 import com.jannik_kuehn.loritime.common.exception.StorageException;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -18,7 +17,7 @@ public interface NameStorage extends AutoCloseable {
 
     void setEntries(Map<UUID, String> entries) throws StorageException;
 
-    Set<String> getEntries() throws StorageException;
+    Set<String> getNameEntries() throws StorageException;
 
     @Override
     void close() throws StorageException;

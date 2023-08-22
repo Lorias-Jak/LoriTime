@@ -4,7 +4,6 @@ import com.jannik_kuehn.loritime.common.exception.StorageException;
 
 import java.util.Map;
 import java.util.OptionalLong;
-import java.util.Set;
 import java.util.UUID;
 
 public interface TimeStorage extends AutoCloseable {
@@ -15,9 +14,7 @@ public interface TimeStorage extends AutoCloseable {
 
     void addTimes(Map<UUID, Long> additionalTimes) throws StorageException;
 
-    Set<String> getKeySet() throws StorageException;
-
-    Map<String, ?> getAllEntries() throws StorageException;
+    Map<String, ?> getAllTimeEntries() throws StorageException;
 
     @Override
     void close() throws StorageException;

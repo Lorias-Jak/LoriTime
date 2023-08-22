@@ -62,7 +62,7 @@ public class FileNameStorage implements NameStorage {
     }
 
     @Override
-    public Set<String> getEntries() throws StorageException {
+    public Set<String> getNameEntries() throws StorageException {
         return storageProvider.readAll().keySet();
     }
 

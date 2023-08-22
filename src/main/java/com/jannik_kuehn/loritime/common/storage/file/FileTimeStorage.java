@@ -61,12 +61,7 @@ public class FileTimeStorage implements TimeStorage {
     }
 
     @Override
-    public Set<String> getKeySet() throws StorageException {
-        return storageProvider.readAll().keySet();
-    }
-
-    @Override
-    public Map<String, ?> getAllEntries() throws StorageException {
+    public Map<String, ?> getAllTimeEntries() throws StorageException {
         return storageProvider.readAll();
     }
 

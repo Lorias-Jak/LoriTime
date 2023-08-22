@@ -59,7 +59,7 @@ public class LoriTimeTopCommand implements CommonCommand {
         List<Map.Entry<String, Long>> timeEntriesList;
         Map<String, Long> rawTimeEntries = new HashMap<>();
         try {
-            for (Map.Entry<String, ?> allEntry : plugin.getTimeStorage().getAllEntries().entrySet()) {
+            for (Map.Entry<String, ?> allEntry : plugin.getTimeStorage().getAllTimeEntries().entrySet()) {
                 if (allEntry.getValue() instanceof Long) {
                     rawTimeEntries.put(allEntry.getKey(), (Long) allEntry.getValue());
                 } else if (allEntry.getValue() instanceof Integer) {

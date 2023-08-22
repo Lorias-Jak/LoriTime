@@ -4,8 +4,6 @@ import com.jannik_kuehn.loritime.api.CommonCommand;
 import com.jannik_kuehn.loritime.common.LoriTimePlugin;
 import com.jannik_kuehn.loritime.common.config.localization.Localization;
 import com.jannik_kuehn.loritime.common.exception.StorageException;
-import com.jannik_kuehn.loritime.common.storage.NameStorage;
-import com.jannik_kuehn.loritime.common.storage.TimeStorage;
 import com.jannik_kuehn.loritime.common.utils.CommonSender;
 import com.jannik_kuehn.loritime.common.utils.TimeUtil;
 import com.velocitypowered.api.command.CommandSource;
@@ -112,7 +110,7 @@ public class LoriTimeCommand implements CommonCommand {
 
         List<String> namesList;
         try {
-            namesList = new ArrayList<>(plugin.getNameStorage().getEntries().stream().toList());
+            namesList = new ArrayList<>(plugin.getNameStorage().getNameEntries().stream().toList());
             return namesList;
         } catch (StorageException e) {
             namesList = new ArrayList<>();

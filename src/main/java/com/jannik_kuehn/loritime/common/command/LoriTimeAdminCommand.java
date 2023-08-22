@@ -1,8 +1,6 @@
 package com.jannik_kuehn.loritime.common.command;
 
 import com.jannik_kuehn.loritime.common.LoriTimePlugin;
-import com.jannik_kuehn.loritime.common.storage.NameStorage;
-import com.jannik_kuehn.loritime.common.storage.TimeStorage;
 import com.jannik_kuehn.loritime.common.utils.CommonSender;
 import com.jannik_kuehn.loritime.common.utils.TimeParser;
 import com.jannik_kuehn.loritime.common.utils.TimeUtil;
@@ -80,7 +78,7 @@ public class LoriTimeAdminCommand implements CommonCommand {
         if (args.length == 2 && !args[0].equalsIgnoreCase("reload")) {
             ArrayList<String> completions = new ArrayList<>();
             try {
-                completions.addAll(plugin.getNameStorage().getEntries().stream().toList());
+                completions.addAll(plugin.getNameStorage().getNameEntries().stream().toList());
             } catch (StorageException e) {
                 plugin.getLogger().error("Could not load entries from NameStorage for tab completion in LoriTimeAdminCommand!", e);
             }

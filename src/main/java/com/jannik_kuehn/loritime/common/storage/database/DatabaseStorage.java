@@ -13,6 +13,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -53,6 +56,14 @@ public class DatabaseStorage implements NameStorage, TimeStorage {
 
     private String getByUuid() {
         return "SELECT `name`, `time` FROM `" + mySQL.getTablePrefix() + "` WHERE `uuid` = ?";
+    }
+
+    private String getAllEntriesSet() {
+        return "SELECT `uuid` AS uuid, `time` FROM `" + mySQL.getTablePrefix() + "`";
+    }
+
+    private String getAllNameEntries() {
+        return "SELECT `name` FROM `" + mySQL.getTablePrefix() + "`";
     }
 
     private String getByName() {
@@ -279,21 +290,58 @@ public class DatabaseStorage implements NameStorage, TimeStorage {
         }
     }
 
-
-    //ToDo
     @Override
-    public Set<String> getEntries() throws StorageException {
-        return null;
+    public Set<String> getNameEntries() throws StorageException {
+        poolLock.readLock().lock();
+        try {
+            checkClosed();
+            try (Connection connection = mySQL.getConnection()){
+                return getNameEntries(connection);
+            }
+        } catch (SQLException ex) {
+            throw new StorageException(ex);
+        } finally {
+            poolLock.readLock().unlock();
+        }
+    }
+
+    private Set<String> getNameEntries(Connection connection) throws SQLException {
+        try (PreparedStatement getByUuidStatement = connection.prepareStatement(getAllNameEntries())) {
+            try (ResultSet result = getByUuidStatement.executeQuery()) {
+                Set<String> nameSet = new HashSet<>();
+                while (result.next()){
+                    nameSet.add(result.getString("name"));
+                }
+                return nameSet;
+            }
+        }
     }
 
     @Override
-    public Set<String> getKeySet() {
-        return null;
+    public Map<String, ?> getAllTimeEntries() throws StorageException {
+        poolLock.readLock().lock();
+        try {
+            checkClosed();
+            try (Connection connection = mySQL.getConnection()){
+                return getAllTimeEntries(connection);
+            }
+        } catch (SQLException ex) {
+            throw new StorageException(ex);
+        } finally {
+            poolLock.readLock().unlock();
+        }
     }
 
-    @Override
-    public Map<String, ?> getAllEntries() throws StorageException {
-        return null;
+    private Map<String, ?> getAllTimeEntries(Connection connection) throws SQLException {
+        try (PreparedStatement getByUuidStatement = connection.prepareStatement(getAllEntriesSet())) {
+            try (ResultSet result = getByUuidStatement.executeQuery()) {
+                Map<String, Long> test = new HashMap<>();
+                while (result.next()){
+                    test.put(UuidUtil.fromBytes(result.getBytes("uuid")).toString(), result.getLong("time"));
+                }
+                return test;
+            }
+        }
     }
 
     @Override

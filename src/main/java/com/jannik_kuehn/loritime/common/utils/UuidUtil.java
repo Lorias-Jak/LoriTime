@@ -1,11 +1,8 @@
 package com.jannik_kuehn.loritime.common.utils;
 
-import java.util.Optional;
 import java.util.UUID;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-// ToDo kann glaube ich rausfliegen
 
 public final class UuidUtil {
 

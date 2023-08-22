@@ -4,6 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <properties>
+        <name>LoriTime</name>
         <version>1.0.0</version>
         <maven-version>${version}-DEV-UNOFFICIAL</maven-version>
         <current-date>${maven.build.timestamp}</current-date>
@@ -14,7 +15,7 @@
         <basePackage>com.jannik_kuehn.loritime</basePackage>
     </properties>
 
-    <name>LoriTime</name>
+    <name>${name}</name>
     <version>${version}</version>
     <groupId>com.jannik_kuehn</groupId>
     <artifactId>LoriTime</artifactId>

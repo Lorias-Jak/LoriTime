@@ -1,8 +1,9 @@
 {
   "id": "loritime",
-  "name": "${project.version}",
+  "name": "${project.name}",
   "version": "${project.version}",
   "url": "https://github.com/Lorias-Jak/LoriTime",
   "description": "A plugin to capture the time that a player spends on your server network",
+  "main": "com.jannik_kuehn.loritime.velocity.LoriTimeVelocity",
   "authors": ["Lorias-Jak"]
 }

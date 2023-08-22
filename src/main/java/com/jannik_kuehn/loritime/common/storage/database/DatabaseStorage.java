@@ -279,8 +279,20 @@ public class DatabaseStorage implements NameStorage, TimeStorage {
         }
     }
 
+
+    //ToDo
     @Override
-    public Set<String> getEntries() {
+    public Set<String> getEntries() throws StorageException {
+        return null;
+    }
+
+    @Override
+    public Set<String> getKeySet() {
+        return null;
+    }
+
+    @Override
+    public Map<String, ?> getAllEntries() throws StorageException {
         return null;
     }
 

@@ -27,18 +27,17 @@ public class LoriTimeInfoCommand implements CommonCommand {
             printUtilityMessage(sender, "message.nopermission");
             return;
         }
-        if (args.length <= 1) {
-            plugin.getScheduler().runAsyncOnce(() -> {
-                MiniMessage miniMessage = MiniMessage.builder().build();
-                String serverVersion = "<#A4A4A4>Server version: <#FF3232>" + plugin.getServer().getServerVersion();
-                String pluginVersion = "<#A4A4A4>Plugin version: <#FF3232>" + plugin.getPluginVersion();
 
-                sender.sendMessage(localization.formatMiniMessage("Version Information"));
-                sender.sendMessage("");
-                sender.sendMessage((TextComponent) miniMessage.deserialize(serverVersion));
-                sender.sendMessage((TextComponent) miniMessage.deserialize(pluginVersion));
-            });
-        }
+        plugin.getScheduler().runAsyncOnce(() -> {
+            MiniMessage miniMessage = MiniMessage.builder().build();
+            String serverVersion = "<#A4A4A4>Server version: <#FF3232>" + plugin.getServer().getServerVersion();
+            String pluginVersion = "<#A4A4A4>Plugin version: <#FF3232>" + plugin.getPluginVersion();
+
+            sender.sendMessage(localization.formatMiniMessage("Version Information"));
+            sender.sendMessage("");
+            sender.sendMessage((TextComponent) miniMessage.deserialize(serverVersion));
+            sender.sendMessage((TextComponent) miniMessage.deserialize(pluginVersion));
+        });
     }
 
     @Override

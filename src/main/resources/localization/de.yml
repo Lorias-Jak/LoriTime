@@ -69,9 +69,17 @@ message:
         success: '<#A4A4A4>Die Spielzeit von <#50CBAB>[player] <#A4A4A4>wurde um <#50CBAB>[time] geändert.'
         negativetimesum: '<#A4A4A4>Die gegebene Zeit <#50CBAB>[time] <#A4A4A4>würde in negativer Spielzeit resultieren, diese muss aber mindestens Null sein.'
       reset:
-        usage: '<#A4A4A4>Benutze <red>/onlinetimeadmin reset [player] [time] um die Spielzeit zu zurückzusetzen.'
+        usage: '<#A4A4A4>Benutze <red>/onlinetimeadmin reset [player] [time] <#A4A4A4>um die Spielzeit zu zurückzusetzen.'
         success: '<#A4A4A4>Die Spielzeit von <#50CBAB>[player] wurde zurückgesetzt.'
       reload:
         usage: '<#A4A4A4> Benutze <red>/onlinetimeadmin reload <#A4A4A4>um das Plugin neu zu laden.'
         success: '<#A4A4A4>Du hast <#1AFA29>erfolgreich <#A4A4A4>das Plugin neu geladen.'
         issue: '<#FF3232>Es ist ein Fehler beim neuladen des Plugins aufgetreten. Die Zeit wird nicht weiter gezählt!'
+    top:
+      usage: '<#A4A4A4>Benutze <red>/onlinetimetop [page] <#A4A4A4>um dir die Top Onlinezeit der Spieler anzeigen zu lassen.'
+      gatheringdata: '<#A4A4A4>Sammle daten zusammen und berechne...'
+      headline: '<#A4A4A4><newline>Top online times <#50CBAB>[dateAndTime] <newline><#A4A4A4>---- Top Times -- Seite <#50CBAB>[pages] <#A4A4A4>----<newline>Server Total: <#50CBAB>[totalTime]'
+      user: '<#50CBAB>[place]: [player] [time]'
+      wrongpage: '<#A4A4A4>Bitte wähle eine Seite zwischen <#FF3232>[pages].'
+      nonumber: '<#FF3232>Der angegebene Wert war keine Zahl.'
+

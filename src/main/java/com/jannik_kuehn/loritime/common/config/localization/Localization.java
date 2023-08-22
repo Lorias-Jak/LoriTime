@@ -28,6 +28,10 @@ public class Localization {
         return (TextComponent) miniMessage.deserialize(PLUGINPREFIX + message);
     }
 
+    public TextComponent formatMiniMessageWithoutPrefix(String message) {
+        return (TextComponent) miniMessage.deserialize(message);
+    }
+
     public String getRawMessage(String key) {
         return Objects.requireNonNullElseGet(langFile.getString(key), () -> "Message not found: " + key);
     }

@@ -4,6 +4,7 @@ import com.jannik_kuehn.loritime.common.LoriTimePlugin;
 import com.jannik_kuehn.loritime.common.command.LoriTimeAdminCommand;
 import com.jannik_kuehn.loritime.common.command.LoriTimeCommand;
 import com.jannik_kuehn.loritime.common.command.LoriTimeInfoCommand;
+import com.jannik_kuehn.loritime.common.command.LoriTimeTopCommand;
 import com.jannik_kuehn.loritime.velocity.module.command.VelocityCommand;
 import com.jannik_kuehn.loritime.velocity.module.listener.TimeAccumulatorVelocityListener;
 import com.jannik_kuehn.loritime.velocity.module.listener.PlayerNameVelocityListener;
@@ -73,6 +74,7 @@ public class LoriTimeVelocity {
                 loriTimePlugin.getParser())));
         commands.add(new VelocityCommand(this, new LoriTimeCommand(loriTimePlugin, loriTimePlugin.getLocalization())));
         commands.add(new VelocityCommand(this, new LoriTimeInfoCommand(loriTimePlugin, loriTimePlugin.getLocalization())));
+        commands.add(new VelocityCommand(this, new LoriTimeTopCommand(loriTimePlugin, loriTimePlugin.getLocalization())));
     }
 
     @Subscribe

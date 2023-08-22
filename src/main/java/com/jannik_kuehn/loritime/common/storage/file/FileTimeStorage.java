@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.OptionalLong;
+import java.util.Set;
 import java.util.UUID;
 
 public class FileTimeStorage implements TimeStorage {
@@ -57,6 +58,16 @@ public class FileTimeStorage implements TimeStorage {
             }
         }
         storageProvider.writeAll(writeData);
+    }
+
+    @Override
+    public Set<String> getKeySet() throws StorageException {
+        return storageProvider.readAll().keySet();
+    }
+
+    @Override
+    public Map<String, ?> getAllEntries() throws StorageException {
+        return storageProvider.readAll();
     }
 
     @Override

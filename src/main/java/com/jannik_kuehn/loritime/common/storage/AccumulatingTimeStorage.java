@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.OptionalLong;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -51,6 +52,16 @@ public class AccumulatingTimeStorage implements TimeStorage, TimeAccumulator {
             }
         }
         storage.addTimes(directWrite);
+    }
+
+    @Override
+    public Set<String> getKeySet() throws StorageException {
+        return storage.getKeySet();
+    }
+
+    @Override
+    public Map<String, ?> getAllEntries() throws StorageException {
+        return storage.getAllEntries();
     }
 
     @Override

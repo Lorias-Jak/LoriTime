@@ -69,3 +69,10 @@ message:
         usage: '<#A4A4A4> Use <red>/onlinetimeadmin reload <#A4A4A4>to reload the plugin.'
         success: '<#A4A4A4>You have <#1AFA29>successfully <#A4A4A4>reloaded the plugin.'
         issue: '<#FF3232>An issue occurred during plugin reload, the plugin will stop counting!'
+    top:
+      usage: '<#A4A4A4>Use <red>/onlinetimetop [page] <#A4A4A4>to see the top online time of the players.'
+      gatheringdata: '<#A4A4A4>Gather data and start calculate...'
+      headline: '<#A4A4A4><newline>Top online times <#50CBAB>[dateAndTime] <newline><#A4A4A4>---- Top times -- Page <#50CBAB>[pages] <#A4A4A4>----<newline>Server total: <#50CBAB>[totalTime]'
+      user: '<#50CBAB>[place]: [player] [time]'
+      wrongpage: '<#A4A4A4>Please choose a page between <#FF3232>[pages].'
+      nonumber: '<#FF3232>The specified value was not a number.'

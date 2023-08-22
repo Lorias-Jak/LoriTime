@@ -32,7 +32,7 @@ public class LoriTimeTopCommand implements CommonCommand {
 
     @Override
     public void execute(CommonSender sender, String... args) {
-        if (!sender.hasPermission("loritime.info")) {
+        if (!sender.hasPermission("loritime.top")) {
             printUtilityMessage(sender, "message.nopermission");
             return;
         }

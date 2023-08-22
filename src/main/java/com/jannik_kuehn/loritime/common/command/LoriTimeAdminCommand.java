@@ -42,12 +42,16 @@ public class LoriTimeAdminCommand implements CommonCommand {
             String[] subCommandArgs = new String[args.length - 1];
             System.arraycopy(args, 1, subCommandArgs, 0, subCommandArgs.length);
 
-            switch (args[0].toLowerCase(Locale.ROOT)) {
-                case "set" -> set(sender, subCommandArgs);
-                case "modify", "mod", "add" -> modify(sender, subCommandArgs);
-                case "reset", "delete", "del" -> reset(sender, subCommandArgs);
-                case "reload" -> reload(sender, subCommandArgs);
-                default -> printUtilityMessage(sender, "message.command.loritimeadmin.usage");
+            try {
+                switch (args[0].toLowerCase(Locale.ROOT)) {
+                    case "set" -> set(sender, subCommandArgs);
+                    case "modify", "mod", "add" -> modify(sender, subCommandArgs);
+                    case "reset", "delete", "del" -> reset(sender, subCommandArgs);
+                    case "reload" -> reload(sender, subCommandArgs);
+                    default -> printUtilityMessage(sender, "message.command.loritimeadmin.usage");
+                }
+            } catch (StorageException e) {
+                plugin.getLogger().error("An exception ocurred during LoriTimeAdminCommand!", e);
             }
         });
     }
@@ -102,41 +106,43 @@ public class LoriTimeAdminCommand implements CommonCommand {
         return "loritimeadmin";
     }
 
-    private void set(CommonSender sender, String... args) {
+    private void set(CommonSender sender, String... args) throws StorageException {
         if (args.length < 2) {
             printUtilityMessage(sender, "message.command.loritimeadmin.set.usage");
             return;
         }
-        Optional<CommonSender> optionalPlayer = plugin.getServer().getPlayer(args[0]);
-        if (!optionalPlayer.isPresent()) {
+        Optional<UUID> optionalUUID = plugin.getNameStorage().getUuid(args[0]);
+        if (optionalUUID.isEmpty()) {
             printMissingUuidMessage(sender, args[0]);
             return;
         }
-        CommonSender player = optionalPlayer.get();
+        UUID playerUUID = optionalUUID.get();
 
         String[] timeArgs = new String[args.length - 1];
         System.arraycopy(args, 1, timeArgs, 0, timeArgs.length);
         OptionalLong optionalTime = parser.parseToSeconds(String.join(" ", timeArgs));
-        if (!optionalTime.isPresent()) {
+        if (optionalTime.isEmpty()) {
             printNotTimeMessage(sender, timeArgs);
             return;
         }
         long time = optionalTime.getAsLong();
+        String playerName = plugin.getNameStorage().getName(playerUUID).get();
+
         if (time < 0) {
             sender.sendMessage(localization.formatMiniMessage(localization.getRawMessage("message.command.loritimeadmin.set.negativetime")
-                    .replace("[player]", player.getName())
+                    .replace("[player]", playerName)
                     .replace("[time]", TimeUtil.formatTime(time, localization))));
             return;
         }
 
         long currentTime;
         try {
-            OptionalLong optionalCurrentTime = plugin.getTimeStorage().getTime(player.getUniqueId());
+            OptionalLong optionalCurrentTime = plugin.getTimeStorage().getTime(playerUUID);
             if (optionalCurrentTime.isPresent()) {
                 currentTime = optionalCurrentTime.getAsLong();
             } else {
                 sender.sendMessage(localization.formatMiniMessage(localization.getRawMessage("message.command.loritime.notfound")
-                        .replace("[player]", player.getName())));
+                        .replace("[player]", playerName)));
                 return;
             }
         } catch (StorageException ex) {
@@ -146,25 +152,25 @@ public class LoriTimeAdminCommand implements CommonCommand {
         }
 
         if (currentTime != time) {
-            modifyOnlineTime(player.getUniqueId(), time - currentTime);
+            modifyOnlineTime(playerUUID, time - currentTime);
         }
         sender.sendMessage(localization.formatMiniMessage(localization.getRawMessage("message.command.loritimeadmin.set.success")
-                .replace("[player]", player.getName())
+                .replace("[player]", playerName)
                 .replace("[time]", TimeUtil.formatTime(time, localization))));
     }
 
-    private void modify(CommonSender sender, String... args) {
+    private void modify(CommonSender sender, String... args) throws StorageException {
         if (args.length < 2) {
             printUtilityMessage(sender, "message.command.loritimeadmin.modify.usage");
             return;
         }
 
-        Optional<CommonSender> optionalPlayer = plugin.getServer().getPlayer(args[0]);
-        if (!optionalPlayer.isPresent()) {
+        Optional<UUID> optionalUUID = plugin.getNameStorage().getUuid(args[0]);
+        if (optionalUUID.isEmpty()) {
             printMissingUuidMessage(sender, args[0]);
             return;
         }
-        CommonSender player = optionalPlayer.get();
+        UUID playerUUID = optionalUUID.get();
 
         String[] timeArgs = new String[args.length - 1];
         System.arraycopy(args, 1, timeArgs, 0, timeArgs.length);
@@ -173,15 +179,16 @@ public class LoriTimeAdminCommand implements CommonCommand {
             printNotTimeMessage(sender, timeArgs);
             return;
         }
+        String playerName = plugin.getNameStorage().getName(playerUUID).get();
         long time = optionalTime.getAsLong();
         long currentTime;
         try {
-            OptionalLong optionalCurrentTime = plugin.getTimeStorage().getTime(player.getUniqueId());
+            OptionalLong optionalCurrentTime = plugin.getTimeStorage().getTime(playerUUID);
             if (optionalCurrentTime.isPresent()) {
                 currentTime = optionalCurrentTime.getAsLong();
             } else {
                 sender.sendMessage(localization.formatMiniMessage(localization.getRawMessage("message.command.loritime.notfound")
-                        .replace("[player]", player.getName())));
+                        .replace("[player]", playerName)));
                 return;
             }
         } catch (StorageException ex) {
@@ -191,37 +198,40 @@ public class LoriTimeAdminCommand implements CommonCommand {
         }
         if (currentTime + time < 0) {
             sender.sendMessage(localization.formatMiniMessage(localization.getRawMessage("message.command.loritimeadmin.modify.negativetimesum")
-                    .replace("[player]", player.getName())
+                    .replace("[player]", playerName)
                     .replace("[time]", TimeUtil.formatTime(time, localization))));
             return;
         }
         if (time != 0) {
-            modifyOnlineTime(player.getUniqueId(), time);
+            modifyOnlineTime(playerUUID, time);
         }
         sender.sendMessage(localization.formatMiniMessage(localization.getRawMessage("message.command.loritimeadmin.modify.success")
-                .replace("[player]", player.getName())
+                .replace("[player]", playerName)
                 .replace("[time]", TimeUtil.formatTime(time, localization))));
     }
 
-    private void reset(CommonSender sender, String... args) {
+    private void reset(CommonSender sender, String... args) throws StorageException {
         if (args.length != 1) {
             printUtilityMessage(sender, "message.command.loritimeadmin.reset.usage");
             return;
         }
-        Optional<CommonSender> optionalPlayer = plugin.getServer().getPlayer(args[0]);
-        if (!optionalPlayer.isPresent()) {
+
+        Optional<UUID> optionalUUID = plugin.getNameStorage().getUuid(args[0]);
+        if (optionalUUID.isEmpty()) {
             printMissingUuidMessage(sender, args[0]);
             return;
         }
-        CommonSender player = optionalPlayer.get();
+        UUID playerUUID = optionalUUID.get();
+
+        String playerName = plugin.getNameStorage().getName(playerUUID).get();
         long currentTime;
         try {
-            OptionalLong optionalCurrentTime = plugin.getTimeStorage().getTime(player.getUniqueId());
+            OptionalLong optionalCurrentTime = plugin.getTimeStorage().getTime(playerUUID);
             if (optionalCurrentTime.isPresent()) {
                 currentTime = optionalCurrentTime.getAsLong();
             } else {
                 sender.sendMessage(localization.formatMiniMessage(localization.getRawMessage("message.command.loritime.notfound")
-                        .replace("[player]", player.getName())));
+                        .replace("[player]", playerName)));
                 return;
             }
         } catch (StorageException ex) {
@@ -230,10 +240,10 @@ public class LoriTimeAdminCommand implements CommonCommand {
             return;
         }
         if (currentTime != 0) {
-            modifyOnlineTime(player.getUniqueId(), -currentTime);
+            modifyOnlineTime(playerUUID, -currentTime);
         }
         sender.sendMessage(localization.formatMiniMessage(localization.getRawMessage("message.command.loritimeadmin.reset.success")
-                .replace("[player]", player.getName())));
+                .replace("[player]", playerName)));
     }
 
     private  void reload(CommonSender sender, String... args) {

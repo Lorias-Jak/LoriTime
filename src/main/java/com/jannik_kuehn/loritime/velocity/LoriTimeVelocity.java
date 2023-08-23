@@ -58,8 +58,8 @@ public class LoriTimeVelocity {
 
     private void enableListener() {
         EventManager eventManager = proxyServer.getEventManager();
-        eventManager.register(this, new PlayerNameVelocityListener(loriTimePlugin, loriTimePlugin.getNameStorage()));
-        eventManager.register(this, new TimeAccumulatorVelocityListener(loriTimePlugin, loriTimePlugin.getTimeStorage()));
+        eventManager.register(this, new PlayerNameVelocityListener(loriTimePlugin));
+        eventManager.register(this, new TimeAccumulatorVelocityListener(loriTimePlugin));
     }
 
     private void enableCommands() {

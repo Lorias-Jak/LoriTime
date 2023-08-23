@@ -87,6 +87,12 @@ public class LoriTimePlugin {
     public void reload() throws StorageException {
         flushCacheTask.cancel();
         flushOnlineTimeCache();
+        timeStorage.close();
+        timeStorage = null;
+        nameStorage.close();
+        nameStorage = null;
+
+        flushCacheTask = null;
 
         config.reload();
         localization.reloadTranslation();
@@ -94,7 +100,6 @@ public class LoriTimePlugin {
         closeStorages();
         loadStorage();
 
-        flushCacheTask = null;
         flushCacheTask = scheduler.scheduleAsync(saveInterval / 2L, saveInterval, this::flushOnlineTimeCache);
     }
 

@@ -11,10 +11,8 @@ import java.util.UUID;
 
 public class PlayerNameVelocityListener {
     private final LoriTimePlugin plugin;
-    private final NameStorage nameStorage;
-    public PlayerNameVelocityListener(LoriTimePlugin plugin, NameStorage nameStorage) {
+    public PlayerNameVelocityListener(LoriTimePlugin plugin) {
         this.plugin = plugin;
-        this.nameStorage = nameStorage;
     }
 
     @Subscribe
@@ -24,7 +22,7 @@ public class PlayerNameVelocityListener {
         final String name = player.getUsername();
         plugin.getScheduler().runAsyncOnce(() -> {
             try {
-                nameStorage.setEntry(uuid, name);
+                plugin.getNameStorage().setEntry(uuid, name);
             } catch (StorageException ex) {
                 plugin.getLogger().warning("could not save player name and uuid " + name, ex);
             }

@@ -11,11 +11,9 @@ import java.util.UUID;
 
 public class TimeAccumulatorVelocityListener {
     private final LoriTimePlugin plugin;
-    private final TimeAccumulator timeAccumulator;
 
-    public TimeAccumulatorVelocityListener(LoriTimePlugin plugin, TimeAccumulator timeAccumulator) {
+    public TimeAccumulatorVelocityListener(LoriTimePlugin plugin) {
         this.plugin = plugin;
-        this.timeAccumulator = timeAccumulator;
     }
 
     @Subscribe
@@ -24,7 +22,7 @@ public class TimeAccumulatorVelocityListener {
         final long now = System.currentTimeMillis();
         plugin.getScheduler().runAsyncOnce(() -> {
             try {
-                timeAccumulator.startAccumulating(uuid, now);
+                plugin.getTimeStorage().startAccumulating(uuid, now);
             } catch (StorageException ex) {
                 plugin.getLogger().warning("could not start accumulating online time for player " + uuid, ex);
             }
@@ -37,7 +35,7 @@ public class TimeAccumulatorVelocityListener {
         final long now = System.currentTimeMillis();
         plugin.getScheduler().runAsyncOnce(() -> {
             try {
-                timeAccumulator.stopAccumulatingAndSaveOnlineTime(uuid, now);
+                plugin.getTimeStorage().stopAccumulatingAndSaveOnlineTime(uuid, now);
             } catch (StorageException ex) {
                 plugin.getLogger().warning("error while stopping accumulation of online time for player " + uuid, ex);
             }

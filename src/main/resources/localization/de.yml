@@ -13,6 +13,7 @@ unit:
     singular: 'Minute'
     plural: 'Minuten'
     identifier:
+      - 'm'
       - 'min'
   hour:
     singular: 'Stunde'
@@ -36,7 +37,7 @@ unit:
     singular: 'Monat'
     plural: 'Monate'
     identifier:
-      - 'm'
+      - 'mo'
   year:
     singular: 'Jahr'
     plural: 'Jahre'
@@ -57,7 +58,7 @@ message:
         self: '<#A4A4A4>Du hast <#50CBAB>[time] <#A4A4A4>auf dem Server gespielt.'
         other: '<#A4A4A4>Der Spieler <#50CBAB>[player] <#A4A4A4>hat <#50CBAB>[time] <#A4A4A4>auf dem Server gespielt.'
     loritimeadmin:
-      usage: '<#A4A4A4>Benutze <red>/onlinetimeadmin [set | mod | reset] [player] [time] <#A4A4A4>um die Spielzeit zu ändern.'
+      usage: '<#A4A4A4>Benutze <red>/onlinetimeadmin [set | mod | reset] [player] [time] <#A4A4A4>um die Spielzeit zu ändern..<newline>Weitere Commands: <red>/loritimeadmin [reload | info]'
       missinguuid: '<#A4A4A4>Der Spieler <#50CBAB>[player] <#A4A4A4>ist unbekannt.'
       nottime: '<#A4A4A4>Das gegebene Zeitargument <#50CBAB>[argument] <#FF3232>hat ein ungültiges Format.'
       set:

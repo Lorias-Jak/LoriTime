@@ -111,7 +111,6 @@ public class LoriTimeCommand implements CommonCommand {
         List<String> namesList;
         try {
             namesList = new ArrayList<>(plugin.getNameStorage().getNameEntries().stream().toList());
-            return namesList;
         } catch (StorageException e) {
             namesList = new ArrayList<>();
             plugin.getLogger().error("Could not load entries from NameStorage for tab completion in LoriTimeAdminCommand!", e);

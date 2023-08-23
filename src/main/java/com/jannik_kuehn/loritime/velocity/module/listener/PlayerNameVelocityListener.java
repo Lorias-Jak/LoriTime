@@ -1,7 +1,6 @@
 package com.jannik_kuehn.loritime.velocity.module.listener;
 
 import com.jannik_kuehn.loritime.common.LoriTimePlugin;
-import com.jannik_kuehn.loritime.common.storage.NameStorage;
 import com.jannik_kuehn.loritime.common.exception.StorageException;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.connection.PostLoginEvent;

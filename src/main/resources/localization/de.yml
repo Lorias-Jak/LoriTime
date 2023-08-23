@@ -79,7 +79,7 @@ message:
       usage: '<#A4A4A4>Benutze <red>/onlinetimetop [page] <#A4A4A4>um dir die Top Onlinezeit der Spieler anzeigen zu lassen.'
       gatheringdata: '<#A4A4A4>Sammle daten zusammen und berechne...'
       headline: '<#A4A4A4><newline>Top online times <#50CBAB>[dateAndTime] <newline><#A4A4A4>---- Top Times -- Seite <#50CBAB>[pages] <#A4A4A4>----<newline>Server Total: <#50CBAB>[totalTime]'
-      user: '<#50CBAB>[place]: [player] [time]'
+      user: '<#A4A4A4>[place]: [player] <#50CBAB>[time]'
       wrongpage: '<#A4A4A4>Bitte wähle eine Seite zwischen <#FF3232>[pages].'
       nonumber: '<#FF3232>Der angegebene Wert war keine Zahl.'
 

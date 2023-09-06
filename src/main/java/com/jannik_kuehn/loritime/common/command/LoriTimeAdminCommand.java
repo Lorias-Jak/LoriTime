@@ -1,7 +1,7 @@
 package com.jannik_kuehn.loritime.common.command;
 
 import com.jannik_kuehn.loritime.common.LoriTimePlugin;
-import com.jannik_kuehn.loritime.common.utils.CommonSender;
+import com.jannik_kuehn.loritime.api.CommonSender;
 import com.jannik_kuehn.loritime.common.utils.TimeParser;
 import com.jannik_kuehn.loritime.common.utils.TimeUtil;
 import com.jannik_kuehn.loritime.common.exception.StorageException;

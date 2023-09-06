@@ -1,4 +1,4 @@
-package com.jannik_kuehn.loritime.common.utils;
+package com.jannik_kuehn.loritime.api;
 
 public interface CommonLogger {
     void info(String s);

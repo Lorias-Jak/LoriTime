@@ -1,15 +1,16 @@
 package com.jannik_kuehn.loritime.velocity;
 
+import com.jannik_kuehn.loritime.api.CommonLogger;
 import com.jannik_kuehn.loritime.common.LoriTimePlugin;
 import com.jannik_kuehn.loritime.common.command.LoriTimeAdminCommand;
 import com.jannik_kuehn.loritime.common.command.LoriTimeCommand;
 import com.jannik_kuehn.loritime.common.command.LoriTimeInfoCommand;
 import com.jannik_kuehn.loritime.common.command.LoriTimeTopCommand;
-import com.jannik_kuehn.loritime.velocity.module.command.VelocityCommand;
-import com.jannik_kuehn.loritime.velocity.module.listener.TimeAccumulatorVelocityListener;
-import com.jannik_kuehn.loritime.velocity.module.listener.PlayerNameVelocityListener;
-import com.jannik_kuehn.loritime.velocity.module.schedule.VelocityScheduleAdapter;
-import com.jannik_kuehn.loritime.velocity.util.VelocityLogger;
+import com.jannik_kuehn.loritime.common.utils.LoriTimeLogger;
+import com.jannik_kuehn.loritime.velocity.command.VelocityCommand;
+import com.jannik_kuehn.loritime.velocity.listener.TimeAccumulatorVelocityListener;
+import com.jannik_kuehn.loritime.velocity.listener.PlayerNameVelocityListener;
+import com.jannik_kuehn.loritime.velocity.schedule.VelocityScheduleAdapter;
 import com.jannik_kuehn.loritime.velocity.util.VelocityServer;
 import com.velocitypowered.api.event.EventManager;
 import com.velocitypowered.api.event.Subscribe;
@@ -25,7 +26,7 @@ import java.util.ArrayList;
 
 public class LoriTimeVelocity {
     private final Path dataDirectory;
-    private final VelocityLogger logger;
+    private final CommonLogger logger;
     private final ProxyServer proxyServer;
     private LoriTimePlugin loriTimePlugin;
     private final ArrayList<VelocityCommand> commands;
@@ -33,7 +34,7 @@ public class LoriTimeVelocity {
     @Inject
     public LoriTimeVelocity(ProxyServer server, Logger logger, @DataDirectory Path dataDirectory) {
         this.dataDirectory = dataDirectory;
-        this.logger = new VelocityLogger(logger);
+        this.logger = new LoriTimeLogger(logger);
         this.proxyServer = server;
         this.commands = new ArrayList<>();
     }

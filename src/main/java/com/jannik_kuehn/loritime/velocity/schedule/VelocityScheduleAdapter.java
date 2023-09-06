@@ -1,4 +1,4 @@
-package com.jannik_kuehn.loritime.velocity.module.schedule;
+package com.jannik_kuehn.loritime.velocity.schedule;
 
 import com.jannik_kuehn.loritime.api.PluginScheduler;
 import com.jannik_kuehn.loritime.api.PluginTask;

@@ -1,4 +1,4 @@
-package com.jannik_kuehn.loritime.velocity.module.listener;
+package com.jannik_kuehn.loritime.velocity.listener;
 
 import com.jannik_kuehn.loritime.common.LoriTimePlugin;
 import com.jannik_kuehn.loritime.common.exception.StorageException;

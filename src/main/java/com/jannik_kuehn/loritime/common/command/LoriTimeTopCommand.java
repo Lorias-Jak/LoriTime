@@ -5,7 +5,7 @@ import com.jannik_kuehn.loritime.common.LoriTimePlugin;
 import com.jannik_kuehn.loritime.common.config.localization.Localization;
 import com.jannik_kuehn.loritime.common.exception.StorageException;
 import com.jannik_kuehn.loritime.common.storage.NameStorage;
-import com.jannik_kuehn.loritime.common.utils.CommonSender;
+import com.jannik_kuehn.loritime.api.CommonSender;
 import com.jannik_kuehn.loritime.common.utils.TimeUtil;
 import com.velocitypowered.api.command.CommandSource;
 import org.joda.time.LocalDate;

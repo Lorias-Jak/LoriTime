@@ -8,11 +8,11 @@ import com.jannik_kuehn.loritime.common.storage.database.DatabaseStorage;
 import com.jannik_kuehn.loritime.common.storage.file.FileTimeStorage;
 import com.jannik_kuehn.loritime.common.storage.file.FileNameStorage;
 import com.jannik_kuehn.loritime.common.storage.NameStorage;
-import com.jannik_kuehn.loritime.common.utils.CommonServer;
+import com.jannik_kuehn.loritime.api.CommonServer;
 import com.jannik_kuehn.loritime.api.PluginScheduler;
 import com.jannik_kuehn.loritime.common.config.Configuration;
 import com.jannik_kuehn.loritime.common.config.localization.Localization;
-import com.jannik_kuehn.loritime.common.utils.CommonLogger;
+import com.jannik_kuehn.loritime.api.CommonLogger;
 import com.jannik_kuehn.loritime.common.utils.FileStorageProvider;
 import com.jannik_kuehn.loritime.common.utils.TimeParser;
 

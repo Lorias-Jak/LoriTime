@@ -1,7 +1,7 @@
 package com.jannik_kuehn.loritime.velocity.util;
 
 import com.jannik_kuehn.loritime.common.LoriTimePlugin;
-import com.jannik_kuehn.loritime.common.utils.CommonSender;
+import com.jannik_kuehn.loritime.api.CommonSender;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
 import net.kyori.adventure.text.TextComponent;

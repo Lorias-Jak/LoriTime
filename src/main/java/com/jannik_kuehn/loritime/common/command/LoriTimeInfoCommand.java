@@ -4,7 +4,6 @@ import com.jannik_kuehn.loritime.api.CommonCommand;
 import com.jannik_kuehn.loritime.common.LoriTimePlugin;
 import com.jannik_kuehn.loritime.common.config.localization.Localization;
 import com.jannik_kuehn.loritime.api.CommonSender;
-import com.velocitypowered.api.command.CommandSource;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 
@@ -41,7 +40,7 @@ public class LoriTimeInfoCommand implements CommonCommand {
     }
 
     @Override
-    public List<String> handleTabComplete(CommandSource source, String... args) {
+    public List<String> handleTabComplete(CommonSender source, String... args) {
         return new ArrayList<>();
     }
 

@@ -1,12 +1,12 @@
-package com.jannik_kuehn.loritime.common.utils;
+package com.jannik_kuehn.loritime.velocity.util;
 
 import com.jannik_kuehn.loritime.api.CommonLogger;
 import org.slf4j.Logger;
 
-public class LoriTimeLogger implements CommonLogger {
+public class VelocityLogger implements CommonLogger {
     private final Logger logger;
 
-    public LoriTimeLogger(Logger logger) {
+    public VelocityLogger(Logger logger) {
         this.logger = logger;
     }
 

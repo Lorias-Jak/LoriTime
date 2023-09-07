@@ -1,0 +1,64 @@
+package com.jannik_kuehn.loritime.bukkit;
+
+import com.jannik_kuehn.loritime.api.CommonLogger;
+import com.jannik_kuehn.loritime.bukkit.command.BukkitCommand;
+import com.jannik_kuehn.loritime.bukkit.listener.PlayerNameBukkitListener;
+import com.jannik_kuehn.loritime.bukkit.listener.TimeAccumulatorBukkitListener;
+import com.jannik_kuehn.loritime.bukkit.schedule.BukkitScheduleAdapter;
+import com.jannik_kuehn.loritime.bukkit.util.BukkitLogger;
+import com.jannik_kuehn.loritime.bukkit.util.BukkitServer;
+import com.jannik_kuehn.loritime.common.LoriTimePlugin;
+import com.jannik_kuehn.loritime.common.command.LoriTimeAdminCommand;
+import com.jannik_kuehn.loritime.common.command.LoriTimeCommand;
+import com.jannik_kuehn.loritime.common.command.LoriTimeInfoCommand;
+import com.jannik_kuehn.loritime.common.command.LoriTimeTopCommand;
+import org.bukkit.Bukkit;
+import org.bukkit.plugin.java.JavaPlugin;
+
+import java.util.ArrayList;
+
+public class LoriTimeBukkit extends JavaPlugin {
+
+    private LoriTimePlugin loriTimePlugin;
+    private final ArrayList<BukkitCommand> commands = new ArrayList<>();
+
+    @Override
+    public void onEnable() {
+        CommonLogger logger = new BukkitLogger(Bukkit.getLogger());
+        BukkitScheduleAdapter scheduleAdapter = new BukkitScheduleAdapter(this, Bukkit.getScheduler());
+        BukkitServer bukkitServer = new BukkitServer();
+        this.loriTimePlugin = new LoriTimePlugin(logger, this.getDataFolder(), scheduleAdapter, bukkitServer);
+
+        try {
+            loriTimePlugin.enable();
+        } catch (Exception e) {
+            loriTimePlugin.disable();
+            throw new RuntimeException(e);
+        }
+
+        enableListener();
+        enableCommands();
+    }
+
+    private void enableListener() {
+        Bukkit.getPluginManager().registerEvents(new PlayerNameBukkitListener(loriTimePlugin), this);
+        Bukkit.getPluginManager().registerEvents(new TimeAccumulatorBukkitListener(loriTimePlugin), this);
+    }
+
+    private void enableCommands() {
+        commands.add(new BukkitCommand(this, new LoriTimeAdminCommand(loriTimePlugin, loriTimePlugin.getLocalization(),
+                loriTimePlugin.getParser())));
+        commands.add(new BukkitCommand(this, new LoriTimeCommand(loriTimePlugin, loriTimePlugin.getLocalization())));
+        commands.add(new BukkitCommand(this, new LoriTimeInfoCommand(loriTimePlugin, loriTimePlugin.getLocalization())));
+        commands.add(new BukkitCommand(this, new LoriTimeTopCommand(loriTimePlugin, loriTimePlugin.getLocalization())));
+    }
+
+    @Override
+    public void onDisable() {
+        loriTimePlugin.disable();
+    }
+
+    public LoriTimePlugin getLoriTimePlugin() {
+        return loriTimePlugin;
+    }
+}

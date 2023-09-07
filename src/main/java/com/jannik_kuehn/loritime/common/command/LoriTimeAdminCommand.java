@@ -7,7 +7,6 @@ import com.jannik_kuehn.loritime.common.utils.TimeUtil;
 import com.jannik_kuehn.loritime.common.exception.StorageException;
 import com.jannik_kuehn.loritime.api.CommonCommand;
 import com.jannik_kuehn.loritime.common.config.localization.Localization;
-import com.velocitypowered.api.command.CommandSource;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -57,7 +56,7 @@ public class LoriTimeAdminCommand implements CommonCommand {
     }
 
     @Override
-    public List<String> handleTabComplete(CommandSource source, String... args) {
+    public List<String> handleTabComplete(CommonSender source, String... args) {
         if (!source.hasPermission("loritime.admin")) {
             return new ArrayList<>();
         }

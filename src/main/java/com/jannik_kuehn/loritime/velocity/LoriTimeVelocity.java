@@ -6,7 +6,7 @@ import com.jannik_kuehn.loritime.common.command.LoriTimeAdminCommand;
 import com.jannik_kuehn.loritime.common.command.LoriTimeCommand;
 import com.jannik_kuehn.loritime.common.command.LoriTimeInfoCommand;
 import com.jannik_kuehn.loritime.common.command.LoriTimeTopCommand;
-import com.jannik_kuehn.loritime.common.utils.LoriTimeLogger;
+import com.jannik_kuehn.loritime.velocity.util.VelocityLogger;
 import com.jannik_kuehn.loritime.velocity.command.VelocityCommand;
 import com.jannik_kuehn.loritime.velocity.listener.TimeAccumulatorVelocityListener;
 import com.jannik_kuehn.loritime.velocity.listener.PlayerNameVelocityListener;
@@ -34,7 +34,7 @@ public class LoriTimeVelocity {
     @Inject
     public LoriTimeVelocity(ProxyServer server, Logger logger, @DataDirectory Path dataDirectory) {
         this.dataDirectory = dataDirectory;
-        this.logger = new LoriTimeLogger(logger);
+        this.logger = new VelocityLogger(logger);
         this.proxyServer = server;
         this.commands = new ArrayList<>();
     }

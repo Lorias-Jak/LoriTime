@@ -7,7 +7,6 @@ import com.jannik_kuehn.loritime.common.exception.StorageException;
 import com.jannik_kuehn.loritime.common.storage.NameStorage;
 import com.jannik_kuehn.loritime.api.CommonSender;
 import com.jannik_kuehn.loritime.common.utils.TimeUtil;
-import com.velocitypowered.api.command.CommandSource;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalTime;
 
@@ -136,7 +135,7 @@ public class LoriTimeTopCommand implements CommonCommand {
     }
 
     @Override
-    public List<String> handleTabComplete(CommandSource source, String... args) {
+    public List<String> handleTabComplete(CommonSender source, String... args) {
         return new ArrayList<>();
     }
 

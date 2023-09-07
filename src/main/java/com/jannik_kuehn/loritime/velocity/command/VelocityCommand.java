@@ -36,7 +36,7 @@ public class VelocityCommand implements SimpleCommand {
     }
 
     public List<String> suggest(final Invocation invocation) {
-        CommandSource commandSource = invocation.source();
+        CommonSender commandSource = getSender(invocation.source());
         String[] args = invocation.arguments();
         return this.command.handleTabComplete(commandSource, args);
     }

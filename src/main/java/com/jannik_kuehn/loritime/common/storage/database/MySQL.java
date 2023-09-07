@@ -35,7 +35,7 @@ public class MySQL implements Closeable, AutoCloseable {
 
     private final String tablePrefix;
 
-    private LoriTimePlugin plugin;
+    private final LoriTimePlugin plugin;
 
     private HikariDataSource hikari;
 
@@ -62,39 +62,43 @@ public class MySQL implements Closeable, AutoCloseable {
         return hikari == null || hikari.isClosed();
     }
 
-    public boolean open() {
+    public void open() {
         if (!loadedJDBCDriver) {
             plugin.getLogger().severe("JDBC Driver was not loaded!");
-            return false;
+            return;
         }
         if (isClosed()) {
             plugin.getLogger().info("Connecting to (" + mySqlHost + ", " + mySqlPort + " ," + mySqlDatabase + ")...");
-            final HikariConfig databaseConfig = new HikariConfig();
-            databaseConfig.setJdbcUrl("jdbc:mysql://" + mySqlHost + ":" + mySqlPort + "/" + mySqlDatabase);
-            databaseConfig.setUsername(mySqlUser);
-            databaseConfig.setPassword(mySqlPassword);
-            databaseConfig.setPoolName("LoriTime-Databasepool");
-
-            final ThreadFactoryBuilder builder = new ThreadFactoryBuilder();
-            builder.setNameFormat("HikariThread-%d");
-            databaseConfig.setThreadFactory(builder.build());
+            final HikariConfig databaseConfig = getHikariConfig();
 
             try {
                 hikari = new HikariDataSource(databaseConfig);
             } catch (final Exception e) {
                 plugin.getLogger().severe("Probably wrong login data for MySQL-Server!");
-                return false;
+                return;
             }
 
             if (!hikari.isClosed()) {
                 plugin.getLogger().info("Successfully connected to the MySQL-Server!");
-                return true;
+                return;
             }
             plugin.getLogger().severe("Could not connect to the MySQL-Server!");
-            return false;
+            return;
         }
         plugin.getLogger().severe("The MySQL connection is already open!");
-        return false;
+    }
+
+    private HikariConfig getHikariConfig() {
+        final HikariConfig databaseConfig = new HikariConfig();
+        databaseConfig.setJdbcUrl("jdbc:mysql://" + mySqlHost + ":" + mySqlPort + "/" + mySqlDatabase);
+        databaseConfig.setUsername(mySqlUser);
+        databaseConfig.setPassword(mySqlPassword);
+        databaseConfig.setPoolName("LoriTime-Databasepool");
+
+        final ThreadFactoryBuilder builder = new ThreadFactoryBuilder();
+        builder.setNameFormat("HikariThread-%d");
+        databaseConfig.setThreadFactory(builder.build());
+        return databaseConfig;
     }
 
     public Connection getConnection() throws SQLException {

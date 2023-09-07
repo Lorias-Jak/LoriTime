@@ -15,7 +15,6 @@ import java.sql.Statement;
 import java.sql.Types;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -184,16 +183,7 @@ public class DatabaseStorage implements NameStorage, TimeStorage {
     private void addOnlineTime(Connection connection, UUID uuid, long additionalOnlineTime) throws SQLException {
         try (PreparedStatement insertOrUpdateEntryStatement = connection.prepareStatement(insertOrUpdateEntry())) {
             Optional<String> name = getName(connection, uuid);
-            insertOrUpdateEntryStatement.setBytes(1, UuidUtil.toBytes(uuid));
-            if (name.isPresent()) {
-                insertOrUpdateEntryStatement.setString(2, name.get());
-                insertOrUpdateEntryStatement.setString(4, name.get());
-            } else {
-                insertOrUpdateEntryStatement.setNull(2, Types.CHAR);
-                insertOrUpdateEntryStatement.setNull(4, Types.CHAR);
-            }
-            insertOrUpdateEntryStatement.setLong(3, Math.max(0, additionalOnlineTime));
-            insertOrUpdateEntryStatement.setLong(5, additionalOnlineTime);
+            insertOrUpdateEntryParams(insertOrUpdateEntryStatement, uuid, name, additionalOnlineTime);
             insertOrUpdateEntryStatement.executeUpdate();
         }
     }
@@ -221,20 +211,24 @@ public class DatabaseStorage implements NameStorage, TimeStorage {
                 UUID uuid = entry.getKey();
                 Optional<String> name = getName(connection, uuid);
                 long additionalOnlineTime = entry.getValue();
-                insertOrUpdateEntryStatement.setBytes(1, UuidUtil.toBytes(uuid));
-                if (name.isPresent()) {
-                    insertOrUpdateEntryStatement.setString(2, name.get());
-                    insertOrUpdateEntryStatement.setString(4, name.get());
-                } else {
-                    insertOrUpdateEntryStatement.setNull(2, Types.CHAR);
-                    insertOrUpdateEntryStatement.setNull(4, Types.CHAR);
-                }
-                insertOrUpdateEntryStatement.setLong(3, Math.max(0, additionalOnlineTime));
-                insertOrUpdateEntryStatement.setLong(5, additionalOnlineTime);
+                insertOrUpdateEntryParams(insertOrUpdateEntryStatement, uuid, name, additionalOnlineTime);
                 insertOrUpdateEntryStatement.addBatch();
             }
             insertOrUpdateEntryStatement.executeBatch();
         }
+    }
+
+    private void insertOrUpdateEntryParams(PreparedStatement insertOrUpdateEntryStatement, UUID uuid, Optional<String> name, long additionalOnlineTime) throws SQLException {
+        insertOrUpdateEntryStatement.setBytes(1, UuidUtil.toBytes(uuid));
+        if (name.isPresent()) {
+            insertOrUpdateEntryStatement.setString(2, name.get());
+            insertOrUpdateEntryStatement.setString(4, name.get());
+        } else {
+            insertOrUpdateEntryStatement.setNull(2, Types.CHAR);
+            insertOrUpdateEntryStatement.setNull(4, Types.CHAR);
+        }
+        insertOrUpdateEntryStatement.setLong(3, Math.max(0, additionalOnlineTime));
+        insertOrUpdateEntryStatement.setLong(5, additionalOnlineTime);
     }
 
 

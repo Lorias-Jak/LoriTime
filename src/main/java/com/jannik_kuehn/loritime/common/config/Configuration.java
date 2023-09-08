@@ -25,6 +25,10 @@ public abstract class Configuration {
 
     public abstract long getLong(String key, long def);
 
+    public abstract boolean getBoolean(String key);
+
+    public abstract boolean getBoolean(String key, boolean def);
+
     public abstract ArrayList<?> getArrayList(String key);
 
     public abstract Object getObject(String key);

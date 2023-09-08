@@ -44,6 +44,16 @@ public class YamlConfiguration extends Configuration {
     }
 
     @Override
+    public boolean getBoolean(String key) {
+        return (boolean) keyValueStore.get(key);
+    }
+
+    @Override
+    public boolean getBoolean(String key, boolean def) {
+        return (boolean) keyValueStore.get(key, def);
+    }
+
+    @Override
     public ArrayList<?> getArrayList(String key) {
         return (ArrayList<?>) keyValueStore.get(key);
     }

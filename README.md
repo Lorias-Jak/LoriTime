@@ -1,9 +1,3 @@
-# LoriTime
-A plugin for getting the onlinetime of the players
-
-
-
-
 <div align="center">
   <a href="https://github.com/Lorias-Jak/LoriTime/blob/v1.0.0/LICENSE" title="This project is licensed under the GPLv3 license!">
       <img src="https://img.shields.io/badge/license-GPLv3-blue?logo=github&style=plastic"/>

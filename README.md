@@ -9,7 +9,7 @@ A plugin for getting the onlinetime of the players
       <img src="https://img.shields.io/badge/license-GPLv3-blue?logo=github&style=plastic"/>
     </a>
   <br>
-  <a href="https://github.com/Lorias-Jak/LoriTime/wiki"> Documentation</a> | 
+  <a href="https://github.com/Lorias-Jak/LoriTime/wiki"> Documentation</a>
   <hr/>
       <p>Both excitement and overview are important when it comes to capturing the total amount of time players are connected to your server network. And thats what you get with LoriTime!.</p>
 </div>

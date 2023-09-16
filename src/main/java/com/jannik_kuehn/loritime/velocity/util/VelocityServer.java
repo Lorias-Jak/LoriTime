@@ -14,6 +14,7 @@ import java.util.UUID;
 public class VelocityServer implements CommonServer {
     private LoriTimePlugin plugin;
     private ProxyServer server;
+    private String serverMode;
 
     public VelocityServer() {
     }
@@ -61,6 +62,21 @@ public class VelocityServer implements CommonServer {
     @Override
     public String getServerVersion() {
         return server.getVersion().getName() + " -> " + server.getVersion().getVersion();
+    }
+
+    @Override
+    public boolean isProxy() {
+        return true;
+    }
+
+    @Override
+    public String getServerMode() {
+        return serverMode;
+    }
+
+    @Override
+    public void setServerMode(String serverMode) {
+        this.serverMode = serverMode;
     }
 
     public CommandManager getCommandManager() {

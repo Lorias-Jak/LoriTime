@@ -15,4 +15,10 @@ public interface CommonServer {
     boolean dispatchCommand(CommonSender consoleSender, String command);
 
     String getServerVersion();
+
+    boolean isProxy();
+
+    String getServerMode();
+
+    void setServerMode(String serverMode);
 }

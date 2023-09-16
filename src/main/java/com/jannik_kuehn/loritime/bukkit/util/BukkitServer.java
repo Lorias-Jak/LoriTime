@@ -14,10 +14,12 @@ import java.util.UUID;
 public class BukkitServer implements CommonServer {
     private LoriTimePlugin plugin;
     private Server server;
+    private String serverMode;
 
-    public void enable(LoriTimePlugin plugin, Server server) {
+    public void enable(LoriTimePlugin plugin, Server server, String serverMode) {
         this.plugin = plugin;
         this.server = server;
+        this.serverMode = serverMode;
     }
 
     @Override
@@ -59,5 +61,20 @@ public class BukkitServer implements CommonServer {
     @Override
     public String getServerVersion() {
         return Bukkit.getVersion();
+    }
+
+    @Override
+    public boolean isProxy() {
+        return false;
+    }
+
+    @Override
+    public String getServerMode() {
+        return serverMode;
+    }
+
+    @Override
+    public void setServerMode(String serverMode) {
+        this.serverMode = serverMode;
     }
 }

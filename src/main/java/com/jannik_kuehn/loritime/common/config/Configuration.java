@@ -43,4 +43,12 @@ public abstract class Configuration {
 
     public abstract void reload();
 
+    public boolean containsKey(String key) {
+        return getKeys().contains(key);
+    }
+
+    protected KeyValueStore getKeyValueStore() {
+        return keyValueStore;
+    }
+
 }

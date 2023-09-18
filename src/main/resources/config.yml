@@ -8,12 +8,19 @@ general:
   language: 'en'
 
   # You can decide how the player data will be stored.
-  # The two options are 'file' or 'mysql'.
-  storage: 'file'
+  # The two options are 'yml' or 'mysql'.
+  storage: 'yml'
 
   # The save interval specifies how often the player's online time is saved.
   # The unit is seconds.
   saveInterval: 30
+
+##############
+# MultiSetup #
+##############
+multiSetup:
+  enabled: false
+  mode: 'master'
 
 ###########
 #  Mysql  #
@@ -26,7 +33,16 @@ mysql:
   password: 'pw'
   tablePrefix: 'lori_time'
 
+###########
+#   AFK   #
+###########
+afk:
+  enabled: false
+  after: '15m'
+  removeTime: true
+  autoKick: true
+
 ###################
 #  Do not touch!  #
 ##################
-configVersion: 1
+configVersion: 2

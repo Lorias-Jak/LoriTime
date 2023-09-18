@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 public class YamlConfiguration extends Configuration {
+
     public YamlConfiguration(final String name) {
         super(new YamlKeyValueStore(name));
     }

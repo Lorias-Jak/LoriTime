@@ -1,6 +1,7 @@
 package com.jannik_kuehn.loritime.common.command;
 
 import com.jannik_kuehn.loritime.api.CommonCommand;
+import com.jannik_kuehn.loritime.api.LoriTimePlayer;
 import com.jannik_kuehn.loritime.common.LoriTimePlugin;
 import com.jannik_kuehn.loritime.common.config.localization.Localization;
 import com.jannik_kuehn.loritime.common.exception.StorageException;
@@ -33,7 +34,7 @@ public class LoriTimeCommand implements CommonCommand {
         if (args.length <= 1) {
             plugin.getScheduler().runAsyncOnce(() -> {
                 CommonSender senderInstance = sender;
-                UUID targetPlayer;
+                LoriTimePlayer targetPlayer;
 
                 if (args.length == 1) {
                     Optional<UUID> optionalPlayer;
@@ -43,7 +44,7 @@ public class LoriTimeCommand implements CommonCommand {
                         throw new RuntimeException(e);
                     }
                     if (optionalPlayer.isPresent()) {
-                        targetPlayer = optionalPlayer.get();
+                        targetPlayer = new LoriTimePlayer(optionalPlayer.get(), args[0]);
                     } else {
                         sender.sendMessage(localization.formatMiniMessage(localization.getRawMessage("message.command.loritime.notfound")
                                 .replace("[player]", args[0])));
@@ -51,14 +52,14 @@ public class LoriTimeCommand implements CommonCommand {
                     }
                 } else {
                     if (!sender.isConsole()) {
-                        targetPlayer = senderInstance.getUniqueId();
+                        targetPlayer = new LoriTimePlayer(senderInstance.getUniqueId(), senderInstance.getName());
                     } else {
                         sender.sendMessage(localization.formatMiniMessage(localization.getRawMessage("message.command.loritime.consoleself")));
                         return;
                     }
                 }
 
-                boolean isTargetSender = targetPlayer != null && targetPlayer.equals(senderInstance.getUniqueId());
+                boolean isTargetSender = targetPlayer.equals(senderInstance.getUniqueId());
                 if (!isTargetSender && !sender.hasPermission("loritime.see.other")) {
                     printUtilityMessage(sender, "message.nopermission");
                     return;
@@ -66,12 +67,12 @@ public class LoriTimeCommand implements CommonCommand {
 
                 final long time;
                 try {
-                    OptionalLong optionalTime = plugin.getTimeStorage().getTime(targetPlayer);
+                    OptionalLong optionalTime = plugin.getTimeStorage().getTime(targetPlayer.getUniqueId());
                     if (optionalTime.isPresent()) {
                         time = optionalTime.getAsLong();
                     } else {
                         sender.sendMessage(localization.formatMiniMessage(localization.getRawMessage("message.command.loritime.notfound")
-                                .replace("[player]", plugin.getNameStorage().getName(targetPlayer).get())));
+                                .replace("[player]", plugin.getNameStorage().getName(targetPlayer.getUniqueId()).get())));
                         return;
                     }
                 } catch (StorageException ex) {
@@ -85,7 +86,7 @@ public class LoriTimeCommand implements CommonCommand {
                 } else {
                     try {
                         sender.sendMessage(localization.formatMiniMessage(localization.getRawMessage("message.command.loritime.timeseen.other")
-                                .replace("[player]", plugin.getNameStorage().getName(targetPlayer).get())
+                                .replace("[player]", plugin.getNameStorage().getName(targetPlayer.getUniqueId()).get())
                                 .replace("[time]", TimeUtil.formatTime(time, localization))));
                     } catch (StorageException e) {
                         throw new RuntimeException(e);

@@ -31,4 +31,12 @@ public interface PluginScheduler {
      * @return task representation
      */
     PluginTask scheduleAsync(long delay, long interval, Runnable task);
+
+    /**
+     * Execute a task synchronously.
+     *
+     * @param task task to run
+     * @return task representation
+     */
+    PluginTask scheduleSync(Runnable task);
 }

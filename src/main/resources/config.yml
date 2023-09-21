@@ -15,13 +15,6 @@ general:
   # The unit is seconds.
   saveInterval: 30
 
-##############
-# MultiSetup #
-##############
-multiSetup:
-  enabled: false
-  mode: 'master'
-
 ###########
 #  Mysql  #
 ###########
@@ -33,14 +26,42 @@ mysql:
   password: 'pw'
   tablePrefix: 'lori_time'
 
+##############
+# MultiSetup #
+##############
+multiSetup:
+
+  # If true, the plugin will be enabled for multiple server setup.
+  # Only activate and set on master on proxy-server, use the slave mode on sub-servers.
+  enabled: false
+
+  # Options to set: "master", "slave".
+  mode: 'master'
+
 ###########
 #   AFK   #
 ###########
 afk:
+
+  # In case you're using MultiSetup, this will change nothing for proxys.
+  # Do not change the value while the server is running!
+  # The required classes will not be loaded if this option is false on startup.
+  # If you change the value to false in runtime and reload the plugin, it could lead into issues with the afk detection.
   enabled: false
+
+  # The time after which a player is considered AFK. You can use the unit-modifier for this.
+  # Currently the player will be considered afk after 15 minutes.
   after: '15m'
+
+  # If true, the time that the player is afk, will be removed.
   removeTime: true
+
+  # If true, the player will be kicked after the time specified in 'kick.after'.
   autoKick: true
+
+  # The time how often the plugin checks if a player is afk.
+  # The unit for this is seconds.
+  repeatCheck: 30
 
 ###################
 #  Do not touch!  #

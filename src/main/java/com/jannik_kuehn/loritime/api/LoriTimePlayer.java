@@ -13,7 +13,7 @@ public class LoriTimePlayer {
         this.name = name;
 
         this.afkStatus = false;
-        //ToDo Testen ob alles geht im Bezug auf Command
+        // ToDo Testen ob alles geht im Bezug auf Command
     }
 
     public UUID getUniqueId() {
@@ -30,5 +30,14 @@ public class LoriTimePlayer {
 
     public void setAFk(final boolean afk) {
         this.afkStatus = afk;
+    }
+
+    public boolean equals(Object data) {
+        if (this == data)
+            return true;
+        if (data == null || getClass() != data.getClass())
+            return false;
+        LoriTimePlayer targetPlayer = (LoriTimePlayer) data;
+        return uuid.equals(targetPlayer.uuid);
     }
 }

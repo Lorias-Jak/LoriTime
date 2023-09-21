@@ -77,3 +77,10 @@ message:
       user: '<#A4A4A4>[place]: [player] <#50CBAB>[time]'
       wrongpage: '<#A4A4A4>Please choose a page between <#FF3232>[pages].'
       nonumber: '<#FF3232>The specified value was not a number.'
+  afk:
+    kick: '<#50CBAB>You were kicked for being AFK for <#FF3232>[time].'
+    kickAnnounce: '<#50CBAB>[player] <#A4A4A4>was kicked for being AFK for <#50CBAB>[time].'
+    afkAnnounce: '<#50CBAB>[player] <#A4A4A4>is now AFK.'
+    resumeAnnounce: '<#50CBAB>[player] <#A4A4A4>is no longer AFK.'
+    afkSelf: '<#A4A4A4>You are now AFK.'
+    afkResume: '<#A4A4A4>You are no longer AFK.'

@@ -1,12 +1,10 @@
 package com.jannik_kuehn.loritime.common.storage.file;
 
 import com.jannik_kuehn.loritime.common.storage.NameStorage;
-import com.jannik_kuehn.loritime.common.utils.UuidUtil;
 import com.jannik_kuehn.loritime.common.exception.StorageException;
-import com.jannik_kuehn.loritime.api.FileStorageProvider;
+import com.jannik_kuehn.loritime.api.FileStorage;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -15,9 +13,9 @@ import java.util.UUID;
 
 public class FileNameStorage implements NameStorage {
 
-    private final FileStorageProvider storageProvider;
+    private final FileStorage storageProvider;
 
-    public FileNameStorage(FileStorageProvider storageProvider) {
+    public FileNameStorage(FileStorage storageProvider) {
         this.storageProvider = Objects.requireNonNull(storageProvider);
     }
 

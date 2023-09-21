@@ -1,5 +1,7 @@
 package com.jannik_kuehn.loritime.api;
 
+import com.jannik_kuehn.loritime.common.module.afk.AfkHandling;
+import net.kyori.adventure.text.TextComponent;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -21,4 +23,6 @@ public interface CommonServer {
     String getServerMode();
 
     void setServerMode(String serverMode);
+
+    void kickPlayer(LoriTimePlayer player, TextComponent message);
 }

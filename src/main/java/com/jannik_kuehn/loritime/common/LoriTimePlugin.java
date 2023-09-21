@@ -3,6 +3,8 @@ package com.jannik_kuehn.loritime.common;
 import com.jannik_kuehn.loritime.api.PluginTask;
 import com.jannik_kuehn.loritime.common.config.YamlConfiguration;
 import com.jannik_kuehn.loritime.common.exception.StorageException;
+import com.jannik_kuehn.loritime.common.module.afk.AfkHandling;
+import com.jannik_kuehn.loritime.common.module.afk.AfkStatusProvider;
 import com.jannik_kuehn.loritime.common.storage.AccumulatingTimeStorage;
 import com.jannik_kuehn.loritime.common.storage.database.DatabaseStorage;
 import com.jannik_kuehn.loritime.common.storage.file.FileTimeStorage;
@@ -32,19 +34,16 @@ public class LoriTimePlugin {
     private final File dataFolder;
     private final PluginScheduler scheduler;
     private final CommonServer server;
-
     private Configuration config;
     private Localization localization;
     private NameStorage nameStorage;
     private AccumulatingTimeStorage timeStorage;
-
     private TimeParser parser;
-
     private int saveInterval;
     private PluginTask flushCacheTask;
-
+    private AfkStatusProvider afkStatusProvider;
     private boolean errorDisable;
-    private String pluginVersion;
+    private final String pluginVersion;
 
     public static LoriTimePlugin getInstance() {
         return instance;
@@ -75,6 +74,25 @@ public class LoriTimePlugin {
             logger.severe("Disabling the plugin because of an issue.");
             disable();
         }
+        server.setServerMode(getServerModeFromConfig());
+    }
+
+    private String getServerModeFromConfig() {
+        String serverMode;
+        if (!config.getBoolean("multiSetup.enabled", false)) {
+            serverMode = "master";
+        } else {
+            serverMode = config.getString("multiSetup.mode", "master");
+        }
+        return serverMode;
+    }
+
+    public void enableAfkFeature(AfkHandling afkHandling) {
+        afkStatusProvider = new AfkStatusProvider(this, afkHandling);
+    }
+
+    public boolean isAfkEnabled() {
+        return config.getBoolean("afk.enabled", false);
     }
 
     public void disable() {
@@ -99,6 +117,7 @@ public class LoriTimePlugin {
 
         closeStorages();
         loadStorage();
+        afkStatusProvider.reloadConfigValues();
 
         flushCacheTask = scheduler.scheduleAsync(saveInterval / 2L, saveInterval, this::flushOnlineTimeCache);
     }
@@ -133,6 +152,7 @@ public class LoriTimePlugin {
         if (!config.isLoaded() || !localization.getLangFile().isLoaded()) {
             logger.severe("The plugins localization and config didn't load correctly. Pls delete the files and try again! Stop starting plugin..");
             errorDisable = true;
+            return;
         }
         try {
             parser = new TimeParser.Builder()
@@ -200,15 +220,9 @@ public class LoriTimePlugin {
     private void loadStorage() throws StorageException {
         String storageMethod = config.getString("general.storage", "file");
         switch (storageMethod.toLowerCase(Locale.ROOT)) {
-            case "file" -> {
-                loadFileStorage();
-            }
-            case "db", "database", "sql", "mysql" -> {
-                loadDatabaseStorage();
-            }
-            default -> {
-                logger.severe("illegal storage method " + storageMethod);
-            }
+            case "yml" -> loadFileStorage();
+            case "sql", "mysql" -> loadDatabaseStorage();
+            default -> logger.severe("illegal storage method " + storageMethod);
         }
     }
 
@@ -272,5 +286,9 @@ public class LoriTimePlugin {
 
     public String getPluginVersion() {
         return pluginVersion;
+    }
+
+    public AfkStatusProvider getAfkStatusProvider() {
+        return afkStatusProvider;
     }
 }

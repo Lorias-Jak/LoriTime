@@ -5,7 +5,7 @@ import com.jannik_kuehn.loritime.common.exception.StorageException;
 import java.util.Map;
 import java.util.Set;
 
-public interface FileStorageProvider extends AutoCloseable {
+public interface FileStorage extends AutoCloseable {
 
     Object read(String path) throws StorageException;
 

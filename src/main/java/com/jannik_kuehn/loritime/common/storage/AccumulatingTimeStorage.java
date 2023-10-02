@@ -87,7 +87,7 @@ public class AccumulatingTimeStorage implements TimeStorage, TimeAccumulator {
         final long now = System.currentTimeMillis();
         onlineSince.keySet().forEach(uuid -> {
             Long from = onlineSince.replace(uuid, now);
-            if (from != null) { // protect from concurrent change
+            if (from != null) {
                 onlineTime.put(uuid, (now - from) / 1000);
             }
         });

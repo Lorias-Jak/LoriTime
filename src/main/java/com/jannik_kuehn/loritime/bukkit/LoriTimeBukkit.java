@@ -1,6 +1,7 @@
 package com.jannik_kuehn.loritime.bukkit;
 
 import com.jannik_kuehn.loritime.api.CommonLogger;
+import com.jannik_kuehn.loritime.bukkit.afk.BukkitSlavedAfkHandling;
 import com.jannik_kuehn.loritime.bukkit.command.BukkitCommand;
 import com.jannik_kuehn.loritime.bukkit.listener.BukkitPlayerAfkListener;
 import com.jannik_kuehn.loritime.bukkit.listener.PlayerNameBukkitListener;
@@ -10,6 +11,7 @@ import com.jannik_kuehn.loritime.bukkit.util.BukkitLogger;
 import com.jannik_kuehn.loritime.bukkit.util.BukkitServer;
 import com.jannik_kuehn.loritime.common.LoriTimePlugin;
 import com.jannik_kuehn.loritime.common.command.LoriTimeAdminCommand;
+import com.jannik_kuehn.loritime.common.command.LoriTimeAfkCommand;
 import com.jannik_kuehn.loritime.common.command.LoriTimeCommand;
 import com.jannik_kuehn.loritime.common.command.LoriTimeInfoCommand;
 import com.jannik_kuehn.loritime.common.command.LoriTimeTopCommand;
@@ -52,13 +54,17 @@ public class LoriTimeBukkit extends JavaPlugin {
     }
 
     private void enableAsMaster() {
-        enableCommands();
         Bukkit.getPluginManager().registerEvents(new PlayerNameBukkitListener(loriTimePlugin), this);
         Bukkit.getPluginManager().registerEvents(new TimeAccumulatorBukkitListener(loriTimePlugin), this);
 
         if (loriTimePlugin.isAfkEnabled()) {
             loriTimePlugin.enableAfkFeature(new MasteredAfkPlayerHandling(loriTimePlugin));
         }
+        commands.add(new BukkitCommand(this, new LoriTimeAdminCommand(loriTimePlugin, loriTimePlugin.getLocalization(),
+                loriTimePlugin.getParser())));
+        commands.add(new BukkitCommand(this, new LoriTimeCommand(loriTimePlugin, loriTimePlugin.getLocalization())));
+        commands.add(new BukkitCommand(this, new LoriTimeInfoCommand(loriTimePlugin, loriTimePlugin.getLocalization())));
+        commands.add(new BukkitCommand(this, new LoriTimeTopCommand(loriTimePlugin, loriTimePlugin.getLocalization())));
     }
 
     private void enableAsSlave() {
@@ -72,17 +78,9 @@ public class LoriTimeBukkit extends JavaPlugin {
     private void enableRemainingFeatures() {
         if (loriTimePlugin.isAfkEnabled()) {
             Bukkit.getPluginManager().registerEvents(new BukkitPlayerAfkListener(loriTimePlugin), this);
+            commands.add(new BukkitCommand(this, new LoriTimeAfkCommand(loriTimePlugin, loriTimePlugin.getLocalization())));
         }
     }
-
-    private void enableCommands() {
-        commands.add(new BukkitCommand(this, new LoriTimeAdminCommand(loriTimePlugin, loriTimePlugin.getLocalization(),
-                loriTimePlugin.getParser())));
-        commands.add(new BukkitCommand(this, new LoriTimeCommand(loriTimePlugin, loriTimePlugin.getLocalization())));
-        commands.add(new BukkitCommand(this, new LoriTimeInfoCommand(loriTimePlugin, loriTimePlugin.getLocalization())));
-        commands.add(new BukkitCommand(this, new LoriTimeTopCommand(loriTimePlugin, loriTimePlugin.getLocalization())));
-    }
-
 
 
     @Override

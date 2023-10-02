@@ -32,3 +32,5 @@ commands:
       - 'lttop'
       - 'ltop'
       - 'toptimes'
+  afk:
+    description: 'Change AFK status'

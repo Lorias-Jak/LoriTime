@@ -22,8 +22,6 @@ public class BukkitPlayerAfkListener implements Listener {
         this.afkPlayers = new ConcurrentHashMap<>();
     }
 
-    //ToDo Afk-Causes mit einfließen lassen (Vorbereitung für Events)
-
     @EventHandler (ignoreCancelled = true)
     public void onPlayerJoin(PlayerJoinEvent event) {
         LoriTimePlayer player = new LoriTimePlayer(event.getPlayer().getUniqueId(), event.getPlayer().getName());
@@ -39,6 +37,11 @@ public class BukkitPlayerAfkListener implements Listener {
 
     @EventHandler (ignoreCancelled = true)
     public void onPlayerMove(PlayerMoveEvent event) {
+        if (event.getFrom().getBlockX() == event.getTo().getBlockX() && event.getFrom().getBlockY() == event.getTo().getBlockY()
+                && event.getFrom().getBlockZ() == event.getTo().getBlockZ()) {
+            return;
+        }
+
         LoriTimePlayer player = new LoriTimePlayer(event.getPlayer().getUniqueId(), event.getPlayer().getName());
         updateAfkStatus(getOrCreatePlayer(event.getPlayer().getUniqueId(), player));
     }

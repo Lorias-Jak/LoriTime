@@ -25,7 +25,6 @@ public class AfkStatusProvider {
         restartAfkCheck();
     }
 
-    // ToDo Reload richtig durch implementieren und alle config-abfragen über die Methode laufen lassen
     public void reloadConfigValues() {
         afkPlayerHandling.reloadConfigValues();
         OptionalLong afkConfigOptional = plugin.getParser().parseToSeconds(plugin.getConfig().getString("afk.after", "15m"));
@@ -106,5 +105,16 @@ public class AfkStatusProvider {
 
     public AfkHandling getAfkPlayerHandling() {
         return afkPlayerHandling;
+    }
+
+    public void setPlayerAfk(LoriTimePlayer player) {
+        LoriTimePlayer target = getRealPlayer(player);
+        if (!target.isAfk()) {
+            target.setAFk(true);
+            afkPlayerHandling.executePlayerAfk(target, 0);
+        } else {
+            target.setAFk(false);
+            afkPlayerHandling.executePlayerResume(target);
+        }
     }
 }

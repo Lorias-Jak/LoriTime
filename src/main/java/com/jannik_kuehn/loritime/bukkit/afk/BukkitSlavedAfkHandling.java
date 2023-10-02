@@ -1,6 +1,7 @@
-package com.jannik_kuehn.loritime.bukkit;
+package com.jannik_kuehn.loritime.bukkit.afk;
 
 import com.jannik_kuehn.loritime.api.LoriTimePlayer;
+import com.jannik_kuehn.loritime.bukkit.LoriTimeBukkit;
 import com.jannik_kuehn.loritime.common.module.afk.AfkHandling;
 import org.bukkit.Bukkit;
 

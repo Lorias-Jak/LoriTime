@@ -13,7 +13,6 @@ public class LoriTimePlayer {
         this.name = name;
 
         this.afkStatus = false;
-        // ToDo Testen ob alles geht im Bezug auf Command
     }
 
     public UUID getUniqueId() {

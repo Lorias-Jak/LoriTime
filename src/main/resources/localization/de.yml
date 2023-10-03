@@ -83,4 +83,10 @@ message:
       user: '<#A4A4A4>[place]: [player] <#50CBAB>[time]'
       wrongpage: '<#A4A4A4>Bitte wähle eine Seite zwischen <#FF3232>[pages].'
       nonumber: '<#FF3232>Der angegebene Wert war keine Zahl.'
-
+  afk:
+    kick: '<#50CBAB>Du wurdest gekickt, weil du <#FF3232>[time] <#50CBAB>AFK warst.'
+    kickAnnounce: '<#50CBAB>[player] <#A4A4A4>wurde gekickt, weil er <#50CBAB>[time] <#A4A4A4>AFK war.'
+    afkAnnounce: '<#50CBAB>[player] <#A4A4A4>ist jetzt AFK.'
+    resumeAnnounce: '<#50CBAB>[player] <#A4A4A4>ist nicht mehr AFK.'
+    afkSelf: '<#A4A4A4>Du bist jetzt AFK.'
+    afkResume: '<#A4A4A4>Du bist nicht mehr AFK.'

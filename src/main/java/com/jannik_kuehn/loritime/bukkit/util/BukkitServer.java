@@ -2,7 +2,11 @@ package com.jannik_kuehn.loritime.bukkit.util;
 
 import com.jannik_kuehn.loritime.api.CommonSender;
 import com.jannik_kuehn.loritime.api.CommonServer;
+import com.jannik_kuehn.loritime.api.LoriTimePlayer;
+import com.jannik_kuehn.loritime.bukkit.BukkitPluginMessanger;
+import com.jannik_kuehn.loritime.bukkit.LoriTimeBukkit;
 import com.jannik_kuehn.loritime.common.LoriTimePlugin;
+import net.kyori.adventure.text.TextComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.Server;
 import org.bukkit.command.CommandSender;
@@ -12,12 +16,21 @@ import java.util.Optional;
 import java.util.UUID;
 
 public class BukkitServer implements CommonServer {
-    private LoriTimePlugin plugin;
-    private Server server;
 
-    public void enable(LoriTimePlugin plugin, Server server) {
-        this.plugin = plugin;
-        this.server = server;
+    private LoriTimeBukkit bukkitPlugin;
+    private LoriTimePlugin loriTimePlugin;
+    private String serverMode;
+    private Server server;
+    private BukkitPluginMessanger pluginMessanger;
+
+    public BukkitServer() {
+        // Empty
+    }
+
+    public void enable(LoriTimeBukkit bukkitPlugin) {
+        this.bukkitPlugin = bukkitPlugin;
+        this.loriTimePlugin = bukkitPlugin.getLoriTimePlugin();
+        this.server = Bukkit.getServer();
     }
 
     @Override
@@ -59,5 +72,37 @@ public class BukkitServer implements CommonServer {
     @Override
     public String getServerVersion() {
         return Bukkit.getVersion();
+    }
+
+    @Override
+    public boolean isProxy() {
+        return false;
+    }
+
+    @Override
+    public String getServerMode() {
+        return serverMode;
+    }
+
+    @Override
+    public void setServerMode(String serverMode) {
+        this.serverMode = serverMode;
+    }
+
+    @Override
+    public void kickPlayer(LoriTimePlayer loriTimePlayer, TextComponent message) {
+        Optional<UUID> optionalUUID = Optional.ofNullable(loriTimePlayer.getUniqueId());
+        if (optionalUUID.isEmpty()) {
+            return;
+        }
+        Player player = Bukkit.getServer().getPlayer(optionalUUID.get());
+        if (player == null) {
+            return;
+        }
+        loriTimePlugin.getScheduler().scheduleSync(() -> kickPlayer(player, message));
+    }
+
+    private void kickPlayer(Player player, TextComponent message) {
+        player.kick(message);
     }
 }

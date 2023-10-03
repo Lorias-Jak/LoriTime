@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 public class YamlConfiguration extends Configuration {
+
     public YamlConfiguration(final String name) {
         super(new YamlKeyValueStore(name));
     }
@@ -41,6 +42,16 @@ public class YamlConfiguration extends Configuration {
     @Override
     public long getLong(String key, long def) {
         return (long) keyValueStore.get(key, def);
+    }
+
+    @Override
+    public boolean getBoolean(String key) {
+        return (boolean) keyValueStore.get(key);
+    }
+
+    @Override
+    public boolean getBoolean(String key, boolean def) {
+        return (boolean) keyValueStore.get(key, def);
     }
 
     @Override

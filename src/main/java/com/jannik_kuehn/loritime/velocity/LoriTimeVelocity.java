@@ -6,6 +6,7 @@ import com.jannik_kuehn.loritime.common.command.LoriTimeAdminCommand;
 import com.jannik_kuehn.loritime.common.command.LoriTimeCommand;
 import com.jannik_kuehn.loritime.common.command.LoriTimeInfoCommand;
 import com.jannik_kuehn.loritime.common.command.LoriTimeTopCommand;
+import com.jannik_kuehn.loritime.common.module.afk.MasteredAfkPlayerHandling;
 import com.jannik_kuehn.loritime.velocity.util.VelocityLogger;
 import com.jannik_kuehn.loritime.velocity.command.VelocityCommand;
 import com.jannik_kuehn.loritime.velocity.listener.TimeAccumulatorVelocityListener;
@@ -18,6 +19,7 @@ import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
 import com.velocitypowered.api.event.proxy.ProxyShutdownEvent;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.ProxyServer;
+import com.velocitypowered.api.proxy.messages.MinecraftChannelIdentifier;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;
@@ -44,7 +46,6 @@ public class LoriTimeVelocity {
         VelocityServer velocityServer = new VelocityServer();
         this.loriTimePlugin = new LoriTimePlugin(logger, dataDirectory.toFile(), new VelocityScheduleAdapter(this, proxyServer.getScheduler()), velocityServer);
         velocityServer.enable(loriTimePlugin, proxyServer);
-
         try {
             loriTimePlugin.enable();
         } catch (Exception e) {
@@ -52,22 +53,41 @@ public class LoriTimeVelocity {
             throw new RuntimeException(e);
         }
 
-        enableListener();
-        enableCommands();
+        if (velocityServer.getServerMode().equalsIgnoreCase("master")) {
+            enableAsMaster();
+        } else if (velocityServer.getServerMode().equalsIgnoreCase("slave")) {
+            enableAsSlave();
+        } else {
+            logger.severe("Server mode is not set correctly! Please set the server mode to 'master' or 'slave' in the config.yml. Disabling the plugin...");
+            loriTimePlugin.disable();
+        }
+        enableRemainingFeatures();
     }
 
-    private void enableListener() {
+    private void enableAsMaster() {
         EventManager eventManager = proxyServer.getEventManager();
         eventManager.register(this, new PlayerNameVelocityListener(loriTimePlugin));
         eventManager.register(this, new TimeAccumulatorVelocityListener(loriTimePlugin));
-    }
+        eventManager.register(this, new VelocityPluginMessage(this));
 
-    private void enableCommands() {
         commands.add(new VelocityCommand(this, new LoriTimeAdminCommand(loriTimePlugin, loriTimePlugin.getLocalization(),
                 loriTimePlugin.getParser())));
         commands.add(new VelocityCommand(this, new LoriTimeCommand(loriTimePlugin, loriTimePlugin.getLocalization())));
         commands.add(new VelocityCommand(this, new LoriTimeInfoCommand(loriTimePlugin, loriTimePlugin.getLocalization())));
         commands.add(new VelocityCommand(this, new LoriTimeTopCommand(loriTimePlugin, loriTimePlugin.getLocalization())));
+    }
+
+    private void enableAsSlave() {
+        logger.warning("Slave mode is not supported on Proxys! Disabling the plugin...");
+        loriTimePlugin.disable();
+    }
+
+    private void enableRemainingFeatures() {
+        if (loriTimePlugin.isAfkEnabled()) {
+            proxyServer.getChannelRegistrar().register(MinecraftChannelIdentifier.from("loritime:afk"));
+            proxyServer.getEventManager().register(this, new VelocityPluginMessage(this));
+            loriTimePlugin.enableAfkFeature(new MasteredAfkPlayerHandling(loriTimePlugin));
+        }
     }
 
     @Subscribe

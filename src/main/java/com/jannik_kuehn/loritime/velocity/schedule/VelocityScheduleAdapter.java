@@ -42,4 +42,12 @@ public class VelocityScheduleAdapter implements PluginScheduler {
                         .schedule()
         );
     }
+
+    @Override
+    public PluginTask scheduleSync(Runnable task) {
+        return new VelocityTask(
+                scheduler.buildTask(plugin, task)
+                        .schedule()
+        );
+    }
 }

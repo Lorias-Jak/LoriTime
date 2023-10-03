@@ -1,20 +1,19 @@
 package com.jannik_kuehn.loritime.common.storage.file;
 
 import com.jannik_kuehn.loritime.common.exception.StorageException;
-import com.jannik_kuehn.loritime.api.FileStorageProvider;
+import com.jannik_kuehn.loritime.api.FileStorage;
 import com.jannik_kuehn.loritime.common.storage.TimeStorage;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.OptionalLong;
-import java.util.Set;
 import java.util.UUID;
 
 public class FileTimeStorage implements TimeStorage {
-    private final FileStorageProvider storageProvider;
+    private final FileStorage storageProvider;
 
-    public FileTimeStorage(FileStorageProvider storageProvider) {
+    public FileTimeStorage(FileStorage storageProvider) {
         this.storageProvider = Objects.requireNonNull(storageProvider);
     }
 

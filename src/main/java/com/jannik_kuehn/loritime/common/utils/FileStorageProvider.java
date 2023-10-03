@@ -1,5 +1,6 @@
 package com.jannik_kuehn.loritime.common.utils;
 
+import com.jannik_kuehn.loritime.api.FileStorage;
 import com.jannik_kuehn.loritime.common.LoriTimePlugin;
 import com.jannik_kuehn.loritime.common.config.Configuration;
 import com.jannik_kuehn.loritime.common.exception.StorageException;
@@ -12,7 +13,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-public class FileStorageProvider implements com.jannik_kuehn.loritime.api.FileStorageProvider {
+public class FileStorageProvider implements FileStorage {
     private final LoriTimePlugin plugin;
     private final Configuration storage;
     private final ReadWriteLock rwLock;

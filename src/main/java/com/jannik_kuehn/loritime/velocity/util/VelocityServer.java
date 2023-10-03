@@ -1,12 +1,13 @@
 package com.jannik_kuehn.loritime.velocity.util;
 
+import com.jannik_kuehn.loritime.api.LoriTimePlayer;
 import com.jannik_kuehn.loritime.common.LoriTimePlugin;
 import com.jannik_kuehn.loritime.api.CommonSender;
 import com.jannik_kuehn.loritime.api.CommonServer;
-import com.velocitypowered.api.command.CommandManager;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
+import net.kyori.adventure.text.TextComponent;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -14,8 +15,10 @@ import java.util.UUID;
 public class VelocityServer implements CommonServer {
     private LoriTimePlugin plugin;
     private ProxyServer server;
+    private String serverMode;
 
     public VelocityServer() {
+        // Empty
     }
 
     public void enable(LoriTimePlugin plugin, ProxyServer server) {
@@ -63,7 +66,31 @@ public class VelocityServer implements CommonServer {
         return server.getVersion().getName() + " -> " + server.getVersion().getVersion();
     }
 
-    public CommandManager getCommandManager() {
-        return server.getCommandManager();
+    @Override
+    public boolean isProxy() {
+        return true;
+    }
+
+    @Override
+    public String getServerMode() {
+        return serverMode;
+    }
+
+    @Override
+    public void setServerMode(String serverMode) {
+        this.serverMode = serverMode;
+    }
+
+    @Override
+    public void kickPlayer(LoriTimePlayer loriTimePlayer, TextComponent message) {
+        Optional<UUID> optionalUUID = Optional.ofNullable(loriTimePlayer.getUniqueId());
+        if (optionalUUID.isEmpty()) {
+            return;
+        }
+        Optional<Player> optionalPlayer = server.getPlayer(optionalUUID.get());
+        if (optionalPlayer.isEmpty()) {
+            return;
+        }
+        optionalPlayer.get().disconnect(message);
     }
 }

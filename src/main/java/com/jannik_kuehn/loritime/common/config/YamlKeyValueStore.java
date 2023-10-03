@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class YamlKeyValueStore implements KeyValueStore {
     private final Map<String, Object> data;
@@ -62,6 +63,11 @@ public class YamlKeyValueStore implements KeyValueStore {
         return new ArrayList<>(data.keySet());
     }
 
+    @Override
+    public Set<Map.Entry<String, Object>> entrySet() {
+        return data.entrySet();
+    }
+
     private void loadFromFile() {
         try {
             FileInputStream input = new FileInputStream(filePath);
@@ -73,7 +79,7 @@ public class YamlKeyValueStore implements KeyValueStore {
                 return;
             }
             data.clear();
-            Map<String, ?> test= readRecursive(loadedData, "");
+            Map<String, ?> test = readRecursive(loadedData, "");
             data.putAll(test);
             loaded = true;
         } catch (FileNotFoundException e) {

@@ -2,7 +2,9 @@ package com.jannik_kuehn.loritime.bungee.util;
 
 import com.jannik_kuehn.loritime.api.CommonSender;
 import net.kyori.adventure.text.TextComponent;
-import net.md_5.bungee.api.chat.BaseComponent;
+import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.serializer.bungeecord.BungeeComponentSerializer;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 
 import java.util.UUID;
@@ -40,7 +42,7 @@ public class BungeePlayer implements CommonSender {
 
     @Override
     public void sendMessage(TextComponent message) {
-        player.sendMessage((BaseComponent) message);
+        player.sendMessage(BungeeComponentSerializer.get().serialize(message));
     }
 
     @Override

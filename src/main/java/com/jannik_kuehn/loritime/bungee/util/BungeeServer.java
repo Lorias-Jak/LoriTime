@@ -5,6 +5,8 @@ import com.jannik_kuehn.loritime.api.CommonServer;
 import com.jannik_kuehn.loritime.api.LoriTimePlayer;
 import com.jannik_kuehn.loritime.common.LoriTimePlugin;
 import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.serializer.bungeecord.BungeeComponentSerializer;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.chat.BaseComponent;
@@ -88,6 +90,6 @@ public class BungeeServer implements CommonServer {
             return;
         }
         ProxiedPlayer proxiedPlayer = server.getPlayer(player.getUniqueId());
-        proxiedPlayer.disconnect((BaseComponent) message);
+        proxiedPlayer.disconnect(BungeeComponentSerializer.get().serialize(message));
     }
 }

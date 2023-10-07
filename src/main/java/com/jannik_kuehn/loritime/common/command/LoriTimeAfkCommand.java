@@ -66,6 +66,6 @@ public class LoriTimeAfkCommand implements CommonCommand {
     }
 
     private void printUtilityMessage(CommonSender sender, String messageKey) {
-        sender.sendMessage(localization.formatMiniMessage(localization.getRawMessage(messageKey)));
+        sender.sendMessage(localization.formatTextComponent(localization.getRawMessage(messageKey)));
     }
 }

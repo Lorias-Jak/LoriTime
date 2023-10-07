@@ -28,7 +28,7 @@ public class MasteredAfkPlayerHandling extends AfkHandling {
 
         if (autoKickEnabled && !hasPermission(loriTimePlayer,"loritime.afk.bypass.kick")) {
             loriTimePlugin.getServer().kickPlayer(loriTimePlayer, loriTimePlugin.getLocalization()
-                    .formatMiniMessageWithoutPrefix(loriTimePlugin.getLocalization().getRawMessage("message.afk.kick")
+                    .formatTextComponentWithoutPrefix(loriTimePlugin.getLocalization().getRawMessage("message.afk.kick")
                             .replace("[player]", loriTimePlayer.getName())
                             .replace("[time]", TimeUtil.formatTime(timeToRemove, loriTimePlugin.getLocalization()))
                     ));

@@ -128,7 +128,7 @@ public class LoriTimeAdminCommand implements CommonCommand {
         long time = optionalTime.getAsLong();
 
         if (time < 0) {
-            sender.sendMessage(localization.formatMiniMessage(localization.getRawMessage("message.command.loritimeadmin.set.negativetime")
+            sender.sendMessage(localization.formatTextComponent(localization.getRawMessage("message.command.loritimeadmin.set.negativetime")
                     .replace("[player]", player.getName())
                     .replace("[time]", TimeUtil.formatTime(time, localization))));
             return;
@@ -140,7 +140,7 @@ public class LoriTimeAdminCommand implements CommonCommand {
             if (optionalCurrentTime.isPresent()) {
                 currentTime = optionalCurrentTime.getAsLong();
             } else {
-                sender.sendMessage(localization.formatMiniMessage(localization.getRawMessage("message.command.loritime.notfound")
+                sender.sendMessage(localization.formatTextComponent(localization.getRawMessage("message.command.loritime.notfound")
                         .replace("[player]", player.getName())));
                 return;
             }
@@ -153,7 +153,7 @@ public class LoriTimeAdminCommand implements CommonCommand {
         if (currentTime != time) {
             modifyOnlineTime(player.getUniqueId(), time - currentTime);
         }
-        sender.sendMessage(localization.formatMiniMessage(localization.getRawMessage("message.command.loritimeadmin.set.success")
+        sender.sendMessage(localization.formatTextComponent(localization.getRawMessage("message.command.loritimeadmin.set.success")
                 .replace("[player]", player.getName())
                 .replace("[time]", TimeUtil.formatTime(time, localization))));
     }
@@ -186,7 +186,7 @@ public class LoriTimeAdminCommand implements CommonCommand {
             if (optionalCurrentTime.isPresent()) {
                 currentTime = optionalCurrentTime.getAsLong();
             } else {
-                sender.sendMessage(localization.formatMiniMessage(localization.getRawMessage("message.command.loritime.notfound")
+                sender.sendMessage(localization.formatTextComponent(localization.getRawMessage("message.command.loritime.notfound")
                         .replace("[player]", player.getName())));
                 return;
             }
@@ -196,7 +196,7 @@ public class LoriTimeAdminCommand implements CommonCommand {
             return;
         }
         if (currentTime + time < 0) {
-            sender.sendMessage(localization.formatMiniMessage(localization.getRawMessage("message.command.loritimeadmin.modify.negativetimesum")
+            sender.sendMessage(localization.formatTextComponent(localization.getRawMessage("message.command.loritimeadmin.modify.negativetimesum")
                     .replace("[player]", player.getName())
                     .replace("[time]", TimeUtil.formatTime(time, localization))));
             return;
@@ -204,7 +204,7 @@ public class LoriTimeAdminCommand implements CommonCommand {
         if (time != 0) {
             modifyOnlineTime(player.getUniqueId(), time);
         }
-        sender.sendMessage(localization.formatMiniMessage(localization.getRawMessage("message.command.loritimeadmin.modify.success")
+        sender.sendMessage(localization.formatTextComponent(localization.getRawMessage("message.command.loritimeadmin.modify.success")
                 .replace("[player]", player.getName())
                 .replace("[time]", TimeUtil.formatTime(time, localization))));
     }
@@ -228,7 +228,7 @@ public class LoriTimeAdminCommand implements CommonCommand {
             if (optionalCurrentTime.isPresent()) {
                 currentTime = optionalCurrentTime.getAsLong();
             } else {
-                sender.sendMessage(localization.formatMiniMessage(localization.getRawMessage("message.command.loritime.notfound")
+                sender.sendMessage(localization.formatTextComponent(localization.getRawMessage("message.command.loritime.notfound")
                         .replace("[player]", player.getName())));
                 return;
             }
@@ -240,7 +240,7 @@ public class LoriTimeAdminCommand implements CommonCommand {
         if (currentTime != 0) {
             modifyOnlineTime(player.getUniqueId(), -currentTime);
         }
-        sender.sendMessage(localization.formatMiniMessage(localization.getRawMessage("message.command.loritimeadmin.reset.success")
+        sender.sendMessage(localization.formatTextComponent(localization.getRawMessage("message.command.loritimeadmin.reset.success")
                 .replace("[player]", player.getName())));
     }
 
@@ -270,17 +270,17 @@ public class LoriTimeAdminCommand implements CommonCommand {
     }
 
     private void printMissingUuidMessage(CommonSender sender, String playerName) {
-        sender.sendMessage(localization.formatMiniMessage(localization.getRawMessage("message.command.loritimeadmin.missinguuid")
+        sender.sendMessage(localization.formatTextComponent(localization.getRawMessage("message.command.loritimeadmin.missinguuid")
                 .replace("[player]", playerName)));
     }
 
     private void printNotTimeMessage(CommonSender sender, String... notTime) {
-        sender.sendMessage(localization.formatMiniMessage(localization.getRawMessage("message.command.loritimeadmin.nottime")
+        sender.sendMessage(localization.formatTextComponent(localization.getRawMessage("message.command.loritimeadmin.nottime")
                 .replace("[argument]", String.join(" ", notTime))));
     }
 
     private void printUtilityMessage(CommonSender sender, String messageKey) {
-        sender.sendMessage(localization.formatMiniMessage(localization.getRawMessage(messageKey)));
+        sender.sendMessage(localization.formatTextComponent(localization.getRawMessage(messageKey)));
     }
 
 }

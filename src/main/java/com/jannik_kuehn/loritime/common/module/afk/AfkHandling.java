@@ -44,7 +44,7 @@ public abstract class AfkHandling {
             if (!onlinePlayer.hasPermission(permission)) {
                 continue;
             }
-            onlinePlayer.sendMessage(loriTimePlugin.getLocalization().formatMiniMessage(loriTimePlugin.getLocalization()
+            onlinePlayer.sendMessage(loriTimePlugin.getLocalization().formatTextComponent(loriTimePlugin.getLocalization()
                     .getRawMessage("message.afk.kickAnnounce")
                     .replace("[player]", player.getName())
                     .replace("[time]", TimeUtil.formatTime(timeToRemove, loriTimePlugin.getLocalization())))
@@ -56,7 +56,7 @@ public abstract class AfkHandling {
             if (!onlinePlayer.hasPermission(permission)) {
                 continue;
             }
-            onlinePlayer.sendMessage(loriTimePlugin.getLocalization().formatMiniMessage(loriTimePlugin.getLocalization()
+            onlinePlayer.sendMessage(loriTimePlugin.getLocalization().formatTextComponent(loriTimePlugin.getLocalization()
                     .getRawMessage(message)
                     .replace("[player]", player.getName()))
             );
@@ -64,7 +64,7 @@ public abstract class AfkHandling {
     }
 
     protected void selfAfkMessage(LoriTimePlayer player, String message) {
-        loriTimePlugin.getServer().getPlayer(player.getUniqueId()).get().sendMessage(loriTimePlugin.getLocalization().formatMiniMessage(
+        loriTimePlugin.getServer().getPlayer(player.getUniqueId()).get().sendMessage(loriTimePlugin.getLocalization().formatTextComponent(
                 loriTimePlugin.getLocalization().getRawMessage(message)));
     }
 

@@ -88,4 +88,9 @@ public class YamlConfiguration extends Configuration {
     public void reload() {
         keyValueStore.reload();
     }
+
+    @Override
+    public void remove(String key) {
+        keyValueStore.remove(key);
+    }
 }

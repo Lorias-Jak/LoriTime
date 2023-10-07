@@ -43,6 +43,8 @@ public abstract class Configuration {
 
     public abstract void reload();
 
+    public abstract void remove(String key);
+
     public boolean containsKey(String key) {
         return getKeys().contains(key);
     }

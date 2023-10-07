@@ -21,7 +21,7 @@ public class PlayerNameVelocityListener {
         final String name = player.getUsername();
         plugin.getScheduler().runAsyncOnce(() -> {
             try {
-                plugin.getNameStorage().setEntry(uuid, name);
+                plugin.getNameStorage().setEntry(uuid, name, true);
             } catch (StorageException ex) {
                 plugin.getLogger().warning("could not save player name and uuid " + name, ex);
             }

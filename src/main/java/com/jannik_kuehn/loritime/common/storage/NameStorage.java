@@ -15,6 +15,8 @@ public interface NameStorage extends AutoCloseable {
 
     void setEntry(UUID uniqueId, String name) throws StorageException;
 
+    void setEntry(UUID uniqueId, String name, boolean override) throws StorageException;
+
     void setEntries(Map<UUID, String> entries) throws StorageException;
 
     Set<String> getNameEntries() throws StorageException;

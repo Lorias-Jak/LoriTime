@@ -24,7 +24,7 @@ public class PlayerNameBukkitListener implements Listener {
         final String name = player.getName();
         plugin.getScheduler().runAsyncOnce(() -> {
             try {
-                plugin.getNameStorage().setEntry(uuid, name);
+                plugin.getNameStorage().setEntry(uuid, name, true);
             } catch (StorageException e) {
                 plugin.getLogger().warning("could not save player name and uuid " + name, e);
             }

@@ -1,6 +1,5 @@
 package com.jannik_kuehn.loritime.common.config;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -14,4 +13,5 @@ public interface KeyValueStore {
     Set<Map.Entry<String, Object>> entrySet();
     boolean isLoaded();
     void reload();
+    void remove(String key);
 }

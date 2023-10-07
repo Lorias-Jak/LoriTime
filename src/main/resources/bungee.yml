@@ -1,0 +1,4 @@
+main: '${basePackage}.bungee.LoriTimeBungee'
+name: '${name}'
+version: '${version}'
+author: 'Lorias-Jak'

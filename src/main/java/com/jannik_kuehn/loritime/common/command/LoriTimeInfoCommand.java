@@ -32,7 +32,7 @@ public class LoriTimeInfoCommand implements CommonCommand {
             String serverVersion = "<#A4A4A4>Server version: <#FF3232>" + plugin.getServer().getServerVersion();
             String pluginVersion = "<#A4A4A4>Plugin version: <#FF3232>" + plugin.getPluginVersion();
 
-            sender.sendMessage(localization.formatMiniMessage("Version Information"));
+            sender.sendMessage(localization.formatTextComponent("Version Information"));
             sender.sendMessage("");
             sender.sendMessage((TextComponent) miniMessage.deserialize(serverVersion));
             sender.sendMessage((TextComponent) miniMessage.deserialize(pluginVersion));
@@ -55,6 +55,6 @@ public class LoriTimeInfoCommand implements CommonCommand {
     }
 
     private void printUtilityMessage(CommonSender sender, String messageKey) {
-        sender.sendMessage(localization.formatMiniMessage(localization.getRawMessage(messageKey)));
+        sender.sendMessage(localization.formatTextComponent(localization.getRawMessage(messageKey)));
     }
 }

@@ -77,7 +77,7 @@ public class LoriTimeTopCommand implements CommonCommand {
 
         int amountOfMaxPages = (int) Math.ceil(amountOfPlayers / PLAYER_AMOUNT_PER_PAGE);
         if (site < 1 || site > amountOfMaxPages) {
-            sender.sendMessage(localization.formatMiniMessage(localization.getRawMessage("message.command.top.wrongpage")
+            sender.sendMessage(localization.formatTextComponent(localization.getRawMessage("message.command.top.wrongpage")
                     .replace("[pages]", 1 + " and " + amountOfMaxPages)
             ));
             return;
@@ -106,7 +106,7 @@ public class LoriTimeTopCommand implements CommonCommand {
             totalTimeSum += value;
         }
 
-        sender.sendMessage(localization.formatMiniMessageWithoutPrefix(localization.getRawMessage("message.command.top.headline")
+        sender.sendMessage(localization.formatTextComponentWithoutPrefix(localization.getRawMessage("message.command.top.headline")
                 .replace("[dateAndTime]", LocalDate.now() + " " + LocalTime.now())
                 .replace("[pages]", usedSite + " / " + amountOfMaxPages)
                 .replace("[totalTime]", TimeUtil.formatTime(totalTimeSum, localization))
@@ -123,7 +123,7 @@ public class LoriTimeTopCommand implements CommonCommand {
                 }
 
                 String name = optionalName.get();
-                sender.sendMessage(localization.formatMiniMessageWithoutPrefix(localization.getRawMessage("message.command.top.user")
+                sender.sendMessage(localization.formatTextComponentWithoutPrefix(localization.getRawMessage("message.command.top.user")
                         .replace("[place]", String.valueOf(place))
                         .replace("[player]", name)
                         .replace("[time]", TimeUtil.formatTime(topEntry.getValue(), localization))
@@ -150,6 +150,6 @@ public class LoriTimeTopCommand implements CommonCommand {
     }
 
     private void printUtilityMessage(CommonSender sender, String messageKey) {
-        sender.sendMessage(localization.formatMiniMessage(localization.getRawMessage(messageKey)));
+        sender.sendMessage(localization.formatTextComponent(localization.getRawMessage(messageKey)));
     }
 }

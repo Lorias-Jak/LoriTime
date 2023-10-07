@@ -1,13 +1,11 @@
 package com.jannik_kuehn.loritime.common.config.localization;
 
 import com.jannik_kuehn.loritime.common.config.Configuration;
-import com.jannik_kuehn.loritime.common.config.YamlConfiguration;
+import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Objects;
 
 public class Localization {
@@ -24,11 +22,11 @@ public class Localization {
         langFile.reload();
     }
 
-    public TextComponent formatMiniMessage(String message) {
+    public TextComponent formatTextComponent(String message) {
         return (TextComponent) miniMessage.deserialize(PLUGINPREFIX + message);
     }
 
-    public TextComponent formatMiniMessageWithoutPrefix(String message) {
+    public TextComponent formatTextComponentWithoutPrefix(String message) {
         return (TextComponent) miniMessage.deserialize(message);
     }
 

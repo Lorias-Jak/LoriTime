@@ -68,9 +68,36 @@ public class FileStorageProvider implements FileStorage {
             checkClosed();
             storage.setValue(path, data);
         } catch (StorageException e) {
-            throw new RuntimeException(e);
+            throw new StorageException("failed to write data to path: " + path, e);
         } finally {
             rwLock.writeLock().unlock();
+        }
+    }
+
+    @Override
+    public void write(String path, Object data, boolean overwrite) throws StorageException {
+        Objects.requireNonNull(path);
+        Objects.requireNonNull(data);
+        checkClosed();
+        rwLock.writeLock().lock();
+        String sameKey = null;
+        try {
+            Map<String, Object> all = (Map<String, Object>) storage.getAll();
+            Set<String> set = all.keySet();
+            for (String value : set) {
+                if (all.get(value).equals(data)) {
+                    sameKey = value;
+                }
+            }
+        } finally {
+            rwLock.writeLock().unlock();
+        }
+
+        if (sameKey != null && overwrite) {
+            delete(sameKey);
+            write(path, data);
+        } else {
+            write(path, data);
         }
     }
 
@@ -90,8 +117,23 @@ public class FileStorageProvider implements FileStorage {
     }
 
     @Override
+    public void writeAll(Map<String, ?> data, boolean overwrite) throws StorageException {
+
+    }
+
+    @Override
     public void delete(String path) throws StorageException {
-        write(path, null);
+        Objects.requireNonNull(path);
+        checkClosed();
+        rwLock.writeLock().lock();
+        try {
+            checkClosed();
+            storage.remove(path);
+        } catch (StorageException e) {
+            throw new StorageException("failed to write data to path: " + path, e);
+        } finally {
+            rwLock.writeLock().unlock();
+        }
     }
 
     @Override

@@ -125,4 +125,9 @@ public class YamlKeyValueStore implements KeyValueStore {
     public void reload() {
         loadFromFile();
     }
+
+    @Override
+    public void remove(String key) {
+        data.remove(key);
+    }
 }

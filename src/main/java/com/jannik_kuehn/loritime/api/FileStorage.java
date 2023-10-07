@@ -13,11 +13,15 @@ public interface FileStorage extends AutoCloseable {
 
     void write(String path, Object data) throws StorageException;
 
+    void write(String path, Object data, boolean overwrite) throws StorageException;
+
     void delete(String path) throws StorageException;
 
     Map<String, ?> readAll() throws StorageException;
 
     void writeAll(Map<String, ?> data) throws StorageException;
+
+    void writeAll(Map<String, ?> data, boolean overwrite) throws StorageException;
 
     void close() throws StorageException;
 }

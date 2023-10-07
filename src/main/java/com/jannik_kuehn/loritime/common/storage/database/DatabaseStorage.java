@@ -249,6 +249,11 @@ public class DatabaseStorage implements NameStorage, TimeStorage {
         }
     }
 
+    @Override
+    public void setEntry(UUID uniqueId, String name, boolean override) throws StorageException {
+        setEntry(uniqueId, name);
+    }
+
     private void setEntry(Connection connection, UUID uuid, String name) throws SQLException {
         Optional<UUID> oldNameHolder = getUuid(connection, name);
         if (oldNameHolder.filter(oldUuid -> !oldUuid.equals(uuid)).isPresent()) { // name not unique ? update on duplicate uuid

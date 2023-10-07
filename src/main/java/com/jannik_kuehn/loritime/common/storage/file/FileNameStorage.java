@@ -47,6 +47,13 @@ public class FileNameStorage implements NameStorage {
     }
 
     @Override
+    public void setEntry(UUID uniqueId, String name, boolean override) throws StorageException {
+        Objects.requireNonNull(uniqueId);
+        Objects.requireNonNull(name);
+        storageProvider.write(name, uniqueId.toString(), override);
+    }
+
+    @Override
     public void setEntries(Map<UUID, String> entries) throws StorageException {
         Objects.requireNonNull(entries);
         Map<String, String> data = new HashMap<>();

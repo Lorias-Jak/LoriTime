@@ -62,5 +62,4 @@ public class VelocityCommand implements SimpleCommand {
             return new VelocitySender(velocityPlugin.getLoriTimePlugin(), source);
         }
     }
-
 }

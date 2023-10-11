@@ -57,7 +57,7 @@ public class LoriTimePlugin {
         this.scheduler = scheduler;
         this.server = server;
         this.errorDisable = false;
-        this.pluginVersion = "LoriTime-1.1.0";
+        this.pluginVersion = "LoriTime-1.2.0";
     }
 
     public void enable() {

@@ -89,7 +89,7 @@ public class AfkStatusProvider {
         afkCheckedPlayers.put(player, System.currentTimeMillis());
     }
 
-    private LoriTimePlayer getRealPlayer(LoriTimePlayer player) {
+    public LoriTimePlayer getRealPlayer(LoriTimePlayer player) {
         LoriTimePlayer playerToReturn = player;
         for (LoriTimePlayer loriTimePlayer : afkCheckedPlayers.keySet()) {
             if (player.equals(loriTimePlayer)) {

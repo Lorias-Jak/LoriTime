@@ -5,6 +5,7 @@ import com.jannik_kuehn.loritime.common.LoriTimePlugin;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
+import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
@@ -54,6 +55,12 @@ public class BukkitPlayerAfkListener implements Listener {
 
     @EventHandler (ignoreCancelled = true)
     public void onPlayerInteract(PlayerInteractEvent event) {
+        LoriTimePlayer player = new LoriTimePlayer(event.getPlayer().getUniqueId(), event.getPlayer().getName());
+        updateAfkStatus(getOrCreatePlayer(event.getPlayer().getUniqueId(), player));
+    }
+
+    @EventHandler(ignoreCancelled = true)
+    public void onPlayerCommandEvent(PlayerCommandPreprocessEvent event) {
         LoriTimePlayer player = new LoriTimePlayer(event.getPlayer().getUniqueId(), event.getPlayer().getName());
         updateAfkStatus(getOrCreatePlayer(event.getPlayer().getUniqueId(), player));
     }

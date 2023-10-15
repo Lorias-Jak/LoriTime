@@ -9,6 +9,7 @@ import com.jannik_kuehn.loritime.bukkit.listener.TimeAccumulatorBukkitListener;
 import com.jannik_kuehn.loritime.bukkit.schedule.BukkitScheduleAdapter;
 import com.jannik_kuehn.loritime.bukkit.util.BukkitLogger;
 import com.jannik_kuehn.loritime.bukkit.util.BukkitServer;
+import com.jannik_kuehn.loritime.bukkit.util.LoriTimePlaceholder;
 import com.jannik_kuehn.loritime.common.LoriTimePlugin;
 import com.jannik_kuehn.loritime.common.command.LoriTimeAdminCommand;
 import com.jannik_kuehn.loritime.common.command.LoriTimeAfkCommand;
@@ -79,6 +80,9 @@ public class LoriTimeBukkit extends JavaPlugin {
         if (loriTimePlugin.isAfkEnabled()) {
             Bukkit.getPluginManager().registerEvents(new BukkitPlayerAfkListener(loriTimePlugin), this);
             commands.add(new BukkitCommand(this, new LoriTimeAfkCommand(loriTimePlugin, loriTimePlugin.getLocalization())));
+        }
+        if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null && loriTimePlugin.getConfig().getBoolean("integrations.PlaceholderAPI", true)) {
+            new LoriTimePlaceholder(loriTimePlugin).register();
         }
     }
 

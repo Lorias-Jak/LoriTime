@@ -63,7 +63,8 @@ afk:
   # The unit for this is seconds.
   repeatCheck: 30
 
-###################
-#  Do not touch!  #
-##################
-configVersion: 2
+################
+# Integrations #
+################
+integrations:
+  PlaceholderAPI: true

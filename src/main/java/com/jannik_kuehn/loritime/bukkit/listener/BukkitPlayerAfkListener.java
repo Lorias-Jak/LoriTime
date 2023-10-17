@@ -60,7 +60,10 @@ public class BukkitPlayerAfkListener implements Listener {
     }
 
     @EventHandler(ignoreCancelled = true)
-    public void onPlayerCommandEvent(PlayerCommandPreprocessEvent event) {
+    public void onPlayerCommand(PlayerCommandPreprocessEvent event) {
+        if (event.getMessage().equalsIgnoreCase("/afk")) {
+            return;
+        }
         LoriTimePlayer player = new LoriTimePlayer(event.getPlayer().getUniqueId(), event.getPlayer().getName());
         updateAfkStatus(getOrCreatePlayer(event.getPlayer().getUniqueId(), player));
     }

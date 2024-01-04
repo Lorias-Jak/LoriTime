@@ -107,7 +107,7 @@ public class AfkStatusProvider {
         return afkPlayerHandling;
     }
 
-    public void setPlayerAfk(LoriTimePlayer player) {
+    public void togglePlayerAfk(LoriTimePlayer player) {
         LoriTimePlayer target = getRealPlayer(player);
         if (!target.isAfk()) {
             target.setAFk(true);

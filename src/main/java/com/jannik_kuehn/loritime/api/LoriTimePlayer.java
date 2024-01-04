@@ -4,27 +4,27 @@ import java.util.UUID;
 
 public class LoriTimePlayer {
 
-    private final UUID uuid;
-    private final String name;
+    private final CommonSender commonSender;
     private boolean afkStatus;
 
-    public LoriTimePlayer(UUID uuid, String name) {
-        this.uuid = uuid;
-        this.name = name;
-
-        this.afkStatus = false;
-    }
-
-    public UUID getUniqueId() {
-        return uuid;
-    }
-
-    public String getName() {
-        return name;
+    public LoriTimePlayer(CommonSender commonSender) {
+        this.commonSender = commonSender;
     }
 
     public boolean isAfk() {
         return afkStatus;
+    }
+
+    public String getName() {
+        return commonSender.getName();
+    }
+
+    public UUID getUuid() {
+        return commonSender.getUniqueId();
+    }
+
+    public CommonSender getCommon() {
+        return commonSender;
     }
 
     public void setAFk(final boolean afk) {
@@ -37,6 +37,6 @@ public class LoriTimePlayer {
         if (data == null || getClass() != data.getClass())
             return false;
         LoriTimePlayer targetPlayer = (LoriTimePlayer) data;
-        return uuid.equals(targetPlayer.uuid);
+        return getUuid().equals(targetPlayer.getUuid());
     }
 }

@@ -1,6 +1,7 @@
 package com.jannik_kuehn.loritime.bukkit.listener;
 
 import com.jannik_kuehn.loritime.api.LoriTimePlayer;
+import com.jannik_kuehn.loritime.bukkit.util.BukkitPlayer;
 import com.jannik_kuehn.loritime.common.LoriTimePlugin;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -25,14 +26,15 @@ public class BukkitPlayerAfkListener implements Listener {
 
     @EventHandler (ignoreCancelled = true)
     public void onPlayerJoin(PlayerJoinEvent event) {
-        LoriTimePlayer player = new LoriTimePlayer(event.getPlayer().getUniqueId(), event.getPlayer().getName());
+        LoriTimePlayer player = new LoriTimePlayer(new BukkitPlayer(event.getPlayer()));
         updateAfkStatus(getOrCreatePlayer(event.getPlayer().getUniqueId(), player));
     }
 
     @EventHandler (ignoreCancelled = true)
     public void onPlayerQuit(PlayerQuitEvent event) {
-        LoriTimePlayer player = new LoriTimePlayer(event.getPlayer().getUniqueId(), event.getPlayer().getName());
+        LoriTimePlayer player = new LoriTimePlayer(new BukkitPlayer(event.getPlayer()));
         plugin.getAfkStatusProvider().playerLeft(getOrCreatePlayer(event.getPlayer().getUniqueId(), player));
+        // ToDo umbauen, so dass der PlayerHandler das übernimmt!
         afkPlayers.remove(event.getPlayer().getUniqueId());
     }
 
@@ -43,20 +45,20 @@ public class BukkitPlayerAfkListener implements Listener {
             return;
         }
 
-        LoriTimePlayer player = new LoriTimePlayer(event.getPlayer().getUniqueId(), event.getPlayer().getName());
-        updateAfkStatus(getOrCreatePlayer(event.getPlayer().getUniqueId(), player));
+        LoriTimePlayer player = new LoriTimePlayer(new BukkitPlayer(event.getPlayer()));
+        updateAfkStatus(player);
     }
 
     @EventHandler (ignoreCancelled = true)
     public void onPlayerChat(AsyncPlayerChatEvent event) {
-        LoriTimePlayer player = new LoriTimePlayer(event.getPlayer().getUniqueId(), event.getPlayer().getName());
-        updateAfkStatus(getOrCreatePlayer(event.getPlayer().getUniqueId(), player));
+        LoriTimePlayer player = new LoriTimePlayer(new BukkitPlayer(event.getPlayer()));
+        updateAfkStatus(player);
     }
 
     @EventHandler (ignoreCancelled = true)
     public void onPlayerInteract(PlayerInteractEvent event) {
-        LoriTimePlayer player = new LoriTimePlayer(event.getPlayer().getUniqueId(), event.getPlayer().getName());
-        updateAfkStatus(getOrCreatePlayer(event.getPlayer().getUniqueId(), player));
+        LoriTimePlayer player = new LoriTimePlayer(new BukkitPlayer(event.getPlayer()));
+        updateAfkStatus(player);
     }
 
     @EventHandler(ignoreCancelled = true)
@@ -64,21 +66,16 @@ public class BukkitPlayerAfkListener implements Listener {
         if (event.getMessage().equalsIgnoreCase("/afk")) {
             return;
         }
-        LoriTimePlayer player = new LoriTimePlayer(event.getPlayer().getUniqueId(), event.getPlayer().getName());
-        updateAfkStatus(getOrCreatePlayer(event.getPlayer().getUniqueId(), player));
+        LoriTimePlayer player = new LoriTimePlayer(new BukkitPlayer(event.getPlayer()));
+        updateAfkStatus(player);
     }
 
     private void updateAfkStatus(LoriTimePlayer player) {
         plugin.getScheduler().runAsyncOnce(() -> {
+            if (!plugin.getPlayerHandler().contains(player)) {
+                plugin.getPlayerHandler().registerPlayer(player);
+            }
             plugin.getAfkStatusProvider().resetTimer(player);
         });
-    }
-
-    private LoriTimePlayer getOrCreatePlayer(UUID uuid, LoriTimePlayer player) {
-        if (afkPlayers.containsKey(uuid)) {
-            return afkPlayers.get(uuid);
-        }
-        afkPlayers.put(uuid, player);
-        return player;
     }
 }

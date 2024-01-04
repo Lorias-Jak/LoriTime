@@ -44,6 +44,7 @@ public class LoriTimePlugin {
     private AfkStatusProvider afkStatusProvider;
     private boolean errorDisable;
     private final String pluginVersion;
+    private PlayerHandler playerHandler;
 
     public static LoriTimePlugin getInstance() {
         return instance;
@@ -75,6 +76,7 @@ public class LoriTimePlugin {
             disable();
         }
         server.setServerMode(getServerModeFromConfig());
+
     }
 
     private String getServerModeFromConfig() {
@@ -88,7 +90,7 @@ public class LoriTimePlugin {
     }
 
     public void enableAfkFeature(AfkHandling afkHandling) {
-        afkStatusProvider = new AfkStatusProvider(this, afkHandling);
+        this.playerHandler = new PlayerHandler(new AfkStatusProvider(this, afkHandling));
     }
 
     public boolean isAfkEnabled() {
@@ -290,5 +292,9 @@ public class LoriTimePlugin {
 
     public AfkStatusProvider getAfkStatusProvider() {
         return afkStatusProvider;
+    }
+
+    public PlayerHandler getPlayerHandler() {
+        return playerHandler;
     }
 }

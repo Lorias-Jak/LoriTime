@@ -5,7 +5,7 @@
 
     <properties>
         <name>LoriTime</name>
-        <version>1.2.0</version>
+        <version>1.3.0</version>
         <maven-version>${version}-DEV-UNOFFICIAL</maven-version>
         <current-date>${maven.build.timestamp}</current-date>
         <maven.build.timestamp.format>yyyy-MM-dd</maven.build.timestamp.format>
@@ -35,7 +35,7 @@
         <dependency>
             <groupId>io.papermc.paper</groupId>
             <artifactId>paper-api</artifactId>
-            <version>1.20.1-R0.1-SNAPSHOT</version>
+            <version>1.20.4-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
             <exclusions>
                 <exclusion>
@@ -47,7 +47,7 @@
         <dependency>
             <groupId>com.velocitypowered</groupId>
             <artifactId>velocity-api</artifactId>
-            <version>3.1.1</version>
+            <version>3.3.0-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
         <!-- from net.md-5 repository -->
@@ -79,27 +79,32 @@
         <dependency>
             <groupId>net.kyori</groupId>
             <artifactId>adventure-api</artifactId>
-            <version>4.14.0</version>
-        </dependency>
-        <dependency>
-            <groupId>net.kyori</groupId>
-            <artifactId>adventure-platform-bukkit</artifactId>
-            <version>4.3.1</version>
-        </dependency>
-        <dependency>
-            <groupId>net.kyori</groupId>
-            <artifactId>adventure-text-serializer-plain</artifactId>
-            <version>4.14.0</version>
+            <version>4.15.0</version>
         </dependency>
         <dependency>
             <groupId>net.kyori</groupId>
             <artifactId>adventure-text-minimessage</artifactId>
-            <version>4.14.0</version>
+            <version>4.15.0</version>
+        </dependency>
+        <dependency>
+            <groupId>net.kyori</groupId>
+            <artifactId>adventure-platform-bukkit</artifactId>
+            <version>4.3.2</version>
+        </dependency>
+        <dependency>
+            <groupId>net.kyori</groupId>
+            <artifactId>adventure-text-serializer-plain</artifactId>
+            <version>4.15.0</version>
+        </dependency>
+        <dependency>
+            <groupId>net.kyori</groupId>
+            <artifactId>adventure-text-minimessage</artifactId>
+            <version>4.15.0</version>
         </dependency>
         <dependency>
             <groupId>net.kyori</groupId>
             <artifactId>adventure-platform-bungeecord</artifactId>
-            <version>4.3.1</version>
+            <version>4.3.2</version>
         </dependency>
 
         <!-- only dependencies from maven central that are no MC Plugins -->
@@ -116,7 +121,7 @@
         <dependency>
             <groupId>org.jetbrains</groupId>
             <artifactId>annotations</artifactId>
-            <version>24.0.1</version>
+            <version>24.1.0</version>
         </dependency>
         <dependency>
             <groupId>org.apache.maven</groupId>
@@ -132,7 +137,7 @@
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>32.1.3-jre</version>
+            <version>33.0.0-jre</version>
         </dependency>
         <dependency>
             <groupId>commons-io</groupId>
@@ -142,7 +147,7 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
-            <version>3.13.0</version>
+            <version>3.14.0</version>
         </dependency>
         <dependency>
             <groupId>org.json</groupId>
@@ -152,7 +157,7 @@
         <dependency>
             <groupId>com.github.spotbugs</groupId>
             <artifactId>spotbugs-annotations</artifactId>
-            <version>4.8.0</version>
+            <version>4.8.3</version>
         </dependency>
         <dependency>
             <groupId>com.cronutils</groupId>
@@ -162,7 +167,7 @@
         <dependency>
             <groupId>com.zaxxer</groupId>
             <artifactId>HikariCP</artifactId>
-            <version>5.0.1</version>
+            <version>5.1.0</version>
         </dependency>
 
         <!-- only dependencies from maven central that are for testing -->
@@ -198,14 +203,14 @@
             <dependency>
                 <groupId>org.junit</groupId>
                 <artifactId>junit-bom</artifactId>
-                <version>5.10.0</version>
+                <version>5.10.1</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
             <dependency>
                 <groupId>org.mockito</groupId>
                 <artifactId>mockito-bom</artifactId>
-                <version>5.6.0</version>
+                <version>5.8.0</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -224,6 +229,10 @@
         <repository>
             <id>placeholderapi-repo</id>
             <url>https://repo.extendedclip.com/content/repositories/placeholderapi/</url>
+        </repository>
+        <repository>
+            <id>s01.oss.sonatype.org-snapshot</id>
+            <url>https://s01.oss.sonatype.org/content/repositories/snapshots/</url>
         </repository>
     </repositories>
 

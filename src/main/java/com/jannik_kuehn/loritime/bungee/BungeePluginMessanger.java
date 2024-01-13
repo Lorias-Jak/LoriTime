@@ -14,11 +14,11 @@ import java.io.IOException;
 public class BungeePluginMessanger implements Listener {
 
     private final LoriTimeBungee bungeePlugin;
-    private final LoriTimePlugin plugin;
+    private final LoriTimePlugin loriTimePlugin;
 
     public BungeePluginMessanger(LoriTimeBungee bungeePlugin) {
         this.bungeePlugin = bungeePlugin;
-        this.plugin = bungeePlugin.getLoriTimePlugin();
+        this.loriTimePlugin = bungeePlugin.getLoriTimePlugin();
     }
 
     @EventHandler
@@ -34,8 +34,8 @@ public class BungeePluginMessanger implements Listener {
         }
 
         final byte[] data = event.getData();
-        final LoriTimePlayer loriTimePlayer = new LoriTimePlayer(player.getUniqueId(), player.getName());
-        plugin.getScheduler().runAsyncOnce(() -> {
+        final LoriTimePlayer loriTimePlayer = new LoriTimePlayer(loriTimePlugin, player.getUniqueId());
+        loriTimePlugin.getScheduler().runAsyncOnce(() -> {
             if (event.getTag().equals("loritime:afk")) {
                 setAfkStatus(data, loriTimePlayer);
             }
@@ -48,13 +48,13 @@ public class BungeePluginMessanger implements Listener {
 
             switch(input.readUTF()) {
                 case "true":
-                    plugin.getAfkStatusProvider().getAfkPlayerHandling().executePlayerAfk(player, input.readLong());
+                    loriTimePlugin.getPlayerHandler().getAfkStatusProvider().getAfkPlayerHandling().executePlayerAfk(player, input.readLong());
                     break;
                 case "false":
-                    plugin.getAfkStatusProvider().getAfkPlayerHandling().executePlayerResume(player);
+                    loriTimePlugin.getPlayerHandler().getAfkStatusProvider().getAfkPlayerHandling().executePlayerResume(player);
                     break;
                 default:
-                    plugin.getLogger().warning("received invalid afk status!");
+                    loriTimePlugin.getLogger().warning("received invalid afk status!");
             }
         } catch (IOException e) {
             throw new RuntimeException(e);

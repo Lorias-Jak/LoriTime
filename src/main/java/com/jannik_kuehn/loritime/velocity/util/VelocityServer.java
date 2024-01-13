@@ -83,7 +83,7 @@ public class VelocityServer implements CommonServer {
 
     @Override
     public void kickPlayer(LoriTimePlayer loriTimePlayer, TextComponent message) {
-        Optional<UUID> optionalUUID = Optional.ofNullable(loriTimePlayer.getUniqueId());
+        Optional<UUID> optionalUUID = Optional.ofNullable(loriTimePlayer.getUuid());
         if (optionalUUID.isEmpty()) {
             return;
         }

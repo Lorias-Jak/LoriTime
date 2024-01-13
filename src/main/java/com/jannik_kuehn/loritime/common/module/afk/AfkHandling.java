@@ -31,7 +31,7 @@ public abstract class AfkHandling {
     }
 
     protected boolean hasPermission(LoriTimePlayer loriTimePlayer, String permission) {
-        Optional<CommonSender> optionalPlayer = loriTimePlugin.getServer().getPlayer(loriTimePlayer.getUniqueId());
+        Optional<CommonSender> optionalPlayer = loriTimePlugin.getServer().getPlayer(loriTimePlayer.getUuid());
         if (optionalPlayer.isEmpty()) {
             return false;
         }
@@ -64,7 +64,7 @@ public abstract class AfkHandling {
     }
 
     protected void selfAfkMessage(LoriTimePlayer player, String message) {
-        loriTimePlugin.getServer().getPlayer(player.getUniqueId()).get().sendMessage(loriTimePlugin.getLocalization().formatTextComponent(
+        loriTimePlugin.getServer().getPlayer(player.getUuid()).get().sendMessage(loriTimePlugin.getLocalization().formatTextComponent(
                 loriTimePlugin.getLocalization().getRawMessage(message)));
     }
 

@@ -12,11 +12,11 @@ import java.util.List;
 
 public class LoriTimeInfoCommand implements CommonCommand {
 
-    private final LoriTimePlugin plugin;
+    private final LoriTimePlugin loriTimePlugin;
     private final Localization localization;
 
-    public LoriTimeInfoCommand(LoriTimePlugin plugin, Localization localization) {
-        this.plugin = plugin;
+    public LoriTimeInfoCommand(LoriTimePlugin loriTimePlugin, Localization localization) {
+        this.loriTimePlugin = loriTimePlugin;
         this.localization = localization;
     }
 
@@ -27,10 +27,10 @@ public class LoriTimeInfoCommand implements CommonCommand {
             return;
         }
 
-        plugin.getScheduler().runAsyncOnce(() -> {
+        loriTimePlugin.getScheduler().runAsyncOnce(() -> {
             MiniMessage miniMessage = MiniMessage.builder().build();
-            String serverVersion = "<#A4A4A4>Server version: <#FF3232>" + plugin.getServer().getServerVersion();
-            String pluginVersion = "<#A4A4A4>Plugin version: <#FF3232>" + plugin.getPluginVersion();
+            String serverVersion = "<#A4A4A4>Server version: <#FF3232>" + loriTimePlugin.getServer().getServerVersion();
+            String pluginVersion = "<#A4A4A4>Plugin version: <#FF3232>" + loriTimePlugin.getPluginVersion();
 
             sender.sendMessage(localization.formatTextComponent("Version Information"));
             sender.sendMessage("");

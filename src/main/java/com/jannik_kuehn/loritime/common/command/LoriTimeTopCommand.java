@@ -21,11 +21,11 @@ import java.util.stream.Collectors;
 public class LoriTimeTopCommand implements CommonCommand {
 
     private static final double PLAYER_AMOUNT_PER_PAGE = 8;
-    private final LoriTimePlugin plugin;
+    private final LoriTimePlugin loriTimePlugin;
     private final Localization localization;
 
-    public LoriTimeTopCommand(LoriTimePlugin plugin, Localization localization) {
-        this.plugin = plugin;
+    public LoriTimeTopCommand(LoriTimePlugin loriTimePlugin, Localization localization) {
+        this.loriTimePlugin = loriTimePlugin;
         this.localization = localization;
     }
 
@@ -36,13 +36,13 @@ public class LoriTimeTopCommand implements CommonCommand {
             return;
         }
         if (args.length < 1) {
-            plugin.getScheduler().runAsyncOnce(() -> {
+            loriTimePlugin.getScheduler().runAsyncOnce(() -> {
                 topOutput(sender, 1);
             });
             return;
         }
         if (args.length == 1) {
-            plugin.getScheduler().runAsyncOnce(() -> {
+            loriTimePlugin.getScheduler().runAsyncOnce(() -> {
                 try {
                     topOutput(sender, Integer.parseInt(args[0]));
                 } catch (NumberFormatException e) {
@@ -58,7 +58,7 @@ public class LoriTimeTopCommand implements CommonCommand {
         List<Map.Entry<String, Long>> timeEntriesList;
         Map<String, Long> rawTimeEntries = new HashMap<>();
         try {
-            for (Map.Entry<String, ?> allEntry : plugin.getTimeStorage().getAllTimeEntries().entrySet()) {
+            for (Map.Entry<String, ?> allEntry : loriTimePlugin.getTimeStorage().getAllTimeEntries().entrySet()) {
                 if (allEntry.getValue() instanceof Long) {
                     rawTimeEntries.put(allEntry.getKey(), (Long) allEntry.getValue());
                 } else if (allEntry.getValue() instanceof Integer) {
@@ -112,7 +112,7 @@ public class LoriTimeTopCommand implements CommonCommand {
                 .replace("[totalTime]", TimeUtil.formatTime(totalTimeSum, localization))
         ));
         try {
-            NameStorage nameStorage = plugin.getNameStorage();
+            NameStorage nameStorage = loriTimePlugin.getNameStorage();
             int place = minValue;
             for (Map.Entry<String, Long> topEntry : timeEntriesList.subList(minValue, maxValue)) {
                 place++;

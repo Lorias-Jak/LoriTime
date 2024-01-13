@@ -1,5 +1,7 @@
 package com.jannik_kuehn.loritime.api;
 
+import com.jannik_kuehn.loritime.common.LoriTimePlugin;
+
 import java.util.UUID;
 
 public class LoriTimePlayer {
@@ -7,8 +9,24 @@ public class LoriTimePlayer {
     private final CommonSender commonSender;
     private boolean afkStatus;
 
-    public LoriTimePlayer(CommonSender commonSender) {
+    public LoriTimePlayer(final CommonSender commonSender) {
         this.commonSender = commonSender;
+    }
+
+    public LoriTimePlayer(final LoriTimePlugin loriTimePlugin, final UUID uuid) {
+        this.commonSender = loriTimePlugin.getServer().getPlayer(uuid).orElse(null);
+        if (commonSender == null) {
+            loriTimePlugin.getLogger().severe("Cant find common Sender with UUID: " + uuid.toString() + " while creating LoriTimePlayer object");
+            throw new IllegalArgumentException("Player not found");
+        }
+    }
+
+    public LoriTimePlayer(final LoriTimePlugin loriTimePlugin, final String playerName) {
+        this.commonSender = loriTimePlugin.getServer().getPlayer(playerName).orElse(null);
+        if (commonSender == null) {
+            loriTimePlugin.getLogger().severe("Cant find common Sender with Name: " + playerName + " while creating LoriTimePlayer object");
+            throw new IllegalArgumentException("Player not found");
+        }
     }
 
     public boolean isAfk() {
@@ -23,7 +41,7 @@ public class LoriTimePlayer {
         return commonSender.getUniqueId();
     }
 
-    public CommonSender getCommon() {
+    public CommonSender getCommonSender() {
         return commonSender;
     }
 

@@ -13,16 +13,16 @@ public class MasteredAfkPlayerHandling extends AfkHandling {
 
     @Override
     public void executePlayerAfk(LoriTimePlayer loriTimePlayer, long timeToRemove) {
-        if (!afkEnabled || !isOnline(loriTimePlayer.getUniqueId())) {
+        if (!afkEnabled || !isOnline(loriTimePlayer.getUuid())) {
             return;
         }
 
         if (removeTimeEnabled && !hasPermission(loriTimePlayer, "loritime.afk.bypass.timeRemove")) {
             try {
                 loriTimePlugin.getTimeStorage().flushOnlineTimeCache();
-                loriTimePlugin.getTimeStorage().addTime(loriTimePlayer.getUniqueId(), -timeToRemove);
+                loriTimePlugin.getTimeStorage().addTime(loriTimePlayer.getUuid(), -timeToRemove);
             } catch (Exception e) {
-                loriTimePlugin.getLogger().warning("Error while removing online time while afk for player " + loriTimePlayer.getUniqueId(), e);
+                loriTimePlugin.getLogger().warning("Error while removing online time while afk for player " + loriTimePlayer.getUuid(), e);
             }
         }
 
@@ -42,7 +42,7 @@ public class MasteredAfkPlayerHandling extends AfkHandling {
 
     @Override
     public void executePlayerResume(LoriTimePlayer loriTimePlayer) {
-        if (!afkEnabled || !isOnline(loriTimePlayer.getUniqueId())) {
+        if (!afkEnabled || !isOnline(loriTimePlayer.getUuid())) {
             return;
         }
         chatAnnounce(loriTimePlayer, "message.afk.resumeAnnounce", "loritime.afk.announce.afkAnnounce");
@@ -53,7 +53,7 @@ public class MasteredAfkPlayerHandling extends AfkHandling {
     private void stopAccumulatingAndSaveOnlineTime(LoriTimePlayer loriTimePlayer) {
         final long now = System.currentTimeMillis();
         try {
-            loriTimePlugin.getTimeStorage().stopAccumulatingAndSaveOnlineTime(loriTimePlayer.getUniqueId(), now);
+            loriTimePlugin.getTimeStorage().stopAccumulatingAndSaveOnlineTime(loriTimePlayer.getUuid(), now);
         } catch (StorageException e) {
             loriTimePlugin.getLogger().error("error while stopping accumulation of online time for player " + loriTimePlayer.getName(), e);
         }
@@ -62,7 +62,7 @@ public class MasteredAfkPlayerHandling extends AfkHandling {
     private void startAccumulatingOnlineTime(LoriTimePlayer loriTimePlayer) {
         final long now = System.currentTimeMillis();
         try {
-            loriTimePlugin.getTimeStorage().startAccumulating(loriTimePlayer.getUniqueId(), now);
+            loriTimePlugin.getTimeStorage().startAccumulating(loriTimePlayer.getUuid(), now);
         } catch (StorageException e) {
             loriTimePlugin.getLogger().error("error while starting accumulation of online time for player " + loriTimePlayer, e);
         }

@@ -8,9 +8,12 @@ import java.util.Optional;
 import java.util.UUID;
 
 public class PlayerHandler {
+    private final LoriTimePlugin loriTimePlugin;
     private final ArrayList<LoriTimePlayer> playerList;
+    private AfkStatusProvider afkStatusProvider;
 
-    public PlayerHandler(AfkStatusProvider afkStatusProvider) {
+    public PlayerHandler(final LoriTimePlugin loriTimePlugin, AfkStatusProvider afkStatusProvider) {
+        this.loriTimePlugin = loriTimePlugin;
         this.afkStatusProvider = afkStatusProvider;
         this.playerList = new ArrayList<>();
     }
@@ -46,6 +49,24 @@ public class PlayerHandler {
     }
 
     public void unregisterPlayer(LoriTimePlayer player) {
+        // ToDo Checken ob das hier vernünftig funktioniert!
+        if (!playerList.contains(player)) {
+            loriTimePlugin.getLogger().severe("Cant unregister player " + player.getName() + " because he is not registered!");
+            return;
+        }
         playerList.remove(player);
+        afkStatusProvider.playerLeft(player);
+    }
+
+    public AfkStatusProvider getAfkStatusProvider() {
+        return afkStatusProvider;
+    }
+
+    public void setAfkStatusProvider(AfkStatusProvider afkStatusProvider) {
+        this.afkStatusProvider = afkStatusProvider;
+    }
+
+    public void reloadPlayerHandler() {
+        afkStatusProvider.reloadConfigValues();
     }
 }

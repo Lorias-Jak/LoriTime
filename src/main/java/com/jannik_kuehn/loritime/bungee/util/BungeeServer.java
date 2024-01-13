@@ -85,11 +85,11 @@ public class BungeeServer implements CommonServer {
 
     @Override
     public void kickPlayer(LoriTimePlayer player, TextComponent message) {
-        Optional<UUID> optionalUUID = Optional.ofNullable(player.getUniqueId());
+        Optional<UUID> optionalUUID = Optional.ofNullable(player.getUuid());
         if (optionalUUID.isEmpty()) {
             return;
         }
-        ProxiedPlayer proxiedPlayer = server.getPlayer(player.getUniqueId());
+        ProxiedPlayer proxiedPlayer = server.getPlayer(player.getUuid());
         proxiedPlayer.disconnect(BungeeComponentSerializer.get().serialize(message));
     }
 }

@@ -16,24 +16,24 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class BukkitPlayerAfkListener implements Listener {
-    private final LoriTimePlugin plugin;
+    private final LoriTimePlugin loriTimePlugin;
     private final ConcurrentHashMap<UUID, LoriTimePlayer> afkPlayers;
 
-    public BukkitPlayerAfkListener(LoriTimePlugin plugin) {
-        this.plugin = plugin;
+    public BukkitPlayerAfkListener(LoriTimePlugin loriTimePlugin) {
+        this.loriTimePlugin = loriTimePlugin;
         this.afkPlayers = new ConcurrentHashMap<>();
     }
 
     @EventHandler (ignoreCancelled = true)
     public void onPlayerJoin(PlayerJoinEvent event) {
         LoriTimePlayer player = new LoriTimePlayer(new BukkitPlayer(event.getPlayer()));
-        updateAfkStatus(getOrCreatePlayer(event.getPlayer().getUniqueId(), player));
+        updateAfkStatus(player);
     }
 
     @EventHandler (ignoreCancelled = true)
     public void onPlayerQuit(PlayerQuitEvent event) {
         LoriTimePlayer player = new LoriTimePlayer(new BukkitPlayer(event.getPlayer()));
-        plugin.getAfkStatusProvider().playerLeft(getOrCreatePlayer(event.getPlayer().getUniqueId(), player));
+        loriTimePlugin.getPlayerHandler().unregisterPlayer(player);
         // ToDo umbauen, so dass der PlayerHandler das übernimmt!
         afkPlayers.remove(event.getPlayer().getUniqueId());
     }
@@ -71,11 +71,11 @@ public class BukkitPlayerAfkListener implements Listener {
     }
 
     private void updateAfkStatus(LoriTimePlayer player) {
-        plugin.getScheduler().runAsyncOnce(() -> {
-            if (!plugin.getPlayerHandler().contains(player)) {
-                plugin.getPlayerHandler().registerPlayer(player);
+        loriTimePlugin.getScheduler().runAsyncOnce(() -> {
+            if (!loriTimePlugin.getPlayerHandler().contains(player)) {
+                loriTimePlugin.getPlayerHandler().registerPlayer(player);
             }
-            plugin.getAfkStatusProvider().resetTimer(player);
+            loriTimePlugin.getPlayerHandler().getAfkStatusProvider().resetTimer(player);
         });
     }
 }

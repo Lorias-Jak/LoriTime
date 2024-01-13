@@ -12,12 +12,10 @@ import java.io.IOException;
 
 public class VelocityPluginMessage {
 
-    private final LoriTimeVelocity velocityPlugin;
-    private final LoriTimePlugin plugin;
+    private final LoriTimePlugin loriTimePlugin;
 
     public VelocityPluginMessage(LoriTimeVelocity velocityPlugin) {
-        this.velocityPlugin = velocityPlugin;
-        this.plugin = velocityPlugin.getLoriTimePlugin();
+        this.loriTimePlugin = velocityPlugin.getLoriTimePlugin();
     }
 
     @Subscribe
@@ -33,9 +31,9 @@ public class VelocityPluginMessage {
         }
 
         final byte[] data = event.getData();
-        final LoriTimePlayer loriTimePlayer = new LoriTimePlayer(player.getUniqueId(), player.getUsername());
+        final LoriTimePlayer loriTimePlayer = new LoriTimePlayer(this.loriTimePlugin, player.getUniqueId());
 
-        plugin.getScheduler().runAsyncOnce(() -> {
+        this.loriTimePlugin.getScheduler().runAsyncOnce(() -> {
             if (event.getIdentifier().getId().equals("loritime:afk")) {
                 setAfkStatus(data, loriTimePlayer);
             }
@@ -49,13 +47,13 @@ public class VelocityPluginMessage {
 
             switch(input.readUTF()) {
                 case "true":
-                    plugin.getAfkStatusProvider().getAfkPlayerHandling().executePlayerAfk(player, input.readLong());
+                    loriTimePlugin.getPlayerHandler().getAfkStatusProvider().getAfkPlayerHandling().executePlayerAfk(player, input.readLong());
                     break;
                 case "false":
-                    plugin.getAfkStatusProvider().getAfkPlayerHandling().executePlayerResume(player);
+                    loriTimePlugin.getPlayerHandler().getAfkStatusProvider().getAfkPlayerHandling().executePlayerResume(player);
                     break;
                 default:
-                    plugin.getLogger().warning("received invalid afk status!");
+                    loriTimePlugin.getLogger().warning("received invalid afk status!");
             }
         } catch (IOException e) {
             throw new RuntimeException(e);

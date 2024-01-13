@@ -41,7 +41,6 @@ public class LoriTimePlugin {
     private TimeParser parser;
     private int saveInterval;
     private PluginTask flushCacheTask;
-    private AfkStatusProvider afkStatusProvider;
     private boolean errorDisable;
     private final String pluginVersion;
     private PlayerHandler playerHandler;
@@ -90,7 +89,7 @@ public class LoriTimePlugin {
     }
 
     public void enableAfkFeature(AfkHandling afkHandling) {
-        this.playerHandler = new PlayerHandler(new AfkStatusProvider(this, afkHandling));
+        this.playerHandler = new PlayerHandler(this, new AfkStatusProvider(this, afkHandling));
     }
 
     public boolean isAfkEnabled() {
@@ -119,8 +118,8 @@ public class LoriTimePlugin {
 
         closeStorages();
         loadStorage();
-        afkStatusProvider.reloadConfigValues();
 
+        playerHandler.reloadPlayerHandler();
         flushCacheTask = scheduler.scheduleAsync(saveInterval / 2L, saveInterval, this::flushOnlineTimeCache);
     }
 
@@ -288,10 +287,6 @@ public class LoriTimePlugin {
 
     public String getPluginVersion() {
         return pluginVersion;
-    }
-
-    public AfkStatusProvider getAfkStatusProvider() {
-        return afkStatusProvider;
     }
 
     public PlayerHandler getPlayerHandler() {

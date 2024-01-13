@@ -17,12 +17,12 @@ public class BukkitSlavedAfkHandling extends AfkHandling {
     @Override
     public void executePlayerAfk(LoriTimePlayer loriTimePlayer, long timeToRemove) {
         bukkitPlugin.getPluginMessanger().sendPluginMessage(Bukkit.getServer().getPlayer(
-                loriTimePlayer.getUniqueId()), "loritime:afk", "true", timeToRemove);
+                loriTimePlayer.getUuid()), "loritime:afk", "true", timeToRemove);
     }
 
     @Override
     public void executePlayerResume(LoriTimePlayer loriTimePlayer) {
         bukkitPlugin.getPluginMessanger().sendPluginMessage(Bukkit.getServer().getPlayer(
-                loriTimePlayer.getUniqueId()), "loritime:afk", "false");
+                loriTimePlayer.getUuid()), "loritime:afk", "false");
     }
 }

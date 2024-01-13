@@ -64,7 +64,7 @@ public class AfkStatusProvider {
         for (LoriTimePlayer player : playersToCheck.keySet()) {
             long playerAfkTime = playersToCheck.get(player);
             long currentTime = System.currentTimeMillis();
-            if (plugin.getServer().getPlayer(player.getUniqueId()).isEmpty()) {
+            if (plugin.getServer().getPlayer(player.getUuid()).isEmpty()) {
                 afkCheckedPlayers.remove(player);
                 continue;
             }

@@ -12,11 +12,11 @@ import java.util.OptionalLong;
 
 public class LoriTimePlaceholder extends PlaceholderExpansion {
 
-    private final LoriTimePlugin plugin;
+    private final LoriTimePlugin loriTimePlugin;
 
-    public LoriTimePlaceholder(LoriTimePlugin plugin) {
+    public LoriTimePlaceholder(LoriTimePlugin loriTimePlugin) {
         super();
-        this.plugin = plugin;
+        this.loriTimePlugin = loriTimePlugin;
     }
 
     @Override
@@ -27,8 +27,8 @@ public class LoriTimePlaceholder extends PlaceholderExpansion {
             case "formatted_onlinetime":
                 return getFormattedOnlineTime(player);
             case "afk":
-                if (plugin.isAfkEnabled()) {
-                    return String.valueOf(plugin.getAfkStatusProvider().getRealPlayer(new LoriTimePlayer(player.getUniqueId(), player.getName())).isAfk());
+                if (loriTimePlugin.isAfkEnabled()) {
+                    return String.valueOf(loriTimePlugin.getPlayerHandler().getAfkStatusProvider().getRealPlayer(new LoriTimePlayer(loriTimePlugin, player.getUniqueId())).isAfk());
                 }
             return "Feature not enabled!";
             default:
@@ -39,18 +39,18 @@ public class LoriTimePlaceholder extends PlaceholderExpansion {
     private long getUnformattedOnlineTime(final OfflinePlayer player) {
         long onlineTime = 0;
         try {
-            OptionalLong optionalLong = plugin.getTimeStorage().getTime(player.getUniqueId());
+            OptionalLong optionalLong = loriTimePlugin.getTimeStorage().getTime(player.getUniqueId());
             if (optionalLong.isPresent()) {
                 onlineTime = optionalLong.getAsLong();
             }
         } catch (StorageException e) {
-            plugin.getLogger().error("Error while getting the online time placeholder of player " + player.getName(), e);
+            loriTimePlugin.getLogger().error("Error while getting the online time placeholder of player " + player.getName(), e);
         }
         return onlineTime;
     }
 
     private String getFormattedOnlineTime(final OfflinePlayer player) {
-        return TimeUtil.formatTime(getUnformattedOnlineTime(player), plugin.getLocalization());
+        return TimeUtil.formatTime(getUnformattedOnlineTime(player), loriTimePlugin.getLocalization());
     }
 
     @Override
@@ -70,6 +70,6 @@ public class LoriTimePlaceholder extends PlaceholderExpansion {
 
     @Override
     public @NotNull String getVersion() {
-        return plugin.getPluginVersion();
+        return loriTimePlugin.getPluginVersion();
     }
 }

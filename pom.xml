@@ -10,8 +10,8 @@
         <current-date>${maven.build.timestamp}</current-date>
         <maven.build.timestamp.format>yyyy-MM-dd</maven.build.timestamp.format>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.target>17</maven.compiler.target>
-        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
+        <maven.compiler.source>21</maven.compiler.source>
         <basePackage>com.jannik_kuehn.loritime</basePackage>
     </properties>
 

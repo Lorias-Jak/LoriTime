@@ -67,6 +67,8 @@ afk:
 #  Commands  #
 ##############
 
+# In case you want to add some aliases to the commands, you can do it here.
+# There are some given aliases, but you can add or remove them.
 command:
   LoriTimeAdmin:
     alias:

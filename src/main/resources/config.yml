@@ -56,7 +56,7 @@ afk:
   # If true, the time that the player is afk, will be removed.
   removeTime: true
 
-  # If true, the player will be kicked after the time specified in 'kick.after'.
+  # If true, the player will be kicked after the time specified in 'afk.after'.
   autoKick: true
 
   # The time how often the plugin checks if a player is afk.
@@ -67,6 +67,8 @@ afk:
 #  Commands  #
 ##############
 
+# In case you want to add some aliases to the commands, you can do it here.
+# There are some given aliases, but you can add or remove them.
 command:
   LoriTimeAdmin:
     alias:

@@ -5,6 +5,7 @@ import com.jannik_kuehn.loritime.api.CommonSender;
 import com.jannik_kuehn.loritime.bungee.LoriTimeBungee;
 import com.jannik_kuehn.loritime.bungee.util.BungeePlayer;
 import com.jannik_kuehn.loritime.bungee.util.BungeeSender;
+import net.kyori.adventure.platform.bungeecord.BungeeAudiences;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.plugin.Command;
@@ -13,11 +14,13 @@ import net.md_5.bungee.api.plugin.TabExecutor;
 public class BungeeCommand extends Command implements TabExecutor {
 
     private final LoriTimeBungee bungeePlugin;
+    private final BungeeAudiences audiences;
     private final CommonCommand command;
 
-    public BungeeCommand(LoriTimeBungee bungeePlugin, CommonCommand command) {
-        super(command.getCommandName(), null, command.getAliases());
+    public BungeeCommand(LoriTimeBungee bungeePlugin, BungeeAudiences audiences, CommonCommand command) {
+        super(command.getCommandName(), null, command.getAliases().toArray(new String[0]));
         this.bungeePlugin = bungeePlugin;
+        this.audiences = audiences;
         this.command = command;
 
         register();
@@ -43,7 +46,7 @@ public class BungeeCommand extends Command implements TabExecutor {
         if (source instanceof ProxiedPlayer) {
             return new BungeePlayer((ProxiedPlayer) source);
         } else {
-            return new BungeeSender((CommandSender) source);
+            return new BungeeSender(audiences, source);
         }
     }
 }

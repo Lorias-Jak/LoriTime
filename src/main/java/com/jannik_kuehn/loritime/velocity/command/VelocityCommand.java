@@ -47,9 +47,9 @@ public class VelocityCommand implements SimpleCommand {
     }
 
     private void register() {
-        String[] aliases = command.getAliases();
+        List<String> aliases = command.getAliases();
         meta = velocityPlugin.getProxyServer().getCommandManager().metaBuilder(command.getCommandName())
-                .aliases(Stream.of(aliases).toArray(String[]::new))
+                .aliases(aliases.toArray(new String[0]))
                 .build();
 
         velocityPlugin.getProxyServer().getCommandManager().register(meta, this);

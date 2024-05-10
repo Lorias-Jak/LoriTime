@@ -140,8 +140,11 @@ public class LoriTimeTopCommand implements CommonCommand {
     }
 
     @Override
-    public String[] getAliases() {
-        return new String[]{"ttop", "lttop", "ltop", "toptimes"};
+    public List<String> getAliases() {
+        return plugin.getConfig().getArrayList("command.LoriTimeTop.alias").stream()
+                .filter(item -> item instanceof String)
+                .map(item -> (String) item)
+                .collect(Collectors.toList());
     }
 
     @Override

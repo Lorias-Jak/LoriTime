@@ -63,6 +63,30 @@ afk:
   # The unit for this is seconds.
   repeatCheck: 30
 
+##############
+#  Commands  #
+##############
+
+command:
+  LoriTimeAdmin:
+    alias:
+      - 'lta'
+      - 'ltadmin'
+      - 'loritimea'
+  LoriTime:
+    alias:
+      - 'lt'
+      - 'loritime'
+      - 'lorit'
+  LoriTimeTop:
+    alias:
+      - "ttop"
+      - "lttop"
+      - "ltop"
+      - "toptimes"
+  Afk:
+    alias: []
+
 ################
 # Integrations #
 ################

@@ -9,6 +9,7 @@ import com.jannik_kuehn.loritime.common.config.localization.Localization;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.stream.Collectors;
 
 public class LoriTimeAfkCommand implements CommonCommand {
 
@@ -56,8 +57,11 @@ public class LoriTimeAfkCommand implements CommonCommand {
     }
 
     @Override
-    public String[] getAliases() {
-        return new String[0];
+    public List<String> getAliases() {
+        return plugin.getConfig().getArrayList("command.Afk.alias").stream()
+                .filter(item -> item instanceof String)
+                .map(item -> (String) item)
+                .collect(Collectors.toList());
     }
 
     @Override

@@ -8,7 +8,7 @@ public interface CommonCommand {
 
     List<String> handleTabComplete(CommonSender source, String... args);
 
-    String[] getAliases();
+    List<String> getAliases();
 
     String getCommandName();
 

@@ -45,8 +45,8 @@ public class LoriTimeInfoCommand implements CommonCommand {
     }
 
     @Override
-    public String[] getAliases() {
-        return new String[]{"lti", "linfo", "ltimeinfo", "loritinfo"};
+    public List<String> getAliases() {
+        return List.of("lti", "linfo", "ltimeinfo", "loritinfo");
     }
 
     @Override

@@ -15,6 +15,7 @@ import java.util.Locale;
 import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class LoriTimeAdminCommand implements CommonCommand {
 
@@ -97,8 +98,11 @@ public class LoriTimeAdminCommand implements CommonCommand {
     }
 
     @Override
-    public String[] getAliases() {
-        return new String[]{"lta", "ltadmin", "loritimea"};
+    public List<String> getAliases() {
+        return plugin.getConfig().getArrayList("command.LoriTimeAdmin.alias").stream()
+                .filter(item -> item instanceof String)
+                .map(item -> (String) item)
+                .collect(Collectors.toList());
     }
 
     @Override

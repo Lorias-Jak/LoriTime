@@ -1,36 +1,6 @@
 main: '${basePackage}.bukkit.LoriTimeBukkit'
 name: '${name}'
 version: '${version}'
-api-version: '1.18'
+api-version: '1.20'
 author: 'Lorias-Jak'
 website: 'https://github.com/Lorias-Jak/LoriTime'
-
-commands:
-  loritime:
-    description: 'Show online time.'
-    aliases:
-      - 'lt'
-      - 'lorit'
-      - 'ltime'
-  loritimeadmin:
-    description: 'Edit online time.'
-    aliases:
-      - 'lta'
-      - 'ltadmin'
-      - 'loritimea'
-  loritimeinfo:
-    description: 'Plugin info'
-    aliases:
-      - 'lti'
-      - 'linfo'
-      - 'ltimeinfo'
-      - 'loritinfo'
-  loritimetop:
-    description: 'Top players sorted by online time'
-    aliases:
-      - 'ttop'
-      - 'lttop'
-      - 'ltop'
-      - 'toptimes'
-  afk:
-    description: 'Change AFK status'

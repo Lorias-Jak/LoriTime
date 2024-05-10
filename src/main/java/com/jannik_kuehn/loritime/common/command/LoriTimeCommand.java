@@ -14,6 +14,7 @@ import java.util.Locale;
 import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class LoriTimeCommand implements CommonCommand {
 
@@ -123,14 +124,18 @@ public class LoriTimeCommand implements CommonCommand {
         }
         return new ArrayList<>();
     }
+
     private List<String> filterCompletion(final List<String> list, final String currentValue) {
         list.removeIf(elem -> !elem.toLowerCase(Locale.ROOT).startsWith(currentValue.toLowerCase(Locale.ROOT)));
         return list;
     }
 
     @Override
-    public String[] getAliases() {
-        return new String[]{"lt", "lorit", "ltime"};
+    public List<String> getAliases() {
+        return plugin.getConfig().getArrayList("command.LoriTime.alias").stream()
+                .filter(item -> item instanceof String)
+                .map(item -> (String) item)
+                .collect(Collectors.toList());
     }
 
     @Override

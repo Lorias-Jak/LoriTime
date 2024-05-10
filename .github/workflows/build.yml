@@ -1,0 +1,35 @@
+name: Build
+on: [ push ]
+
+jobs:
+  build:
+    name: build all jars
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+      - name: Setup JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: 17
+          cache: 'maven'
+      - name: Cache target folder
+        uses: actions/cache@v4
+        with:
+          path: target
+          key: ${{ runner.os }}-target-${{ github.run_number }}
+      - name: Activate lf line ending check in editorconfig
+        run: |
+          find . -type f -name ".editorconfig" -exec sed -i "s~#end_of_line = ~end_of_line = ~g" {} \;
+      - name: Build with Maven. Phase 'verify'
+        run: |
+          mvn verify
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: LoriTime-Artifacts
+          path: |
+            **/target/*.jar
+            !config/target/*.jar

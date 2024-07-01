@@ -2,7 +2,6 @@ package com.jannik_kuehn.loritime.velocity;
 
 import com.jannik_kuehn.loritime.api.LoriTimeAPI;
 import com.jannik_kuehn.loritime.api.common.CommonLogger;
-import com.jannik_kuehn.loritime.api.common.CommonPlugin;
 import com.jannik_kuehn.loritime.common.LoriTimePlugin;
 import com.jannik_kuehn.loritime.common.command.LoriTimeAdminCommand;
 import com.jannik_kuehn.loritime.common.command.LoriTimeCommand;
@@ -29,7 +28,7 @@ import javax.inject.Inject;
 import java.nio.file.Path;
 import java.util.ArrayList;
 
-public class LoriTimeVelocity implements CommonPlugin {
+public class LoriTimeVelocity {
     private final Path dataDirectory;
     private final CommonLogger logger;
     private final ProxyServer proxyServer;
@@ -107,8 +106,7 @@ public class LoriTimeVelocity implements CommonPlugin {
         return proxyServer;
     }
 
-    @Override
     public LoriTimePlugin getPlugin() {
-        return LoriTimeAPI.get();
+        return loriTimePlugin;
     }
 }

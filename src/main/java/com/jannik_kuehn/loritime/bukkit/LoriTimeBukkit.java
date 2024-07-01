@@ -2,7 +2,6 @@ package com.jannik_kuehn.loritime.bukkit;
 
 import com.jannik_kuehn.loritime.api.LoriTimeAPI;
 import com.jannik_kuehn.loritime.api.common.CommonLogger;
-import com.jannik_kuehn.loritime.api.common.CommonPlugin;
 import com.jannik_kuehn.loritime.bukkit.afk.BukkitSlavedAfkHandling;
 import com.jannik_kuehn.loritime.bukkit.command.BukkitCommand;
 import com.jannik_kuehn.loritime.bukkit.listener.BukkitPlayerAfkListener;
@@ -23,7 +22,7 @@ import com.jannik_kuehn.loritime.common.module.afk.MasteredAfkPlayerHandling;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
-public class LoriTimeBukkit extends JavaPlugin implements CommonPlugin {
+public class LoriTimeBukkit extends JavaPlugin {
 
     private LoriTimePlugin loriTimePlugin;
 
@@ -99,8 +98,7 @@ public class LoriTimeBukkit extends JavaPlugin implements CommonPlugin {
         return pluginMessanger;
     }
 
-    @Override
     public LoriTimePlugin getPlugin() {
-        return LoriTimeAPI.get();
+        return loriTimePlugin;
     }
 }

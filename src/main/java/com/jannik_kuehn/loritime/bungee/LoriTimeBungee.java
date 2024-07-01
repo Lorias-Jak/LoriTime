@@ -2,7 +2,6 @@ package com.jannik_kuehn.loritime.bungee;
 
 import com.jannik_kuehn.loritime.api.LoriTimeAPI;
 import com.jannik_kuehn.loritime.api.common.CommonLogger;
-import com.jannik_kuehn.loritime.api.common.CommonPlugin;
 import com.jannik_kuehn.loritime.bungee.command.BungeeCommand;
 import com.jannik_kuehn.loritime.bungee.listener.PlayerNameBungeeListener;
 import com.jannik_kuehn.loritime.bungee.listener.TimeAccumulatorBungeeListener;
@@ -22,7 +21,7 @@ import net.md_5.bungee.api.plugin.PluginManager;
 
 import java.util.ArrayList;
 
-public class LoriTimeBungee extends Plugin implements CommonPlugin {
+public class LoriTimeBungee extends Plugin {
 
     private LoriTimePlugin loriTimePlugin;
     private BungeeAudiences audiences;
@@ -89,8 +88,7 @@ public class LoriTimeBungee extends Plugin implements CommonPlugin {
         getProxy().getPluginManager().unregisterCommands(this);
     }
 
-    @Override
     public LoriTimePlugin getPlugin() {
-        return LoriTimeAPI.get();
+        return loriTimePlugin;
     }
 }

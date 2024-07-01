@@ -84,3 +84,8 @@ message:
     resumeAnnounce: '<#50CBAB>[player] <#A4A4A4>is no longer AFK.'
     afkSelf: '<#A4A4A4>You are now AFK.'
     afkResume: '<#A4A4A4>You are no longer AFK.'
+  update:
+    available: |
+      <#A4A4A4>An update is available for the plugin.
+      Current version: <#50CBAB>[currentVersion]<#A4A4A4> | new Version: <#50CBAB>[newVersion]
+      <#A4A4A4>You can download it at: <#50CBAB>[url]

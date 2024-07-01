@@ -15,6 +15,11 @@ general:
   # The unit is seconds.
   saveInterval: 30
 
+  # LoriTime will automatically check for Updates on Modrinth.
+  # In case you use the multi-setup this will only be checked on the master.
+  # If you want to disable this feature, set this to false.
+  checkForUpdates: true
+
 ###########
 #  Mysql  #
 ###########

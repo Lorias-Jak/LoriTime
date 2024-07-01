@@ -17,6 +17,7 @@ import com.jannik_kuehn.loritime.common.config.localization.Localization;
 import com.jannik_kuehn.loritime.api.CommonLogger;
 import com.jannik_kuehn.loritime.common.utils.FileStorageProvider;
 import com.jannik_kuehn.loritime.common.utils.TimeParser;
+import com.jannik_kuehn.loritime.common.utils.UpdateCheck;
 
 import java.io.File;
 import java.io.IOException;
@@ -30,20 +31,36 @@ import java.util.Set;
 
 public class LoriTimePlugin {
     private static LoriTimePlugin instance;
+
     private final CommonLogger logger;
-    private final File dataFolder;
-    private final PluginScheduler scheduler;
+
     private final CommonServer server;
+
+    private final PluginScheduler scheduler;
+
     private Configuration config;
+
     private Localization localization;
+
+    private final File dataFolder;
+
     private NameStorage nameStorage;
+
     private AccumulatingTimeStorage timeStorage;
+
     private TimeParser parser;
+
     private int saveInterval;
+
     private PluginTask flushCacheTask;
+
     private AfkStatusProvider afkStatusProvider;
+
     private boolean errorDisable;
+
     private final String pluginVersion;
+
+    private UpdateCheck updateCheck;
 
     public static LoriTimePlugin getInstance() {
         return instance;
@@ -75,6 +92,11 @@ public class LoriTimePlugin {
             disable();
         }
         server.setServerMode(getServerModeFromConfig());
+
+        if (server.getServerMode().equalsIgnoreCase("master")) {
+            updateCheck = new UpdateCheck(this);
+            updateCheck.startCheck();
+        }
     }
 
     private String getServerModeFromConfig() {
@@ -96,6 +118,7 @@ public class LoriTimePlugin {
     }
 
     public void disable() {
+        updateCheck.stopCheck();
         flushCacheTask.cancel();
         flushOnlineTimeCache();
 
@@ -103,13 +126,13 @@ public class LoriTimePlugin {
     }
 
     public void reload() throws StorageException {
+        updateCheck.stopCheck();
         flushCacheTask.cancel();
         flushOnlineTimeCache();
         timeStorage.close();
-        timeStorage = null;
         nameStorage.close();
+        timeStorage = null;
         nameStorage = null;
-
         flushCacheTask = null;
 
         config.reload();
@@ -118,7 +141,7 @@ public class LoriTimePlugin {
         closeStorages();
         loadStorage();
         afkStatusProvider.reloadConfigValues();
-
+        updateCheck.startCheck();
         flushCacheTask = scheduler.scheduleAsync(saveInterval / 2L, saveInterval, this::flushOnlineTimeCache);
     }
 
@@ -290,5 +313,9 @@ public class LoriTimePlugin {
 
     public AfkStatusProvider getAfkStatusProvider() {
         return afkStatusProvider;
+    }
+
+    public UpdateCheck getUpdateCheck() {
+        return updateCheck;
     }
 }

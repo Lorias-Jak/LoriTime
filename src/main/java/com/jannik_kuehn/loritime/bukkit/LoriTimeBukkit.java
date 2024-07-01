@@ -6,6 +6,7 @@ import com.jannik_kuehn.loritime.bukkit.command.BukkitCommand;
 import com.jannik_kuehn.loritime.bukkit.listener.BukkitPlayerAfkListener;
 import com.jannik_kuehn.loritime.bukkit.listener.PlayerNameBukkitListener;
 import com.jannik_kuehn.loritime.bukkit.listener.TimeAccumulatorBukkitListener;
+import com.jannik_kuehn.loritime.bukkit.listener.UpdateNotificationBukkitListener;
 import com.jannik_kuehn.loritime.bukkit.schedule.BukkitScheduleAdapter;
 import com.jannik_kuehn.loritime.bukkit.util.BukkitLogger;
 import com.jannik_kuehn.loritime.bukkit.util.BukkitServer;
@@ -57,6 +58,7 @@ public class LoriTimeBukkit extends JavaPlugin {
     private void enableAsMaster() {
         Bukkit.getPluginManager().registerEvents(new PlayerNameBukkitListener(loriTimePlugin), this);
         Bukkit.getPluginManager().registerEvents(new TimeAccumulatorBukkitListener(loriTimePlugin), this);
+        Bukkit.getPluginManager().registerEvents(new UpdateNotificationBukkitListener(loriTimePlugin), this);
 
         if (loriTimePlugin.isAfkEnabled()) {
             loriTimePlugin.enableAfkFeature(new MasteredAfkPlayerHandling(loriTimePlugin));

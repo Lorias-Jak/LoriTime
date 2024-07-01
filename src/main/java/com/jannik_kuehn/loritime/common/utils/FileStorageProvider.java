@@ -1,6 +1,6 @@
 package com.jannik_kuehn.loritime.common.utils;
 
-import com.jannik_kuehn.loritime.api.FileStorage;
+import com.jannik_kuehn.loritime.api.storage.FileStorage;
 import com.jannik_kuehn.loritime.common.LoriTimePlugin;
 import com.jannik_kuehn.loritime.common.config.Configuration;
 import com.jannik_kuehn.loritime.common.exception.StorageException;

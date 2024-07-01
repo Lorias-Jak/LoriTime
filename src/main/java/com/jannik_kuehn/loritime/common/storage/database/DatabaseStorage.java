@@ -2,8 +2,8 @@ package com.jannik_kuehn.loritime.common.storage.database;
 
 import com.jannik_kuehn.loritime.common.LoriTimePlugin;
 import com.jannik_kuehn.loritime.common.config.Configuration;
-import com.jannik_kuehn.loritime.common.storage.TimeStorage;
-import com.jannik_kuehn.loritime.common.storage.NameStorage;
+import com.jannik_kuehn.loritime.api.storage.TimeStorage;
+import com.jannik_kuehn.loritime.api.storage.NameStorage;
 import com.jannik_kuehn.loritime.common.utils.UuidUtil;
 import com.jannik_kuehn.loritime.common.exception.StorageException;
 

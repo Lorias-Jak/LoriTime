@@ -1,7 +1,7 @@
 package com.jannik_kuehn.loritime.bungee.command;
 
-import com.jannik_kuehn.loritime.api.CommonCommand;
-import com.jannik_kuehn.loritime.api.CommonSender;
+import com.jannik_kuehn.loritime.api.common.CommonCommand;
+import com.jannik_kuehn.loritime.api.common.CommonSender;
 import com.jannik_kuehn.loritime.bungee.LoriTimeBungee;
 import com.jannik_kuehn.loritime.bungee.util.BungeePlayer;
 import com.jannik_kuehn.loritime.bungee.util.BungeeSender;

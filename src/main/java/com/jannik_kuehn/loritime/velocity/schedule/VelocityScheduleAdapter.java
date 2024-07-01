@@ -1,7 +1,7 @@
 package com.jannik_kuehn.loritime.velocity.schedule;
 
-import com.jannik_kuehn.loritime.api.PluginScheduler;
-import com.jannik_kuehn.loritime.api.PluginTask;
+import com.jannik_kuehn.loritime.api.scheduler.PluginScheduler;
+import com.jannik_kuehn.loritime.api.scheduler.PluginTask;
 import com.jannik_kuehn.loritime.velocity.LoriTimeVelocity;
 import com.velocitypowered.api.scheduler.Scheduler;
 

@@ -1,6 +1,6 @@
 package com.jannik_kuehn.loritime.bungee.util;
 
-import com.jannik_kuehn.loritime.api.CommonLogger;
+import com.jannik_kuehn.loritime.api.common.CommonLogger;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;

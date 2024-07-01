@@ -1,6 +1,6 @@
-package com.jannik_kuehn.loritime.api;
+package com.jannik_kuehn.loritime.api.common;
 
-import com.jannik_kuehn.loritime.common.module.afk.AfkHandling;
+import com.jannik_kuehn.loritime.api.LoriTimePlayer;
 import net.kyori.adventure.text.TextComponent;
 
 import java.util.Optional;

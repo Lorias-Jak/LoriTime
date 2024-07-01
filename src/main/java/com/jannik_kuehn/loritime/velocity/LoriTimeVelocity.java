@@ -1,6 +1,8 @@
 package com.jannik_kuehn.loritime.velocity;
 
-import com.jannik_kuehn.loritime.api.CommonLogger;
+import com.jannik_kuehn.loritime.api.LoriTimeAPI;
+import com.jannik_kuehn.loritime.api.common.CommonLogger;
+import com.jannik_kuehn.loritime.api.common.CommonPlugin;
 import com.jannik_kuehn.loritime.common.LoriTimePlugin;
 import com.jannik_kuehn.loritime.common.command.LoriTimeAdminCommand;
 import com.jannik_kuehn.loritime.common.command.LoriTimeCommand;
@@ -27,7 +29,7 @@ import javax.inject.Inject;
 import java.nio.file.Path;
 import java.util.ArrayList;
 
-public class LoriTimeVelocity {
+public class LoriTimeVelocity implements CommonPlugin {
     private final Path dataDirectory;
     private final CommonLogger logger;
     private final ProxyServer proxyServer;
@@ -49,9 +51,10 @@ public class LoriTimeVelocity {
         velocityServer.enable(loriTimePlugin, proxyServer);
         try {
             loriTimePlugin.enable();
+            LoriTimeAPI.setPlugin(loriTimePlugin);
         } catch (Exception e) {
             loriTimePlugin.disable();
-            throw new RuntimeException(e);
+            logger.error("Error while enabling the plugin! Disabling the plugin...", e);
         }
 
         if (velocityServer.getServerMode().equalsIgnoreCase("master")) {
@@ -104,8 +107,8 @@ public class LoriTimeVelocity {
         return proxyServer;
     }
 
-    public LoriTimePlugin getLoriTimePlugin() {
-        return loriTimePlugin;
+    @Override
+    public LoriTimePlugin getPlugin() {
+        return LoriTimeAPI.get();
     }
-
 }

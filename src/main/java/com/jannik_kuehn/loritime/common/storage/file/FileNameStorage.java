@@ -1,8 +1,8 @@
 package com.jannik_kuehn.loritime.common.storage.file;
 
-import com.jannik_kuehn.loritime.common.storage.NameStorage;
+import com.jannik_kuehn.loritime.api.storage.NameStorage;
 import com.jannik_kuehn.loritime.common.exception.StorageException;
-import com.jannik_kuehn.loritime.api.FileStorage;
+import com.jannik_kuehn.loritime.api.storage.FileStorage;
 
 import java.util.HashMap;
 import java.util.Map;

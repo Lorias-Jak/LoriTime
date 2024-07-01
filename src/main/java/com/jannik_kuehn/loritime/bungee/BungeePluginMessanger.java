@@ -18,7 +18,7 @@ public class BungeePluginMessanger implements Listener {
 
     public BungeePluginMessanger(LoriTimeBungee bungeePlugin) {
         this.bungeePlugin = bungeePlugin;
-        this.plugin = bungeePlugin.getLoriTimePlugin();
+        this.plugin = bungeePlugin.getPlugin();
     }
 
     @EventHandler

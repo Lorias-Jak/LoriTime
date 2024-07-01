@@ -1,9 +1,9 @@
 package com.jannik_kuehn.loritime.common.command;
 
-import com.jannik_kuehn.loritime.api.CommonCommand;
+import com.jannik_kuehn.loritime.api.common.CommonCommand;
 import com.jannik_kuehn.loritime.common.LoriTimePlugin;
 import com.jannik_kuehn.loritime.common.config.localization.Localization;
-import com.jannik_kuehn.loritime.api.CommonSender;
+import com.jannik_kuehn.loritime.api.common.CommonSender;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 

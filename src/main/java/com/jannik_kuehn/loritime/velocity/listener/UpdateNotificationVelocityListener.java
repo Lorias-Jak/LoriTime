@@ -1,6 +1,6 @@
 package com.jannik_kuehn.loritime.velocity.listener;
 
-import com.jannik_kuehn.loritime.api.CommonSender;
+import com.jannik_kuehn.loritime.api.common.CommonSender;
 import com.jannik_kuehn.loritime.common.LoriTimePlugin;
 import com.jannik_kuehn.loritime.velocity.util.VelocitySender;
 import com.velocitypowered.api.event.Subscribe;

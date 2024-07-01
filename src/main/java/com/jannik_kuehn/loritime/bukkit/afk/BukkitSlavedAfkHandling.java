@@ -10,7 +10,7 @@ public class BukkitSlavedAfkHandling extends AfkHandling {
     private final LoriTimeBukkit bukkitPlugin;
 
     public BukkitSlavedAfkHandling(LoriTimeBukkit bukkitPlugin) {
-        super(bukkitPlugin.getLoriTimePlugin());
+        super(bukkitPlugin.getPlugin());
         this.bukkitPlugin = bukkitPlugin;
     }
 

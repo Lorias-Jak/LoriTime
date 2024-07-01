@@ -1,4 +1,4 @@
-package com.jannik_kuehn.loritime.api;
+package com.jannik_kuehn.loritime.api.scheduler;
 
 /**
  * Representation of a basic scheduler. Decouples the underlying APIs scheduler as interface for adapters.

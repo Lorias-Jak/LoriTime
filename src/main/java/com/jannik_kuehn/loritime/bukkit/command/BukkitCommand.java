@@ -1,13 +1,12 @@
 package com.jannik_kuehn.loritime.bukkit.command;
 
-import com.jannik_kuehn.loritime.api.CommonCommand;
-import com.jannik_kuehn.loritime.api.CommonSender;
+import com.jannik_kuehn.loritime.api.common.CommonCommand;
+import com.jannik_kuehn.loritime.api.common.CommonSender;
 import com.jannik_kuehn.loritime.bukkit.LoriTimeBukkit;
 import com.jannik_kuehn.loritime.bukkit.util.BukkitPlayer;
 import com.jannik_kuehn.loritime.bukkit.util.BukkitSender;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.bukkit.Bukkit;
-import org.bukkit.Server;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandMap;
@@ -21,7 +20,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
-import java.util.Arrays;
 import java.util.List;
 
 public class BukkitCommand implements CommandExecutor, TabExecutor {
@@ -53,7 +51,7 @@ public class BukkitCommand implements CommandExecutor, TabExecutor {
         if (source instanceof Player) {
             return new BukkitPlayer ((Player) source);
         } else {
-            return new BukkitSender(bukkitPlugin.getLoriTimePlugin(), source);
+            return new BukkitSender(bukkitPlugin.getPlugin(), source);
         }
     }
 
@@ -66,7 +64,7 @@ public class BukkitCommand implements CommandExecutor, TabExecutor {
             commandMapField.setAccessible(true);
             return (CommandMap) commandMapField.get(craftServer);
         } catch (Exception e) {
-            bukkitPlugin.getLoriTimePlugin().getLogger().error("Error while getting the CommandMap!", e);
+            bukkitPlugin.getPlugin().getLogger().error("Error while getting the CommandMap!", e);
         }
         return null;
     }
@@ -78,7 +76,7 @@ public class BukkitCommand implements CommandExecutor, TabExecutor {
             constructor.setAccessible(true);
             command = constructor.newInstance(name, plugin);
         } catch (Exception e) {
-            bukkitPlugin.getLoriTimePlugin().getLogger().error("Error while creating a plugin Command", e);
+            bukkitPlugin.getPlugin().getLogger().error("Error while creating a plugin Command", e);
         }
         return command;
     }
@@ -87,7 +85,7 @@ public class BukkitCommand implements CommandExecutor, TabExecutor {
     private void register() {
         CommandMap commandMap = getCommandMap();
         if (commandMap == null) {
-            bukkitPlugin.getLoriTimePlugin().getLogger().severe("Can not register the command '" + command.getCommandName() + "'! Skipping the registration...");
+            bukkitPlugin.getPlugin().getLogger().severe("Can not register the command '" + command.getCommandName() + "'! Skipping the registration...");
             return;
         }
         PluginCommand pluginCommand = createPluginCommand(command.getCommandName(), bukkitPlugin);

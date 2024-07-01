@@ -2,11 +2,11 @@ package com.jannik_kuehn.loritime.common.command;
 
 import com.jannik_kuehn.loritime.api.LoriTimePlayer;
 import com.jannik_kuehn.loritime.common.LoriTimePlugin;
-import com.jannik_kuehn.loritime.api.CommonSender;
+import com.jannik_kuehn.loritime.api.common.CommonSender;
 import com.jannik_kuehn.loritime.common.utils.TimeParser;
 import com.jannik_kuehn.loritime.common.utils.TimeUtil;
 import com.jannik_kuehn.loritime.common.exception.StorageException;
-import com.jannik_kuehn.loritime.api.CommonCommand;
+import com.jannik_kuehn.loritime.api.common.CommonCommand;
 import com.jannik_kuehn.loritime.common.config.localization.Localization;
 
 import java.util.ArrayList;

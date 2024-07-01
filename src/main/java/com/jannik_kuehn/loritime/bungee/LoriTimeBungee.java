@@ -4,6 +4,7 @@ import com.jannik_kuehn.loritime.api.CommonLogger;
 import com.jannik_kuehn.loritime.bungee.command.BungeeCommand;
 import com.jannik_kuehn.loritime.bungee.listener.PlayerNameBungeeListener;
 import com.jannik_kuehn.loritime.bungee.listener.TimeAccumulatorBungeeListener;
+import com.jannik_kuehn.loritime.bungee.listener.UpdateNotificationBungeeListener;
 import com.jannik_kuehn.loritime.bungee.schedule.BungeeScheduleAdapter;
 import com.jannik_kuehn.loritime.bungee.util.BungeeLogger;
 import com.jannik_kuehn.loritime.bungee.util.BungeeServer;
@@ -56,6 +57,7 @@ public class LoriTimeBungee extends Plugin {
         PluginManager pluginManager = getProxy().getPluginManager();
         pluginManager.registerListener(this, new PlayerNameBungeeListener(loriTimePlugin));
         pluginManager.registerListener(this, new TimeAccumulatorBungeeListener(loriTimePlugin));
+        pluginManager.registerListener(this, new UpdateNotificationBungeeListener(loriTimePlugin, audiences));
 
 
         commands.add(new BungeeCommand(this, audiences, new LoriTimeAdminCommand(loriTimePlugin, loriTimePlugin.getLocalization(),

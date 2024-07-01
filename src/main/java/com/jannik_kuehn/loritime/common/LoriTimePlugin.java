@@ -314,4 +314,8 @@ public class LoriTimePlugin {
     public AfkStatusProvider getAfkStatusProvider() {
         return afkStatusProvider;
     }
+
+    public UpdateCheck getUpdateCheck() {
+        return updateCheck;
+    }
 }

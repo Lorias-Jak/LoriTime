@@ -1,4 +1,4 @@
-package com.jannik_kuehn.loritime.api;
+package com.jannik_kuehn.loritime.api.common;
 
 import net.kyori.adventure.text.TextComponent;
 

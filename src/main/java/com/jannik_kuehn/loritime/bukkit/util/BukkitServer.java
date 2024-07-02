@@ -1,7 +1,7 @@
 package com.jannik_kuehn.loritime.bukkit.util;
 
-import com.jannik_kuehn.loritime.api.CommonSender;
-import com.jannik_kuehn.loritime.api.CommonServer;
+import com.jannik_kuehn.loritime.api.common.CommonSender;
+import com.jannik_kuehn.loritime.api.common.CommonServer;
 import com.jannik_kuehn.loritime.api.LoriTimePlayer;
 import com.jannik_kuehn.loritime.bukkit.BukkitPluginMessanger;
 import com.jannik_kuehn.loritime.bukkit.LoriTimeBukkit;
@@ -29,7 +29,7 @@ public class BukkitServer implements CommonServer {
 
     public void enable(LoriTimeBukkit bukkitPlugin) {
         this.bukkitPlugin = bukkitPlugin;
-        this.loriTimePlugin = bukkitPlugin.getLoriTimePlugin();
+        this.loriTimePlugin = bukkitPlugin.getPlugin();
         this.server = Bukkit.getServer();
     }
 

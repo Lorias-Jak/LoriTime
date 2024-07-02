@@ -1,4 +1,4 @@
-package com.jannik_kuehn.loritime.api;
+package com.jannik_kuehn.loritime.api.storage;
 
 import com.jannik_kuehn.loritime.common.exception.StorageException;
 

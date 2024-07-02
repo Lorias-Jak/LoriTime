@@ -1,6 +1,6 @@
 package com.jannik_kuehn.loritime.common.module.afk;
 
-import com.jannik_kuehn.loritime.api.CommonSender;
+import com.jannik_kuehn.loritime.api.common.CommonSender;
 import com.jannik_kuehn.loritime.api.LoriTimePlayer;
 import com.jannik_kuehn.loritime.common.LoriTimePlugin;
 import com.jannik_kuehn.loritime.common.utils.TimeUtil;

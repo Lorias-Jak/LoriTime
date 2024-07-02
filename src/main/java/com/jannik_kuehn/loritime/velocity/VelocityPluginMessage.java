@@ -17,7 +17,7 @@ public class VelocityPluginMessage {
 
     public VelocityPluginMessage(LoriTimeVelocity velocityPlugin) {
         this.velocityPlugin = velocityPlugin;
-        this.plugin = velocityPlugin.getLoriTimePlugin();
+        this.plugin = velocityPlugin.getPlugin();
     }
 
     @Subscribe

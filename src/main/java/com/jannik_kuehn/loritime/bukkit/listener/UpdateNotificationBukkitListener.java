@@ -1,6 +1,6 @@
 package com.jannik_kuehn.loritime.bukkit.listener;
 
-import com.jannik_kuehn.loritime.api.CommonSender;
+import com.jannik_kuehn.loritime.api.common.CommonSender;
 import com.jannik_kuehn.loritime.bukkit.util.BukkitPlayer;
 import com.jannik_kuehn.loritime.common.LoriTimePlugin;
 import org.bukkit.event.EventHandler;

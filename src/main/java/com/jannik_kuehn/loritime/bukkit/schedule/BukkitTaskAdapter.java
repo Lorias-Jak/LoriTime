@@ -1,6 +1,6 @@
 package com.jannik_kuehn.loritime.bukkit.schedule;
 
-import com.jannik_kuehn.loritime.api.PluginTask;
+import com.jannik_kuehn.loritime.api.scheduler.PluginTask;
 import org.bukkit.scheduler.BukkitTask;
 
 public class BukkitTaskAdapter implements PluginTask {

@@ -1,6 +1,6 @@
 package com.jannik_kuehn.loritime.velocity.schedule;
 
-import com.jannik_kuehn.loritime.api.PluginTask;
+import com.jannik_kuehn.loritime.api.scheduler.PluginTask;
 import com.velocitypowered.api.scheduler.ScheduledTask;
 
 public class VelocityTask implements PluginTask {

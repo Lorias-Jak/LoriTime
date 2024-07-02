@@ -1,7 +1,7 @@
 package com.jannik_kuehn.loritime.common.module.afk;
 
 import com.jannik_kuehn.loritime.api.LoriTimePlayer;
-import com.jannik_kuehn.loritime.api.PluginTask;
+import com.jannik_kuehn.loritime.api.scheduler.PluginTask;
 import com.jannik_kuehn.loritime.common.LoriTimePlugin;
 
 import java.util.HashMap;

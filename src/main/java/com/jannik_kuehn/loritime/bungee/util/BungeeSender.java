@@ -1,13 +1,11 @@
 package com.jannik_kuehn.loritime.bungee.util;
 
-import com.jannik_kuehn.loritime.api.CommonSender;
-import com.jannik_kuehn.loritime.bungee.LoriTimeBungee;
+import com.jannik_kuehn.loritime.api.common.CommonSender;
 import com.velocitypowered.api.proxy.Player;
 import net.kyori.adventure.platform.bungeecord.BungeeAudiences;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.md_5.bungee.api.CommandSender;
-import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 
 import java.util.UUID;

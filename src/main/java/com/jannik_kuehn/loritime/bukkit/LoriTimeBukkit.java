@@ -1,6 +1,7 @@
 package com.jannik_kuehn.loritime.bukkit;
 
-import com.jannik_kuehn.loritime.api.CommonLogger;
+import com.jannik_kuehn.loritime.api.LoriTimeAPI;
+import com.jannik_kuehn.loritime.api.common.CommonLogger;
 import com.jannik_kuehn.loritime.bukkit.afk.BukkitSlavedAfkHandling;
 import com.jannik_kuehn.loritime.bukkit.command.BukkitCommand;
 import com.jannik_kuehn.loritime.bukkit.listener.BukkitPlayerAfkListener;
@@ -21,12 +22,10 @@ import com.jannik_kuehn.loritime.common.module.afk.MasteredAfkPlayerHandling;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.util.ArrayList;
-
 public class LoriTimeBukkit extends JavaPlugin {
 
     private LoriTimePlugin loriTimePlugin;
-    private final ArrayList<BukkitCommand> commands = new ArrayList<>();
+
     private BukkitPluginMessanger pluginMessanger;
 
     @Override
@@ -38,6 +37,7 @@ public class LoriTimeBukkit extends JavaPlugin {
         bukkitServer.enable(this);
         try {
             loriTimePlugin.enable();
+            LoriTimeAPI.setPlugin(loriTimePlugin);
         } catch (Exception e) {
             loriTimePlugin.disable();
             logger.warning("Error while enabling the plugin! Disabling the plugin...", e);
@@ -63,11 +63,11 @@ public class LoriTimeBukkit extends JavaPlugin {
         if (loriTimePlugin.isAfkEnabled()) {
             loriTimePlugin.enableAfkFeature(new MasteredAfkPlayerHandling(loriTimePlugin));
         }
-        commands.add(new BukkitCommand(this, new LoriTimeAdminCommand(loriTimePlugin, loriTimePlugin.getLocalization(),
-                loriTimePlugin.getParser())));
-        commands.add(new BukkitCommand(this, new LoriTimeCommand(loriTimePlugin, loriTimePlugin.getLocalization())));
-        commands.add(new BukkitCommand(this, new LoriTimeInfoCommand(loriTimePlugin, loriTimePlugin.getLocalization())));
-        commands.add(new BukkitCommand(this, new LoriTimeTopCommand(loriTimePlugin, loriTimePlugin.getLocalization())));
+        new BukkitCommand(this, new LoriTimeAdminCommand(loriTimePlugin, loriTimePlugin.getLocalization(),
+                loriTimePlugin.getParser()));
+        new BukkitCommand(this, new LoriTimeCommand(loriTimePlugin, loriTimePlugin.getLocalization()));
+        new BukkitCommand(this, new LoriTimeInfoCommand(loriTimePlugin, loriTimePlugin.getLocalization()));
+        new BukkitCommand(this, new LoriTimeTopCommand(loriTimePlugin, loriTimePlugin.getLocalization()));
     }
 
     private void enableAsSlave() {
@@ -81,7 +81,7 @@ public class LoriTimeBukkit extends JavaPlugin {
     private void enableRemainingFeatures() {
         if (loriTimePlugin.isAfkEnabled()) {
             Bukkit.getPluginManager().registerEvents(new BukkitPlayerAfkListener(loriTimePlugin), this);
-            commands.add(new BukkitCommand(this, new LoriTimeAfkCommand(loriTimePlugin, loriTimePlugin.getLocalization())));
+            new BukkitCommand(this, new LoriTimeAfkCommand(loriTimePlugin, loriTimePlugin.getLocalization()));
         }
         if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null && loriTimePlugin.getConfig().getBoolean("integrations.PlaceholderAPI", true)) {
             new LoriTimePlaceholder(loriTimePlugin).register();
@@ -94,11 +94,11 @@ public class LoriTimeBukkit extends JavaPlugin {
         loriTimePlugin.disable();
     }
 
-    public LoriTimePlugin getLoriTimePlugin() {
-        return loriTimePlugin;
-    }
-
     public BukkitPluginMessanger getPluginMessanger() {
         return pluginMessanger;
+    }
+
+    public LoriTimePlugin getPlugin() {
+        return loriTimePlugin;
     }
 }

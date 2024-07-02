@@ -1,21 +1,17 @@
 package com.jannik_kuehn.loritime.common;
 
-import com.jannik_kuehn.loritime.api.PluginTask;
 import com.jannik_kuehn.loritime.common.config.YamlConfiguration;
 import com.jannik_kuehn.loritime.common.exception.StorageException;
 import com.jannik_kuehn.loritime.common.module.afk.AfkHandling;
 import com.jannik_kuehn.loritime.common.module.afk.AfkStatusProvider;
-import com.jannik_kuehn.loritime.common.storage.AccumulatingTimeStorage;
-import com.jannik_kuehn.loritime.common.storage.database.DatabaseStorage;
-import com.jannik_kuehn.loritime.common.storage.file.FileTimeStorage;
-import com.jannik_kuehn.loritime.common.storage.file.FileNameStorage;
-import com.jannik_kuehn.loritime.common.storage.NameStorage;
-import com.jannik_kuehn.loritime.api.CommonServer;
-import com.jannik_kuehn.loritime.api.PluginScheduler;
+import com.jannik_kuehn.loritime.api.storage.AccumulatingTimeStorage;
+import com.jannik_kuehn.loritime.common.storage.DataStorageManager;
+import com.jannik_kuehn.loritime.api.storage.NameStorage;
+import com.jannik_kuehn.loritime.api.common.CommonServer;
+import com.jannik_kuehn.loritime.api.scheduler.PluginScheduler;
 import com.jannik_kuehn.loritime.common.config.Configuration;
 import com.jannik_kuehn.loritime.common.config.localization.Localization;
-import com.jannik_kuehn.loritime.api.CommonLogger;
-import com.jannik_kuehn.loritime.common.utils.FileStorageProvider;
+import com.jannik_kuehn.loritime.api.common.CommonLogger;
 import com.jannik_kuehn.loritime.common.utils.TimeParser;
 import com.jannik_kuehn.loritime.common.utils.UpdateCheck;
 
@@ -26,7 +22,6 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Locale;
 import java.util.Set;
 
 public class LoriTimePlugin {
@@ -44,15 +39,7 @@ public class LoriTimePlugin {
 
     private final File dataFolder;
 
-    private NameStorage nameStorage;
-
-    private AccumulatingTimeStorage timeStorage;
-
     private TimeParser parser;
-
-    private int saveInterval;
-
-    private PluginTask flushCacheTask;
 
     private AfkStatusProvider afkStatusProvider;
 
@@ -61,6 +48,8 @@ public class LoriTimePlugin {
     private final String pluginVersion;
 
     private UpdateCheck updateCheck;
+
+    private final DataStorageManager dataStorageManager;
 
     public static LoriTimePlugin getInstance() {
         return instance;
@@ -75,21 +64,23 @@ public class LoriTimePlugin {
         this.server = server;
         this.errorDisable = false;
         this.pluginVersion = "LoriTime-1.4.0";
+        this.dataStorageManager = new DataStorageManager(this, dataFolder);
     }
 
     public void enable() {
         loadOrCreateConfigs();
         try {
-            loadStorage();
+            dataStorageManager.loadStorages();
         } catch (StorageException e) {
             logger.error("An error occurred while enabling the storage", e);
             errorDisable = true;
+            return;
         }
-        flushCacheTask = scheduler.scheduleAsync(saveInterval / 2L, saveInterval, this::flushOnlineTimeCache);
 
         if (errorDisable) {
             logger.severe("Disabling the plugin because of an issue.");
             disable();
+            return;
         }
         server.setServerMode(getServerModeFromConfig());
 
@@ -97,6 +88,7 @@ public class LoriTimePlugin {
             updateCheck = new UpdateCheck(this);
             updateCheck.startCheck();
         }
+        dataStorageManager.startCache();
     }
 
     private String getServerModeFromConfig() {
@@ -119,47 +111,19 @@ public class LoriTimePlugin {
 
     public void disable() {
         updateCheck.stopCheck();
-        flushCacheTask.cancel();
-        flushOnlineTimeCache();
-
-        closeStorages();
+        dataStorageManager.disableCache();
+        dataStorageManager.closeStorages();
     }
 
     public void reload() throws StorageException {
         updateCheck.stopCheck();
-        flushCacheTask.cancel();
-        flushOnlineTimeCache();
-        timeStorage.close();
-        nameStorage.close();
-        timeStorage = null;
-        nameStorage = null;
-        flushCacheTask = null;
-
         config.reload();
         localization.reloadTranslation();
-
-        closeStorages();
-        loadStorage();
+        dataStorageManager.disableCache();
+        dataStorageManager.reloadStorages();
         afkStatusProvider.reloadConfigValues();
+        dataStorageManager.startCache();
         updateCheck.startCheck();
-        flushCacheTask = scheduler.scheduleAsync(saveInterval / 2L, saveInterval, this::flushOnlineTimeCache);
-    }
-
-    private void closeStorages() {
-        if (nameStorage != null) {
-            try {
-                nameStorage.close();
-            } catch (StorageException e) {
-                logger.error("An exception occurred while closing the nameStorage", e);
-            }
-        }
-        if (timeStorage != null) {
-            try {
-                timeStorage.close();
-            } catch (StorageException e) {
-                logger.error("An exception occurred while closing the timeStorage", e);
-            }
-        }
     }
 
     private void loadOrCreateConfigs() {
@@ -190,11 +154,9 @@ public class LoriTimePlugin {
         } catch (IllegalArgumentException ex) {
             logger.error("Could not create time parser.", ex);
         }
-
-        saveInterval = config.getInt("general.saveInterval");
     }
 
-    private Configuration getOrCreateFile(String folder, String fileName, boolean needCopy) {
+    public Configuration getOrCreateFile(String folder, String fileName, boolean needCopy) {
         File file = new File(folder, fileName);
         if (!file.exists()) {
             try {
@@ -240,41 +202,6 @@ public class LoriTimePlugin {
         return units.toArray(new String[0]);
     }
 
-    private void loadStorage() throws StorageException {
-        String storageMethod = config.getString("general.storage", "file");
-        switch (storageMethod.toLowerCase(Locale.ROOT)) {
-            case "yml" -> loadFileStorage();
-            case "sql", "mysql" -> loadDatabaseStorage();
-            default -> logger.severe("illegal storage method " + storageMethod);
-        }
-    }
-
-    private void loadFileStorage() {
-        File directory = new File(dataFolder.toString() + "/data/");
-        if (!directory.exists()) {
-            directory.mkdir();
-        }
-
-        Configuration nameFile = getOrCreateFile(dataFolder + "/data/","names.yml", false);
-        Configuration timeFile = getOrCreateFile(dataFolder + "/data/","time.yml", false);
-        this.nameStorage = new FileNameStorage(new FileStorageProvider(this, nameFile));
-        this.timeStorage = new AccumulatingTimeStorage(new FileTimeStorage(new FileStorageProvider(this, timeFile)));
-    }
-
-    private void loadDatabaseStorage() throws StorageException {
-        DatabaseStorage databaseStorage = new DatabaseStorage(config, this);
-        this.nameStorage = databaseStorage;
-        this.timeStorage = new AccumulatingTimeStorage(databaseStorage);
-    }
-
-    public void flushOnlineTimeCache() {
-        try {
-            timeStorage.flushOnlineTimeCache();
-        } catch (StorageException ex) {
-            logger.error("could not flush online time cache", ex);
-        }
-    }
-
     public CommonLogger getLogger() {
         return logger;
     }
@@ -300,11 +227,11 @@ public class LoriTimePlugin {
     }
 
     public NameStorage getNameStorage() {
-        return nameStorage;
+        return dataStorageManager.getNameStorage();
     }
 
     public AccumulatingTimeStorage getTimeStorage() {
-        return timeStorage;
+        return dataStorageManager.getTimeStorage();
     }
 
     public String getPluginVersion() {
@@ -317,5 +244,9 @@ public class LoriTimePlugin {
 
     public UpdateCheck getUpdateCheck() {
         return updateCheck;
+    }
+
+    public DataStorageManager getDataStorageManager() {
+        return dataStorageManager;
     }
 }

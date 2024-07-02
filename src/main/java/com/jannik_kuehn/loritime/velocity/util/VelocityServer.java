@@ -2,8 +2,8 @@ package com.jannik_kuehn.loritime.velocity.util;
 
 import com.jannik_kuehn.loritime.api.LoriTimePlayer;
 import com.jannik_kuehn.loritime.common.LoriTimePlugin;
-import com.jannik_kuehn.loritime.api.CommonSender;
-import com.jannik_kuehn.loritime.api.CommonServer;
+import com.jannik_kuehn.loritime.api.common.CommonSender;
+import com.jannik_kuehn.loritime.api.common.CommonServer;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;

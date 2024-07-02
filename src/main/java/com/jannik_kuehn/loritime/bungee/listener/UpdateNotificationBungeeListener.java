@@ -1,6 +1,6 @@
 package com.jannik_kuehn.loritime.bungee.listener;
 
-import com.jannik_kuehn.loritime.api.CommonSender;
+import com.jannik_kuehn.loritime.api.common.CommonSender;
 import com.jannik_kuehn.loritime.bungee.util.BungeeSender;
 import com.jannik_kuehn.loritime.common.LoriTimePlugin;
 import net.kyori.adventure.platform.bungeecord.BungeeAudiences;

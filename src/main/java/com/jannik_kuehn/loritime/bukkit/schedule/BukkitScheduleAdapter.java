@@ -1,7 +1,7 @@
 package com.jannik_kuehn.loritime.bukkit.schedule;
 
-import com.jannik_kuehn.loritime.api.PluginScheduler;
-import com.jannik_kuehn.loritime.api.PluginTask;
+import com.jannik_kuehn.loritime.api.scheduler.PluginScheduler;
+import com.jannik_kuehn.loritime.api.scheduler.PluginTask;
 import com.jannik_kuehn.loritime.bukkit.LoriTimeBukkit;
 import org.bukkit.scheduler.BukkitScheduler;
 

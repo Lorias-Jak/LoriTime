@@ -14,7 +14,7 @@ public class BukkitPluginMessanger {
 
     public BukkitPluginMessanger(LoriTimeBukkit bukkitPlugin) {
         this.bukkitPlugin = bukkitPlugin;
-        this.loriTimePlugin = bukkitPlugin.getLoriTimePlugin();
+        this.loriTimePlugin = bukkitPlugin.getPlugin();
     }
 
     public void sendPluginMessage(PluginMessageRecipient target, String channel, Object... message) {

@@ -1,6 +1,6 @@
 package com.jannik_kuehn.loritime.bungee.schedule;
 
-import com.jannik_kuehn.loritime.api.PluginTask;
+import com.jannik_kuehn.loritime.api.scheduler.PluginTask;
 import net.md_5.bungee.api.scheduler.ScheduledTask;
 
 public class BungeeTaskAdapter implements PluginTask {

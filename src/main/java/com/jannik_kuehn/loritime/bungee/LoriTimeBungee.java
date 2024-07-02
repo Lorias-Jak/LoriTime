@@ -1,6 +1,7 @@
 package com.jannik_kuehn.loritime.bungee;
 
-import com.jannik_kuehn.loritime.api.CommonLogger;
+import com.jannik_kuehn.loritime.api.LoriTimeAPI;
+import com.jannik_kuehn.loritime.api.common.CommonLogger;
 import com.jannik_kuehn.loritime.bungee.command.BungeeCommand;
 import com.jannik_kuehn.loritime.bungee.listener.PlayerNameBungeeListener;
 import com.jannik_kuehn.loritime.bungee.listener.TimeAccumulatorBungeeListener;
@@ -24,7 +25,6 @@ public class LoriTimeBungee extends Plugin {
 
     private LoriTimePlugin loriTimePlugin;
     private BungeeAudiences audiences;
-    private final ArrayList<BungeeCommand> commands = new ArrayList<>();
 
     @Override
     public void onEnable() {
@@ -36,6 +36,7 @@ public class LoriTimeBungee extends Plugin {
         audiences = BungeeAudiences.create(this);
         try {
             loriTimePlugin.enable();
+            LoriTimeAPI.setPlugin(loriTimePlugin);
         } catch (Exception e) {
             loriTimePlugin.disable();
             logger.warning("Error while enabling the plugin! Disabling the plugin...", e);
@@ -59,12 +60,11 @@ public class LoriTimeBungee extends Plugin {
         pluginManager.registerListener(this, new TimeAccumulatorBungeeListener(loriTimePlugin));
         pluginManager.registerListener(this, new UpdateNotificationBungeeListener(loriTimePlugin, audiences));
 
-
-        commands.add(new BungeeCommand(this, audiences, new LoriTimeAdminCommand(loriTimePlugin, loriTimePlugin.getLocalization(),
-                loriTimePlugin.getParser())));
-        commands.add(new BungeeCommand(this, audiences, new LoriTimeCommand(loriTimePlugin, loriTimePlugin.getLocalization())));
-        commands.add(new BungeeCommand(this, audiences, new LoriTimeInfoCommand(loriTimePlugin, loriTimePlugin.getLocalization())));
-        commands.add(new BungeeCommand(this, audiences, new LoriTimeTopCommand(loriTimePlugin, loriTimePlugin.getLocalization())));
+        new BungeeCommand(this, audiences, new LoriTimeAdminCommand(loriTimePlugin, loriTimePlugin.getLocalization(),
+                loriTimePlugin.getParser()));
+        new BungeeCommand(this, audiences, new LoriTimeCommand(loriTimePlugin, loriTimePlugin.getLocalization()));
+        new BungeeCommand(this, audiences, new LoriTimeInfoCommand(loriTimePlugin, loriTimePlugin.getLocalization()));
+        new BungeeCommand(this, audiences, new LoriTimeTopCommand(loriTimePlugin, loriTimePlugin.getLocalization()));
     }
 
     private void enableAsSlave() {
@@ -88,7 +88,7 @@ public class LoriTimeBungee extends Plugin {
         getProxy().getPluginManager().unregisterCommands(this);
     }
 
-    public LoriTimePlugin getLoriTimePlugin() {
+    public LoriTimePlugin getPlugin() {
         return loriTimePlugin;
     }
 }

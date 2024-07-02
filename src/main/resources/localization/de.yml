@@ -92,6 +92,6 @@ message:
     afkResume: '<#A4A4A4>Du bist nicht mehr AFK.'
   update:
     available: |
-      <#A4A4A4>Ein neues Update ist verfügbar.<newline> 
-      Derzeitige Version: <#50CBAB>[currentVersion]<#A4A4A4> | Neue Version: <#50CBAB>[newVersion]<newline>
+      <#A4A4A4>Ein neues Update ist verfügbar.
+      Derzeitige Version: <#50CBAB>[currentVersion]<#A4A4A4> | Neue Version: <#50CBAB>[newVersion]
       <#A4A4A4>Du kannst dir die neuste Version hier Herunterladen: <#50CBAB>[url]

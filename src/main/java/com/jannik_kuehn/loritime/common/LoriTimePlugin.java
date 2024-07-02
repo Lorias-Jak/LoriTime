@@ -88,6 +88,7 @@ public class LoriTimePlugin {
             updateCheck = new UpdateCheck(this);
             updateCheck.startCheck();
         }
+        dataStorageManager.startCache();
     }
 
     private String getServerModeFromConfig() {
@@ -118,8 +119,10 @@ public class LoriTimePlugin {
         updateCheck.stopCheck();
         config.reload();
         localization.reloadTranslation();
+        dataStorageManager.disableCache();
         dataStorageManager.reloadStorages();
         afkStatusProvider.reloadConfigValues();
+        dataStorageManager.startCache();
         updateCheck.startCheck();
     }
 

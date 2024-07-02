@@ -29,8 +29,6 @@ public class DataStorageManager {
 
     private boolean externalStorage;
 
-    private final int saveInterval;
-
     private PluginTask flushCacheTask;
 
 
@@ -39,7 +37,6 @@ public class DataStorageManager {
         this.log = loriTime.getLogger();
         this.dataFolder = dataFolder;
         this.externalStorage = false;
-        this.saveInterval = loriTime.getConfig().getInt("general.saveInterval");
     }
 
     public void injectCustomStorage(NameStorage nameStorage, AccumulatingTimeStorage timeStorage) {
@@ -53,20 +50,14 @@ public class DataStorageManager {
     }
 
     public void startCache() {
+        int saveInterval = loriTime.getConfig().getInt("general.saveInterval");
         flushCacheTask = loriTime.getScheduler().scheduleAsync(saveInterval / 2L, saveInterval, this::flushOnlineTimeCache);
     }
 
     public void disableCache() {
         flushCacheTask.cancel();
         flushOnlineTimeCache();
-    }
-
-    public void reloadCacheTask() {
-        flushCacheTask.cancel();
-        flushOnlineTimeCache();
         flushCacheTask = null;
-
-        startCache();
     }
 
     public void loadStorages() throws StorageException {

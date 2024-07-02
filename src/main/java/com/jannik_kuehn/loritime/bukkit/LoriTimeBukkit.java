@@ -10,6 +10,7 @@ import com.jannik_kuehn.loritime.bukkit.listener.TimeAccumulatorBukkitListener;
 import com.jannik_kuehn.loritime.bukkit.listener.UpdateNotificationBukkitListener;
 import com.jannik_kuehn.loritime.bukkit.schedule.BukkitScheduleAdapter;
 import com.jannik_kuehn.loritime.bukkit.util.BukkitLogger;
+import com.jannik_kuehn.loritime.bukkit.util.BukkitMetrics;
 import com.jannik_kuehn.loritime.bukkit.util.BukkitServer;
 import com.jannik_kuehn.loritime.bukkit.util.LoriTimePlaceholder;
 import com.jannik_kuehn.loritime.common.LoriTimePlugin;
@@ -19,6 +20,7 @@ import com.jannik_kuehn.loritime.common.command.LoriTimeCommand;
 import com.jannik_kuehn.loritime.common.command.LoriTimeInfoCommand;
 import com.jannik_kuehn.loritime.common.command.LoriTimeTopCommand;
 import com.jannik_kuehn.loritime.common.module.afk.MasteredAfkPlayerHandling;
+import org.bstats.bukkit.Metrics;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -53,6 +55,7 @@ public class LoriTimeBukkit extends JavaPlugin {
             loriTimePlugin.disable();
         }
         enableRemainingFeatures();
+        new BukkitMetrics(loriTimePlugin, new Metrics(this, 22500));
     }
 
     private void enableAsMaster() {

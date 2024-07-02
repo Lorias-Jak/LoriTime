@@ -8,6 +8,7 @@ import com.jannik_kuehn.loritime.bungee.listener.TimeAccumulatorBungeeListener;
 import com.jannik_kuehn.loritime.bungee.listener.UpdateNotificationBungeeListener;
 import com.jannik_kuehn.loritime.bungee.schedule.BungeeScheduleAdapter;
 import com.jannik_kuehn.loritime.bungee.util.BungeeLogger;
+import com.jannik_kuehn.loritime.bungee.util.BungeeMetrics;
 import com.jannik_kuehn.loritime.bungee.util.BungeeServer;
 import com.jannik_kuehn.loritime.common.LoriTimePlugin;
 import com.jannik_kuehn.loritime.common.command.LoriTimeAdminCommand;
@@ -18,6 +19,7 @@ import com.jannik_kuehn.loritime.common.module.afk.MasteredAfkPlayerHandling;
 import net.kyori.adventure.platform.bungeecord.BungeeAudiences;
 import net.md_5.bungee.api.plugin.Plugin;
 import net.md_5.bungee.api.plugin.PluginManager;
+import org.bstats.bungeecord.Metrics;
 
 import java.util.ArrayList;
 
@@ -52,6 +54,7 @@ public class LoriTimeBungee extends Plugin {
             loriTimePlugin.disable();
         }
         enableRemainingFeatures();
+        new BungeeMetrics(loriTimePlugin, new Metrics(this, 22499));
     }
 
     private void enableAsMaster() {

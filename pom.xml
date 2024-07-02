@@ -31,6 +31,24 @@
 
 
     <dependencies>
+        <dependency>
+            <groupId>org.bstats</groupId>
+            <artifactId>bstats-bukkit</artifactId>
+            <version>3.0.2</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.bstats</groupId>
+            <artifactId>bstats-bungeecord</artifactId>
+            <version>3.0.2</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.bstats</groupId>
+            <artifactId>bstats-velocity</artifactId>
+            <version>3.0.2</version>
+            <scope>compile</scope>
+        </dependency>
         <!-- from papermc repository -->
         <dependency>
             <groupId>io.papermc.paper</groupId>
@@ -337,6 +355,10 @@
                         <relocation>
                             <pattern>com.zaxxer</pattern>
                             <shadedPattern>${basePackage}.libraries.hikaricp</shadedPattern>
+                        </relocation>
+                        <relocation>
+                            <pattern>org.bstats</pattern>
+                            <shadedPattern>${basePackage}.libraries.bstats</shadedPattern>
                         </relocation>
                     </relocations>
                 </configuration>

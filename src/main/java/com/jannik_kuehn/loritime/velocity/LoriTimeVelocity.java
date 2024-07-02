@@ -14,6 +14,7 @@ import com.jannik_kuehn.loritime.velocity.command.VelocityCommand;
 import com.jannik_kuehn.loritime.velocity.listener.TimeAccumulatorVelocityListener;
 import com.jannik_kuehn.loritime.velocity.listener.PlayerNameVelocityListener;
 import com.jannik_kuehn.loritime.velocity.schedule.VelocityScheduleAdapter;
+import com.jannik_kuehn.loritime.velocity.util.VelocityMetrics;
 import com.jannik_kuehn.loritime.velocity.util.VelocityServer;
 import com.velocitypowered.api.event.EventManager;
 import com.velocitypowered.api.event.Subscribe;
@@ -22,6 +23,7 @@ import com.velocitypowered.api.event.proxy.ProxyShutdownEvent;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.proxy.messages.MinecraftChannelIdentifier;
+import org.bstats.velocity.Metrics;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;
@@ -34,13 +36,15 @@ public class LoriTimeVelocity {
     private final ProxyServer proxyServer;
     private LoriTimePlugin loriTimePlugin;
     private final ArrayList<VelocityCommand> commands;
+    private final Metrics.Factory metricsFactory;
 
     @Inject
-    public LoriTimeVelocity(ProxyServer server, Logger logger, @DataDirectory Path dataDirectory) {
+    public LoriTimeVelocity(ProxyServer server, Logger logger, @DataDirectory Path dataDirectory, Metrics.Factory metricsFactory) {
         this.dataDirectory = dataDirectory;
         this.logger = new VelocityLogger(logger);
         this.proxyServer = server;
         this.commands = new ArrayList<>();
+        this.metricsFactory = metricsFactory;
     }
 
     @Subscribe
@@ -65,6 +69,8 @@ public class LoriTimeVelocity {
             loriTimePlugin.disable();
         }
         enableRemainingFeatures();
+
+        new VelocityMetrics(loriTimePlugin, metricsFactory.make(this, 22484));
     }
 
     private void enableAsMaster() {

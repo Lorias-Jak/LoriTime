@@ -92,7 +92,7 @@ command:
       - "ltop"
       - "toptimes"
   Afk:
-    alias: []
+    alias: [ ]
 
 ################
 # Integrations #

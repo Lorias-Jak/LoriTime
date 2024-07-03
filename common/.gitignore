@@ -1,0 +1,8 @@
+# IntelliJ
+*.iml
+/.idea
+# Custom dictionaries
+!/.idea/dictionaries/
+
+#Maven
+**/target/

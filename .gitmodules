@@ -1,0 +1,12 @@
+[submodule "common"]
+	path = common
+	url = ../common
+[submodule "bukkit"]
+	path = bukkit
+	url = ../bukkit
+[submodule "bungee"]
+	path = bungee
+	url = ../bungee
+[submodule "velocity"]
+	path = velocity
+	url = ../velocity

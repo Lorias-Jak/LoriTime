@@ -4,7 +4,6 @@ import com.jannik_kuehn.common.LoriTimePlugin;
 import com.jannik_kuehn.common.api.LoriTimePlayer;
 import com.jannik_kuehn.common.api.common.CommonSender;
 import com.jannik_kuehn.common.api.common.CommonServer;
-import com.jannik_kuehn.loritimebukkit.BukkitPluginMessanger;
 import com.jannik_kuehn.loritimebukkit.LoriTimeBukkit;
 import net.kyori.adventure.text.TextComponent;
 import org.bukkit.Bukkit;
@@ -16,23 +15,17 @@ import java.util.Optional;
 import java.util.UUID;
 
 public class BukkitServer implements CommonServer {
-
-    private LoriTimeBukkit bukkitPlugin;
-
     private LoriTimePlugin loriTimePlugin;
 
     private String serverMode;
 
     private Server server;
 
-    private BukkitPluginMessanger pluginMessanger;
-
     public BukkitServer() {
         // Empty
     }
 
     public void enable(LoriTimeBukkit bukkitPlugin) {
-        this.bukkitPlugin = bukkitPlugin;
         this.loriTimePlugin = bukkitPlugin.getPlugin();
         this.server = Bukkit.getServer();
     }

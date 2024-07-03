@@ -1,6 +1,5 @@
 package com.jannik_kuehn.loritimebungee.util;
 
-import com.jannik_kuehn.common.LoriTimePlugin;
 import com.jannik_kuehn.common.api.LoriTimePlayer;
 import com.jannik_kuehn.common.api.common.CommonSender;
 import com.jannik_kuehn.common.api.common.CommonServer;
@@ -15,8 +14,6 @@ import java.util.UUID;
 
 public class BungeeServer implements CommonServer {
 
-    private LoriTimePlugin plugin;
-
     private ProxyServer server;
 
     private String serverMode;
@@ -25,8 +22,7 @@ public class BungeeServer implements CommonServer {
         // Empty
     }
 
-    public void enable(LoriTimePlugin plugin, ProxyServer server) {
-        this.plugin = plugin;
+    public void enable(ProxyServer server) {
         this.server = server;
     }
 

@@ -35,7 +35,6 @@ public class LoriTimeCommand implements CommonCommand {
         }
         if (args.length <= 1) {
             plugin.getScheduler().runAsyncOnce(() -> {
-                CommonSender senderInstance = sender;
                 LoriTimePlayer targetPlayer;
 
                 if (args.length == 1) {
@@ -54,14 +53,14 @@ public class LoriTimeCommand implements CommonCommand {
                     }
                 } else {
                     if (!sender.isConsole()) {
-                        targetPlayer = new LoriTimePlayer(senderInstance.getUniqueId(), senderInstance.getName());
+                        targetPlayer = new LoriTimePlayer(sender.getUniqueId(), sender.getName());
                     } else {
                         sender.sendMessage(localization.formatTextComponent(localization.getRawMessage("message.command.loritime.consoleself")));
                         return;
                     }
                 }
 
-                boolean isTargetSender = targetPlayer.equals(senderInstance.getUniqueId());
+                boolean isTargetSender = targetPlayer.getUniqueId().equals(sender.getUniqueId());
                 if (!isTargetSender && !sender.hasPermission("loritime.see.other")) {
                     printUtilityMessage(sender, "message.nopermission");
                     return;

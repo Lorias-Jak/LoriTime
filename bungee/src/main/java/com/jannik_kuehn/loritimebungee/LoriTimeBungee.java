@@ -14,7 +14,6 @@ import com.jannik_kuehn.loritimebungee.listener.TimeAccumulatorBungeeListener;
 import com.jannik_kuehn.loritimebungee.listener.UpdateNotificationBungeeListener;
 import com.jannik_kuehn.loritimebungee.schedule.BungeeScheduleAdapter;
 import com.jannik_kuehn.loritimebungee.util.BungeeLogger;
-import com.jannik_kuehn.loritimebungee.util.BungeeMetrics;
 import com.jannik_kuehn.loritimebungee.util.BungeeServer;
 import net.kyori.adventure.platform.bungeecord.BungeeAudiences;
 import net.md_5.bungee.api.plugin.Plugin;
@@ -33,7 +32,7 @@ public class LoriTimeBungee extends Plugin {
         BungeeScheduleAdapter scheduleAdapter = new BungeeScheduleAdapter(this, getProxy().getScheduler());
         BungeeServer bungeeServer = new BungeeServer();
         this.loriTimePlugin = new LoriTimePlugin(logger, this.getDataFolder(), scheduleAdapter, bungeeServer);
-        bungeeServer.enable(loriTimePlugin, getProxy());
+        bungeeServer.enable(getProxy());
         audiences = BungeeAudiences.create(this);
         try {
             loriTimePlugin.enable();
@@ -53,7 +52,7 @@ public class LoriTimeBungee extends Plugin {
             loriTimePlugin.disable();
         }
         enableRemainingFeatures();
-        new BungeeMetrics(loriTimePlugin, new Metrics(this, 22499));
+        new Metrics(this, 22499);
     }
 
     private void enableAsMaster() {
@@ -77,7 +76,7 @@ public class LoriTimeBungee extends Plugin {
     private void enableRemainingFeatures() {
         if (loriTimePlugin.isAfkEnabled()) {
             getProxy().registerChannel("loritime:afk");
-            getProxy().getPluginManager().registerListener(this, new BungeePluginMessanger(this));
+            getProxy().getPluginManager().registerListener(this, new BungeePluginMessage(this));
             loriTimePlugin.enableAfkFeature(new MasteredAfkPlayerHandling(loriTimePlugin));
         }
     }

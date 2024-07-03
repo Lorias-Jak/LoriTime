@@ -1,6 +1,5 @@
 package com.jannik_kuehn.loritimebukkit.util;
 
-import com.jannik_kuehn.common.LoriTimePlugin;
 import com.jannik_kuehn.common.api.common.CommonSender;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
@@ -10,12 +9,9 @@ import org.bukkit.entity.Player;
 import java.util.UUID;
 
 public class BukkitSender implements CommonSender {
-    private LoriTimePlugin plugin;
-
     private CommandSender source;
 
-    public BukkitSender(LoriTimePlugin plugin, CommandSender source) {
-        this.plugin = plugin;
+    public BukkitSender(CommandSender source) {
         this.source = source;
     }
 

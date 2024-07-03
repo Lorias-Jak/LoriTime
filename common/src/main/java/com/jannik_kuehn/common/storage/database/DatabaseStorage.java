@@ -30,7 +30,7 @@ public class DatabaseStorage implements NameStorage, TimeStorage {
 
     private final ReadWriteLock poolLock;
 
-    public DatabaseStorage(Configuration config, LoriTimePlugin plugin) throws StorageException {
+    public DatabaseStorage(Configuration config, LoriTimePlugin plugin) {
         this.mySQL = new MySQL(config, plugin);
         mySQL.open();
         this.poolLock = new ReentrantReadWriteLock();
@@ -41,7 +41,7 @@ public class DatabaseStorage implements NameStorage, TimeStorage {
         ) {
             statement.execute(createTable());
         } catch (SQLException ex) {
-            throw new StorageException(ex);
+            plugin.getLogger().error("Error creating table", ex);
         }
     }
 

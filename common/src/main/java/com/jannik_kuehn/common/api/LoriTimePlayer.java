@@ -1,10 +1,11 @@
 package com.jannik_kuehn.common.api;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 import java.util.Objects;
 import java.util.UUID;
 
 public class LoriTimePlayer {
-
     private final UUID uuid;
 
     private final String name;
@@ -14,7 +15,6 @@ public class LoriTimePlayer {
     public LoriTimePlayer(UUID uuid, String name) {
         this.uuid = uuid;
         this.name = name;
-
         this.afkStatus = false;
     }
 
@@ -34,17 +34,20 @@ public class LoriTimePlayer {
         this.afkStatus = afk;
     }
 
-    public boolean equals(Object data) {
-        if (this == data) {
+    @Override
+    @SuppressFBWarnings("EC_UNRELATED_TYPES")
+    public boolean equals(Object obj) {
+        if (this == obj) {
             return true;
         }
-        if (data == null || getClass() != data.getClass()) {
+        if (obj == null || getClass() != obj.getClass()) {
             return false;
         }
-        LoriTimePlayer targetPlayer = (LoriTimePlayer) data;
-        return uuid.equals(targetPlayer.uuid);
+        LoriTimePlayer that = (LoriTimePlayer) obj;
+        return uuid.equals(that.uuid);
     }
 
+    @Override
     public int hashCode() {
         return Objects.hash(uuid);
     }

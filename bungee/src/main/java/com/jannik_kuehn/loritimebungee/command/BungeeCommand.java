@@ -1,10 +1,10 @@
 package com.jannik_kuehn.loritimebungee.command;
 
+import com.jannik_kuehn.common.api.common.CommonCommand;
+import com.jannik_kuehn.common.api.common.CommonSender;
 import com.jannik_kuehn.loritimebungee.LoriTimeBungee;
 import com.jannik_kuehn.loritimebungee.util.BungeePlayer;
 import com.jannik_kuehn.loritimebungee.util.BungeeSender;
-import com.jannik_kuehn.common.api.common.CommonCommand;
-import com.jannik_kuehn.common.api.common.CommonSender;
 import net.kyori.adventure.platform.bungeecord.BungeeAudiences;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.connection.ProxiedPlayer;

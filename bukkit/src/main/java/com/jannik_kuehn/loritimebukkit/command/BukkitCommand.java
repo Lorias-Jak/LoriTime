@@ -52,7 +52,7 @@ public class BukkitCommand implements CommandExecutor, TabExecutor {
         if (source instanceof Player) {
             return new BukkitPlayer((Player) source);
         } else {
-            return new BukkitSender(bukkitPlugin.getPlugin(), source);
+            return new BukkitSender(source);
         }
     }
 

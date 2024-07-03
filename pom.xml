@@ -488,34 +488,34 @@
           </execution>
         </executions>
       </plugin>
-<!--      <plugin>-->
-<!--        <groupId>org.apache.maven.plugins</groupId>-->
-<!--        <artifactId>maven-pmd-plugin</artifactId>-->
-<!--        <executions>-->
-<!--          <execution>-->
-<!--            <id>check</id>-->
-<!--            <goals>-->
-<!--              <goal>check</goal>-->
-<!--            </goals>-->
-<!--            <configuration>-->
-<!--              <failOnViolation>true</failOnViolation>-->
-<!--              <printFailingErrors>true</printFailingErrors>-->
-<!--            </configuration>-->
-<!--          </execution>-->
-<!--        </executions>-->
-<!--      </plugin>-->
-<!--      <plugin>-->
-<!--        <groupId>com.github.spotbugs</groupId>-->
-<!--        <artifactId>spotbugs-maven-plugin</artifactId>-->
-<!--        <executions>-->
-<!--          <execution>-->
-<!--            <id>check</id>-->
-<!--            <goals>-->
-<!--              <goal>check</goal>-->
-<!--            </goals>-->
-<!--          </execution>-->
-<!--        </executions>-->
-<!--      </plugin>-->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-pmd-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>check</id>
+            <goals>
+              <goal>check</goal>
+            </goals>
+            <configuration>
+              <failOnViolation>true</failOnViolation>
+              <printFailingErrors>true</printFailingErrors>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>com.github.spotbugs</groupId>
+        <artifactId>spotbugs-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>check</id>
+            <goals>
+              <goal>check</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-checkstyle-plugin</artifactId>
@@ -584,23 +584,23 @@
 <!--            <includeTests>true</includeTests>-->
 <!--          </configuration>-->
 <!--        </plugin>-->
-<!--        <plugin>-->
-<!--          <groupId>com.github.spotbugs</groupId>-->
-<!--          <artifactId>spotbugs-maven-plugin</artifactId>-->
-<!--          <version>4.8.2.0</version>-->
-<!--          <dependencies>-->
-<!--            <dependency>-->
-<!--              <groupId>com.jannik_kuehn</groupId>-->
-<!--              <artifactId>config</artifactId>-->
-<!--              <version>1.0.0</version>-->
-<!--            </dependency>-->
-<!--          </dependencies>-->
-<!--          <configuration>-->
-<!--            <excludeFilterFile>config/spotbugs-exclude.xml</excludeFilterFile>-->
-<!--            <effort>max</effort>-->
-<!--            <threshold>low</threshold>-->
-<!--          </configuration>-->
-<!--        </plugin>-->
+        <plugin>
+          <groupId>com.github.spotbugs</groupId>
+          <artifactId>spotbugs-maven-plugin</artifactId>
+          <version>4.8.2.0</version>
+          <dependencies>
+            <dependency>
+              <groupId>com.jannik_kuehn</groupId>
+              <artifactId>config</artifactId>
+              <version>1.0.0</version>
+            </dependency>
+          </dependencies>
+          <configuration>
+            <excludeFilterFile>config/spotbugs-exclude.xml</excludeFilterFile>
+            <effort>max</effort>
+            <threshold>low</threshold>
+          </configuration>
+        </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-checkstyle-plugin</artifactId>
@@ -719,10 +719,10 @@
 <!--        <groupId>org.apache.maven.plugins</groupId>-->
 <!--        <artifactId>maven-pmd-plugin</artifactId>-->
 <!--      </plugin>-->
-<!--      <plugin>-->
-<!--        <groupId>com.github.spotbugs</groupId>-->
-<!--        <artifactId>spotbugs-maven-plugin</artifactId>-->
-<!--      </plugin>-->
+      <plugin>
+        <groupId>com.github.spotbugs</groupId>
+        <artifactId>spotbugs-maven-plugin</artifactId>
+      </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-checkstyle-plugin</artifactId>

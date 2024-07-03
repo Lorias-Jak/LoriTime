@@ -5,11 +5,11 @@ import com.jannik_kuehn.common.api.LoriTimePlayer;
 import com.jannik_kuehn.common.api.scheduler.PluginTask;
 
 import java.util.HashMap;
+import java.util.Map;
 import java.util.OptionalLong;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class AfkStatusProvider {
-
     private final LoriTimePlugin plugin;
 
     private final ConcurrentHashMap<LoriTimePlayer, Long> afkCheckedPlayers;
@@ -65,8 +65,9 @@ public class AfkStatusProvider {
 
     private void repeatedTimeCheck() {
         final HashMap<LoriTimePlayer, Long> playersToCheck = new HashMap<>(afkCheckedPlayers);
-        for (LoriTimePlayer player : playersToCheck.keySet()) {
-            long playerAfkTime = playersToCheck.get(player);
+        for (Map.Entry<LoriTimePlayer, Long> entry : playersToCheck.entrySet()) {
+            LoriTimePlayer player = entry.getKey();
+            long playerAfkTime = entry.getValue();
             long currentTime = System.currentTimeMillis();
             if (plugin.getServer().getPlayer(player.getUniqueId()).isEmpty()) {
                 afkCheckedPlayers.remove(player);
@@ -81,6 +82,7 @@ public class AfkStatusProvider {
                 afkPlayerHandling.executePlayerAfk(player, timeToRemove);
             }
         }
+
     }
 
     public void resetTimer(LoriTimePlayer player) {

@@ -82,10 +82,9 @@ public class FileStorageProvider implements FileStorage {
         String sameKey = null;
         try {
             Map<String, Object> all = (Map<String, Object>) storage.getAll();
-            Set<String> set = all.keySet();
-            for (String value : set) {
-                if (all.get(value).equals(data)) {
-                    sameKey = value;
+            for (Map.Entry<String, Object> entry : all.entrySet()) {
+                if (entry.getValue().equals(data)) {
+                    sameKey = entry.getKey();
                 }
             }
         } finally {

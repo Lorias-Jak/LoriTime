@@ -14,6 +14,8 @@ import com.jannik_kuehn.common.module.afk.AfkStatusProvider;
 import com.jannik_kuehn.common.storage.DataStorageManager;
 import com.jannik_kuehn.common.utils.TimeParser;
 import com.jannik_kuehn.common.utils.UpdateCheck;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -25,6 +27,8 @@ import java.util.List;
 import java.util.Set;
 
 public class LoriTimePlugin {
+    private static final Logger log = LoggerFactory.getLogger(LoriTimePlugin.class);
+
     private static LoriTimePlugin instance;
 
     private final CommonLogger logger;
@@ -129,7 +133,10 @@ public class LoriTimePlugin {
     private void loadOrCreateConfigs() {
         File directory = new File(dataFolder.toString());
         if (!directory.exists()) {
-            directory.mkdir();
+            boolean created = directory.mkdir();
+            if (!created) {
+                log.error("Could not create the data folder for plugin.");
+            }
         }
 
         this.config = getOrCreateFile(dataFolder.toString(), "config.yml", true);
@@ -158,9 +165,10 @@ public class LoriTimePlugin {
 
     public Configuration getOrCreateFile(String folder, String fileName, boolean needCopy) {
         File file = new File(folder, fileName);
+        boolean created = false;
         if (!file.exists()) {
             try {
-                file.createNewFile();
+                created = file.createNewFile();
                 logger.info("Creating new File '" + fileName + "'.");
                 if (needCopy) {
                     copyDataFromResource(file.toPath(), fileName);
@@ -173,6 +181,9 @@ public class LoriTimePlugin {
         if (!configurationFile.isLoaded()) {
             logger.severe("An issue occurred while loading the file '" + fileName + "'. The File is null, there should be data.");
             return null;
+        }
+        if (created) {
+            logger.info("The file '" + fileName + "' was created successfully.");
         }
         logger.info("Successfully loaded '" + fileName + "'.");
         return configurationFile;

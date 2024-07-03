@@ -1,6 +1,5 @@
 package com.jannik_kuehn.loritimevelocity.util;
 
-import com.jannik_kuehn.common.LoriTimePlugin;
 import com.jannik_kuehn.common.api.common.CommonSender;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
@@ -10,12 +9,9 @@ import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import java.util.UUID;
 
 public class VelocitySender implements CommonSender {
-    private LoriTimePlugin plugin;
+    private final CommandSource source;
 
-    private CommandSource source;
-
-    public VelocitySender(LoriTimePlugin plugin, CommandSource source) {
-        this.plugin = plugin;
+    public VelocitySender(CommandSource source) {
         this.source = source;
     }
 

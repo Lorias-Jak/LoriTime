@@ -1,8 +1,8 @@
 package com.jannik_kuehn.loritimevelocity.schedule;
 
-import com.jannik_kuehn.loritimevelocity.LoriTimeVelocity;
 import com.jannik_kuehn.common.api.scheduler.PluginScheduler;
 import com.jannik_kuehn.common.api.scheduler.PluginTask;
+import com.jannik_kuehn.loritimevelocity.LoriTimeVelocity;
 import com.velocitypowered.api.scheduler.Scheduler;
 
 import java.util.concurrent.TimeUnit;
@@ -29,8 +29,8 @@ public class VelocityScheduleAdapter implements PluginScheduler {
     public PluginTask runAsyncOnceLater(long delay, Runnable task) {
         return new VelocityTask(
                 scheduler.buildTask(plugin, task)
-                    .delay(delay, TimeUnit.SECONDS)
-                    .schedule()
+                        .delay(delay, TimeUnit.SECONDS)
+                        .schedule()
         );
     }
 

@@ -4,12 +4,14 @@ import com.jannik_kuehn.common.LoriTimePlugin;
 import com.jannik_kuehn.common.api.LoriTimePlayer;
 import com.jannik_kuehn.common.exception.StorageException;
 import com.jannik_kuehn.common.utils.TimeUtil;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import org.bukkit.OfflinePlayer;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.OptionalLong;
 
+@SuppressFBWarnings("HE_INHERITS_EQUALS_USE_HASHCODE")
 public class LoriTimePlaceholder extends PlaceholderExpansion {
 
     private final LoriTimePlugin plugin;
@@ -30,7 +32,7 @@ public class LoriTimePlaceholder extends PlaceholderExpansion {
                 if (plugin.isAfkEnabled()) {
                     return String.valueOf(plugin.getAfkStatusProvider().getRealPlayer(new LoriTimePlayer(player.getUniqueId(), player.getName())).isAfk());
                 }
-            return "Feature not enabled!";
+                return "Feature not enabled!";
             default:
                 return "Nothing Found";
         }

@@ -6,8 +6,10 @@ import org.yaml.snakeyaml.Yaml;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileWriter;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -16,15 +18,18 @@ import java.util.Map;
 import java.util.Set;
 
 public class YamlKeyValueStore implements KeyValueStore {
-    private final Map<String, Object> data;
-
     private final String filePath;
+
+    private final LoriTimePlugin loriTimePlugin;
+
+    private final Map<String, Object> data;
 
     private boolean loaded;
 
     public YamlKeyValueStore(final String filePath) {
-        this.data = new HashMap<>();
         this.filePath = filePath;
+        this.loriTimePlugin = LoriTimePlugin.getInstance();
+        this.data = new HashMap<>();
         loaded = false;
 
         loadFromFile();
@@ -71,8 +76,7 @@ public class YamlKeyValueStore implements KeyValueStore {
     }
 
     private void loadFromFile() {
-        try {
-            FileInputStream input = new FileInputStream(filePath);
+        try (FileInputStream input = new FileInputStream(filePath)) {  // try-with-resources Block
             Yaml yaml = new Yaml();
             Map<String, Object> loadedData = yaml.load(input);
             if (loadedData == null) {
@@ -86,19 +90,21 @@ public class YamlKeyValueStore implements KeyValueStore {
             loaded = true;
         } catch (FileNotFoundException e) {
             loaded = false;
-            e.printStackTrace();
+            LoriTimePlugin.getInstance().getLogger().error("Failed to load data from file: " + filePath, e);
+        } catch (IOException e) {
+            loaded = false;
+            LoriTimePlugin.getInstance().getLogger().error("IO Exception while loading data from file: " + filePath, e);
         }
     }
 
     private Map<String, ?> readRecursive(Map<String, ?> map, String keyChain) {
         String subPathPrefix = keyChain == null || keyChain.isEmpty() ? "" : keyChain + ".";
         Map<String, Object> dataMap = new HashMap<>();
-        for (String key : map.keySet()) {
-            Object data = map.get(key);
+        for (Map.Entry<String, ?> entry : map.entrySet()) {
+            String key = entry.getKey();
+            Object data = entry.getValue();
             if (data instanceof LinkedHashMap<?, ?>) {
                 dataMap.putAll(readRecursive((Map<String, ?>) data, subPathPrefix + key));
-            } else if (data instanceof ArrayList<?>) {
-                dataMap.put(subPathPrefix + key, data);
             } else {
                 dataMap.put(subPathPrefix + key, data);
             }
@@ -110,13 +116,12 @@ public class YamlKeyValueStore implements KeyValueStore {
         DumperOptions options = new DumperOptions();
         options.setPrettyFlow(true);
         options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
-
         Yaml yaml = new Yaml(options);
 
-        try (FileWriter writer = new FileWriter(filePath)) {
+        try (OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(filePath), StandardCharsets.UTF_8)) {
             yaml.dump(data, writer);
         } catch (IOException e) {
-            e.printStackTrace();
+            loriTimePlugin.getLogger().error("Failed to save data to file: " + filePath, e);
         }
     }
 

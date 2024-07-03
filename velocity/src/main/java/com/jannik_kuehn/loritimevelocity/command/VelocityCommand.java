@@ -1,8 +1,8 @@
 package com.jannik_kuehn.loritimevelocity.command;
 
-import com.jannik_kuehn.loritimevelocity.LoriTimeVelocity;
 import com.jannik_kuehn.common.api.common.CommonCommand;
 import com.jannik_kuehn.common.api.common.CommonSender;
+import com.jannik_kuehn.loritimevelocity.LoriTimeVelocity;
 import com.jannik_kuehn.loritimevelocity.util.VelocityPlayer;
 import com.jannik_kuehn.loritimevelocity.util.VelocitySender;
 import com.velocitypowered.api.command.CommandMeta;
@@ -60,7 +60,7 @@ public class VelocityCommand implements SimpleCommand {
         if (source instanceof Player) {
             return new VelocityPlayer((Player) source);
         } else {
-            return new VelocitySender(velocityPlugin.getPlugin(), source);
+            return new VelocitySender(source);
         }
     }
 }

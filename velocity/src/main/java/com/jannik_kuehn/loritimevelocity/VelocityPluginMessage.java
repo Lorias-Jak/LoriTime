@@ -11,12 +11,9 @@ import java.io.DataInputStream;
 import java.io.IOException;
 
 public class VelocityPluginMessage {
-    private final LoriTimeVelocity velocityPlugin;
-
     private final LoriTimePlugin plugin;
 
     public VelocityPluginMessage(LoriTimeVelocity velocityPlugin) {
-        this.velocityPlugin = velocityPlugin;
         this.plugin = velocityPlugin.getPlugin();
     }
 

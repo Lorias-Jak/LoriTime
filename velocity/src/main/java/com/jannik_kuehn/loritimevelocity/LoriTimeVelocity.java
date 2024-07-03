@@ -37,27 +37,26 @@ public class LoriTimeVelocity {
 
     private final ProxyServer proxyServer;
 
-    private LoriTimePlugin loriTimePlugin;
-
     private final ArrayList<VelocityCommand> commands;
 
     private final Metrics.Factory metricsFactory;
 
+    private LoriTimePlugin loriTimePlugin;
+
     @Inject
     public LoriTimeVelocity(ProxyServer server, Logger logger, @DataDirectory Path dataDirectory, Metrics.Factory metricsFactory) {
-        this.dataDirectory = dataDirectory;
-        this.logger = new VelocityLogger(logger);
-        this.metricsFactory = metricsFactory;
         this.proxyServer = server;
+        this.logger = new VelocityLogger(logger);
+        this.dataDirectory = dataDirectory;
+        this.metricsFactory = metricsFactory;
         this.commands = new ArrayList<>();
-
     }
 
     @Subscribe
     public void onInitialize(ProxyInitializeEvent event) {
         VelocityServer velocityServer = new VelocityServer();
         this.loriTimePlugin = new LoriTimePlugin(logger, dataDirectory.toFile(), new VelocityScheduleAdapter(this, proxyServer.getScheduler()), velocityServer);
-        velocityServer.enable(loriTimePlugin, proxyServer);
+        velocityServer.enable(proxyServer);
         try {
             loriTimePlugin.enable();
             LoriTimeAPI.setPlugin(loriTimePlugin);
@@ -76,7 +75,7 @@ public class LoriTimeVelocity {
         }
         enableRemainingFeatures();
 
-//        new VelocityMetrics(loriTimePlugin, metricsFactory.make(this, 22484));
+        metricsFactory.make(this, 22484);
     }
 
     private void enableAsMaster() {

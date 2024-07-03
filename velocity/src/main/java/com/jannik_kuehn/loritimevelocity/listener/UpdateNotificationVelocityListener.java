@@ -16,7 +16,7 @@ public class UpdateNotificationVelocityListener {
 
     @Subscribe
     public void onPostLogin(PostLoginEvent event) {
-        CommonSender sender = new VelocitySender(loriTime, event.getPlayer());
+        CommonSender sender = new VelocitySender(event.getPlayer());
         loriTime.getScheduler().runAsyncOnceLater(1L, () -> loriTime.getUpdateCheck().playerUpdateNotification(sender));
     }
 }

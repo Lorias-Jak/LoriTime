@@ -115,7 +115,10 @@ public class DataStorageManager {
     private void loadFileStorage() {
         File directory = new File(dataFolder.toString() + "/data/");
         if (!directory.exists()) {
-            directory.mkdir();
+            boolean created = directory.mkdir();
+            if (!created) {
+                log.severe("Exception while creating the data directory. Could not create data directory for saving player data!");
+            }
         }
 
         Configuration nameFile = loriTime.getOrCreateFile(dataFolder + "/data/", "names.yml", false);
@@ -124,7 +127,7 @@ public class DataStorageManager {
         this.timeStorage = new AccumulatingTimeStorage(new FileTimeStorage(new FileStorageProvider(timeFile)));
     }
 
-    private void loadDatabaseStorage() throws StorageException {
+    private void loadDatabaseStorage() {
         DatabaseStorage databaseStorage = new DatabaseStorage(loriTime.getConfig(), loriTime);
         this.nameStorage = databaseStorage;
         this.timeStorage = new AccumulatingTimeStorage(databaseStorage);

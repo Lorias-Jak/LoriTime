@@ -1,6 +1,5 @@
 package com.jannik_kuehn.loritimevelocity.util;
 
-import com.jannik_kuehn.common.LoriTimePlugin;
 import com.jannik_kuehn.common.api.LoriTimePlayer;
 import com.jannik_kuehn.common.api.common.CommonSender;
 import com.jannik_kuehn.common.api.common.CommonServer;
@@ -13,8 +12,6 @@ import java.util.Optional;
 import java.util.UUID;
 
 public class VelocityServer implements CommonServer {
-    private LoriTimePlugin plugin;
-
     private ProxyServer server;
 
     private String serverMode;
@@ -23,8 +20,7 @@ public class VelocityServer implements CommonServer {
         // Empty
     }
 
-    public void enable(LoriTimePlugin plugin, ProxyServer server) {
-        this.plugin = plugin;
+    public void enable(ProxyServer server) {
         this.server = server;
     }
 

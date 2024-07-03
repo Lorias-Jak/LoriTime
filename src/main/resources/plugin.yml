@@ -1,6 +1,0 @@
-main: '${basePackage}.bukkit.LoriTimeBukkit'
-name: '${name}'
-version: '${version}'
-api-version: '1.20'
-author: 'Lorias-Jak'
-website: 'https://github.com/Lorias-Jak/LoriTime'

@@ -1,11 +1,8 @@
 package com.jannik_kuehn.common.utils;
 
 import java.util.UUID;
-import java.util.regex.Pattern;
 
 public final class UuidUtil {
-
-    public static final Pattern UUID_PATTERN = Pattern.compile("([0-9a-f]{8})-?([0-9a-f]{4})-?([0-9a-f]{4})-?([0-9a-f]{4})-?([0-9a-f]{12})", Pattern.CASE_INSENSITIVE);
 
     public static byte[] toBytes(final UUID id) {
         final byte[] result = new byte[16];

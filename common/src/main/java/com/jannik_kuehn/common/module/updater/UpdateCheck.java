@@ -96,13 +96,13 @@ public class UpdateCheck {
     }
 
     /**
-     * Sends an update notification if an update is available, the sender has the permission
+     * Sends an update notification if an update is available, the sender has the permission,
      * and the update check is enabled.
      *
      * @param sender The {@link CommonSender} to send the update notification.
      */
     public void sendUpdateNotification(final CommonSender sender) {
-        if (hasUpdate() && hasPermission(sender) && isUpdateCheckEnabled) {
+        if (hasUpdate(newVersion) && hasPermission(sender) && isUpdateCheckEnabled) {
             sender.sendMessage(getMessage());
         }
     }
@@ -117,7 +117,7 @@ public class UpdateCheck {
         final JsonObject latestVersionInfo = jsonArray.get(0).getAsJsonObject();
         newVersion = latestVersionInfo.get("version_number").getAsString();
 
-        if (!hasUpdate()) {
+        if (!hasUpdate(newVersion)) {
             log.info("You are using the latest version of LoriTime!");
             return;
         }
@@ -156,8 +156,8 @@ public class UpdateCheck {
         );
     }
 
-    private boolean hasUpdate() {
-        return !currentVersion.equalsIgnoreCase(newVersion);
+    private boolean hasUpdate(final String newVersion) {
+        return VersionUtil.isNewerVersion(currentVersion, newVersion);
     }
 
     private boolean hasPermission(final CommonSender sender) {

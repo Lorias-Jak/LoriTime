@@ -18,7 +18,7 @@ public abstract class AfkHandling {
 
     protected boolean autoKickEnabled;
 
-    public AfkHandling(LoriTimePlugin plugin) {
+    public AfkHandling(final LoriTimePlugin plugin) {
         this.loriTimePlugin = plugin;
         reloadConfigValues();
     }
@@ -33,17 +33,17 @@ public abstract class AfkHandling {
         autoKickEnabled = loriTimePlugin.getConfig().getBoolean("afk.autoKick", true);
     }
 
-    protected boolean hasPermission(LoriTimePlayer loriTimePlayer, String permission) {
-        Optional<CommonSender> optionalPlayer = loriTimePlugin.getServer().getPlayer(loriTimePlayer.getUniqueId());
+    protected boolean hasPermission(final LoriTimePlayer loriTimePlayer, final String permission) {
+        final Optional<CommonSender> optionalPlayer = loriTimePlugin.getServer().getPlayer(loriTimePlayer.getUniqueId());
         if (optionalPlayer.isEmpty()) {
             return false;
         }
-        CommonSender player = optionalPlayer.get();
+        final CommonSender player = optionalPlayer.get();
         return player.hasPermission(permission);
     }
 
-    protected void sendKickAnnounce(LoriTimePlayer player, long timeToRemove, String permission) {
-        for (CommonSender onlinePlayer : loriTimePlugin.getServer().getOnlinePlayers()) {
+    protected void sendKickAnnounce(final LoriTimePlayer player, final long timeToRemove, final String permission) {
+        for (final CommonSender onlinePlayer : loriTimePlugin.getServer().getOnlinePlayers()) {
             if (!onlinePlayer.hasPermission(permission)) {
                 continue;
             }
@@ -55,8 +55,8 @@ public abstract class AfkHandling {
         }
     }
 
-    protected void chatAnnounce(LoriTimePlayer player, String message, String permission) {
-        for (CommonSender onlinePlayer : loriTimePlugin.getServer().getOnlinePlayers()) {
+    protected void chatAnnounce(final LoriTimePlayer player, final String message, final String permission) {
+        for (final CommonSender onlinePlayer : loriTimePlugin.getServer().getOnlinePlayers()) {
             if (!onlinePlayer.hasPermission(permission)) {
                 continue;
             }
@@ -67,13 +67,13 @@ public abstract class AfkHandling {
         }
     }
 
-    protected void selfAfkMessage(LoriTimePlayer player, String message) {
+    protected void selfAfkMessage(final LoriTimePlayer player, final String message) {
         loriTimePlugin.getServer().getPlayer(player.getUniqueId()).get().sendMessage(loriTimePlugin.getLocalization().formatTextComponent(
                 loriTimePlugin.getLocalization().getRawMessage(message)));
     }
 
-    protected boolean isOnline(UUID uuid) {
-        Optional<CommonSender> optionalPlayer = loriTimePlugin.getServer().getPlayer(uuid);
+    protected boolean isOnline(final UUID uuid) {
+        final Optional<CommonSender> optionalPlayer = loriTimePlugin.getServer().getPlayer(uuid);
         return optionalPlayer.isPresent();
     }
 }

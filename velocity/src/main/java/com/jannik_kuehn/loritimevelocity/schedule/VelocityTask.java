@@ -7,7 +7,7 @@ public class VelocityTask implements PluginTask {
 
     private final ScheduledTask task;
 
-    public VelocityTask(ScheduledTask task) {
+    public VelocityTask(final ScheduledTask task) {
         this.task = task;
     }
 

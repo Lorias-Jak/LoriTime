@@ -11,18 +11,18 @@ public class PlayerNameBungeeListener implements Listener {
 
     private final LoriTimePlugin plugin;
 
-    public PlayerNameBungeeListener(LoriTimePlugin plugin) {
+    public PlayerNameBungeeListener(final LoriTimePlugin plugin) {
         this.plugin = plugin;
     }
 
     @EventHandler
-    public void onPostLogin(PostLoginEvent event) {
+    public void onPostLogin(final PostLoginEvent event) {
         final UUID uuid = event.getPlayer().getUniqueId();
         final String name = event.getPlayer().getName();
         plugin.getScheduler().runAsyncOnce(() -> {
             try {
                 plugin.getNameStorage().setEntry(uuid, name, true);
-            } catch (Exception ex) {
+            } catch (final Exception ex) {
                 plugin.getLogger().warning("could not save player name and uuid " + name, ex);
             }
         });

@@ -20,7 +20,7 @@ public class AfkStatusProvider {
 
     private long afkConfigTime;
 
-    public AfkStatusProvider(LoriTimePlugin loriTimePlugin, AfkHandling afkHandling) {
+    public AfkStatusProvider(final LoriTimePlugin loriTimePlugin, final AfkHandling afkHandling) {
         this.plugin = loriTimePlugin;
         this.afkCheckedPlayers = new ConcurrentHashMap<>();
         this.afkPlayerHandling = afkHandling;
@@ -31,7 +31,7 @@ public class AfkStatusProvider {
 
     public void reloadConfigValues() {
         afkPlayerHandling.reloadConfigValues();
-        OptionalLong afkConfigOptional = plugin.getParser().parseToSeconds(plugin.getConfig().getString("afk.after", "15m"));
+        final OptionalLong afkConfigOptional = plugin.getParser().parseToSeconds(plugin.getConfig().getString("afk.after", "15m"));
         if (afkConfigOptional.isEmpty()) {
             plugin.getLogger().severe("Can not start the afk-check. No valid afk-config-value present! Skipping the process...");
             return;
@@ -41,7 +41,7 @@ public class AfkStatusProvider {
 
     public void restartAfkCheck() {
         stopAfkCheck();
-        boolean afkEnabled = plugin.getConfig().getBoolean("afk.enabled", false);
+        final boolean afkEnabled = plugin.getConfig().getBoolean("afk.enabled", false);
         if (afkEnabled) {
             startAfkCheck();
         }
@@ -52,7 +52,7 @@ public class AfkStatusProvider {
             plugin.getLogger().severe("afk.after time needs to be at least 1! Disabling afk feature...");
             return;
         }
-        int repeatTime = plugin.getConfig().getInt("afk.repeatCheck", 30);
+        final int repeatTime = plugin.getConfig().getInt("afk.repeatCheck", 30);
         afkCheck = plugin.getScheduler().scheduleAsync(repeatTime / 2L, repeatTime, this::repeatedTimeCheck);
     }
 
@@ -65,10 +65,10 @@ public class AfkStatusProvider {
 
     private void repeatedTimeCheck() {
         final HashMap<LoriTimePlayer, Long> playersToCheck = new HashMap<>(afkCheckedPlayers);
-        for (Map.Entry<LoriTimePlayer, Long> entry : playersToCheck.entrySet()) {
-            LoriTimePlayer player = entry.getKey();
-            long playerAfkTime = entry.getValue();
-            long currentTime = System.currentTimeMillis();
+        for (final Map.Entry<LoriTimePlayer, Long> entry : playersToCheck.entrySet()) {
+            final LoriTimePlayer player = entry.getKey();
+            final long playerAfkTime = entry.getValue();
+            final long currentTime = System.currentTimeMillis();
             if (plugin.getServer().getPlayer(player.getUniqueId()).isEmpty()) {
                 afkCheckedPlayers.remove(player);
                 continue;
@@ -78,14 +78,14 @@ public class AfkStatusProvider {
             }
             if (currentTime - playerAfkTime >= afkConfigTime) {
                 getRealPlayer(player).setAFk(true);
-                long timeToRemove = (currentTime - playerAfkTime) / 1000L;
+                final long timeToRemove = (currentTime - playerAfkTime) / 1000L;
                 afkPlayerHandling.executePlayerAfk(player, timeToRemove);
             }
         }
 
     }
 
-    public void resetTimer(LoriTimePlayer player) {
+    public void resetTimer(final LoriTimePlayer player) {
         if (player.isAfk()) {
             player.setAFk(false);
             afkPlayerHandling.executePlayerResume(player);
@@ -95,9 +95,9 @@ public class AfkStatusProvider {
         afkCheckedPlayers.put(player, System.currentTimeMillis());
     }
 
-    public LoriTimePlayer getRealPlayer(LoriTimePlayer player) {
+    public LoriTimePlayer getRealPlayer(final LoriTimePlayer player) {
         LoriTimePlayer playerToReturn = player;
-        for (LoriTimePlayer loriTimePlayer : afkCheckedPlayers.keySet()) {
+        for (final LoriTimePlayer loriTimePlayer : afkCheckedPlayers.keySet()) {
             if (player.equals(loriTimePlayer)) {
                 playerToReturn = loriTimePlayer;
             }
@@ -105,7 +105,7 @@ public class AfkStatusProvider {
         return playerToReturn;
     }
 
-    public void playerLeft(LoriTimePlayer player) {
+    public void playerLeft(final LoriTimePlayer player) {
         afkCheckedPlayers.remove(player);
     }
 
@@ -113,8 +113,8 @@ public class AfkStatusProvider {
         return afkPlayerHandling;
     }
 
-    public void setPlayerAfk(LoriTimePlayer player) {
-        LoriTimePlayer target = getRealPlayer(player);
+    public void setPlayerAfk(final LoriTimePlayer player) {
+        final LoriTimePlayer target = getRealPlayer(player);
         if (!target.isAfk()) {
             target.setAFk(true);
             afkPlayerHandling.executePlayerAfk(target, 0);

@@ -16,36 +16,34 @@ public class LoriTimePlaceholder extends PlaceholderExpansion {
 
     private final LoriTimePlugin plugin;
 
-    public LoriTimePlaceholder(LoriTimePlugin plugin) {
+    public LoriTimePlaceholder(final LoriTimePlugin plugin) {
         super();
         this.plugin = plugin;
     }
 
     @Override
     public String onRequest(final OfflinePlayer player, @NotNull final String params) {
-        switch (params) {
-            case "unformatted_onlinetime":
-                return String.valueOf(getUnformattedOnlineTime(player));
-            case "formatted_onlinetime":
-                return getFormattedOnlineTime(player);
-            case "afk":
+        return switch (params) {
+            case "unformatted_onlinetime" -> String.valueOf(getUnformattedOnlineTime(player));
+            case "formatted_onlinetime" -> getFormattedOnlineTime(player);
+            case "afk" -> {
                 if (plugin.isAfkEnabled()) {
-                    return String.valueOf(plugin.getAfkStatusProvider().getRealPlayer(new LoriTimePlayer(player.getUniqueId(), player.getName())).isAfk());
+                    yield String.valueOf(plugin.getAfkStatusProvider().getRealPlayer(new LoriTimePlayer(player.getUniqueId(), player.getName())).isAfk());
                 }
-                return "Feature not enabled!";
-            default:
-                return "Nothing Found";
-        }
+                yield "Feature not enabled!";
+            }
+            default -> "Nothing Found";
+        };
     }
 
     private long getUnformattedOnlineTime(final OfflinePlayer player) {
         long onlineTime = 0;
         try {
-            OptionalLong optionalLong = plugin.getTimeStorage().getTime(player.getUniqueId());
+            final OptionalLong optionalLong = plugin.getTimeStorage().getTime(player.getUniqueId());
             if (optionalLong.isPresent()) {
                 onlineTime = optionalLong.getAsLong();
             }
-        } catch (StorageException e) {
+        } catch (final StorageException e) {
             plugin.getLogger().error("Error while getting the online time placeholder of player " + player.getName(), e);
         }
         return onlineTime;

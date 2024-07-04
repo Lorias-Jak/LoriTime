@@ -11,7 +11,7 @@ import java.util.UUID;
 public class VelocitySender implements CommonSender {
     private final CommandSource source;
 
-    public VelocitySender(CommandSource source) {
+    public VelocitySender(final CommandSource source) {
         this.source = source;
     }
 
@@ -26,17 +26,17 @@ public class VelocitySender implements CommonSender {
     }
 
     @Override
-    public boolean hasPermission(String permission) {
+    public boolean hasPermission(final String permission) {
         return source.hasPermission(permission);
     }
 
     @Override
-    public void sendMessage(String message) {
+    public void sendMessage(final String message) {
         source.sendMessage(LegacyComponentSerializer.legacy('&').deserialize(message));
     }
 
     @Override
-    public void sendMessage(TextComponent message) {
+    public void sendMessage(final TextComponent message) {
         source.sendMessage(message);
     }
 

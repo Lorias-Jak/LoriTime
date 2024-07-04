@@ -28,16 +28,16 @@ public class LoriTimeBungee extends Plugin {
 
     @Override
     public void onEnable() {
-        CommonLogger logger = new BungeeLogger(getProxy().getLogger());
-        BungeeScheduleAdapter scheduleAdapter = new BungeeScheduleAdapter(this, getProxy().getScheduler());
-        BungeeServer bungeeServer = new BungeeServer();
+        final CommonLogger logger = new BungeeLogger(getProxy().getLogger());
+        final BungeeScheduleAdapter scheduleAdapter = new BungeeScheduleAdapter(this, getProxy().getScheduler());
+        final BungeeServer bungeeServer = new BungeeServer();
         this.loriTimePlugin = new LoriTimePlugin(logger, this.getDataFolder(), scheduleAdapter, bungeeServer);
         bungeeServer.enable(getProxy());
         audiences = BungeeAudiences.create(this);
         try {
             loriTimePlugin.enable();
             LoriTimeAPI.setPlugin(loriTimePlugin);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             loriTimePlugin.disable();
             logger.warning("Error while enabling the plugin! Disabling the plugin...", e);
             return;
@@ -56,7 +56,7 @@ public class LoriTimeBungee extends Plugin {
     }
 
     private void enableAsMaster() {
-        PluginManager pluginManager = getProxy().getPluginManager();
+        final PluginManager pluginManager = getProxy().getPluginManager();
         pluginManager.registerListener(this, new PlayerNameBungeeListener(loriTimePlugin));
         pluginManager.registerListener(this, new TimeAccumulatorBungeeListener(loriTimePlugin));
         pluginManager.registerListener(this, new UpdateNotificationBungeeListener(loriTimePlugin, audiences));

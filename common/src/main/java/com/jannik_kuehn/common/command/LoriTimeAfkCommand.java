@@ -17,13 +17,13 @@ public class LoriTimeAfkCommand implements CommonCommand {
 
     private final Localization localization;
 
-    public LoriTimeAfkCommand(LoriTimePlugin plugin, Localization localization) {
+    public LoriTimeAfkCommand(final LoriTimePlugin plugin, final Localization localization) {
         this.plugin = plugin;
         this.localization = localization;
     }
 
     @Override
-    public void execute(CommonSender sender, String... arguments) {
+    public void execute(final CommonSender sender, final String... arguments) {
         if (!sender.hasPermission("loritime.afk")) {
             printUtilityMessage(sender, "message.nopermission");
             return;
@@ -32,15 +32,15 @@ public class LoriTimeAfkCommand implements CommonCommand {
             return;
         }
         plugin.getScheduler().runAsyncOnce(() -> {
-            LoriTimePlayer player = new LoriTimePlayer(sender.getUniqueId(), sender.getName());
+            final LoriTimePlayer player = new LoriTimePlayer(sender.getUniqueId(), sender.getName());
             plugin.getAfkStatusProvider().setPlayerAfk(player);
         });
     }
 
     @Override
-    public List<String> handleTabComplete(CommonSender source, String... args) {
-        List<String> result = new ArrayList<>();
-        for (CommonSender onlinePlayer : plugin.getServer().getOnlinePlayers()) {
+    public List<String> handleTabComplete(final CommonSender source, final String... args) {
+        final List<String> result = new ArrayList<>();
+        for (final CommonSender onlinePlayer : plugin.getServer().getOnlinePlayers()) {
             result.add(onlinePlayer.getName());
         }
         if (args.length == 0) {
@@ -70,7 +70,7 @@ public class LoriTimeAfkCommand implements CommonCommand {
         return "afk";
     }
 
-    private void printUtilityMessage(CommonSender sender, String messageKey) {
+    private void printUtilityMessage(final CommonSender sender, final String messageKey) {
         sender.sendMessage(localization.formatTextComponent(localization.getRawMessage(messageKey)));
     }
 }

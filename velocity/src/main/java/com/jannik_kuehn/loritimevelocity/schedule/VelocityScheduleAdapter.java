@@ -12,13 +12,13 @@ public class VelocityScheduleAdapter implements PluginScheduler {
 
     private final Scheduler scheduler;
 
-    public VelocityScheduleAdapter(LoriTimeVelocity plugin, Scheduler scheduler) {
+    public VelocityScheduleAdapter(final LoriTimeVelocity plugin, final Scheduler scheduler) {
         this.plugin = plugin;
         this.scheduler = scheduler;
     }
 
     @Override
-    public PluginTask runAsyncOnce(Runnable task) {
+    public PluginTask runAsyncOnce(final Runnable task) {
         return new VelocityTask(
                 scheduler.buildTask(plugin, task)
                         .schedule()
@@ -26,7 +26,7 @@ public class VelocityScheduleAdapter implements PluginScheduler {
     }
 
     @Override
-    public PluginTask runAsyncOnceLater(long delay, Runnable task) {
+    public PluginTask runAsyncOnceLater(final long delay, final Runnable task) {
         return new VelocityTask(
                 scheduler.buildTask(plugin, task)
                         .delay(delay, TimeUnit.SECONDS)
@@ -35,7 +35,7 @@ public class VelocityScheduleAdapter implements PluginScheduler {
     }
 
     @Override
-    public PluginTask scheduleAsync(long delay, long interval, Runnable task) {
+    public PluginTask scheduleAsync(final long delay, final long interval, final Runnable task) {
         return new VelocityTask(
                 scheduler.buildTask(plugin, task)
                         .delay(delay, TimeUnit.SECONDS)
@@ -45,7 +45,7 @@ public class VelocityScheduleAdapter implements PluginScheduler {
     }
 
     @Override
-    public PluginTask scheduleSync(Runnable task) {
+    public PluginTask scheduleSync(final Runnable task) {
         return new VelocityTask(
                 scheduler.buildTask(plugin, task)
                         .schedule()

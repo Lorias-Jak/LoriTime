@@ -10,13 +10,13 @@ public class UpdateNotificationVelocityListener {
 
     private final LoriTimePlugin loriTime;
 
-    public UpdateNotificationVelocityListener(LoriTimePlugin loriTime) {
+    public UpdateNotificationVelocityListener(final LoriTimePlugin loriTime) {
         this.loriTime = loriTime;
     }
 
     @Subscribe
-    public void onPostLogin(PostLoginEvent event) {
-        CommonSender sender = new VelocitySender(event.getPlayer());
+    public void onPostLogin(final PostLoginEvent event) {
+        final CommonSender sender = new VelocitySender(event.getPlayer());
         loriTime.getScheduler().runAsyncOnceLater(1L, () -> loriTime.getUpdateCheck().sendUpdateNotification(sender));
     }
 }

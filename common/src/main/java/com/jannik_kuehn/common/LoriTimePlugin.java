@@ -55,7 +55,7 @@ public class LoriTimePlugin {
 
     private UpdateCheck updateCheck;
 
-    public LoriTimePlugin(CommonLogger logger, File dataFolder, PluginScheduler scheduler, CommonServer server) {
+    public LoriTimePlugin(final CommonLogger logger, final File dataFolder, final PluginScheduler scheduler, final CommonServer server) {
         instance = this;
         this.logger = logger;
         this.dataFolder = dataFolder;
@@ -74,7 +74,7 @@ public class LoriTimePlugin {
         loadOrCreateConfigs();
         try {
             dataStorageManager.loadStorages();
-        } catch (StorageException e) {
+        } catch (final StorageException e) {
             logger.error("An error occurred while enabling the storage", e);
             errorDisable = true;
             return;
@@ -95,7 +95,7 @@ public class LoriTimePlugin {
     }
 
     private String getServerModeFromConfig() {
-        String serverMode;
+        final String serverMode;
         if (!config.getBoolean("multiSetup.enabled", false)) {
             serverMode = "master";
         } else {
@@ -104,7 +104,7 @@ public class LoriTimePlugin {
         return serverMode;
     }
 
-    public void enableAfkFeature(AfkHandling afkHandling) {
+    public void enableAfkFeature(final AfkHandling afkHandling) {
         afkStatusProvider = new AfkStatusProvider(this, afkHandling);
     }
 
@@ -130,16 +130,16 @@ public class LoriTimePlugin {
     }
 
     private void loadOrCreateConfigs() {
-        File directory = new File(dataFolder.toString());
+        final File directory = new File(dataFolder.toString());
         if (!directory.exists()) {
-            boolean created = directory.mkdir();
+            final boolean created = directory.mkdir();
             if (!created) {
                 log.error("Could not create the data folder for plugin.");
             }
         }
 
         this.config = getOrCreateFile(dataFolder.toString(), "config.yml", true);
-        Configuration localizationFile = getOrCreateFile(dataFolder.toString(), config.getString("general.language", "en") + ".yml", true);
+        final Configuration localizationFile = getOrCreateFile(dataFolder.toString(), config.getString("general.language", "en") + ".yml", true);
         this.localization = new Localization(localizationFile);
 
         if (!config.isLoaded() || !localization.getLangFile().isLoaded()) {
@@ -157,13 +157,13 @@ public class LoriTimePlugin {
                     .addUnit(60 * 60 * 24 * 30, getUnits(localization, "month"))
                     .addUnit(60 * 60 * 24 * 30 * 12, getUnits(localization, "year"))
                     .build();
-        } catch (IllegalArgumentException ex) {
+        } catch (final IllegalArgumentException ex) {
             logger.error("Could not create time parser.", ex);
         }
     }
 
-    public Configuration getOrCreateFile(String folder, String fileName, boolean needCopy) {
-        File file = new File(folder, fileName);
+    public Configuration getOrCreateFile(final String folder, final String fileName, final boolean needCopy) {
+        final File file = new File(folder, fileName);
         boolean created = false;
         if (!file.exists()) {
             try {
@@ -172,11 +172,11 @@ public class LoriTimePlugin {
                 if (needCopy) {
                     copyDataFromResource(file.toPath(), fileName);
                 }
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 logger.error("An exception occurred while creating the file '" + fileName + "' on startup.", e);
             }
         }
-        Configuration configurationFile = new YamlConfiguration(file.toString());
+        final Configuration configurationFile = new YamlConfiguration(file.toString());
         if (!configurationFile.isLoaded()) {
             logger.severe("An issue occurred while loading the file '" + fileName + "'. The File is null, there should be data.");
             return null;
@@ -188,22 +188,22 @@ public class LoriTimePlugin {
         return configurationFile;
     }
 
-    private void copyDataFromResource(Path configFile, String nameFromSourceOfReplacement) {
+    private void copyDataFromResource(final Path configFile, final String nameFromSourceOfReplacement) {
         try {
             Files.copy(this.getClass().getClassLoader().getResource(nameFromSourceOfReplacement).openStream(), configFile, StandardCopyOption.REPLACE_EXISTING);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             logger.error("Could not copy the file content to the file '" + nameFromSourceOfReplacement + "'. Pls delete the file and try again.", e);
         }
     }
 
-    private String[] getUnits(Localization langConfig, String unit) {
-        String singular = langConfig.getRawMessage("unit." + unit + ".singular");
-        String plural = langConfig.getRawMessage("unit." + unit + ".plural");
-        List<?> identifier = langConfig.getLangArray("unit." + unit + ".identifier");
-        Set<String> units = new HashSet<>();
+    private String[] getUnits(final Localization langConfig, final String unit) {
+        final String singular = langConfig.getRawMessage("unit." + unit + ".singular");
+        final String plural = langConfig.getRawMessage("unit." + unit + ".plural");
+        final List<?> identifier = langConfig.getLangArray("unit." + unit + ".identifier");
+        final Set<String> units = new HashSet<>();
         units.add(singular);
         units.add(plural);
-        for (Object content : identifier) {
+        for (final Object content : identifier) {
             if (content instanceof String) {
                 units.add((String) content);
             } else {

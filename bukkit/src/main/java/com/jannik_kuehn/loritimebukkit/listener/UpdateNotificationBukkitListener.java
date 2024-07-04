@@ -11,12 +11,12 @@ public class UpdateNotificationBukkitListener implements Listener {
 
     private final LoriTimePlugin loriTime;
 
-    public UpdateNotificationBukkitListener(LoriTimePlugin loriTime) {
+    public UpdateNotificationBukkitListener(final LoriTimePlugin loriTime) {
         this.loriTime = loriTime;
     }
 
     @EventHandler
-    public void onPlayerJoin(PlayerJoinEvent event) {
+    public void onPlayerJoin(final PlayerJoinEvent event) {
         final CommonSender sender = new BukkitPlayer(event.getPlayer());
         loriTime.getScheduler().runAsyncOnceLater(1L, () -> loriTime.getUpdateCheck().sendUpdateNotification(sender));
     }

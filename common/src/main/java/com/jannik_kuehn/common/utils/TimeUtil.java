@@ -10,13 +10,16 @@ import java.util.Objects;
 
 public final class TimeUtil {
 
-    public static String formatTime(long seconds, Localization localization) {
+    private TimeUtil() {
+    }
+
+    public static String formatTime(final long seconds, final Localization localization) {
         Objects.requireNonNull(localization);
 
-        Duration duration = Duration.standardSeconds(seconds);
-        Period period = duration.toPeriodFrom(new org.joda.time.Instant(0)).normalizedStandard();
+        final Duration duration = Duration.standardSeconds(seconds);
+        final Period period = duration.toPeriodFrom(new org.joda.time.Instant(0)).normalizedStandard();
 
-        PeriodFormatter formatter = new PeriodFormatterBuilder()
+        final PeriodFormatter formatter = new PeriodFormatterBuilder()
                 .appendYears()
                 .appendSuffix(getLocalizedUnitString(period.getYears(), localization, "unit.year"))
                 .appendMonths()
@@ -36,12 +39,9 @@ public final class TimeUtil {
         return formatter.print(period).replaceAll("\\s+", " ").trim();
     }
 
-    private static String getLocalizedUnitString(long value, Localization localization, String unitKey) {
-        String unitMessageKey = unitKey + (value == 1 ? ".singular" : ".plural");
-        String unitString = localization.getRawMessage(unitMessageKey);
+    private static String getLocalizedUnitString(final long value, final Localization localization, final String unitKey) {
+        final String unitMessageKey = unitKey + (value == 1 ? ".singular" : ".plural");
+        final String unitString = localization.getRawMessage(unitMessageKey);
         return (value == 0 ? "" : " ") + unitString + (value == 0 ? "" : " ");
-    }
-
-    private TimeUtil() {
     }
 }

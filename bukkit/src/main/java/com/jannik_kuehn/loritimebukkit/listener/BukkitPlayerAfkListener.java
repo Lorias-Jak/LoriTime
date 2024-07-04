@@ -19,63 +19,63 @@ public class BukkitPlayerAfkListener implements Listener {
 
     private final ConcurrentHashMap<UUID, LoriTimePlayer> afkPlayers;
 
-    public BukkitPlayerAfkListener(LoriTimePlugin plugin) {
+    public BukkitPlayerAfkListener(final LoriTimePlugin plugin) {
         this.plugin = plugin;
         this.afkPlayers = new ConcurrentHashMap<>();
     }
 
-    @EventHandler (ignoreCancelled = true)
-    public void onPlayerJoin(PlayerJoinEvent event) {
-        LoriTimePlayer player = new LoriTimePlayer(event.getPlayer().getUniqueId(), event.getPlayer().getName());
+    @EventHandler(ignoreCancelled = true)
+    public void onPlayerJoin(final PlayerJoinEvent event) {
+        final LoriTimePlayer player = new LoriTimePlayer(event.getPlayer().getUniqueId(), event.getPlayer().getName());
         updateAfkStatus(getOrCreatePlayer(event.getPlayer().getUniqueId(), player));
     }
 
-    @EventHandler (ignoreCancelled = true)
-    public void onPlayerQuit(PlayerQuitEvent event) {
-        LoriTimePlayer player = new LoriTimePlayer(event.getPlayer().getUniqueId(), event.getPlayer().getName());
+    @EventHandler(ignoreCancelled = true)
+    public void onPlayerQuit(final PlayerQuitEvent event) {
+        final LoriTimePlayer player = new LoriTimePlayer(event.getPlayer().getUniqueId(), event.getPlayer().getName());
         plugin.getAfkStatusProvider().playerLeft(getOrCreatePlayer(event.getPlayer().getUniqueId(), player));
         afkPlayers.remove(event.getPlayer().getUniqueId());
     }
 
-    @EventHandler (ignoreCancelled = true)
-    public void onPlayerMove(PlayerMoveEvent event) {
+    @EventHandler(ignoreCancelled = true)
+    public void onPlayerMove(final PlayerMoveEvent event) {
         if (event.getFrom().getBlockX() == event.getTo().getBlockX() && event.getFrom().getBlockY() == event.getTo().getBlockY()
                 && event.getFrom().getBlockZ() == event.getTo().getBlockZ()) {
             return;
         }
 
-        LoriTimePlayer player = new LoriTimePlayer(event.getPlayer().getUniqueId(), event.getPlayer().getName());
-        updateAfkStatus(getOrCreatePlayer(event.getPlayer().getUniqueId(), player));
-    }
-
-    @EventHandler (ignoreCancelled = true)
-    public void onPlayerChat(AsyncPlayerChatEvent event) {
-        LoriTimePlayer player = new LoriTimePlayer(event.getPlayer().getUniqueId(), event.getPlayer().getName());
-        updateAfkStatus(getOrCreatePlayer(event.getPlayer().getUniqueId(), player));
-    }
-
-    @EventHandler (ignoreCancelled = true)
-    public void onPlayerInteract(PlayerInteractEvent event) {
-        LoriTimePlayer player = new LoriTimePlayer(event.getPlayer().getUniqueId(), event.getPlayer().getName());
+        final LoriTimePlayer player = new LoriTimePlayer(event.getPlayer().getUniqueId(), event.getPlayer().getName());
         updateAfkStatus(getOrCreatePlayer(event.getPlayer().getUniqueId(), player));
     }
 
     @EventHandler(ignoreCancelled = true)
-    public void onPlayerCommand(PlayerCommandPreprocessEvent event) {
-        if (event.getMessage().equalsIgnoreCase("/afk")) {
-            return;
-        }
-        LoriTimePlayer player = new LoriTimePlayer(event.getPlayer().getUniqueId(), event.getPlayer().getName());
+    public void onPlayerChat(final AsyncPlayerChatEvent event) {
+        final LoriTimePlayer player = new LoriTimePlayer(event.getPlayer().getUniqueId(), event.getPlayer().getName());
         updateAfkStatus(getOrCreatePlayer(event.getPlayer().getUniqueId(), player));
     }
 
-    private void updateAfkStatus(LoriTimePlayer player) {
+    @EventHandler(ignoreCancelled = true)
+    public void onPlayerInteract(final PlayerInteractEvent event) {
+        final LoriTimePlayer player = new LoriTimePlayer(event.getPlayer().getUniqueId(), event.getPlayer().getName());
+        updateAfkStatus(getOrCreatePlayer(event.getPlayer().getUniqueId(), player));
+    }
+
+    @EventHandler(ignoreCancelled = true)
+    public void onPlayerCommand(final PlayerCommandPreprocessEvent event) {
+        if (event.getMessage().equalsIgnoreCase("/afk")) {
+            return;
+        }
+        final LoriTimePlayer player = new LoriTimePlayer(event.getPlayer().getUniqueId(), event.getPlayer().getName());
+        updateAfkStatus(getOrCreatePlayer(event.getPlayer().getUniqueId(), player));
+    }
+
+    private void updateAfkStatus(final LoriTimePlayer player) {
         plugin.getScheduler().runAsyncOnce(() -> {
             plugin.getAfkStatusProvider().resetTimer(player);
         });
     }
 
-    private LoriTimePlayer getOrCreatePlayer(UUID uuid, LoriTimePlayer player) {
+    private LoriTimePlayer getOrCreatePlayer(final UUID uuid, final LoriTimePlayer player) {
         if (afkPlayers.containsKey(uuid)) {
             return afkPlayers.get(uuid);
         }

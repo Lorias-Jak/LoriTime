@@ -12,7 +12,7 @@ public class VelocityPlayer implements CommonSender {
 
     private final UUID uuid;
 
-    public VelocityPlayer(Player player) {
+    public VelocityPlayer(final Player player) {
         this.player = player;
         this.uuid = player.getUniqueId();
     }
@@ -28,17 +28,17 @@ public class VelocityPlayer implements CommonSender {
     }
 
     @Override
-    public boolean hasPermission(String permission) {
+    public boolean hasPermission(final String permission) {
         return player.hasPermission(permission);
     }
 
     @Override
-    public void sendMessage(String message) {
+    public void sendMessage(final String message) {
         LegacyComponentSerializer.legacy('&').deserialize(message);
     }
 
     @Override
-    public void sendMessage(TextComponent message) {
+    public void sendMessage(final TextComponent message) {
         player.sendMessage(message);
     }
 

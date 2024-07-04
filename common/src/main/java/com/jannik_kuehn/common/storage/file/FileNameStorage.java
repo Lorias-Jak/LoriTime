@@ -15,14 +15,14 @@ public class FileNameStorage implements NameStorage {
 
     private final FileStorage storageProvider;
 
-    public FileNameStorage(FileStorage storageProvider) {
+    public FileNameStorage(final FileStorage storageProvider) {
         this.storageProvider = Objects.requireNonNull(storageProvider);
     }
 
     @Override
-    public Optional<UUID> getUuid(String playerName) throws StorageException {
+    public Optional<UUID> getUuid(final String playerName) throws StorageException {
         Objects.requireNonNull(playerName);
-        Object uuid = storageProvider.read(playerName);
+        final Object uuid = storageProvider.read(playerName);
         if (null == uuid) {
             return Optional.empty();
         } else {
@@ -31,8 +31,8 @@ public class FileNameStorage implements NameStorage {
     }
 
     @Override
-    public Optional<String> getName(UUID uniqueId) throws StorageException {
-        String value = Objects.requireNonNull(uniqueId).toString();
+    public Optional<String> getName(final UUID uniqueId) throws StorageException {
+        final String value = Objects.requireNonNull(uniqueId).toString();
         return storageProvider.readAll().entrySet().parallelStream()
                 .filter(entry -> value.equals(entry.getValue()))
                 .findFirst()
@@ -40,25 +40,25 @@ public class FileNameStorage implements NameStorage {
     }
 
     @Override
-    public void setEntry(UUID uuid, String name) throws StorageException {
+    public void setEntry(final UUID uuid, final String name) throws StorageException {
         Objects.requireNonNull(uuid);
         Objects.requireNonNull(name);
         storageProvider.write(name, uuid.toString());
     }
 
     @Override
-    public void setEntry(UUID uniqueId, String name, boolean override) throws StorageException {
+    public void setEntry(final UUID uniqueId, final String name, final boolean override) throws StorageException {
         Objects.requireNonNull(uniqueId);
         Objects.requireNonNull(name);
         storageProvider.write(name, uniqueId.toString(), override);
     }
 
     @Override
-    public void setEntries(Map<UUID, String> entries) throws StorageException {
+    public void setEntries(final Map<UUID, String> entries) throws StorageException {
         Objects.requireNonNull(entries);
-        Map<String, String> data = new HashMap<>();
-        for (Map.Entry<UUID, String> entry : entries.entrySet()) {
-            String previous = data.put(entry.getValue(), entry.getKey().toString());
+        final Map<String, String> data = new HashMap<>();
+        for (final Map.Entry<UUID, String> entry : entries.entrySet()) {
+            final String previous = data.put(entry.getValue(), entry.getKey().toString());
             if (previous != null) {
                 throw new StorageException("duplicate name: " + entry.getValue());
             }

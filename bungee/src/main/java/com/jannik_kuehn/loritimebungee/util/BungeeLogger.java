@@ -9,32 +9,32 @@ public class BungeeLogger implements CommonLogger {
 
     private final Logger logger;
 
-    public BungeeLogger(Logger logger) {
+    public BungeeLogger(final Logger logger) {
         this.logger = logger;
     }
 
     @Override
-    public void info(String s) {
+    public void info(final String s) {
         logger.info(s);
     }
 
     @Override
-    public void warning(String s) {
+    public void warning(final String s) {
         logger.warning(s);
     }
 
     @Override
-    public void warning(String s, Exception e) {
+    public void warning(final String s, final Exception e) {
         logger.log(Level.WARNING, s, e);
     }
 
     @Override
-    public void error(String s, Exception e) {
+    public void error(final String s, final Exception e) {
         logger.log(Level.SEVERE, s, e);
     }
 
     @Override
-    public void severe(String s) {
+    public void severe(final String s) {
         logger.log(Level.SEVERE, s);
     }
 }

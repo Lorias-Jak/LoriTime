@@ -6,32 +6,32 @@ import org.slf4j.Logger;
 public class VelocityLogger implements CommonLogger {
     private final Logger logger;
 
-    public VelocityLogger(Logger logger) {
+    public VelocityLogger(final Logger logger) {
         this.logger = logger;
     }
 
     @Override
-    public void info(String s) {
+    public void info(final String s) {
         logger.info(s);
     }
 
     @Override
-    public void warning(String s) {
+    public void warning(final String s) {
         logger.warn(s);
     }
 
     @Override
-    public void warning(String s, Exception e) {
+    public void warning(final String s, final Exception e) {
         logger.warn(s, e);
     }
 
     @Override
-    public void error(String s, Exception e) {
+    public void error(final String s, final Exception e) {
         logger.error(s, e);
     }
 
     @Override
-    public void severe(String s) {
+    public void severe(final String s) {
         logger.error(s);
     }
 }

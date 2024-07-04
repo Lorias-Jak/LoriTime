@@ -7,7 +7,7 @@ public class BungeeTaskAdapter implements PluginTask {
 
     private final ScheduledTask task;
 
-    public BungeeTaskAdapter(ScheduledTask task) {
+    public BungeeTaskAdapter(final ScheduledTask task) {
         this.task = task;
     }
 

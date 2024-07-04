@@ -20,7 +20,7 @@ public class VelocityCommand implements SimpleCommand {
 
     private CommandMeta meta;
 
-    public VelocityCommand(LoriTimeVelocity velocityPlugin, CommonCommand command) {
+    public VelocityCommand(final LoriTimeVelocity velocityPlugin, final CommonCommand command) {
         this.velocityPlugin = velocityPlugin;
         this.command = command;
 
@@ -28,17 +28,17 @@ public class VelocityCommand implements SimpleCommand {
     }
 
     @Override
-    public void execute(Invocation invocation) {
-        CommandSource commandSource = invocation.source();
-        String[] args = invocation.arguments();
-        CommonSender commonSender = getSender(commandSource);
+    public void execute(final Invocation invocation) {
+        final CommandSource commandSource = invocation.source();
+        final String[] args = invocation.arguments();
+        final CommonSender commonSender = getSender(commandSource);
 
         this.command.execute(commonSender, args);
     }
 
     public List<String> suggest(final Invocation invocation) {
-        CommonSender commandSource = getSender(invocation.source());
-        String[] args = invocation.arguments();
+        final CommonSender commandSource = getSender(invocation.source());
+        final String[] args = invocation.arguments();
         return this.command.handleTabComplete(commandSource, args);
     }
 
@@ -48,7 +48,7 @@ public class VelocityCommand implements SimpleCommand {
     }
 
     private void register() {
-        List<String> aliases = command.getAliases();
+        final List<String> aliases = command.getAliases();
         meta = velocityPlugin.getProxyServer().getCommandManager().metaBuilder(command.getCommandName())
                 .aliases(aliases.toArray(new String[0]))
                 .build();
@@ -56,7 +56,7 @@ public class VelocityCommand implements SimpleCommand {
         velocityPlugin.getProxyServer().getCommandManager().register(meta, this);
     }
 
-    private CommonSender getSender(CommandSource source) {
+    private CommonSender getSender(final CommandSource source) {
         if (source instanceof Player) {
             return new VelocityPlayer((Player) source);
         } else {

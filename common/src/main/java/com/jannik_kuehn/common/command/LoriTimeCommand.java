@@ -22,26 +22,26 @@ public class LoriTimeCommand implements CommonCommand {
 
     private final Localization localization;
 
-    public LoriTimeCommand(LoriTimePlugin plugin, Localization localization) {
+    public LoriTimeCommand(final LoriTimePlugin plugin, final Localization localization) {
         this.plugin = plugin;
         this.localization = localization;
     }
 
     @Override
-    public void execute(CommonSender sender, String... args) {
+    public void execute(final CommonSender sender, final String... args) {
         if (!sender.hasPermission("loritime.see")) {
             printUtilityMessage(sender, "message.nopermission");
             return;
         }
         if (args.length <= 1) {
             plugin.getScheduler().runAsyncOnce(() -> {
-                LoriTimePlayer targetPlayer;
+                final LoriTimePlayer targetPlayer;
 
                 if (args.length == 1) {
-                    Optional<UUID> optionalPlayer;
+                    final Optional<UUID> optionalPlayer;
                     try {
                         optionalPlayer = plugin.getNameStorage().getUuid(args[0]);
-                    } catch (StorageException e) {
+                    } catch (final StorageException e) {
                         throw new RuntimeException(e);
                     }
                     if (optionalPlayer.isPresent()) {
@@ -60,7 +60,7 @@ public class LoriTimeCommand implements CommonCommand {
                     }
                 }
 
-                boolean isTargetSender = targetPlayer.getUniqueId().equals(sender.getUniqueId());
+                final boolean isTargetSender = targetPlayer.getUniqueId().equals(sender.getUniqueId());
                 if (!isTargetSender && !sender.hasPermission("loritime.see.other")) {
                     printUtilityMessage(sender, "message.nopermission");
                     return;
@@ -68,7 +68,7 @@ public class LoriTimeCommand implements CommonCommand {
 
                 final long time;
                 try {
-                    OptionalLong optionalTime = plugin.getTimeStorage().getTime(targetPlayer.getUniqueId());
+                    final OptionalLong optionalTime = plugin.getTimeStorage().getTime(targetPlayer.getUniqueId());
                     if (optionalTime.isPresent()) {
                         time = optionalTime.getAsLong();
                     } else {
@@ -76,7 +76,7 @@ public class LoriTimeCommand implements CommonCommand {
                                 .replace("[player]", plugin.getNameStorage().getName(targetPlayer.getUniqueId()).get())));
                         return;
                     }
-                } catch (StorageException ex) {
+                } catch (final StorageException ex) {
                     plugin.getLogger().warning("could not load online time", ex);
                     printUtilityMessage(sender, "message.error");
                     return;
@@ -89,7 +89,7 @@ public class LoriTimeCommand implements CommonCommand {
                         sender.sendMessage(localization.formatTextComponent(localization.getRawMessage("message.command.loritime.timeseen.other")
                                 .replace("[player]", plugin.getNameStorage().getName(targetPlayer.getUniqueId()).get())
                                 .replace("[time]", TimeUtil.formatTime(time, localization))));
-                    } catch (StorageException e) {
+                    } catch (final StorageException e) {
                         throw new RuntimeException(e);
                     }
                 }
@@ -99,12 +99,12 @@ public class LoriTimeCommand implements CommonCommand {
         }
     }
 
-    private void printUtilityMessage(CommonSender sender, String messageKey) {
+    private void printUtilityMessage(final CommonSender sender, final String messageKey) {
         sender.sendMessage(localization.formatTextComponent(localization.getRawMessage(messageKey)));
     }
 
     @Override
-    public List<String> handleTabComplete(CommonSender source, String... args) {
+    public List<String> handleTabComplete(final CommonSender source, final String... args) {
         if (!source.hasPermission("loritime.see.other")) {
             return new ArrayList<>();
         }
@@ -112,7 +112,7 @@ public class LoriTimeCommand implements CommonCommand {
         List<String> namesList;
         try {
             namesList = new ArrayList<>(plugin.getNameStorage().getNameEntries().stream().toList());
-        } catch (StorageException e) {
+        } catch (final StorageException e) {
             namesList = new ArrayList<>();
             plugin.getLogger().error("Could not load entries from NameStorage for tab completion in LoriTimeAdminCommand!", e);
         }

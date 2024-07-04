@@ -25,20 +25,20 @@ public class BukkitServer implements CommonServer {
         // Empty
     }
 
-    public void enable(LoriTimeBukkit bukkitPlugin) {
+    public void enable(final LoriTimeBukkit bukkitPlugin) {
         this.loriTimePlugin = bukkitPlugin.getPlugin();
         this.server = Bukkit.getServer();
     }
 
     @Override
-    public Optional<CommonSender> getPlayer(UUID uniqueId) {
-        Optional<Player> player = Optional.ofNullable(server.getPlayer(uniqueId));
+    public Optional<CommonSender> getPlayer(final UUID uniqueId) {
+        final Optional<Player> player = Optional.ofNullable(server.getPlayer(uniqueId));
         return Optional.ofNullable(player.map(BukkitPlayer::new).orElse(null));
     }
 
     @Override
-    public Optional<CommonSender> getPlayer(String name) {
-        Optional<Player> player = Optional.ofNullable(server.getPlayer(name));
+    public Optional<CommonSender> getPlayer(final String name) {
+        final Optional<Player> player = Optional.ofNullable(server.getPlayer(name));
         return Optional.ofNullable(player.map(BukkitPlayer::new).orElse(null));
     }
 
@@ -50,17 +50,20 @@ public class BukkitServer implements CommonServer {
     }
 
     @Override
-    public boolean dispatchCommand(CommonSender consoleSender, String command) {
-        CommandSender commandSource;
+    public boolean dispatchCommand(final CommonSender consoleSender, final String command) {
+        final CommandSender commandSource;
         if (consoleSender.isConsole()) {
             commandSource = server.getConsoleSender();
         } else {
-            Player player = server.getPlayer(consoleSender.getName());
+            final Player player = server.getPlayer(consoleSender.getName());
             if (server.getPlayer(consoleSender.getName()) != null) {
                 commandSource = player;
             } else {
                 return false;
             }
+        }
+        if (commandSource == null) {
+            return false;
         }
         server.dispatchCommand(commandSource, command);
         return true;
@@ -82,24 +85,24 @@ public class BukkitServer implements CommonServer {
     }
 
     @Override
-    public void setServerMode(String serverMode) {
+    public void setServerMode(final String serverMode) {
         this.serverMode = serverMode;
     }
 
     @Override
-    public void kickPlayer(LoriTimePlayer loriTimePlayer, TextComponent message) {
-        Optional<UUID> optionalUUID = Optional.ofNullable(loriTimePlayer.getUniqueId());
+    public void kickPlayer(final LoriTimePlayer loriTimePlayer, final TextComponent message) {
+        final Optional<UUID> optionalUUID = Optional.ofNullable(loriTimePlayer.getUniqueId());
         if (optionalUUID.isEmpty()) {
             return;
         }
-        Player player = Bukkit.getServer().getPlayer(optionalUUID.get());
+        final Player player = Bukkit.getServer().getPlayer(optionalUUID.get());
         if (player == null) {
             return;
         }
         loriTimePlugin.getScheduler().scheduleSync(() -> kickPlayer(player, message));
     }
 
-    private void kickPlayer(Player player, TextComponent message) {
+    private void kickPlayer(final Player player, final TextComponent message) {
         player.kick(message);
     }
 }

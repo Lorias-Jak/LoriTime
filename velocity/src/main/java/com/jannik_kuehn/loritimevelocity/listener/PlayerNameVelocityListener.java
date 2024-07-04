@@ -11,19 +11,19 @@ import java.util.UUID;
 public class PlayerNameVelocityListener {
     private final LoriTimePlugin plugin;
 
-    public PlayerNameVelocityListener(LoriTimePlugin plugin) {
+    public PlayerNameVelocityListener(final LoriTimePlugin plugin) {
         this.plugin = plugin;
     }
 
     @Subscribe
-    public void postLogin(PostLoginEvent event) {
-        Player player = event.getPlayer();
+    public void postLogin(final PostLoginEvent event) {
+        final Player player = event.getPlayer();
         final UUID uuid = player.getUniqueId();
         final String name = player.getUsername();
         plugin.getScheduler().runAsyncOnce(() -> {
             try {
                 plugin.getNameStorage().setEntry(uuid, name, true);
-            } catch (StorageException ex) {
+            } catch (final StorageException ex) {
                 plugin.getLogger().warning("could not save player name and uuid " + name, ex);
             }
         });

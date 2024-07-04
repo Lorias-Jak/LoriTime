@@ -20,19 +20,19 @@ public class VelocityServer implements CommonServer {
         // Empty
     }
 
-    public void enable(ProxyServer server) {
+    public void enable(final ProxyServer server) {
         this.server = server;
     }
 
     @Override
-    public Optional<CommonSender> getPlayer(UUID uniqueId) {
-        Optional<Player> player = server.getPlayer(uniqueId);
+    public Optional<CommonSender> getPlayer(final UUID uniqueId) {
+        final Optional<Player> player = server.getPlayer(uniqueId);
         return Optional.ofNullable(player.map(VelocityPlayer::new).orElse(null));
     }
 
     @Override
-    public Optional<CommonSender> getPlayer(String name) {
-        Optional<Player> player = server.getPlayer(name);
+    public Optional<CommonSender> getPlayer(final String name) {
+        final Optional<Player> player = server.getPlayer(name);
         return Optional.ofNullable(player.map(VelocityPlayer::new).orElse(null));
     }
 
@@ -44,8 +44,8 @@ public class VelocityServer implements CommonServer {
     }
 
     @Override
-    public boolean dispatchCommand(CommonSender sender, String command) {
-        CommandSource commandSource;
+    public boolean dispatchCommand(final CommonSender sender, final String command) {
+        final CommandSource commandSource;
         if (sender.isConsole()) {
             commandSource = server.getConsoleCommandSource();
         } else {
@@ -75,17 +75,17 @@ public class VelocityServer implements CommonServer {
     }
 
     @Override
-    public void setServerMode(String serverMode) {
+    public void setServerMode(final String serverMode) {
         this.serverMode = serverMode;
     }
 
     @Override
-    public void kickPlayer(LoriTimePlayer loriTimePlayer, TextComponent message) {
-        Optional<UUID> optionalUUID = Optional.ofNullable(loriTimePlayer.getUniqueId());
+    public void kickPlayer(final LoriTimePlayer loriTimePlayer, final TextComponent message) {
+        final Optional<UUID> optionalUUID = Optional.ofNullable(loriTimePlayer.getUniqueId());
         if (optionalUUID.isEmpty()) {
             return;
         }
-        Optional<Player> optionalPlayer = server.getPlayer(optionalUUID.get());
+        final Optional<Player> optionalPlayer = server.getPlayer(optionalUUID.get());
         if (optionalPlayer.isEmpty()) {
             return;
         }

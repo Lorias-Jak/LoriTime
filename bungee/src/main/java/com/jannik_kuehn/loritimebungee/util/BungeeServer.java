@@ -22,17 +22,17 @@ public class BungeeServer implements CommonServer {
         // Empty
     }
 
-    public void enable(ProxyServer server) {
+    public void enable(final ProxyServer server) {
         this.server = server;
     }
 
     @Override
-    public Optional<CommonSender> getPlayer(UUID uniqueId) {
+    public Optional<CommonSender> getPlayer(final UUID uniqueId) {
         return Optional.of(new BungeePlayer(server.getPlayer(uniqueId)));
     }
 
     @Override
-    public Optional<CommonSender> getPlayer(String name) {
+    public Optional<CommonSender> getPlayer(final String name) {
         return Optional.of(new BungeePlayer(server.getPlayer(name)));
     }
 
@@ -44,8 +44,8 @@ public class BungeeServer implements CommonServer {
     }
 
     @Override
-    public boolean dispatchCommand(CommonSender sender, String command) {
-        CommandSender commandSource;
+    public boolean dispatchCommand(final CommonSender sender, final String command) {
+        final CommandSender commandSource;
         if (sender.isConsole()) {
             commandSource = server.getConsole();
         } else {
@@ -75,17 +75,17 @@ public class BungeeServer implements CommonServer {
     }
 
     @Override
-    public void setServerMode(String serverMode) {
+    public void setServerMode(final String serverMode) {
         this.serverMode = serverMode;
     }
 
     @Override
-    public void kickPlayer(LoriTimePlayer player, TextComponent message) {
-        Optional<UUID> optionalUUID = Optional.ofNullable(player.getUniqueId());
+    public void kickPlayer(final LoriTimePlayer player, final TextComponent message) {
+        final Optional<UUID> optionalUUID = Optional.ofNullable(player.getUniqueId());
         if (optionalUUID.isEmpty()) {
             return;
         }
-        ProxiedPlayer proxiedPlayer = server.getPlayer(player.getUniqueId());
+        final ProxiedPlayer proxiedPlayer = server.getPlayer(player.getUniqueId());
         proxiedPlayer.disconnect(BungeeComponentSerializer.get().serialize(message));
     }
 }

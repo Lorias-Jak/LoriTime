@@ -26,13 +26,13 @@ public class LoriTimeTopCommand implements CommonCommand {
 
     private final Localization localization;
 
-    public LoriTimeTopCommand(LoriTimePlugin plugin, Localization localization) {
+    public LoriTimeTopCommand(final LoriTimePlugin plugin, final Localization localization) {
         this.plugin = plugin;
         this.localization = localization;
     }
 
     @Override
-    public void execute(CommonSender sender, String... args) {
+    public void execute(final CommonSender sender, final String... args) {
         if (!sender.hasPermission("loritime.top")) {
             printUtilityMessage(sender, "message.nopermission");
             return;
@@ -47,7 +47,7 @@ public class LoriTimeTopCommand implements CommonCommand {
             plugin.getScheduler().runAsyncOnce(() -> {
                 try {
                     topOutput(sender, Integer.parseInt(args[0]));
-                } catch (NumberFormatException e) {
+                } catch (final NumberFormatException e) {
                     printUtilityMessage(sender, "message.command.top.nonumber");
                 }
             });
@@ -56,11 +56,11 @@ public class LoriTimeTopCommand implements CommonCommand {
         printUtilityMessage(sender, "message.command.top.usage");
     }
 
-    private void topOutput(CommonSender sender, int site) {
-        List<Map.Entry<String, Long>> timeEntriesList;
-        Map<String, Long> rawTimeEntries = new HashMap<>();
+    private void topOutput(final CommonSender sender, final int site) {
+        final List<Map.Entry<String, Long>> timeEntriesList;
+        final Map<String, Long> rawTimeEntries = new HashMap<>();
         try {
-            for (Map.Entry<String, ?> allEntry : plugin.getTimeStorage().getAllTimeEntries().entrySet()) {
+            for (final Map.Entry<String, ?> allEntry : plugin.getTimeStorage().getAllTimeEntries().entrySet()) {
                 if (allEntry.getValue() instanceof Long) {
                     rawTimeEntries.put(allEntry.getKey(), (Long) allEntry.getValue());
                 } else if (allEntry.getValue() instanceof Integer) {
@@ -72,12 +72,12 @@ public class LoriTimeTopCommand implements CommonCommand {
                     .stream()
                     .sorted(Map.Entry.<String, Long>comparingByValue().reversed())
                     .collect(Collectors.toList());
-        } catch (StorageException e) {
+        } catch (final StorageException e) {
             throw new RuntimeException(e);
         }
-        int amountOfPlayers = rawTimeEntries.size();
+        final int amountOfPlayers = rawTimeEntries.size();
 
-        int amountOfMaxPages = (int) Math.ceil(amountOfPlayers / PLAYER_AMOUNT_PER_PAGE);
+        final int amountOfMaxPages = (int) Math.ceil(amountOfPlayers / PLAYER_AMOUNT_PER_PAGE);
         if (site < 1 || site > amountOfMaxPages) {
             sender.sendMessage(localization.formatTextComponent(localization.getRawMessage("message.command.top.wrongpage")
                     .replace("[pages]", 1 + " and " + amountOfMaxPages)
@@ -86,9 +86,9 @@ public class LoriTimeTopCommand implements CommonCommand {
         }
         printUtilityMessage(sender, "message.command.top.gatheringdata");
 
-        int minValue;
-        int maxValue;
-        int usedSite;
+        final int minValue;
+        final int maxValue;
+        final int usedSite;
         if (site * 8 > amountOfPlayers && site < amountOfMaxPages) {
             usedSite = 1;
             minValue = 0;
@@ -104,7 +104,7 @@ public class LoriTimeTopCommand implements CommonCommand {
         }
 
         long totalTimeSum = 0;
-        for (Long value : rawTimeEntries.values()) {
+        for (final Long value : rawTimeEntries.values()) {
             totalTimeSum += value;
         }
 
@@ -114,30 +114,30 @@ public class LoriTimeTopCommand implements CommonCommand {
                 .replace("[totalTime]", TimeUtil.formatTime(totalTimeSum, localization))
         ));
         try {
-            NameStorage nameStorage = plugin.getNameStorage();
+            final NameStorage nameStorage = plugin.getNameStorage();
             int place = minValue;
-            for (Map.Entry<String, Long> topEntry : timeEntriesList.subList(minValue, maxValue)) {
+            for (final Map.Entry<String, Long> topEntry : timeEntriesList.subList(minValue, maxValue)) {
                 place++;
-                UUID uuid = UUID.fromString(topEntry.getKey());
-                Optional<String> optionalName = nameStorage.getName(uuid);
+                final UUID uuid = UUID.fromString(topEntry.getKey());
+                final Optional<String> optionalName = nameStorage.getName(uuid);
                 if (optionalName.isEmpty()) {
                     continue;
                 }
 
-                String name = optionalName.get();
+                final String name = optionalName.get();
                 sender.sendMessage(localization.formatTextComponentWithoutPrefix(localization.getRawMessage("message.command.top.user")
                         .replace("[place]", String.valueOf(place))
                         .replace("[player]", name)
                         .replace("[time]", TimeUtil.formatTime(topEntry.getValue(), localization))
                 ));
             }
-        } catch (StorageException e) {
+        } catch (final StorageException e) {
             throw new RuntimeException(e);
         }
     }
 
     @Override
-    public List<String> handleTabComplete(CommonSender source, String... args) {
+    public List<String> handleTabComplete(final CommonSender source, final String... args) {
         return new ArrayList<>();
     }
 
@@ -154,7 +154,7 @@ public class LoriTimeTopCommand implements CommonCommand {
         return "loritimetop";
     }
 
-    private void printUtilityMessage(CommonSender sender, String messageKey) {
+    private void printUtilityMessage(final CommonSender sender, final String messageKey) {
         sender.sendMessage(localization.formatTextComponent(localization.getRawMessage(messageKey)));
     }
 }

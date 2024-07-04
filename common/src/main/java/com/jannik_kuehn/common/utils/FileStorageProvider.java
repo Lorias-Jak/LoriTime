@@ -19,14 +19,14 @@ public class FileStorageProvider implements FileStorage {
 
     private final AtomicBoolean closed;
 
-    public FileStorageProvider(Configuration file) {
+    public FileStorageProvider(final Configuration file) {
         this.storage = file;
         this.rwLock = new ReentrantReadWriteLock();
         this.closed = new AtomicBoolean(false);
     }
 
     @Override
-    public Object read(String path) throws StorageException {
+    public Object read(final String path) throws StorageException {
         Objects.requireNonNull(path);
         checkClosed();
         rwLock.readLock().lock();
@@ -39,15 +39,15 @@ public class FileStorageProvider implements FileStorage {
     }
 
     @Override
-    public Map<String, ?> read(Set<String> paths) throws StorageException {
+    public Map<String, ?> read(final Set<String> paths) throws StorageException {
         Objects.requireNonNull(paths);
         checkClosed();
         rwLock.readLock().lock();
         try {
             checkClosed();
-            Map<String, Object> data = new HashMap<>();
-            for (String key : paths) {
-                Object value = storage.getObject(key);
+            final Map<String, Object> data = new HashMap<>();
+            for (final String key : paths) {
+                final Object value = storage.getObject(key);
                 if (null != value) {
                     data.put(key, value);
                 }
@@ -59,14 +59,14 @@ public class FileStorageProvider implements FileStorage {
     }
 
     @Override
-    public void write(String path, Object data) throws StorageException {
+    public void write(final String path, final Object data) throws StorageException {
         Objects.requireNonNull(path);
         checkClosed();
         rwLock.writeLock().lock();
         try {
             checkClosed();
             storage.setValue(path, data);
-        } catch (StorageException e) {
+        } catch (final StorageException e) {
             throw new StorageException("failed to write data to path: " + path, e);
         } finally {
             rwLock.writeLock().unlock();
@@ -74,15 +74,15 @@ public class FileStorageProvider implements FileStorage {
     }
 
     @Override
-    public void write(String path, Object data, boolean overwrite) throws StorageException {
+    public void write(final String path, final Object data, final boolean overwrite) throws StorageException {
         Objects.requireNonNull(path);
         Objects.requireNonNull(data);
         checkClosed();
         rwLock.writeLock().lock();
         String sameKey = null;
         try {
-            Map<String, Object> all = (Map<String, Object>) storage.getAll();
-            for (Map.Entry<String, Object> entry : all.entrySet()) {
+            final Map<String, Object> all = (Map<String, Object>) storage.getAll();
+            for (final Map.Entry<String, Object> entry : all.entrySet()) {
                 if (entry.getValue().equals(data)) {
                     sameKey = entry.getKey();
                 }
@@ -100,13 +100,13 @@ public class FileStorageProvider implements FileStorage {
     }
 
     @Override
-    public void writeAll(Map<String, ?> data) throws StorageException {
+    public void writeAll(final Map<String, ?> data) throws StorageException {
         Objects.requireNonNull(data);
         checkClosed();
         rwLock.writeLock().lock();
         try {
             checkClosed();
-            for (Map.Entry<String, ?> entry : data.entrySet()) {
+            for (final Map.Entry<String, ?> entry : data.entrySet()) {
                 storage.setValue(entry.getKey(), entry.getValue());
             }
         } finally {
@@ -115,19 +115,19 @@ public class FileStorageProvider implements FileStorage {
     }
 
     @Override
-    public void writeAll(Map<String, ?> data, boolean overwrite) throws StorageException {
+    public void writeAll(final Map<String, ?> data, final boolean overwrite) throws StorageException {
 
     }
 
     @Override
-    public void delete(String path) throws StorageException {
+    public void delete(final String path) throws StorageException {
         Objects.requireNonNull(path);
         checkClosed();
         rwLock.writeLock().lock();
         try {
             checkClosed();
             storage.remove(path);
-        } catch (StorageException e) {
+        } catch (final StorageException e) {
             throw new StorageException("failed to write data to path: " + path, e);
         } finally {
             rwLock.writeLock().unlock();

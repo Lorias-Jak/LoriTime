@@ -31,14 +31,14 @@ public class DataStorageManager {
 
     private PluginTask flushCacheTask;
 
-    public DataStorageManager(LoriTimePlugin loriTime, File dataFolder) {
+    public DataStorageManager(final LoriTimePlugin loriTime, final File dataFolder) {
         this.loriTime = loriTime;
         this.log = loriTime.getLogger();
         this.dataFolder = dataFolder;
         this.externalStorage = false;
     }
 
-    public void injectCustomStorage(NameStorage nameStorage, AccumulatingTimeStorage timeStorage) {
+    public void injectCustomStorage(final NameStorage nameStorage, final AccumulatingTimeStorage timeStorage) {
         if (nameStorage == null || timeStorage == null) {
             log.severe("Custom storage injection failed: nameStorage and timeStorage must not be null!");
             return;
@@ -49,7 +49,7 @@ public class DataStorageManager {
     }
 
     public void startCache() {
-        int saveInterval = loriTime.getConfig().getInt("general.saveInterval");
+        final int saveInterval = loriTime.getConfig().getInt("general.saveInterval");
         flushCacheTask = loriTime.getScheduler().scheduleAsync(saveInterval / 2L, saveInterval, this::flushOnlineTimeCache);
     }
 
@@ -64,7 +64,7 @@ public class DataStorageManager {
             log.info("External storage detected, skipping LoriTime's default storage loading.");
             return;
         }
-        String storageMethod = loriTime.getConfig().getString("general.storage", "file");
+        final String storageMethod = loriTime.getConfig().getString("general.storage", "file");
         switch (storageMethod.toLowerCase(Locale.ROOT)) {
             case "yml" -> loadFileStorage();
             case "sql", "mysql" -> loadDatabaseStorage();
@@ -80,7 +80,7 @@ public class DataStorageManager {
         try {
             closeStorages();
             loadStorages();
-        } catch (StorageException e) {
+        } catch (final StorageException e) {
             log.error("An exception occurred while reloading the storage", e);
         }
     }
@@ -89,14 +89,14 @@ public class DataStorageManager {
         if (nameStorage != null) {
             try {
                 nameStorage.close();
-            } catch (StorageException e) {
+            } catch (final StorageException e) {
                 log.error("An exception occurred while closing the nameStorage", e);
             }
         }
         if (timeStorage != null) {
             try {
                 timeStorage.close();
-            } catch (StorageException e) {
+            } catch (final StorageException e) {
                 log.error("An exception occurred while closing the timeStorage", e);
             }
         }
@@ -107,28 +107,28 @@ public class DataStorageManager {
     public void flushOnlineTimeCache() {
         try {
             timeStorage.flushOnlineTimeCache();
-        } catch (StorageException ex) {
+        } catch (final StorageException ex) {
             log.error("could not flush online time cache", ex);
         }
     }
 
     private void loadFileStorage() {
-        File directory = new File(dataFolder.toString() + "/data/");
+        final File directory = new File(dataFolder.toString() + "/data/");
         if (!directory.exists()) {
-            boolean created = directory.mkdir();
+            final boolean created = directory.mkdir();
             if (!created) {
                 log.severe("Exception while creating the data directory. Could not create data directory for saving player data!");
             }
         }
 
-        Configuration nameFile = loriTime.getOrCreateFile(dataFolder + "/data/", "names.yml", false);
-        Configuration timeFile = loriTime.getOrCreateFile(dataFolder + "/data/", "time.yml", false);
+        final Configuration nameFile = loriTime.getOrCreateFile(dataFolder + "/data/", "names.yml", false);
+        final Configuration timeFile = loriTime.getOrCreateFile(dataFolder + "/data/", "time.yml", false);
         this.nameStorage = new FileNameStorage(new FileStorageProvider(nameFile));
         this.timeStorage = new AccumulatingTimeStorage(new FileTimeStorage(new FileStorageProvider(timeFile)));
     }
 
     private void loadDatabaseStorage() {
-        DatabaseStorage databaseStorage = new DatabaseStorage(loriTime.getConfig(), loriTime);
+        final DatabaseStorage databaseStorage = new DatabaseStorage(loriTime.getConfig(), loriTime);
         this.nameStorage = databaseStorage;
         this.timeStorage = new AccumulatingTimeStorage(databaseStorage);
     }

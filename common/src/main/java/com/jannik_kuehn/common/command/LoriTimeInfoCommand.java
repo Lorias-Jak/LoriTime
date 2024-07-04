@@ -16,22 +16,22 @@ public class LoriTimeInfoCommand implements CommonCommand {
 
     private final Localization localization;
 
-    public LoriTimeInfoCommand(LoriTimePlugin plugin, Localization localization) {
+    public LoriTimeInfoCommand(final LoriTimePlugin plugin, final Localization localization) {
         this.plugin = plugin;
         this.localization = localization;
     }
 
     @Override
-    public void execute(CommonSender sender, String... args) {
+    public void execute(final CommonSender sender, final String... args) {
         if (!sender.hasPermission("loritime.info")) {
             printUtilityMessage(sender, "message.nopermission");
             return;
         }
 
         plugin.getScheduler().runAsyncOnce(() -> {
-            MiniMessage miniMessage = MiniMessage.builder().build();
-            String serverVersion = "<#A4A4A4>Server version: <#FF3232>" + plugin.getServer().getServerVersion();
-            String pluginVersion = "<#A4A4A4>Plugin version: <#FF3232>" + plugin.getPluginVersion();
+            final MiniMessage miniMessage = MiniMessage.builder().build();
+            final String serverVersion = "<#A4A4A4>Server version: <#FF3232>" + plugin.getServer().getServerVersion();
+            final String pluginVersion = "<#A4A4A4>Plugin version: <#FF3232>" + plugin.getPluginVersion();
 
             sender.sendMessage(localization.formatTextComponent("Version Information"));
             sender.sendMessage("");
@@ -41,7 +41,7 @@ public class LoriTimeInfoCommand implements CommonCommand {
     }
 
     @Override
-    public List<String> handleTabComplete(CommonSender source, String... args) {
+    public List<String> handleTabComplete(final CommonSender source, final String... args) {
         return new ArrayList<>();
     }
 
@@ -55,7 +55,7 @@ public class LoriTimeInfoCommand implements CommonCommand {
         return "loritimeinfo";
     }
 
-    private void printUtilityMessage(CommonSender sender, String messageKey) {
+    private void printUtilityMessage(final CommonSender sender, final String messageKey) {
         sender.sendMessage(localization.formatTextComponent(localization.getRawMessage(messageKey)));
     }
 }

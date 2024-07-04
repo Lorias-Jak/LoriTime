@@ -40,9 +40,9 @@ public class MySQL implements Closeable, AutoCloseable {
     private HikariDataSource hikari;
 
     /**
-     * @param config   The {@link Configuration} for the connection
+     * @param config The {@link Configuration} for the connection
      */
-    public MySQL(final Configuration config, LoriTimePlugin plugin) {
+    public MySQL(final Configuration config, final LoriTimePlugin plugin) {
         this.mySqlHost = config.getString("mysql.host", "localhost");
         this.mySqlPort = config.getInt("mysql.port", 3306);
         this.mySqlDatabase = config.getString("mysql.database");

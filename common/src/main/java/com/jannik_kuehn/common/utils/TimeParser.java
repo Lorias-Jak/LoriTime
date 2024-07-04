@@ -17,31 +17,31 @@ public final class TimeParser {
 
     private final Pattern globalPattern;
 
-    private TimeParser(Map<String, Long> units) {
+    private TimeParser(final Map<String, Long> units) {
         this.units = units;
-        String unitRegex = units.keySet().stream().collect(Collectors.joining("|", "(", ")"));
-        String globalRegex = "(" + LONG_PATTERN + "\\s*" + unitRegex + "\\s*)*(" + LONG_PATTERN + ")?";
+        final String unitRegex = units.keySet().stream().collect(Collectors.joining("|", "(", ")"));
+        final String globalRegex = "(" + LONG_PATTERN + "\\s*" + unitRegex + "\\s*)*(" + LONG_PATTERN + ")?";
         this.globalPattern = Pattern.compile(globalRegex);
     }
 
-    public OptionalLong parseToSeconds(String representation) {
-        String raw = representation.trim();
+    public OptionalLong parseToSeconds(final String representation) {
+        final String raw = representation.trim();
         if (!globalPattern.matcher(raw).matches()) {
             return OptionalLong.empty();
         }
         int position = 0;
         long time = 0L;
 
-        Matcher longMatcher = LONG_PATTERN.matcher(raw);
-        Matcher unitMatcher = UNIT_PATTERN.matcher(raw);
+        final Matcher longMatcher = LONG_PATTERN.matcher(raw);
+        final Matcher unitMatcher = UNIT_PATTERN.matcher(raw);
         while (position < raw.length()) {
             longMatcher.find(position);
             position = longMatcher.end();
-            long unitTime = Long.parseLong(longMatcher.group());
+            final long unitTime = Long.parseLong(longMatcher.group());
             if (position < raw.length()) {
                 unitMatcher.find(position);
                 position = unitMatcher.end();
-                long unitFactor = units.get(unitMatcher.group());
+                final long unitFactor = units.get(unitMatcher.group());
                 time += unitTime * unitFactor;
             } else {
                 time += unitTime;
@@ -53,9 +53,9 @@ public final class TimeParser {
     public static class Builder {
         private final Map<String, Long> units = new HashMap<>();
 
-        public Builder addUnit(long inSeconds, String... unitSymbols) {
+        public Builder addUnit(final long inSeconds, final String... unitSymbols) {
             if (unitSymbols != null) {
-                for (String symbol : unitSymbols) {
+                for (final String symbol : unitSymbols) {
                     if (!UNIT_PATTERN.matcher(symbol).matches()) {
                         throw new IllegalArgumentException("invalid unit symbol: " + symbol);
                     }

@@ -30,17 +30,17 @@ public class DatabaseStorage implements NameStorage, TimeStorage {
 
     private final ReadWriteLock poolLock;
 
-    public DatabaseStorage(Configuration config, LoriTimePlugin plugin) {
+    public DatabaseStorage(final Configuration config, final LoriTimePlugin plugin) {
         this.mySQL = new MySQL(config, plugin);
         mySQL.open();
         this.poolLock = new ReentrantReadWriteLock();
 
         try (
                 Connection connection = mySQL.getConnection();
-             Statement statement = connection.createStatement()
+                Statement statement = connection.createStatement()
         ) {
             statement.execute(createTable());
-        } catch (SQLException ex) {
+        } catch (final SQLException ex) {
             plugin.getLogger().error("Error creating table", ex);
         }
     }
@@ -79,7 +79,7 @@ public class DatabaseStorage implements NameStorage, TimeStorage {
     }
 
     @Override
-    public Optional<UUID> getUuid(String name) throws StorageException {
+    public Optional<UUID> getUuid(final String name) throws StorageException {
         Objects.requireNonNull(name);
         poolLock.readLock().lock();
         try {
@@ -87,14 +87,14 @@ public class DatabaseStorage implements NameStorage, TimeStorage {
             try (Connection connection = mySQL.getConnection()) {
                 return getUuid(connection, name);
             }
-        } catch (SQLException ex) {
+        } catch (final SQLException ex) {
             throw new StorageException(ex);
         } finally {
             poolLock.readLock().unlock();
         }
     }
 
-    private Optional<UUID> getUuid(Connection connection, String name) throws SQLException {
+    private Optional<UUID> getUuid(final Connection connection, final String name) throws SQLException {
         try (PreparedStatement getByNameStatement = connection.prepareStatement(getByName())) {
             getByNameStatement.setString(1, name);
             try (ResultSet result = getByNameStatement.executeQuery()) {
@@ -108,7 +108,7 @@ public class DatabaseStorage implements NameStorage, TimeStorage {
     }
 
     @Override
-    public Optional<String> getName(UUID uniqueId) throws StorageException {
+    public Optional<String> getName(final UUID uniqueId) throws StorageException {
         Objects.requireNonNull(uniqueId);
         poolLock.readLock().lock();
         try {
@@ -116,14 +116,14 @@ public class DatabaseStorage implements NameStorage, TimeStorage {
             try (Connection connection = mySQL.getConnection()) {
                 return getName(connection, uniqueId);
             }
-        } catch (SQLException ex) {
+        } catch (final SQLException ex) {
             throw new StorageException(ex);
         } finally {
             poolLock.readLock().unlock();
         }
     }
 
-    private Optional<String> getName(Connection connection, UUID uuid) throws SQLException {
+    private Optional<String> getName(final Connection connection, final UUID uuid) throws SQLException {
         try (PreparedStatement getByUuidStatement = connection.prepareStatement(getByUuid())) {
             getByUuidStatement.setBytes(1, UuidUtil.toBytes(uuid));
             try (ResultSet result = getByUuidStatement.executeQuery()) {
@@ -137,7 +137,7 @@ public class DatabaseStorage implements NameStorage, TimeStorage {
     }
 
     @Override
-    public OptionalLong getTime(UUID uniqueId) throws StorageException {
+    public OptionalLong getTime(final UUID uniqueId) throws StorageException {
         Objects.requireNonNull(uniqueId);
         poolLock.readLock().lock();
         try {
@@ -145,14 +145,14 @@ public class DatabaseStorage implements NameStorage, TimeStorage {
             try (Connection connection = mySQL.getConnection()) {
                 return getOnlineTime(connection, uniqueId);
             }
-        } catch (SQLException ex) {
+        } catch (final SQLException ex) {
             throw new StorageException(ex);
         } finally {
             poolLock.readLock().unlock();
         }
     }
 
-    private OptionalLong getOnlineTime(Connection connection, UUID uuid) throws SQLException {
+    private OptionalLong getOnlineTime(final Connection connection, final UUID uuid) throws SQLException {
         try (PreparedStatement getByUuidStatement = connection.prepareStatement(getByUuid())) {
             getByUuidStatement.setBytes(1, UuidUtil.toBytes(uuid));
             try (ResultSet result = getByUuidStatement.executeQuery()) {
@@ -166,7 +166,7 @@ public class DatabaseStorage implements NameStorage, TimeStorage {
     }
 
     @Override
-    public void addTime(UUID uuid, long additionalTime) throws StorageException {
+    public void addTime(final UUID uuid, final long additionalTime) throws StorageException {
         Objects.requireNonNull(uuid);
         poolLock.readLock().lock();
         try {
@@ -174,23 +174,23 @@ public class DatabaseStorage implements NameStorage, TimeStorage {
             try (Connection connection = mySQL.getConnection()) {
                 addOnlineTime(connection, uuid, additionalTime);
             }
-        } catch (SQLException ex) {
+        } catch (final SQLException ex) {
             throw new StorageException(ex);
         } finally {
             poolLock.readLock().unlock();
         }
     }
 
-    private void addOnlineTime(Connection connection, UUID uuid, long additionalOnlineTime) throws SQLException {
+    private void addOnlineTime(final Connection connection, final UUID uuid, final long additionalOnlineTime) throws SQLException {
         try (PreparedStatement insertOrUpdateEntryStatement = connection.prepareStatement(insertOrUpdateEntry())) {
-            Optional<String> name = getName(connection, uuid);
+            final Optional<String> name = getName(connection, uuid);
             insertOrUpdateEntryParams(insertOrUpdateEntryStatement, uuid, name, additionalOnlineTime);
             insertOrUpdateEntryStatement.executeUpdate();
         }
     }
 
     @Override
-    public void addTimes(Map<UUID, Long> additionalTimes) throws StorageException {
+    public void addTimes(final Map<UUID, Long> additionalTimes) throws StorageException {
         if (additionalTimes == null) {
             return;
         }
@@ -199,19 +199,19 @@ public class DatabaseStorage implements NameStorage, TimeStorage {
             try (Connection connection = mySQL.getConnection()) {
                 addOnlineTimes(connection, additionalTimes);
             }
-        } catch (SQLException ex) {
+        } catch (final SQLException ex) {
             throw new StorageException(ex);
         } finally {
             poolLock.readLock().unlock();
         }
     }
 
-    private void addOnlineTimes(Connection connection, Map<UUID, Long> additionalOnlineTimes) throws SQLException {
+    private void addOnlineTimes(final Connection connection, final Map<UUID, Long> additionalOnlineTimes) throws SQLException {
         try (PreparedStatement insertOrUpdateEntryStatement = connection.prepareStatement(insertOrUpdateEntry())) {
-            for (Map.Entry<UUID, Long> entry : additionalOnlineTimes.entrySet()) {
-                UUID uuid = entry.getKey();
-                Optional<String> name = getName(connection, uuid);
-                long additionalOnlineTime = entry.getValue();
+            for (final Map.Entry<UUID, Long> entry : additionalOnlineTimes.entrySet()) {
+                final UUID uuid = entry.getKey();
+                final Optional<String> name = getName(connection, uuid);
+                final long additionalOnlineTime = entry.getValue();
                 insertOrUpdateEntryParams(insertOrUpdateEntryStatement, uuid, name, additionalOnlineTime);
                 insertOrUpdateEntryStatement.addBatch();
             }
@@ -219,7 +219,7 @@ public class DatabaseStorage implements NameStorage, TimeStorage {
         }
     }
 
-    private void insertOrUpdateEntryParams(PreparedStatement insertOrUpdateEntryStatement, UUID uuid, Optional<String> name, long additionalOnlineTime) throws SQLException {
+    private void insertOrUpdateEntryParams(final PreparedStatement insertOrUpdateEntryStatement, final UUID uuid, final Optional<String> name, final long additionalOnlineTime) throws SQLException {
         insertOrUpdateEntryStatement.setBytes(1, UuidUtil.toBytes(uuid));
         if (name.isPresent()) {
             insertOrUpdateEntryStatement.setString(2, name.get());
@@ -233,7 +233,7 @@ public class DatabaseStorage implements NameStorage, TimeStorage {
     }
 
     @Override
-    public void setEntry(UUID uuid, String name) throws StorageException {
+    public void setEntry(final UUID uuid, final String name) throws StorageException {
         Objects.requireNonNull(uuid);
         Objects.requireNonNull(name);
         poolLock.readLock().lock();
@@ -242,7 +242,7 @@ public class DatabaseStorage implements NameStorage, TimeStorage {
             try (Connection connection = mySQL.getConnection()) {
                 setEntry(connection, uuid, name);
             }
-        } catch (SQLException ex) {
+        } catch (final SQLException ex) {
             throw new StorageException(ex);
         } finally {
             poolLock.readLock().unlock();
@@ -250,12 +250,12 @@ public class DatabaseStorage implements NameStorage, TimeStorage {
     }
 
     @Override
-    public void setEntry(UUID uniqueId, String name, boolean override) throws StorageException {
+    public void setEntry(final UUID uniqueId, final String name, final boolean override) throws StorageException {
         setEntry(uniqueId, name);
     }
 
-    private void setEntry(Connection connection, UUID uuid, String name) throws SQLException {
-        Optional<UUID> oldNameHolder = getUuid(connection, name);
+    private void setEntry(final Connection connection, final UUID uuid, final String name) throws SQLException {
+        final Optional<UUID> oldNameHolder = getUuid(connection, name);
         if (oldNameHolder.filter(oldUuid -> !oldUuid.equals(uuid)).isPresent()) { // name not unique ? update on duplicate uuid
             try (PreparedStatement unsetTakenNameStatement = connection.prepareStatement(unsetTakenName())) {
                 unsetTakenNameStatement.setBytes(1, UuidUtil.toBytes(oldNameHolder.get()));
@@ -273,7 +273,7 @@ public class DatabaseStorage implements NameStorage, TimeStorage {
     }
 
     @Override
-    public void setEntries(Map<UUID, String> entries) throws StorageException {
+    public void setEntries(final Map<UUID, String> entries) throws StorageException {
         if (entries == null) {
             return;
         }
@@ -282,7 +282,7 @@ public class DatabaseStorage implements NameStorage, TimeStorage {
             try (Connection connection = mySQL.getConnection()) {
                 setEntries(connection, entries);
             }
-        } catch (SQLException ex) {
+        } catch (final SQLException ex) {
             throw new StorageException(ex);
         } finally {
             poolLock.readLock().unlock();
@@ -297,17 +297,17 @@ public class DatabaseStorage implements NameStorage, TimeStorage {
             try (Connection connection = mySQL.getConnection()) {
                 return getNameEntries(connection);
             }
-        } catch (SQLException ex) {
+        } catch (final SQLException ex) {
             throw new StorageException(ex);
         } finally {
             poolLock.readLock().unlock();
         }
     }
 
-    private Set<String> getNameEntries(Connection connection) throws SQLException {
+    private Set<String> getNameEntries(final Connection connection) throws SQLException {
         try (PreparedStatement getByUuidStatement = connection.prepareStatement(getAllNameEntries())) {
             try (ResultSet result = getByUuidStatement.executeQuery()) {
-                Set<String> nameSet = new HashSet<>();
+                final Set<String> nameSet = new HashSet<>();
                 while (result.next()) {
                     nameSet.add(result.getString("name"));
                 }
@@ -324,17 +324,17 @@ public class DatabaseStorage implements NameStorage, TimeStorage {
             try (Connection connection = mySQL.getConnection()) {
                 return getAllTimeEntries(connection);
             }
-        } catch (SQLException ex) {
+        } catch (final SQLException ex) {
             throw new StorageException(ex);
         } finally {
             poolLock.readLock().unlock();
         }
     }
 
-    private Map<String, ?> getAllTimeEntries(Connection connection) throws SQLException {
+    private Map<String, ?> getAllTimeEntries(final Connection connection) throws SQLException {
         try (PreparedStatement getByUuidStatement = connection.prepareStatement(getAllEntriesSet())) {
             try (ResultSet result = getByUuidStatement.executeQuery()) {
-                Map<String, Long> test = new HashMap<>();
+                final Map<String, Long> test = new HashMap<>();
                 while (result.next()) {
                     test.put(UuidUtil.fromBytes(result.getBytes("uuid")).toString(), result.getLong("time"));
                 }
@@ -350,13 +350,13 @@ public class DatabaseStorage implements NameStorage, TimeStorage {
         }
     }
 
-    private void setEntries(Connection connection, Map<UUID, String> entries) throws SQLException {
+    private void setEntries(final Connection connection, final Map<UUID, String> entries) throws SQLException {
         try (PreparedStatement unsetTakenNameStatement = connection.prepareStatement(unsetTakenName());
              PreparedStatement insertOrUpdateEntryStatement = connection.prepareStatement(insertOrUpdateEntry())) {
-            for (Map.Entry<UUID, String> entry : entries.entrySet()) {
-                UUID uuid = entry.getKey();
-                String name = entry.getValue();
-                Optional<UUID> oldNameHolder = getUuid(connection, name);
+            for (final Map.Entry<UUID, String> entry : entries.entrySet()) {
+                final UUID uuid = entry.getKey();
+                final String name = entry.getValue();
+                final Optional<UUID> oldNameHolder = getUuid(connection, name);
                 if (oldNameHolder.filter(oldUuid -> !oldUuid.equals(uuid)).isPresent()) { // name not unique ? update on duplicate uuid
                     unsetTakenNameStatement.setBytes(1, UuidUtil.toBytes(oldNameHolder.get()));
                     unsetTakenNameStatement.addBatch();

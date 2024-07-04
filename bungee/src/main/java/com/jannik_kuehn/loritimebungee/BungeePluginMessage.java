@@ -14,16 +14,16 @@ import java.io.IOException;
 public class BungeePluginMessage implements Listener {
     private final LoriTimePlugin loriTimePlugin;
 
-    public BungeePluginMessage(LoriTimeBungee bungeePlugin) {
+    public BungeePluginMessage(final LoriTimeBungee bungeePlugin) {
         this.loriTimePlugin = bungeePlugin.getPlugin();
     }
 
     @EventHandler
-    public void onPluginMessage(PluginMessageEvent event) {
+    public void onPluginMessage(final PluginMessageEvent event) {
         if (!event.getTag().contains("loritime:")) {
             return;
         }
-        if (!(event.getReceiver() instanceof ProxiedPlayer player)) {
+        if (!(event.getReceiver() instanceof final ProxiedPlayer player)) {
             return;
         }
         if (event.isCancelled()) {
@@ -39,7 +39,7 @@ public class BungeePluginMessage implements Listener {
         });
     }
 
-    private void setAfkStatus(byte[] data, LoriTimePlayer player) {
+    private void setAfkStatus(final byte[] data, final LoriTimePlayer player) {
         try (ByteArrayInputStream byteInputStream = new ByteArrayInputStream(data);
              DataInputStream input = new DataInputStream(byteInputStream)) {
 
@@ -53,7 +53,7 @@ public class BungeePluginMessage implements Listener {
                 default:
                     loriTimePlugin.getLogger().warning("received invalid afk status!");
             }
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new RuntimeException(e);
         }
     }

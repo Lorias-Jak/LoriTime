@@ -16,47 +16,47 @@ public class YamlConfiguration extends Configuration {
     }
 
     @Override
-    public String getString(String key) {
+    public String getString(final String key) {
         return (String) keyValueStore.get(key);
     }
 
     @Override
-    public String getString(String key, String def) {
+    public String getString(final String key, final String def) {
         return (String) keyValueStore.get(key, def);
     }
 
     @Override
-    public int getInt(String key) {
+    public int getInt(final String key) {
         return (int) keyValueStore.get(key);
     }
 
     @Override
-    public int getInt(String key, int def) {
+    public int getInt(final String key, final int def) {
         return (int) keyValueStore.get(key, def);
     }
 
     @Override
-    public long getLong(String key) {
+    public long getLong(final String key) {
         return (long) keyValueStore.get(key);
     }
 
     @Override
-    public long getLong(String key, long def) {
+    public long getLong(final String key, final long def) {
         return (long) keyValueStore.get(key, def);
     }
 
     @Override
-    public boolean getBoolean(String key) {
+    public boolean getBoolean(final String key) {
         return (boolean) keyValueStore.get(key);
     }
 
     @Override
-    public boolean getBoolean(String key, boolean def) {
+    public boolean getBoolean(final String key, final boolean def) {
         return (boolean) keyValueStore.get(key, def);
     }
 
     @Override
-    public ArrayList<?> getArrayList(String key) {
+    public ArrayList<?> getArrayList(final String key) {
         return (ArrayList<?>) keyValueStore.get(key);
     }
 
@@ -66,7 +66,7 @@ public class YamlConfiguration extends Configuration {
     }
 
     @Override
-    public Object getObject(String key, Object def) {
+    public Object getObject(final String key, final Object def) {
         return keyValueStore.get(key, def);
     }
 
@@ -91,7 +91,7 @@ public class YamlConfiguration extends Configuration {
     }
 
     @Override
-    public void remove(String key) {
+    public void remove(final String key) {
         keyValueStore.remove(key);
     }
 }

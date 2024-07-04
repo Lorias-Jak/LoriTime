@@ -17,7 +17,7 @@ public class UncheckedStorageException extends RuntimeException {
      * @param cause the {@code StorageException}
      * @throws NullPointerException if the cause is {@code null}
      */
-    public UncheckedStorageException(StorageException cause) {
+    public UncheckedStorageException(final StorageException cause) {
         super(Objects.requireNonNull(cause));
     }
 
@@ -25,10 +25,10 @@ public class UncheckedStorageException extends RuntimeException {
      * Constructs an instance of this class.
      *
      * @param message the detail message, can be null
-     * @param cause the {@code StorageException}
+     * @param cause   the {@code StorageException}
      * @throws NullPointerException if the cause is {@code null}
      */
-    public UncheckedStorageException(String message, StorageException cause) {
+    public UncheckedStorageException(final String message, final StorageException cause) {
         super(message, Objects.requireNonNull(cause));
     }
 
@@ -47,9 +47,9 @@ public class UncheckedStorageException extends RuntimeException {
      *
      * @throws InvalidObjectException if the object is invalid or has a cause that is not an {@code StorageException}
      */
-    private void readObject(ObjectInputStream objectInputStream) throws IOException, ClassNotFoundException {
+    private void readObject(final ObjectInputStream objectInputStream) throws IOException, ClassNotFoundException {
         objectInputStream.defaultReadObject();
-        Throwable cause = super.getCause();
+        final Throwable cause = super.getCause();
         if (!(cause instanceof StorageException)) {
             throw new InvalidObjectException("Cause must be an StorageException");
         }

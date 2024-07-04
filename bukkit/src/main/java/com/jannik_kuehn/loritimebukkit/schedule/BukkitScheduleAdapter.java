@@ -10,28 +10,28 @@ public class BukkitScheduleAdapter implements PluginScheduler {
 
     private final BukkitScheduler scheduler;
 
-    public BukkitScheduleAdapter(LoriTimeBukkit plugin, BukkitScheduler scheduler) {
+    public BukkitScheduleAdapter(final LoriTimeBukkit plugin, final BukkitScheduler scheduler) {
         this.plugin = plugin;
         this.scheduler = scheduler;
     }
 
     @Override
-    public PluginTask runAsyncOnce(Runnable task) {
+    public PluginTask runAsyncOnce(final Runnable task) {
         return new BukkitTaskAdapter(scheduler.runTaskAsynchronously(plugin, task));
     }
 
     @Override
-    public PluginTask runAsyncOnceLater(long delay, Runnable task) {
+    public PluginTask runAsyncOnceLater(final long delay, final Runnable task) {
         return new BukkitTaskAdapter(scheduler.runTaskLater(plugin, task, delay * 20));
     }
 
     @Override
-    public PluginTask scheduleAsync(long delay, long interval, Runnable task) {
+    public PluginTask scheduleAsync(final long delay, final long interval, final Runnable task) {
         return new BukkitTaskAdapter(scheduler.runTaskTimerAsynchronously(plugin, task, delay * 20, interval * 20));
     }
 
     @Override
-    public PluginTask scheduleSync(Runnable task) {
+    public PluginTask scheduleSync(final Runnable task) {
         return new BukkitTaskAdapter(scheduler.runTask(plugin, task));
     }
 }

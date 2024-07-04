@@ -13,13 +13,13 @@ public class BukkitPluginMessanger {
 
     private final LoriTimePlugin loriTimePlugin;
 
-    public BukkitPluginMessanger(LoriTimeBukkit bukkitPlugin) {
+    public BukkitPluginMessanger(final LoriTimeBukkit bukkitPlugin) {
         this.bukkitPlugin = bukkitPlugin;
         this.loriTimePlugin = bukkitPlugin.getPlugin();
     }
 
-    public void sendPluginMessage(PluginMessageRecipient target, String channel, Object... message) {
-        byte[] data = getDataAsByte(message);
+    public void sendPluginMessage(final PluginMessageRecipient target, final String channel, final Object... message) {
+        final byte[] data = getDataAsByte(message);
         if (data != null) {
             target.sendPluginMessage(bukkitPlugin, channel, data);
         } else {
@@ -27,10 +27,10 @@ public class BukkitPluginMessanger {
         }
     }
 
-    private byte[] getDataAsByte(Object... message) {
+    private byte[] getDataAsByte(final Object... message) {
         try (ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
              DataOutputStream out = new DataOutputStream(byteOut)) {
-            for (Object part : message) {
+            for (final Object part : message) {
                 if (part instanceof String) {
                     out.writeUTF((String) part);
                 } else if (part instanceof Integer) {
@@ -48,7 +48,7 @@ public class BukkitPluginMessanger {
                 }
             }
             return byteOut.toByteArray();
-        } catch (IOException e) {
+        } catch (final IOException e) {
             loriTimePlugin.getLogger().warning("could not serialize plugin message", e);
         }
         return null;

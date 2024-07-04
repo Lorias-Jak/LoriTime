@@ -13,16 +13,16 @@ import java.io.IOException;
 public class VelocityPluginMessage {
     private final LoriTimePlugin plugin;
 
-    public VelocityPluginMessage(LoriTimeVelocity velocityPlugin) {
+    public VelocityPluginMessage(final LoriTimeVelocity velocityPlugin) {
         this.plugin = velocityPlugin.getPlugin();
     }
 
     @Subscribe
-    public void onPluginMessage(PluginMessageEvent event) {
+    public void onPluginMessage(final PluginMessageEvent event) {
         if (!event.getIdentifier().getId().contains("loritime:")) {
             return;
         }
-        if (!(event.getTarget() instanceof Player player)) {
+        if (!(event.getTarget() instanceof final Player player)) {
             return;
         }
         if (event.getResult().equals(PluginMessageEvent.ForwardResult.handled())) {
@@ -40,7 +40,7 @@ public class VelocityPluginMessage {
         event.setResult(PluginMessageEvent.ForwardResult.handled());
     }
 
-    private void setAfkStatus(byte[] data, LoriTimePlayer player) {
+    private void setAfkStatus(final byte[] data, final LoriTimePlayer player) {
         try (ByteArrayInputStream byteInputStream = new ByteArrayInputStream(data);
              DataInputStream input = new DataInputStream(byteInputStream)) {
 
@@ -54,7 +54,7 @@ public class VelocityPluginMessage {
                 default:
                     plugin.getLogger().warning("received invalid afk status!");
             }
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new RuntimeException(e);
         }
     }

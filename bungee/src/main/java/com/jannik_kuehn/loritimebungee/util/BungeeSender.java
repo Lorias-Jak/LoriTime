@@ -15,7 +15,7 @@ public class BungeeSender implements CommonSender {
 
     private final CommandSender source;
 
-    public BungeeSender(BungeeAudiences audiences, CommandSender source) {
+    public BungeeSender(final BungeeAudiences audiences, final CommandSender source) {
         this.audiences = audiences;
         this.source = source;
     }
@@ -27,21 +27,21 @@ public class BungeeSender implements CommonSender {
 
     @Override
     public String getName() {
-        return isConsole() ? "CONSOLE" : ((ProxiedPlayer) source).getName();
+        return isConsole() ? "CONSOLE" : source.getName();
     }
 
     @Override
-    public boolean hasPermission(String permission) {
+    public boolean hasPermission(final String permission) {
         return source.hasPermission(permission);
     }
 
     @Override
-    public void sendMessage(String message) {
+    public void sendMessage(final String message) {
         audiences.sender(source).sendMessage(LegacyComponentSerializer.legacy('&').deserialize(message));
     }
 
     @Override
-    public void sendMessage(TextComponent message) {
+    public void sendMessage(final TextComponent message) {
         audiences.sender(source).sendMessage(message);
     }
 

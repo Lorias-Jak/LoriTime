@@ -11,28 +11,28 @@ public class BungeeScheduleAdapter implements PluginScheduler {
 
     private final TaskScheduler scheduler;
 
-    public BungeeScheduleAdapter(LoriTimeBungee plugin, TaskScheduler scheduler) {
+    public BungeeScheduleAdapter(final LoriTimeBungee plugin, final TaskScheduler scheduler) {
         this.plugin = plugin;
         this.scheduler = scheduler;
     }
 
     @Override
-    public PluginTask runAsyncOnce(Runnable task) {
+    public PluginTask runAsyncOnce(final Runnable task) {
         return new BungeeTaskAdapter(scheduler.runAsync(plugin, task));
     }
 
     @Override
-    public PluginTask runAsyncOnceLater(long delay, Runnable task) {
+    public PluginTask runAsyncOnceLater(final long delay, final Runnable task) {
         return new BungeeTaskAdapter(scheduler.schedule(plugin, task, delay, java.util.concurrent.TimeUnit.SECONDS));
     }
 
     @Override
-    public PluginTask scheduleAsync(long delay, long interval, Runnable task) {
+    public PluginTask scheduleAsync(final long delay, final long interval, final Runnable task) {
         return new BungeeTaskAdapter(scheduler.schedule(plugin, task, delay, interval, java.util.concurrent.TimeUnit.SECONDS));
     }
 
     @Override
-    public PluginTask scheduleSync(Runnable task) {
+    public PluginTask scheduleSync(final Runnable task) {
         return new BungeeTaskAdapter(scheduler.runAsync(plugin, task));
     }
 }

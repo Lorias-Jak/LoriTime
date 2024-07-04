@@ -7,7 +7,7 @@ import java.util.Map;
 public abstract class Configuration {
     protected KeyValueStore keyValueStore;
 
-    public Configuration(KeyValueStore keyValueStore) {
+    public Configuration(final KeyValueStore keyValueStore) {
         this.keyValueStore = keyValueStore;
     }
 
@@ -45,7 +45,7 @@ public abstract class Configuration {
 
     public abstract void remove(String key);
 
-    public boolean containsKey(String key) {
+    public boolean containsKey(final String key) {
         return getKeys().contains(key);
     }
 

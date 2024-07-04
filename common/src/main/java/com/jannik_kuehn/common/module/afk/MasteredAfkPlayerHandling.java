@@ -7,12 +7,12 @@ import com.jannik_kuehn.common.utils.TimeUtil;
 
 public class MasteredAfkPlayerHandling extends AfkHandling {
 
-    public MasteredAfkPlayerHandling(LoriTimePlugin plugin) {
+    public MasteredAfkPlayerHandling(final LoriTimePlugin plugin) {
         super(plugin);
     }
 
     @Override
-    public void executePlayerAfk(LoriTimePlayer loriTimePlayer, long timeToRemove) {
+    public void executePlayerAfk(final LoriTimePlayer loriTimePlayer, final long timeToRemove) {
         if (!afkEnabled || !isOnline(loriTimePlayer.getUniqueId())) {
             return;
         }
@@ -21,7 +21,7 @@ public class MasteredAfkPlayerHandling extends AfkHandling {
             try {
                 loriTimePlugin.getTimeStorage().flushOnlineTimeCache();
                 loriTimePlugin.getTimeStorage().addTime(loriTimePlayer.getUniqueId(), -timeToRemove);
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 loriTimePlugin.getLogger().warning("Error while removing online time while afk for player " + loriTimePlayer.getUniqueId(), e);
             }
         }
@@ -41,7 +41,7 @@ public class MasteredAfkPlayerHandling extends AfkHandling {
     }
 
     @Override
-    public void executePlayerResume(LoriTimePlayer loriTimePlayer) {
+    public void executePlayerResume(final LoriTimePlayer loriTimePlayer) {
         if (!afkEnabled || !isOnline(loriTimePlayer.getUniqueId())) {
             return;
         }
@@ -50,20 +50,20 @@ public class MasteredAfkPlayerHandling extends AfkHandling {
         startAccumulatingOnlineTime(loriTimePlayer);
     }
 
-    private void stopAccumulatingAndSaveOnlineTime(LoriTimePlayer loriTimePlayer) {
+    private void stopAccumulatingAndSaveOnlineTime(final LoriTimePlayer loriTimePlayer) {
         final long now = System.currentTimeMillis();
         try {
             loriTimePlugin.getTimeStorage().stopAccumulatingAndSaveOnlineTime(loriTimePlayer.getUniqueId(), now);
-        } catch (StorageException e) {
+        } catch (final StorageException e) {
             loriTimePlugin.getLogger().error("error while stopping accumulation of online time for player " + loriTimePlayer.getName(), e);
         }
     }
 
-    private void startAccumulatingOnlineTime(LoriTimePlayer loriTimePlayer) {
+    private void startAccumulatingOnlineTime(final LoriTimePlayer loriTimePlayer) {
         final long now = System.currentTimeMillis();
         try {
             loriTimePlugin.getTimeStorage().startAccumulating(loriTimePlayer.getUniqueId(), now);
-        } catch (StorageException e) {
+        } catch (final StorageException e) {
             loriTimePlugin.getLogger().error("error while starting accumulation of online time for player " + loriTimePlayer, e);
         }
     }

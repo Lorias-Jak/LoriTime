@@ -9,19 +9,19 @@ public class BukkitSlavedAfkHandling extends AfkHandling {
 
     private final LoriTimeBukkit bukkitPlugin;
 
-    public BukkitSlavedAfkHandling(LoriTimeBukkit bukkitPlugin) {
+    public BukkitSlavedAfkHandling(final LoriTimeBukkit bukkitPlugin) {
         super(bukkitPlugin.getPlugin());
         this.bukkitPlugin = bukkitPlugin;
     }
 
     @Override
-    public void executePlayerAfk(LoriTimePlayer loriTimePlayer, long timeToRemove) {
+    public void executePlayerAfk(final LoriTimePlayer loriTimePlayer, final long timeToRemove) {
         bukkitPlugin.getPluginMessanger().sendPluginMessage(Bukkit.getServer().getPlayer(
                 loriTimePlayer.getUniqueId()), "loritime:afk", "true", timeToRemove);
     }
 
     @Override
-    public void executePlayerResume(LoriTimePlayer loriTimePlayer) {
+    public void executePlayerResume(final LoriTimePlayer loriTimePlayer) {
         bukkitPlugin.getPluginMessanger().sendPluginMessage(Bukkit.getServer().getPlayer(
                 loriTimePlayer.getUniqueId()), "loritime:afk", "false");
     }

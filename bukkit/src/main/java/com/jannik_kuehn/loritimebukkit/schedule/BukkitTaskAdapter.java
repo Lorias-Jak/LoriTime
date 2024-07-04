@@ -7,7 +7,7 @@ public class BukkitTaskAdapter implements PluginTask {
 
     private final BukkitTask task;
 
-    public BukkitTaskAdapter(BukkitTask scheduler) {
+    public BukkitTaskAdapter(final BukkitTask scheduler) {
         this.task = scheduler;
     }
 

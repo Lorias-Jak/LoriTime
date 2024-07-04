@@ -14,14 +14,14 @@ public class UpdateNotificationBungeeListener implements Listener {
 
     private final BungeeAudiences bungeeAudiences;
 
-    public UpdateNotificationBungeeListener(LoriTimePlugin loriTime, BungeeAudiences bungeeAudiences) {
+    public UpdateNotificationBungeeListener(final LoriTimePlugin loriTime, final BungeeAudiences bungeeAudiences) {
         this.loriTime = loriTime;
         this.bungeeAudiences = bungeeAudiences;
     }
 
     @EventHandler
-    public void onPostLogin(PostLoginEvent event) {
-        CommonSender sender = new BungeeSender(bungeeAudiences, event.getPlayer());
+    public void onPostLogin(final PostLoginEvent event) {
+        final CommonSender sender = new BungeeSender(bungeeAudiences, event.getPlayer());
         loriTime.getScheduler().runAsyncOnceLater(1L, () -> loriTime.getUpdateCheck().sendUpdateNotification(sender));
     }
 }

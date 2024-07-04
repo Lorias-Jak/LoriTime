@@ -26,6 +26,7 @@ import org.bstats.velocity.Metrics;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;
+
 import java.nio.file.Path;
 import java.util.ArrayList;
 

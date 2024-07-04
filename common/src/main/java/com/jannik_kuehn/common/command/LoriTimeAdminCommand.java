@@ -25,14 +25,14 @@ public class LoriTimeAdminCommand implements CommonCommand {
 
     private final TimeParser parser;
 
-    public LoriTimeAdminCommand(LoriTimePlugin plugin, Localization localization, TimeParser parser) {
+    public LoriTimeAdminCommand(final LoriTimePlugin plugin, final Localization localization, final TimeParser parser) {
         this.plugin = plugin;
         this.localization = localization;
         this.parser = parser;
     }
 
     @Override
-    public void execute(CommonSender sender, String... args) {
+    public void execute(final CommonSender sender, final String... args) {
         if (!sender.hasPermission("loritime.admin")) {
             printUtilityMessage(sender, "message.nopermission");
             return;
@@ -42,7 +42,7 @@ public class LoriTimeAdminCommand implements CommonCommand {
             return;
         }
         plugin.getScheduler().runAsyncOnce(() -> {
-            String[] subCommandArgs = new String[args.length - 1];
+            final String[] subCommandArgs = new String[args.length - 1];
             System.arraycopy(args, 1, subCommandArgs, 0, subCommandArgs.length);
 
             try {
@@ -53,19 +53,19 @@ public class LoriTimeAdminCommand implements CommonCommand {
                     case "reload" -> reload(sender, subCommandArgs);
                     default -> printUtilityMessage(sender, "message.command.loritimeadmin.usage");
                 }
-            } catch (StorageException e) {
+            } catch (final StorageException e) {
                 plugin.getLogger().error("An exception ocurred during LoriTimeAdminCommand!", e);
             }
         });
     }
 
     @Override
-    public List<String> handleTabComplete(CommonSender source, String... args) {
+    public List<String> handleTabComplete(final CommonSender source, final String... args) {
         if (!source.hasPermission("loritime.admin")) {
             return new ArrayList<>();
         }
         if (args.length == 0) {
-            ArrayList<String> completions = new ArrayList<>();
+            final ArrayList<String> completions = new ArrayList<>();
             completions.add("set");
             completions.add("modify");
             completions.add("add");
@@ -74,7 +74,7 @@ public class LoriTimeAdminCommand implements CommonCommand {
             return completions;
         }
         if (args.length == 1) {
-            ArrayList<String> completions = new ArrayList<>();
+            final ArrayList<String> completions = new ArrayList<>();
             completions.add("set");
             completions.add("modify");
             completions.add("add");
@@ -83,10 +83,10 @@ public class LoriTimeAdminCommand implements CommonCommand {
             return filterCompletion(completions, args[0]);
         }
         if (args.length == 2 && !args[0].equalsIgnoreCase("reload")) {
-            ArrayList<String> completions = new ArrayList<>();
+            final ArrayList<String> completions = new ArrayList<>();
             try {
                 completions.addAll(plugin.getNameStorage().getNameEntries().stream().toList());
-            } catch (StorageException e) {
+            } catch (final StorageException e) {
                 plugin.getLogger().error("Could not load entries from NameStorage for tab completion in LoriTimeAdminCommand!", e);
             }
             return filterCompletion(completions, args[1]);
@@ -112,26 +112,26 @@ public class LoriTimeAdminCommand implements CommonCommand {
         return "loritimeadmin";
     }
 
-    private void set(CommonSender sender, String... args) throws StorageException {
+    private void set(final CommonSender sender, final String... args) throws StorageException {
         if (args.length < 2) {
             printUtilityMessage(sender, "message.command.loritimeadmin.set.usage");
             return;
         }
-        Optional<UUID> optionalUUID = plugin.getNameStorage().getUuid(args[0]);
+        final Optional<UUID> optionalUUID = plugin.getNameStorage().getUuid(args[0]);
         if (optionalUUID.isEmpty()) {
             printMissingUuidMessage(sender, args[0]);
             return;
         }
-        LoriTimePlayer player = new LoriTimePlayer(optionalUUID.get(), args[0]);
+        final LoriTimePlayer player = new LoriTimePlayer(optionalUUID.get(), args[0]);
 
-        String[] timeArgs = new String[args.length - 1];
+        final String[] timeArgs = new String[args.length - 1];
         System.arraycopy(args, 1, timeArgs, 0, timeArgs.length);
-        OptionalLong optionalTime = parser.parseToSeconds(String.join(" ", timeArgs));
+        final OptionalLong optionalTime = parser.parseToSeconds(String.join(" ", timeArgs));
         if (optionalTime.isEmpty()) {
             printNotTimeMessage(sender, timeArgs);
             return;
         }
-        long time = optionalTime.getAsLong();
+        final long time = optionalTime.getAsLong();
 
         if (time < 0) {
             sender.sendMessage(localization.formatTextComponent(localization.getRawMessage("message.command.loritimeadmin.set.negativetime")
@@ -140,9 +140,9 @@ public class LoriTimeAdminCommand implements CommonCommand {
             return;
         }
 
-        long currentTime;
+        final long currentTime;
         try {
-            OptionalLong optionalCurrentTime = plugin.getTimeStorage().getTime(player.getUniqueId());
+            final OptionalLong optionalCurrentTime = plugin.getTimeStorage().getTime(player.getUniqueId());
             if (optionalCurrentTime.isPresent()) {
                 currentTime = optionalCurrentTime.getAsLong();
             } else {
@@ -150,7 +150,7 @@ public class LoriTimeAdminCommand implements CommonCommand {
                         .replace("[player]", player.getName())));
                 return;
             }
-        } catch (StorageException ex) {
+        } catch (final StorageException ex) {
             plugin.getLogger().warning("could not load online time", ex);
             printUtilityMessage(sender, "message.error");
             return;
@@ -164,31 +164,31 @@ public class LoriTimeAdminCommand implements CommonCommand {
                 .replace("[time]", TimeUtil.formatTime(time, localization))));
     }
 
-    private void modify(CommonSender sender, String... args) throws StorageException {
+    private void modify(final CommonSender sender, final String... args) throws StorageException {
         if (args.length < 2) {
             printUtilityMessage(sender, "message.command.loritimeadmin.modify.usage");
             return;
         }
 
-        Optional<UUID> optionalUUID = plugin.getNameStorage().getUuid(args[0]);
+        final Optional<UUID> optionalUUID = plugin.getNameStorage().getUuid(args[0]);
         if (optionalUUID.isEmpty()) {
             printMissingUuidMessage(sender, args[0]);
             return;
         }
-        LoriTimePlayer player = new LoriTimePlayer(optionalUUID.get(), args[0]);
+        final LoriTimePlayer player = new LoriTimePlayer(optionalUUID.get(), args[0]);
 
-        String[] timeArgs = new String[args.length - 1];
+        final String[] timeArgs = new String[args.length - 1];
         System.arraycopy(args, 1, timeArgs, 0, timeArgs.length);
-        OptionalLong optionalTime = parser.parseToSeconds(String.join(" ", timeArgs));
+        final OptionalLong optionalTime = parser.parseToSeconds(String.join(" ", timeArgs));
         if (!optionalTime.isPresent()) {
             printNotTimeMessage(sender, timeArgs);
             return;
         }
 
-        long time = optionalTime.getAsLong();
-        long currentTime;
+        final long time = optionalTime.getAsLong();
+        final long currentTime;
         try {
-            OptionalLong optionalCurrentTime = plugin.getTimeStorage().getTime(player.getUniqueId());
+            final OptionalLong optionalCurrentTime = plugin.getTimeStorage().getTime(player.getUniqueId());
             if (optionalCurrentTime.isPresent()) {
                 currentTime = optionalCurrentTime.getAsLong();
             } else {
@@ -196,7 +196,7 @@ public class LoriTimeAdminCommand implements CommonCommand {
                         .replace("[player]", player.getName())));
                 return;
             }
-        } catch (StorageException ex) {
+        } catch (final StorageException ex) {
             plugin.getLogger().warning("could not load online time", ex);
             printUtilityMessage(sender, "message.error");
             return;
@@ -215,22 +215,22 @@ public class LoriTimeAdminCommand implements CommonCommand {
                 .replace("[time]", TimeUtil.formatTime(time, localization))));
     }
 
-    private void reset(CommonSender sender, String... args) throws StorageException {
+    private void reset(final CommonSender sender, final String... args) throws StorageException {
         if (args.length != 1) {
             printUtilityMessage(sender, "message.command.loritimeadmin.reset.usage");
             return;
         }
 
-        Optional<UUID> optionalUUID = plugin.getNameStorage().getUuid(args[0]);
+        final Optional<UUID> optionalUUID = plugin.getNameStorage().getUuid(args[0]);
         if (optionalUUID.isEmpty()) {
             printMissingUuidMessage(sender, args[0]);
             return;
         }
-        LoriTimePlayer player = new LoriTimePlayer(optionalUUID.get(), args[0]);
+        final LoriTimePlayer player = new LoriTimePlayer(optionalUUID.get(), args[0]);
 
-        long currentTime;
+        final long currentTime;
         try {
-            OptionalLong optionalCurrentTime = plugin.getTimeStorage().getTime(player.getUniqueId());
+            final OptionalLong optionalCurrentTime = plugin.getTimeStorage().getTime(player.getUniqueId());
             if (optionalCurrentTime.isPresent()) {
                 currentTime = optionalCurrentTime.getAsLong();
             } else {
@@ -238,7 +238,7 @@ public class LoriTimeAdminCommand implements CommonCommand {
                         .replace("[player]", player.getName())));
                 return;
             }
-        } catch (StorageException ex) {
+        } catch (final StorageException ex) {
             plugin.getLogger().warning("could not load online time", ex);
             printUtilityMessage(sender, "message.error");
             return;
@@ -250,7 +250,7 @@ public class LoriTimeAdminCommand implements CommonCommand {
                 .replace("[player]", player.getName())));
     }
 
-    private void reload(CommonSender sender, String... args) {
+    private void reload(final CommonSender sender, final String... args) {
         if (args.length > 1) {
             printUtilityMessage(sender, "message.command.loritimeadmin.reload.usage");
             return;
@@ -259,7 +259,7 @@ public class LoriTimeAdminCommand implements CommonCommand {
 
         try {
             plugin.reload();
-        } catch (StorageException e) {
+        } catch (final StorageException e) {
             plugin.getLogger().error("Could not reload the plugin!", e);
             printUtilityMessage(sender, "message.command.loritimeadmin.reload.issue");
             return;
@@ -267,25 +267,25 @@ public class LoriTimeAdminCommand implements CommonCommand {
         printUtilityMessage(sender, "message.command.loritimeadmin.reload.success");
     }
 
-    public void modifyOnlineTime(UUID uuid, final long modifyBy) {
+    public void modifyOnlineTime(final UUID uuid, final long modifyBy) {
         try {
             plugin.getTimeStorage().addTime(uuid, modifyBy);
-        } catch (StorageException ex) {
+        } catch (final StorageException ex) {
             plugin.getLogger().error("could not modify online time of " + uuid.toString(), ex);
         }
     }
 
-    private void printMissingUuidMessage(CommonSender sender, String playerName) {
+    private void printMissingUuidMessage(final CommonSender sender, final String playerName) {
         sender.sendMessage(localization.formatTextComponent(localization.getRawMessage("message.command.loritimeadmin.missinguuid")
                 .replace("[player]", playerName)));
     }
 
-    private void printNotTimeMessage(CommonSender sender, String... notTime) {
+    private void printNotTimeMessage(final CommonSender sender, final String... notTime) {
         sender.sendMessage(localization.formatTextComponent(localization.getRawMessage("message.command.loritimeadmin.nottime")
                 .replace("[argument]", String.join(" ", notTime))));
     }
 
-    private void printUtilityMessage(CommonSender sender, String messageKey) {
+    private void printUtilityMessage(final CommonSender sender, final String messageKey) {
         sender.sendMessage(localization.formatTextComponent(localization.getRawMessage(messageKey)));
     }
 

@@ -19,7 +19,7 @@ public class BungeeCommand extends Command implements TabExecutor {
 
     private final CommonCommand command;
 
-    public BungeeCommand(LoriTimeBungee bungeePlugin, BungeeAudiences audiences, CommonCommand command) {
+    public BungeeCommand(final LoriTimeBungee bungeePlugin, final BungeeAudiences audiences, final CommonCommand command) {
         super(command.getCommandName(), null, command.getAliases().toArray(new String[0]));
         this.bungeePlugin = bungeePlugin;
         this.audiences = audiences;
@@ -29,14 +29,14 @@ public class BungeeCommand extends Command implements TabExecutor {
     }
 
     @Override
-    public void execute(CommandSender commandSender, String[] strings) {
-        CommonSender commonSender = getSender(commandSender);
+    public void execute(final CommandSender commandSender, final String[] strings) {
+        final CommonSender commonSender = getSender(commandSender);
         this.command.execute(commonSender, strings);
     }
 
     @Override
-    public Iterable<String> onTabComplete(CommandSender commandSender, String[] strings) {
-        CommonSender commonSender = getSender(commandSender);
+    public Iterable<String> onTabComplete(final CommandSender commandSender, final String[] strings) {
+        final CommonSender commonSender = getSender(commandSender);
         return this.command.handleTabComplete(commonSender, strings);
     }
 
@@ -44,7 +44,7 @@ public class BungeeCommand extends Command implements TabExecutor {
         bungeePlugin.getProxy().getPluginManager().registerCommand(bungeePlugin, this);
     }
 
-    private CommonSender getSender(CommandSender source) {
+    private CommonSender getSender(final CommandSender source) {
         if (source instanceof ProxiedPlayer) {
             return new BungeePlayer((ProxiedPlayer) source);
         } else {

@@ -13,31 +13,31 @@ public class TimeAccumulatorBungeeListener implements Listener {
 
     private final LoriTimePlugin plugin;
 
-    public TimeAccumulatorBungeeListener(LoriTimePlugin plugin) {
+    public TimeAccumulatorBungeeListener(final LoriTimePlugin plugin) {
         this.plugin = plugin;
     }
 
     @EventHandler
-    public void onPostLogin(PostLoginEvent event) {
+    public void onPostLogin(final PostLoginEvent event) {
         final UUID uuid = event.getPlayer().getUniqueId();
         final long now = System.currentTimeMillis();
         plugin.getScheduler().runAsyncOnce(() -> {
             try {
                 plugin.getTimeStorage().startAccumulating(uuid, now);
-            } catch (StorageException ex) {
+            } catch (final StorageException ex) {
                 plugin.getLogger().warning("could not start accumulating online time for player " + uuid, ex);
             }
         });
     }
 
     @EventHandler
-    public void onDisconnect(PlayerDisconnectEvent event) {
+    public void onDisconnect(final PlayerDisconnectEvent event) {
         final UUID uuid = event.getPlayer().getUniqueId();
         final long now = System.currentTimeMillis();
         plugin.getScheduler().runAsyncOnce(() -> {
             try {
                 plugin.getTimeStorage().stopAccumulatingAndSaveOnlineTime(uuid, now);
-            } catch (StorageException ex) {
+            } catch (final StorageException ex) {
                 plugin.getLogger().warning("error while stopping accumulation of online time for player " + uuid, ex);
             }
         });

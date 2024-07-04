@@ -41,19 +41,14 @@ public class YamlKeyValueStore implements KeyValueStore {
         saveToFile();
     }
 
-    public void setAll(final Map<String, ?> dataMap) {
-        data.putAll(dataMap);
-        saveToFile();
-    }
-
     @Override
-    public Object get(String key) {
+    public Object get(final String key) {
         return data.get(key);
     }
 
     @Override
     public Object get(final String key, final Object defaultValue) {
-        Object obj = data.get(key);
+        final Object obj = data.get(key);
         if (obj == null) {
             return defaultValue;
         }
@@ -63,6 +58,11 @@ public class YamlKeyValueStore implements KeyValueStore {
     @Override
     public Map<String, ?> getAll() {
         return data;
+    }
+
+    public void setAll(final Map<String, ?> dataMap) {
+        data.putAll(dataMap);
+        saveToFile();
     }
 
     @Override
@@ -77,32 +77,32 @@ public class YamlKeyValueStore implements KeyValueStore {
 
     private void loadFromFile() {
         try (FileInputStream input = new FileInputStream(filePath)) {  // try-with-resources Block
-            Yaml yaml = new Yaml();
-            Map<String, Object> loadedData = yaml.load(input);
+            final Yaml yaml = new Yaml();
+            final Map<String, Object> loadedData = yaml.load(input);
             if (loadedData == null) {
                 loaded = true;
                 LoriTimePlugin.getInstance().getLogger().warning("Your file '" + filePath + "' seems to be empty. Is this right?");
                 return;
             }
             data.clear();
-            Map<String, ?> test = readRecursive(loadedData, "");
+            final Map<String, ?> test = readRecursive(loadedData, "");
             data.putAll(test);
             loaded = true;
-        } catch (FileNotFoundException e) {
+        } catch (final FileNotFoundException e) {
             loaded = false;
             LoriTimePlugin.getInstance().getLogger().error("Failed to load data from file: " + filePath, e);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             loaded = false;
             LoriTimePlugin.getInstance().getLogger().error("IO Exception while loading data from file: " + filePath, e);
         }
     }
 
-    private Map<String, ?> readRecursive(Map<String, ?> map, String keyChain) {
-        String subPathPrefix = keyChain == null || keyChain.isEmpty() ? "" : keyChain + ".";
-        Map<String, Object> dataMap = new HashMap<>();
-        for (Map.Entry<String, ?> entry : map.entrySet()) {
-            String key = entry.getKey();
-            Object data = entry.getValue();
+    private Map<String, ?> readRecursive(final Map<String, ?> map, final String keyChain) {
+        final String subPathPrefix = keyChain == null || keyChain.isEmpty() ? "" : keyChain + ".";
+        final Map<String, Object> dataMap = new HashMap<>();
+        for (final Map.Entry<String, ?> entry : map.entrySet()) {
+            final String key = entry.getKey();
+            final Object data = entry.getValue();
             if (data instanceof LinkedHashMap<?, ?>) {
                 dataMap.putAll(readRecursive((Map<String, ?>) data, subPathPrefix + key));
             } else {
@@ -113,14 +113,14 @@ public class YamlKeyValueStore implements KeyValueStore {
     }
 
     private void saveToFile() {
-        DumperOptions options = new DumperOptions();
+        final DumperOptions options = new DumperOptions();
         options.setPrettyFlow(true);
         options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
-        Yaml yaml = new Yaml(options);
+        final Yaml yaml = new Yaml(options);
 
         try (OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(filePath), StandardCharsets.UTF_8)) {
             yaml.dump(data, writer);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             loriTimePlugin.getLogger().error("Failed to save data to file: " + filePath, e);
         }
     }
@@ -134,7 +134,7 @@ public class YamlKeyValueStore implements KeyValueStore {
     }
 
     @Override
-    public void remove(String key) {
+    public void remove(final String key) {
         data.remove(key);
     }
 }

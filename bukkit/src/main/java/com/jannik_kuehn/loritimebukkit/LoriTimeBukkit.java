@@ -31,15 +31,15 @@ public class LoriTimeBukkit extends JavaPlugin {
 
     @Override
     public void onEnable() {
-        CommonLogger logger = new BukkitLogger(getLogger());
-        BukkitScheduleAdapter scheduleAdapter = new BukkitScheduleAdapter(this, Bukkit.getScheduler());
-        BukkitServer bukkitServer = new BukkitServer();
+        final CommonLogger logger = new BukkitLogger(getLogger());
+        final BukkitScheduleAdapter scheduleAdapter = new BukkitScheduleAdapter(this, Bukkit.getScheduler());
+        final BukkitServer bukkitServer = new BukkitServer();
         this.loriTimePlugin = new LoriTimePlugin(logger, this.getDataFolder(), scheduleAdapter, bukkitServer);
         bukkitServer.enable(this);
         try {
             loriTimePlugin.enable();
             LoriTimeAPI.setPlugin(loriTimePlugin);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             loriTimePlugin.disable();
             logger.warning("Error while enabling the plugin! Disabling the plugin...", e);
             return;

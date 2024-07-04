@@ -3,6 +3,7 @@ package com.jannik_kuehn.loritimebungee.util;
 import com.jannik_kuehn.common.api.LoriTimePlayer;
 import com.jannik_kuehn.common.api.common.CommonSender;
 import com.jannik_kuehn.common.api.common.CommonServer;
+import net.kyori.adventure.platform.bungeecord.BungeeAudiences;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.serializer.bungeecord.BungeeComponentSerializer;
 import net.md_5.bungee.api.CommandSender;
@@ -14,12 +15,14 @@ import java.util.UUID;
 
 public class BungeeServer implements CommonServer {
 
+    private final BungeeAudiences audiences;
+
     private ProxyServer server;
 
     private String serverMode;
 
-    public BungeeServer() {
-        // Empty
+    public BungeeServer(final BungeeAudiences audiences) {
+        this.audiences = audiences;
     }
 
     public void enable(final ProxyServer server) {
@@ -87,5 +90,10 @@ public class BungeeServer implements CommonServer {
         }
         final ProxiedPlayer proxiedPlayer = server.getPlayer(player.getUniqueId());
         proxiedPlayer.disconnect(BungeeComponentSerializer.get().serialize(message));
+    }
+
+    @Override
+    public void sendMessageToConsole(final TextComponent message) {
+        audiences.sender(server.getConsole()).sendMessage(message);
     }
 }

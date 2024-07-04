@@ -102,6 +102,11 @@ public class BukkitServer implements CommonServer {
         loriTimePlugin.getScheduler().scheduleSync(() -> kickPlayer(player, message));
     }
 
+    @Override
+    public void sendMessageToConsole(final TextComponent message) {
+        server.sendMessage(message);
+    }
+
     private void kickPlayer(final Player player, final TextComponent message) {
         player.kick(message);
     }

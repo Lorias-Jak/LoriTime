@@ -25,4 +25,6 @@ public interface CommonServer {
     void setServerMode(String serverMode);
 
     void kickPlayer(LoriTimePlayer player, TextComponent message);
+
+    void sendMessageToConsole(TextComponent message);
 }

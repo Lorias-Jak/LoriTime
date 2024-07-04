@@ -144,7 +144,7 @@ public class UpdateCheck {
     }
 
     private void sendUpdateNotificationToConsole(final String message) {
-        log.info(message);
+        loriTime.getServer().sendMessageToConsole(localization.formatTextComponent(message));
     }
 
     private TextComponent getMessage() {

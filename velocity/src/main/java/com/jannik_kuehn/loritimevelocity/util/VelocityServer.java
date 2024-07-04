@@ -91,4 +91,9 @@ public class VelocityServer implements CommonServer {
         }
         optionalPlayer.get().disconnect(message);
     }
+
+    @Override
+    public void sendMessageToConsole(final TextComponent message) {
+        server.getConsoleCommandSource().sendMessage(message);
+    }
 }

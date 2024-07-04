@@ -30,10 +30,10 @@ public class LoriTimeBungee extends Plugin {
     public void onEnable() {
         final CommonLogger logger = new BungeeLogger(getProxy().getLogger());
         final BungeeScheduleAdapter scheduleAdapter = new BungeeScheduleAdapter(this, getProxy().getScheduler());
-        final BungeeServer bungeeServer = new BungeeServer();
+        audiences = BungeeAudiences.create(this);
+        final BungeeServer bungeeServer = new BungeeServer(audiences);
         this.loriTimePlugin = new LoriTimePlugin(logger, this.getDataFolder(), scheduleAdapter, bungeeServer);
         bungeeServer.enable(getProxy());
-        audiences = BungeeAudiences.create(this);
         try {
             loriTimePlugin.enable();
             LoriTimeAPI.setPlugin(loriTimePlugin);

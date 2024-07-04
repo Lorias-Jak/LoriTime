@@ -22,6 +22,6 @@ public class UpdateNotificationBungeeListener implements Listener {
     @EventHandler
     public void onPostLogin(PostLoginEvent event) {
         CommonSender sender = new BungeeSender(bungeeAudiences, event.getPlayer());
-        loriTime.getScheduler().runAsyncOnceLater(1L, () -> loriTime.getUpdateCheck().playerUpdateNotification(sender));
+        loriTime.getScheduler().runAsyncOnceLater(1L, () -> loriTime.getUpdateCheck().sendUpdateNotification(sender));
     }
 }

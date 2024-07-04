@@ -17,7 +17,7 @@ public class UpdateNotificationBukkitListener implements Listener {
 
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
-        CommonSender sender = new BukkitPlayer(event.getPlayer());
-        loriTime.getScheduler().runAsyncOnceLater(1L, () -> loriTime.getUpdateCheck().playerUpdateNotification(sender));
+        final CommonSender sender = new BukkitPlayer(event.getPlayer());
+        loriTime.getScheduler().runAsyncOnceLater(1L, () -> loriTime.getUpdateCheck().sendUpdateNotification(sender));
     }
 }

@@ -26,7 +26,6 @@ import org.bstats.velocity.Metrics;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;
-
 import java.nio.file.Path;
 import java.util.ArrayList;
 
@@ -44,7 +43,7 @@ public class LoriTimeVelocity {
     private LoriTimePlugin loriTimePlugin;
 
     @Inject
-    public LoriTimeVelocity(ProxyServer server, Logger logger, @DataDirectory Path dataDirectory, Metrics.Factory metricsFactory) {
+    public LoriTimeVelocity(final ProxyServer server, final Logger logger, @DataDirectory final Path dataDirectory, final Metrics.Factory metricsFactory) {
         this.proxyServer = server;
         this.logger = new VelocityLogger(logger);
         this.dataDirectory = dataDirectory;
@@ -53,14 +52,14 @@ public class LoriTimeVelocity {
     }
 
     @Subscribe
-    public void onInitialize(ProxyInitializeEvent event) {
-        VelocityServer velocityServer = new VelocityServer();
+    public void onInitialize(final ProxyInitializeEvent event) {
+        final VelocityServer velocityServer = new VelocityServer();
         this.loriTimePlugin = new LoriTimePlugin(logger, dataDirectory.toFile(), new VelocityScheduleAdapter(this, proxyServer.getScheduler()), velocityServer);
         velocityServer.enable(proxyServer);
         try {
             loriTimePlugin.enable();
             LoriTimeAPI.setPlugin(loriTimePlugin);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             loriTimePlugin.disable();
             logger.error("Error while enabling the plugin! Disabling the plugin...", e);
         }
@@ -79,7 +78,7 @@ public class LoriTimeVelocity {
     }
 
     private void enableAsMaster() {
-        EventManager eventManager = proxyServer.getEventManager();
+        final EventManager eventManager = proxyServer.getEventManager();
         eventManager.register(this, new PlayerNameVelocityListener(loriTimePlugin));
         eventManager.register(this, new TimeAccumulatorVelocityListener(loriTimePlugin));
         eventManager.register(this, new UpdateNotificationVelocityListener(loriTimePlugin));
@@ -105,8 +104,8 @@ public class LoriTimeVelocity {
     }
 
     @Subscribe
-    public void onShutDown(ProxyShutdownEvent event) {
-        for (VelocityCommand command : commands) {
+    public void onShutDown(final ProxyShutdownEvent event) {
+        for (final VelocityCommand command : commands) {
             command.unregisterCommand();
         }
         proxyServer.getEventManager().unregisterListeners(this);

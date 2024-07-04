@@ -11,9 +11,9 @@ import com.jannik_kuehn.common.config.localization.Localization;
 import com.jannik_kuehn.common.exception.StorageException;
 import com.jannik_kuehn.common.module.afk.AfkHandling;
 import com.jannik_kuehn.common.module.afk.AfkStatusProvider;
+import com.jannik_kuehn.common.module.updater.UpdateCheck;
 import com.jannik_kuehn.common.storage.DataStorageManager;
 import com.jannik_kuehn.common.utils.TimeParser;
-import com.jannik_kuehn.common.utils.UpdateCheck;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,11 +37,15 @@ public class LoriTimePlugin {
 
     private final PluginScheduler scheduler;
 
+    private final File dataFolder;
+
+    private final String pluginVersion;
+
+    private final DataStorageManager dataStorageManager;
+
     private Configuration config;
 
     private Localization localization;
-
-    private final File dataFolder;
 
     private TimeParser parser;
 
@@ -49,19 +53,10 @@ public class LoriTimePlugin {
 
     private boolean errorDisable;
 
-    private final String pluginVersion;
-
     private UpdateCheck updateCheck;
-
-    private final DataStorageManager dataStorageManager;
-
-    public static LoriTimePlugin getInstance() {
-        return instance;
-    }
 
     public LoriTimePlugin(CommonLogger logger, File dataFolder, PluginScheduler scheduler, CommonServer server) {
         instance = this;
-
         this.logger = logger;
         this.dataFolder = dataFolder;
         this.scheduler = scheduler;
@@ -69,6 +64,10 @@ public class LoriTimePlugin {
         this.errorDisable = false;
         this.pluginVersion = "LoriTime-1.4.0";
         this.dataStorageManager = new DataStorageManager(this, dataFolder);
+    }
+
+    public static LoriTimePlugin getInstance() {
+        return instance;
     }
 
     public void enable() {

@@ -57,6 +57,11 @@ public class UpdateCheck {
     private String newVersion;
 
     /**
+     * Is the newest Version a release version.
+     */
+    private boolean isRelease;
+
+    /**
      * A boolean to check if the update check is enabled.
      */
     private boolean isUpdateCheckEnabled;
@@ -116,6 +121,7 @@ public class UpdateCheck {
         }
         final JsonObject latestVersionInfo = jsonArray.get(0).getAsJsonObject();
         newVersion = latestVersionInfo.get("version_number").getAsString();
+        isRelease = latestVersionInfo.get("version_type").getAsString().equalsIgnoreCase("release");
 
         if (!hasUpdate(newVersion)) {
             log.info("You are using the latest version of LoriTime!");
@@ -157,7 +163,7 @@ public class UpdateCheck {
     }
 
     private boolean hasUpdate(final String newVersion) {
-        return VersionUtil.isNewerVersion(currentVersion, newVersion);
+        return isRelease && VersionUtil.isNewerVersion(currentVersion, newVersion);
     }
 
     private boolean hasPermission(final CommonSender sender) {

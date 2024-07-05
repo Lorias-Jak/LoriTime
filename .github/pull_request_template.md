@@ -13,5 +13,7 @@ Run maven Verify in your IDE and ensure it SUCCEEDS!
 - [ ]  ... test your changes?
 - [ ]  ... solve all TODOs?
 - [ ]  ... remove any commented out code?
+- [ ]  ... update the changelog?
+- [ ]  ... update the documentation?
 
 Check if the build pipeline succeeded for this PR!

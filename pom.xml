@@ -20,7 +20,7 @@
   <description>A plugin to capture the time that a player spends on your server network</description>
 
   <modules>
-    <module>Config</module>
+    <module>config</module>
     <module>common</module>
     <module>bungee</module>
     <module>velocity</module>

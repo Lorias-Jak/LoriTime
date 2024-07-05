@@ -6,6 +6,7 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased] - ${maven.build.timestamp}
 ### Added
+- more metrics for better tracking what features are used
 ### Changed
 - to only show `release` updates from modrinth for the users.
 - how the version gets displayed when using the info command

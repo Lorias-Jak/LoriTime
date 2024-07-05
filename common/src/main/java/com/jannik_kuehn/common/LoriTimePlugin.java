@@ -98,7 +98,7 @@ public class LoriTimePlugin {
 
     private String getServerModeFromConfig() {
         final String serverMode;
-        if (!config.getBoolean("multiSetup.enabled", false)) {
+        if (!isMultiSetupEnabled()) {
             serverMode = "master";
         } else {
             serverMode = config.getString("multiSetup.mode", "master");
@@ -108,6 +108,10 @@ public class LoriTimePlugin {
 
     public void enableAfkFeature(final AfkHandling afkHandling) {
         afkStatusProvider = new AfkStatusProvider(this, afkHandling);
+    }
+
+    public boolean isMultiSetupEnabled() {
+        return config.getBoolean("multiSetup.enabled", false);
     }
 
     public boolean isAfkEnabled() {

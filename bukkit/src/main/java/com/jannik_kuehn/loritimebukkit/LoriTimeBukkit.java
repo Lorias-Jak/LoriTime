@@ -17,6 +17,7 @@ import com.jannik_kuehn.loritimebukkit.listener.TimeAccumulatorBukkitListener;
 import com.jannik_kuehn.loritimebukkit.listener.UpdateNotificationBukkitListener;
 import com.jannik_kuehn.loritimebukkit.schedule.BukkitScheduleAdapter;
 import com.jannik_kuehn.loritimebukkit.util.BukkitLogger;
+import com.jannik_kuehn.loritimebukkit.util.BukkitMetrics;
 import com.jannik_kuehn.loritimebukkit.util.BukkitServer;
 import com.jannik_kuehn.loritimebukkit.util.LoriTimePlaceholder;
 import org.bstats.bukkit.Metrics;
@@ -54,7 +55,7 @@ public class LoriTimeBukkit extends JavaPlugin {
             loriTimePlugin.disable();
         }
         enableRemainingFeatures();
-        new Metrics(this, 22500);
+        new BukkitMetrics(this, new Metrics(this, 22500));
     }
 
     private void enableAsMaster() {

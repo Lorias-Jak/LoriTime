@@ -14,6 +14,7 @@ import com.jannik_kuehn.loritimevelocity.listener.TimeAccumulatorVelocityListene
 import com.jannik_kuehn.loritimevelocity.listener.UpdateNotificationVelocityListener;
 import com.jannik_kuehn.loritimevelocity.schedule.VelocityScheduleAdapter;
 import com.jannik_kuehn.loritimevelocity.util.VelocityLogger;
+import com.jannik_kuehn.loritimevelocity.util.VelocityMetrics;
 import com.jannik_kuehn.loritimevelocity.util.VelocityServer;
 import com.velocitypowered.api.event.EventManager;
 import com.velocitypowered.api.event.Subscribe;
@@ -82,7 +83,7 @@ public class LoriTimeVelocity {
         }
         enableRemainingFeatures();
 
-        metricsFactory.make(this, 22484);
+        new VelocityMetrics(this, metricsFactory.make(this, 22484));
     }
 
     private void enableAsMaster() {

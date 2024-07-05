@@ -8,7 +8,7 @@
     <version>${revision}${changelist}</version>
   </parent>
   <artifactId>common</artifactId>
-  <name>common</name>
+  <name>Common</name>
   <description>A plugin to capture the time that a player spends on your server network.</description>
   <dependencies>
     <dependency>

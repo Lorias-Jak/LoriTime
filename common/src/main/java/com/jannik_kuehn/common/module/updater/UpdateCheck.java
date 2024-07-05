@@ -75,7 +75,7 @@ public class UpdateCheck {
         this.loriTime = loriTime;
         this.log = loriTime.getLogger();
         this.localization = loriTime.getLocalization();
-        this.currentVersion = loriTime.getPluginVersion();
+        this.currentVersion = loriTime.getServer().getPluginVersion();
     }
 
     /**

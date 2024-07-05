@@ -33,7 +33,7 @@ public class LoriTimeBukkit extends JavaPlugin {
     public void onEnable() {
         final CommonLogger logger = new BukkitLogger(getLogger());
         final BukkitScheduleAdapter scheduleAdapter = new BukkitScheduleAdapter(this, Bukkit.getScheduler());
-        final BukkitServer bukkitServer = new BukkitServer();
+        final BukkitServer bukkitServer = new BukkitServer(getDescription().getVersion());
         this.loriTimePlugin = new LoriTimePlugin(logger, this.getDataFolder(), scheduleAdapter, bukkitServer);
         bukkitServer.enable(this);
         try {

@@ -14,6 +14,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 public class BungeeServer implements CommonServer {
+    private final String version;
 
     private final BungeeAudiences audiences;
 
@@ -21,7 +22,8 @@ public class BungeeServer implements CommonServer {
 
     private String serverMode;
 
-    public BungeeServer(final BungeeAudiences audiences) {
+    public BungeeServer(final String version, final BungeeAudiences audiences) {
+        this.version = version;
         this.audiences = audiences;
     }
 
@@ -95,5 +97,10 @@ public class BungeeServer implements CommonServer {
     @Override
     public void sendMessageToConsole(final TextComponent message) {
         audiences.sender(server.getConsole()).sendMessage(message);
+    }
+
+    @Override
+    public String getPluginVersion() {
+        return version;
     }
 }

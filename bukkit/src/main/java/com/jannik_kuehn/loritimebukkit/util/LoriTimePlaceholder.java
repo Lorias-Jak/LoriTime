@@ -70,6 +70,6 @@ public class LoriTimePlaceholder extends PlaceholderExpansion {
 
     @Override
     public @NotNull String getVersion() {
-        return plugin.getPluginVersion();
+        return plugin.getServer().getPluginVersion();
     }
 }

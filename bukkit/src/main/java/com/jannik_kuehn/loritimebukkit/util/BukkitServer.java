@@ -15,14 +15,16 @@ import java.util.Optional;
 import java.util.UUID;
 
 public class BukkitServer implements CommonServer {
+    private final String version;
+
     private LoriTimePlugin loriTimePlugin;
 
     private String serverMode;
 
     private Server server;
 
-    public BukkitServer() {
-        // Empty
+    public BukkitServer(final String version) {
+        this.version = version;
     }
 
     public void enable(final LoriTimeBukkit bukkitPlugin) {
@@ -105,6 +107,11 @@ public class BukkitServer implements CommonServer {
     @Override
     public void sendMessageToConsole(final TextComponent message) {
         server.sendMessage(message);
+    }
+
+    @Override
+    public String getPluginVersion() {
+        return version;
     }
 
     private void kickPlayer(final Player player, final TextComponent message) {

@@ -27,4 +27,6 @@ public interface CommonServer {
     void kickPlayer(LoriTimePlayer player, TextComponent message);
 
     void sendMessageToConsole(TextComponent message);
+
+    String getPluginVersion();
 }

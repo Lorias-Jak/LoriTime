@@ -31,7 +31,7 @@ public class LoriTimeInfoCommand implements CommonCommand {
         plugin.getScheduler().runAsyncOnce(() -> {
             final MiniMessage miniMessage = MiniMessage.builder().build();
             final String serverVersion = "<#A4A4A4>Server version: <#FF3232>" + plugin.getServer().getServerVersion();
-            final String pluginVersion = "<#A4A4A4>Plugin version: <#FF3232>" + plugin.getPluginVersion();
+            final String pluginVersion = "<#A4A4A4>Plugin version: <#FF3232>" + plugin.getServer().getPluginVersion();
 
             sender.sendMessage(localization.formatTextComponent("Version Information"));
             sender.sendMessage("");

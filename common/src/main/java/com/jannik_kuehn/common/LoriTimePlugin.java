@@ -39,8 +39,6 @@ public class LoriTimePlugin {
 
     private final File dataFolder;
 
-    private final String pluginVersion;
-
     private final DataStorageManager dataStorageManager;
 
     private Configuration config;
@@ -62,7 +60,6 @@ public class LoriTimePlugin {
         this.scheduler = scheduler;
         this.server = server;
         this.errorDisable = false;
-        this.pluginVersion = "LoriTime-1.4.0";
         this.dataStorageManager = new DataStorageManager(this, dataFolder);
     }
 
@@ -244,10 +241,6 @@ public class LoriTimePlugin {
 
     public AccumulatingTimeStorage getTimeStorage() {
         return dataStorageManager.getTimeStorage();
-    }
-
-    public String getPluginVersion() {
-        return pluginVersion;
     }
 
     public AfkStatusProvider getAfkStatusProvider() {

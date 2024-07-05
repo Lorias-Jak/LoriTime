@@ -31,7 +31,7 @@ public class LoriTimeBungee extends Plugin {
         final CommonLogger logger = new BungeeLogger(getProxy().getLogger());
         final BungeeScheduleAdapter scheduleAdapter = new BungeeScheduleAdapter(this, getProxy().getScheduler());
         audiences = BungeeAudiences.create(this);
-        final BungeeServer bungeeServer = new BungeeServer(audiences);
+        final BungeeServer bungeeServer = new BungeeServer(getDescription().getVersion(), audiences);
         this.loriTimePlugin = new LoriTimePlugin(logger, this.getDataFolder(), scheduleAdapter, bungeeServer);
         bungeeServer.enable(getProxy());
         try {

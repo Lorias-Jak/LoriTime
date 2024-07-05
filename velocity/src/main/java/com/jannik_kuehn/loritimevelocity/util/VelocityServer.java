@@ -12,12 +12,14 @@ import java.util.Optional;
 import java.util.UUID;
 
 public class VelocityServer implements CommonServer {
+    private final String version;
+
     private ProxyServer server;
 
     private String serverMode;
 
-    public VelocityServer() {
-        // Empty
+    public VelocityServer(final String version) {
+        this.version = version;
     }
 
     public void enable(final ProxyServer server) {
@@ -95,5 +97,10 @@ public class VelocityServer implements CommonServer {
     @Override
     public void sendMessageToConsole(final TextComponent message) {
         server.getConsoleCommandSource().sendMessage(message);
+    }
+
+    @Override
+    public String getPluginVersion() {
+        return version;
     }
 }

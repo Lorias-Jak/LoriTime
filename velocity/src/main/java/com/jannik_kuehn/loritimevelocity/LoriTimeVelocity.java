@@ -19,6 +19,7 @@ import com.velocitypowered.api.event.EventManager;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
 import com.velocitypowered.api.event.proxy.ProxyShutdownEvent;
+import com.velocitypowered.api.plugin.PluginContainer;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.proxy.messages.MinecraftChannelIdentifier;
@@ -54,7 +55,13 @@ public class LoriTimeVelocity {
 
     @Subscribe
     public void onInitialize(final ProxyInitializeEvent event) {
-        final VelocityServer velocityServer = new VelocityServer();
+        final PluginContainer container = proxyServer.getPluginManager().ensurePluginContainer(this);
+        if (container.getDescription().getVersion().isEmpty()) {
+            logger.severe("Could not get the version of the plugin! Pls report this to the dev!");
+        }
+        final String version = container.getDescription().getVersion().get();
+
+        final VelocityServer velocityServer = new VelocityServer(version);
         this.loriTimePlugin = new LoriTimePlugin(logger, dataDirectory.toFile(), new VelocityScheduleAdapter(this, proxyServer.getScheduler()), velocityServer);
         velocityServer.enable(proxyServer);
         try {

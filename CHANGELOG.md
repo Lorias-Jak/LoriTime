@@ -14,4 +14,6 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Fixed
 - wrong versioning of the velocity module
 - error message when deactivating the plugin if the cache scheduler is not running
+- cache task running as `slave` in a multi-setup, even if its not needed.
+- storage being loaded as `slave` in a multi-setup, even if its not needed.
 ### Security

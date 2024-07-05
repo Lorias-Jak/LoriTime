@@ -69,6 +69,14 @@ public class LoriTimePlugin {
 
     public void enable() {
         loadOrCreateConfigs();
+        server.setServerMode(getServerModeFromConfig());
+
+        if (server.getServerMode().equalsIgnoreCase("master")) {
+            enableAsMaster();
+        }
+    }
+
+    private void enableAsMaster() {
         try {
             dataStorageManager.loadStorages();
         } catch (final StorageException e) {
@@ -82,12 +90,9 @@ public class LoriTimePlugin {
             disable();
             return;
         }
-        server.setServerMode(getServerModeFromConfig());
 
-        if (server.getServerMode().equalsIgnoreCase("master")) {
-            updateCheck = new UpdateCheck(this);
-            updateCheck.startCheck();
-        }
+        updateCheck = new UpdateCheck(this);
+        updateCheck.startCheck();
         dataStorageManager.startCache();
     }
 
@@ -115,15 +120,20 @@ public class LoriTimePlugin {
         dataStorageManager.closeStorages();
     }
 
-    public void reload() throws StorageException {
+    public void reload() {
         updateCheck.stopCheck();
         config.reload();
         localization.reloadTranslation();
+        afkStatusProvider.reloadConfigValues();
+        updateCheck.startCheck();
+
+        reloadMasteredFunctions();
+    }
+
+    private void reloadMasteredFunctions() {
         dataStorageManager.disableCache();
         dataStorageManager.reloadStorages();
-        afkStatusProvider.reloadConfigValues();
         dataStorageManager.startCache();
-        updateCheck.startCheck();
     }
 
     private void loadOrCreateConfigs() {

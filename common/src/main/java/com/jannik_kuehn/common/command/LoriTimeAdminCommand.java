@@ -257,13 +257,7 @@ public class LoriTimeAdminCommand implements CommonCommand {
         }
         plugin.getLocalization().reloadTranslation();
 
-        try {
-            plugin.reload();
-        } catch (final StorageException e) {
-            plugin.getLogger().error("Could not reload the plugin!", e);
-            printUtilityMessage(sender, "message.command.loritimeadmin.reload.issue");
-            return;
-        }
+        plugin.reload();
         printUtilityMessage(sender, "message.command.loritimeadmin.reload.success");
     }
 

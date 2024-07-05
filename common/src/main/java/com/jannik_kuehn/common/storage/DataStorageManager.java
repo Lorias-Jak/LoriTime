@@ -54,9 +54,11 @@ public class DataStorageManager {
     }
 
     public void disableCache() {
-        flushCacheTask.cancel();
-        flushOnlineTimeCache();
-        flushCacheTask = null;
+        if (flushCacheTask != null) {
+            flushCacheTask.cancel();
+            flushOnlineTimeCache();
+            flushCacheTask = null;
+        }
     }
 
     public void loadStorages() throws StorageException {

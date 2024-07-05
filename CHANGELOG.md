@@ -13,4 +13,5 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Removed
 ### Fixed
 - wrong versioning of the velocity module
+- error message when deactivating the plugin if the cache scheduler is not running
 ### Security

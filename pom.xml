@@ -6,7 +6,7 @@
   <properties>
     <revision>1.4.1</revision>
     <changelist>-SNAPSHOT</changelist>
-    <loritime.version>${revision}-DEV-UNOFFICIAL</loritime.version>
+    <loritime.version>-DEV-1</loritime.version>
     <minecraft.api.version>1.20</minecraft.api.version>
     <java.api.version>17</java.api.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

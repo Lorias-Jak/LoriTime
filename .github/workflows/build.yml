@@ -42,12 +42,21 @@ jobs:
           VERSION=$(mvn help:evaluate -Dexpression=loritime.version -q -DforceStdout)
           echo "CURRENT_VERSION=${VERSION}" >> $GITHUB_ENV
           echo "Current loritime version: $VERSION"
-          BUILD_NUMBER=${{ github.run_number }}
-          if [ "${{ github.event_name }}" = "pull_request" ]; then
-            NEW_VERSION="${VERSION/-DEV-UNOFFICIAL/-DEV-ARTIFACT-${BUILD_NUMBER}}"
+
+          # Extract the current build number from the version
+          if [[ "${VERSION}" =~ -DEV-([0-9]+)$ ]]; then
+            BUILD_NUMBER=${BASH_REMATCH[1]}
+            NEW_BUILD_NUMBER=$((BUILD_NUMBER + 1))
           else
-            NEW_VERSION="${VERSION/-DEV-UNOFFICIAL/-DEV-${BUILD_NUMBER}}"
+            NEW_BUILD_NUMBER=1
           fi
+
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            NEW_VERSION="${VERSION/-DEV-UNOFFICIAL/-DEV-ARTIFACT-${{ github.run_number }}}"
+          else
+            NEW_VERSION="${VERSION/-DEV-UNOFFICIAL/-DEV-${NEW_BUILD_NUMBER}}"
+          fi
+
           echo "NEW_VERSION=${NEW_VERSION}" >> $GITHUB_ENV
           echo "New loritime version: $NEW_VERSION"
 
@@ -65,7 +74,7 @@ jobs:
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: artifacts-${{ github.run_number }}
+          name: LoriTimeArtifacts
           path: |
             **/target/*.jar
             !config/target/*.jar

@@ -1,7 +1,7 @@
 {
   "id": "${project.artifactId}",
   "name": "${project.name}",
-  "version": "version: ${loritime.version}",
+  "version": "${loritime.version}",
   "url": "https://github.com/Lorias-Jak/LoriTime",
   "description": "${project.description}",
   "main": "${project.groupId}.${project.artifactId}.${project.name}",

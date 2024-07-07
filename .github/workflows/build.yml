@@ -1,4 +1,5 @@
 name: Build
+
 on:
   push:
     branches:
@@ -46,20 +47,28 @@ jobs:
         id: increment-version
         run: |
           CURRENT_VERSION=${{ env.CURRENT_VERSION }}
-          if [[ "$CURRENT_VERSION" =~ -DEV-([0-9]+)-UNOFFICIAL$ ]]; then
+          if [[ "$CURRENT_VERSION" == *-DEV-UNOFFICIAL ]]; then
+            NEW_VERSION="${CURRENT_VERSION/-DEV-UNOFFICIAL/-DEV-1}"
+          elif [[ "$CURRENT_VERSION" =~ -DEV-([0-9]+) ]]; then
             BUILD_NUMBER=${BASH_REMATCH[1]}
             NEW_BUILD_NUMBER=$((BUILD_NUMBER + 1))
+            NEW_VERSION="${CURRENT_VERSION/-DEV-$BUILD_NUMBER/-DEV-$NEW_BUILD_NUMBER}"
           else
-            NEW_BUILD_NUMBER=1
+            NEW_VERSION="${CURRENT_VERSION}-DEV-1"
           fi
-          NEW_VERSION=$(echo $CURRENT_VERSION | sed -e "s/-DEV-[0-9]*-UNOFFICIAL/-DEV-${NEW_BUILD_NUMBER}/")
           echo "NEW_VERSION=${NEW_VERSION}" >> $GITHUB_ENV
           echo "New loritime version: $NEW_VERSION"
 
-      - name: Build with updated version
+      - name: Set temporary version
         run: |
-          mvn versions:set -DnewVersion=${{ env.NEW_VERSION }} -DgenerateBackupPoms=false
-          mvn verify
+          sed -i "s/<loritime.version>.*<\/loritime.version>/<loritime.version>${{ env.NEW_VERSION }}<\/loritime.version>/" pom.xml
+
+      - name: Build with updated version
+        run: mvn verify
+
+      - name: Restore original version
+        run: |
+          sed -i "s/<loritime.version>.*<\/loritime.version>/<loritime.version>${{ env.CURRENT_VERSION }}<\/loritime.version>/" pom.xml
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4

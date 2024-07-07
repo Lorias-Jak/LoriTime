@@ -43,10 +43,10 @@ jobs:
           echo "CURRENT_VERSION=${VERSION}" >> $GITHUB_ENV
           echo "Current loritime version: $VERSION"
           BUILD_NUMBER=${{ github.run_number }}
-          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-            NEW_VERSION="${CURRENT_VERSION/-DEV-UNOFFICIAL/-DEV-ARTIFACT-${BUILD_NUMBER}}"
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            NEW_VERSION="${VERSION/-DEV-UNOFFICIAL/-DEV-ARTIFACT-${BUILD_NUMBER}}"
           else
-            NEW_VERSION="${CURRENT_VERSION/-DEV-UNOFFICIAL/-DEV-${BUILD_NUMBER}}"
+            NEW_VERSION="${VERSION/-DEV-UNOFFICIAL/-DEV-${BUILD_NUMBER}}"
           fi
           echo "NEW_VERSION=${NEW_VERSION}" >> $GITHUB_ENV
           echo "New loritime version: $NEW_VERSION"

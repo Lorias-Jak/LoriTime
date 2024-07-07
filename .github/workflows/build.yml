@@ -1,4 +1,5 @@
 name: Build
+
 on:
   push:
     branches:
@@ -58,10 +59,16 @@ jobs:
           echo "NEW_VERSION=${NEW_VERSION}" >> $GITHUB_ENV
           echo "New loritime version: $NEW_VERSION"
 
-      - name: Build with updated version
+      - name: Set temporary version
         run: |
-          mvn versions:set -DnewVersion=${{ env.NEW_VERSION }} -DgenerateBackupPoms=false
-          mvn verify
+          sed -i "s/<loritime.version>.*<\/loritime.version>/<loritime.version>${{ env.NEW_VERSION }}<\/loritime.version>/" pom.xml
+
+      - name: Build with updated version
+        run: mvn verify
+
+      - name: Restore original version
+        run: |
+          sed -i "s/<loritime.version>.*<\/loritime.version>/<loritime.version>${{ env.CURRENT_VERSION }}<\/loritime.version>/" pom.xml
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4

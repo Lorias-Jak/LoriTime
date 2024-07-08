@@ -6,14 +6,6 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased] - ${maven.build.timestamp}
 ### Added
-### Changed
-### Deprecated
-### Removed
-### Fixed
-### Security
-
-## [1.4.1] - 2024-07-08
-### Added
 - more metrics for better tracking what features are used
 ### Changed
 - to only show `release` updates from modrinth for the users.

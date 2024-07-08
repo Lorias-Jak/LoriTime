@@ -18,3 +18,5 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - cache task running as `slave` in a multi-setup, even if its not needed.
 - storage being loaded as `slave` in a multi-setup, even if its not needed.
 ### Security
+### To update
+- Just drag and drop the new jar in.

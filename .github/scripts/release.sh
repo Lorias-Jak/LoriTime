@@ -144,10 +144,10 @@ releasePrepare() {
 releaseSelectRemote() {
   echo
   echo '    ? Enter the name (not URL) of the Git remote repository you want to create the release in'
-  echo -n '    Remote repository (upstream): '
+  echo -n '    Remote repository (origin): '
   read -r RELEASE_REMOTE_REPOSITORY
   if [ -z "$RELEASE_REMOTE_REPOSITORY" ]; then
-    RELEASE_REMOTE_REPOSITORY='upstream'
+    RELEASE_REMOTE_REPOSITORY='origin'
   fi
   deletePreviousLines 3
   echo "    Remote repository: $RELEASE_REMOTE_REPOSITORY"

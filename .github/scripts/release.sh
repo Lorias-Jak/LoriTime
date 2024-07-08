@@ -158,6 +158,12 @@ releaseSelectRemote() {
 releasePublish() {
   echo 'Release'
 
+  echo '    Checking if version tag already exists...'
+  if git rev-parse "v$CURRENT_VERSION" >/dev/null 2>&1; then
+    echo "    Tag 'v$CURRENT_VERSION' already exists. Aborting release."
+    exit 1
+  fi
+
   echo '    Creating version tag...'
   git tag "v$CURRENT_VERSION" HEAD 2>&1 > /dev/null | sed 's/^/        /'
 

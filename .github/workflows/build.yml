@@ -19,7 +19,7 @@ jobs:
           submodules: true
 
       - name: Setup version context
-        uses: ./.github/actions/action.yml
+        uses: ./.github/actions/version
         id: version_context
         with:
           ROOT_REPOSITORY: ${{ github.repository }}

@@ -33,11 +33,13 @@ deletePreviousLines() {
 
 goToRootDirectory() {
   CURRENT_PATH="$(pwd)"
+  echo "Current path: $CURRENT_PATH" # Debugging-Ausgabe
   if [[ "$CURRENT_PATH" == */.github/scripts ]]; then
     cd ../../
   elif [[ "$CURRENT_PATH" == */.github ]]; then
     cd ../
   fi
+  echo "New path: $(pwd)" # Debugging-Ausgabe
 }
 
 checkRequirements() {

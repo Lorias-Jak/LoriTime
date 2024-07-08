@@ -1,0 +1,53 @@
+name: Setup version context
+description: |
+  Setup the version context with a bunch of environment variables based on maven.
+
+inputs:
+  ROOT_REPOSITORY:
+    description: |
+      The root repository name.
+    required: true
+  GITHUB_TOKEN:
+    description: |
+      The GitHub token to use for creating the build-number tag.
+    required: true
+
+outputs:
+  VERSION:
+    description: |
+      The version of the build.
+    value: ${{ steps.determine_version.outputs.VERSION }}
+  VERSION_TYPE:
+    description: |
+      The type of the build.
+    value: ${{ steps.determine_version.outputs.VERSION_TYPE }}
+
+runs:
+  using: composite
+  steps:
+    - name: Checkout source code
+      uses: actions/checkout@v4
+      with:
+        submodules: true
+
+    - name: Determine build version type
+      id: determine_version
+      shell: bash
+      run: |
+        VERSION=$(mvn help:evaluate -Dexpression=revision -q -DforceStdout)
+        BUILD_NUMBER=${{ github.run_number }}
+
+        if [[ "${{ github.ref }}" == refs/tags/* ]]; then
+          VERSION_TYPE="release"
+        elif [[ "${{ github.event_name }}" == "pull_request" ]]; then
+          VERSION_TYPE="artifact"
+          VERSION="${VERSION}-DEV-ARTIFACT-${BUILD_NUMBER}"
+        else
+          VERSION_TYPE="development"
+          VERSION="${VERSION}-DEV-${BUILD_NUMBER}"
+        fi
+
+        echo "VERSION=${VERSION}" >> $GITHUB_ENV
+        echo "VERSION_TYPE=${VERSION_TYPE}" >> $GITHUB_ENV
+        echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+        echo "VERSION_TYPE=$VERSION_TYPE" >> $GITHUB_OUTPUT

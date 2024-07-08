@@ -9,9 +9,26 @@ on:
       - main
 
 jobs:
+  setup-version:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - name: Setup version context
+        uses: ./.github/actions/version-setup/action.yml
+        id: version_context
+        with:
+          ROOT_REPOSITORY: ${{ github.repository }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
   build:
     name: Build and Verify
     runs-on: ubuntu-latest
+    needs: setup-version
 
     steps:
       - name: Checkout source code
@@ -36,45 +53,60 @@ jobs:
         run: |
           find . -type f -name ".editorconfig" -exec sed -i "s~#end_of_line = ~end_of_line = ~g" {} \;
 
-      - name: Prepare build variables
-        id: prepare-variables
-        run: |
-          VERSION=$(mvn help:evaluate -Dexpression=loritime.version -q -DforceStdout)
-          echo "CURRENT_VERSION=${VERSION}" >> $GITHUB_ENV
-          echo "Current loritime version: $VERSION"
-
-          # Extract the current build number from the version
-          if [[ "${VERSION}" =~ -DEV-([0-9]+)$ ]]; then
-            BUILD_NUMBER=${BASH_REMATCH[1]}
-            NEW_BUILD_NUMBER=$((BUILD_NUMBER + 1))
-          else
-            NEW_BUILD_NUMBER=1
-          fi
-
-          if [ "${{ github.event_name }}" = "pull_request" ]; then
-            NEW_VERSION="${VERSION/-DEV-UNOFFICIAL/-DEV-ARTIFACT-${{ github.run_number }}}"
-          else
-            NEW_VERSION="${VERSION/-DEV-UNOFFICIAL/-DEV-${NEW_BUILD_NUMBER}}"
-          fi
-
-          echo "NEW_VERSION=${NEW_VERSION}" >> $GITHUB_ENV
-          echo "New loritime version: $NEW_VERSION"
-
       - name: Set temporary version
         run: |
-          sed -i "s/<loritime.version>.*<\/loritime.version>/<loritime.version>${{ env.NEW_VERSION }}<\/loritime.version>/" pom.xml
+          sed -i "s/<loritime.version>.*<\/loritime.version>/<loritime.version>${{ needs.setup-version.outputs.VERSION }}<\/loritime.version>/" pom.xml
 
       - name: Build with updated version
         run: mvn verify
 
       - name: Restore original version
         run: |
-          sed -i "s/<loritime.version>.*<\/loritime.version>/<loritime.version>${{ env.CURRENT_VERSION }}<\/loritime.version>/" pom.xml
+          git checkout -- pom.xml
 
       - name: Upload Artifact
+        if: ${{ needs.setup-version.outputs.VERSION_TYPE != 'release' }}
         uses: actions/upload-artifact@v4
         with:
           name: LoriTimeArtifacts
           path: |
             **/target/*.jar
             !config/target/*.jar
+
+  deploy:
+    name: Deploy Artifacts
+    runs-on: ubuntu-latest
+    needs: build
+    if: needs.setup-version.outputs.VERSION_TYPE == 'release'
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      - name: Install GitHub CLI
+        run: |
+          sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-key C99B11DEB97541F0
+          echo "deb [arch=amd64] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list
+          sudo apt-get update
+          sudo apt-get install gh
+
+      - name: Set up GitHub CLI
+        uses: actions/setup-gh@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create GitHub Release
+        id: create_release
+        run: |
+          TAG_NAME="v${{ needs.setup-version.outputs.VERSION }}"
+          RELEASE_TITLE="LoriTime-${{ needs.setup-version.outputs.VERSION }}"
+          CHANGELOG=$(cat CHANGELOG.md)
+
+          gh release create "$TAG_NAME" \
+            --title "$RELEASE_TITLE" \
+            --notes "$CHANGELOG"
+
+      - name: Upload Release Assets
+        run: |
+          TAG_NAME="v${{ needs.setup-version.outputs.VERSION }}"
+          gh release upload "$TAG_NAME" bukkit/target/LoriTimeBukkit.jar bungee/target/LoriTimeBungee.jar velocity/target/LoriTimeVelocity.jar

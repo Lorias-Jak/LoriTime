@@ -5,7 +5,7 @@ on:
     branches:
       - main
     tags:
-      - 'v*'  # Reagiert auf Tag-Push-Events, die mit "v" beginnen
+      - 'v*'
   pull_request:
     branches:
       - main
@@ -80,7 +80,6 @@ jobs:
           git checkout -- .
 
       - name: Upload Artifact
-        if: ${{ needs.setup-version.outputs.VERSION_TYPE != 'release' }}
         uses: actions/upload-artifact@v4
         with:
           name: LoriTimeArtifacts
@@ -105,7 +104,7 @@ jobs:
           DRAFT_RELEASE: false
           PRE_RELEASE: false
           CHANGELOG_FILE: CHANGELOG.md
-          RELEASE_NAME: LoriTime ${{ needs.setup-version.outputs.VERSION }}
+          RELEASE_NAME: "LoriTime-${{ needs.setup-version.outputs.VERSION }}"
         with:
           args: |
             bukkit/target/LoriTimeBukkit.jar

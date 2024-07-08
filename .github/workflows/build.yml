@@ -53,6 +53,11 @@ jobs:
         run: |
           find . -type f -name ".editorconfig" -exec sed -i "s~#end_of_line = ~end_of_line = ~g" {} \;
 
+      - name: Debugging Version Output
+        run: |
+          echo "Debugging: VERSION is ${{ needs.version_context.outputs.VERSION }}"
+          echo "Debugging: VERSION_TYPE is ${{ needs.version_context.outputs.VERSION_TYPE }}"
+
       - name: Set temporary version in all pom.xml files
         run: |
           find . -name 'pom.xml' -exec sed -i "s/<loritime.version>.*<\/loritime.version>/<loritime.version>${{ needs.version_context.outputs.VERSION }}<\/loritime.version>/" {} +

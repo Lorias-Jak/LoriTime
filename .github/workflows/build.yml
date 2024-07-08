@@ -90,7 +90,7 @@ jobs:
   deploy:
     name: Deploy Artifacts
     runs-on: ubuntu-latest
-    needs: build
+    needs: [ setup-version, build ]
     if: needs.setup-version.outputs.VERSION_TYPE == 'release'
 
     steps:

@@ -1,6 +1,14 @@
 name: Build
 
-on: [ push, pull_request ]
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - 'v*'  # Reagiert auf Tag-Push-Events, die mit "v" beginnen
+  pull_request:
+    branches:
+      - main
 
 jobs:
   setup-version:
@@ -90,30 +98,16 @@ jobs:
       - name: Checkout source code
         uses: actions/checkout@v4
 
-      - name: Install GitHub CLI
-        run: |
-          sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-key C99B11DEB97541F0
-          echo "deb [arch=amd64] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list
-          sudo apt-get update
-          sudo apt-get install gh
-
-      - name: Set up GitHub CLI
-        uses: actions/setup-gh@v2
+      - name: Create release
+        uses: docker://antonyurchenko/git-release:v6
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DRAFT_RELEASE: false
+          PRE_RELEASE: false
+          CHANGELOG_FILE: CHANGELOG.md
+          RELEASE_NAME: LoriTime ${{ needs.setup-version.outputs.VERSION }}
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Create GitHub Release
-        id: create_release
-        run: |
-          TAG_NAME="v${{ needs.setup-version.outputs.VERSION }}"
-          RELEASE_TITLE="LoriTime-${{ needs.setup-version.outputs.VERSION }}"
-          CHANGELOG=$(cat CHANGELOG.md)
-
-          gh release create "$TAG_NAME" \
-            --title "$RELEASE_TITLE" \
-            --notes "$CHANGELOG"
-
-      - name: Upload Release Assets
-        run: |
-          TAG_NAME="v${{ needs.setup-version.outputs.VERSION }}"
-          gh release upload "$TAG_NAME" bukkit/target/LoriTimeBukkit.jar bungee/target/LoriTimeBungee.jar velocity/target/LoriTimeVelocity.jar
+          args: |
+            bukkit/target/LoriTimeBukkit.jar
+            bungee/target/LoriTimeBungee.jar
+            velocity/target/LoriTimeVelocity.jar

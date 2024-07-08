@@ -57,6 +57,10 @@ jobs:
         run: |
           find . -name 'pom.xml' -exec sed -i "s/<loritime.version>.*<\/loritime.version>/<loritime.version>${{ needs.version_context.outputs.VERSION }}<\/loritime.version>/" {} +
 
+      - name: Verify temporary version in all pom.xml files
+        run: |
+          find . -name 'pom.xml' -exec grep '<loritime.version>' {} \; || exit 1
+
       - name: Build with updated version
         run: mvn verify
 

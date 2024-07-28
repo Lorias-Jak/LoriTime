@@ -5,9 +5,9 @@ import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.connection.PluginMessageEvent;
 import com.velocitypowered.api.proxy.ServerConnection;
 
-public class VelocityPluginMessage extends PluginMessaging {
+public class VelocityPluginMessenger extends PluginMessaging {
 
-    public VelocityPluginMessage(final LoriTimeVelocity velocityPlugin) {
+    public VelocityPluginMessenger(final LoriTimeVelocity velocityPlugin) {
         super(velocityPlugin.getPlugin());
     }
 

@@ -107,7 +107,7 @@ public class LoriTimeVelocity {
     private void enableRemainingFeatures() {
         if (loriTimePlugin.isAfkEnabled()) {
             proxyServer.getChannelRegistrar().register(MinecraftChannelIdentifier.from("loritime:afk"));
-            proxyServer.getEventManager().register(this, new VelocityPluginMessage(this));
+            proxyServer.getEventManager().register(this, new VelocityPluginMessenger(this));
             loriTimePlugin.enableAfkFeature(new MasteredAfkPlayerHandling(loriTimePlugin));
         }
     }

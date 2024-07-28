@@ -7,6 +7,7 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## [Unreleased] - ${maven.build.timestamp}
 ### Added
 ### Changed
+- the way how the PluginMessaging is working within the plugin.
 ### Deprecated
 ### Removed
 ### Fixed

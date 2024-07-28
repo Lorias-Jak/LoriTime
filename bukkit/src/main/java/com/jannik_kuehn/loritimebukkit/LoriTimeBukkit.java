@@ -28,7 +28,7 @@ public class LoriTimeBukkit extends JavaPlugin {
 
     private LoriTimePlugin loriTimePlugin;
 
-    private BukkitPluginMessanger pluginMessanger;
+    private BukkitPluginMessenger bukkitPluginMessenger;
 
     @Override
     public void onEnable() {
@@ -75,7 +75,7 @@ public class LoriTimeBukkit extends JavaPlugin {
 
     private void enableAsSlave() {
         Bukkit.getServer().getMessenger().registerOutgoingPluginChannel(this, "loritime:afk");
-        pluginMessanger = new BukkitPluginMessanger(this);
+        bukkitPluginMessenger = new BukkitPluginMessenger(this);
         if (loriTimePlugin.isAfkEnabled()) {
             loriTimePlugin.enableAfkFeature(new BukkitSlavedAfkHandling(this));
         }
@@ -96,8 +96,8 @@ public class LoriTimeBukkit extends JavaPlugin {
         loriTimePlugin.disable();
     }
 
-    public BukkitPluginMessanger getPluginMessanger() {
-        return pluginMessanger;
+    public BukkitPluginMessenger getBukkitPluginMessenger() {
+        return bukkitPluginMessenger;
     }
 
     public LoriTimePlugin getPlugin() {

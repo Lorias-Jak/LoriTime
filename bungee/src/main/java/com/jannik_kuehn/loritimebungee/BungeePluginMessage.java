@@ -1,21 +1,15 @@
 package com.jannik_kuehn.loritimebungee;
 
-import com.jannik_kuehn.common.LoriTimePlugin;
-import com.jannik_kuehn.common.api.LoriTimePlayer;
+import com.jannik_kuehn.common.module.messaging.PluginMessaging;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.event.PluginMessageEvent;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.event.EventHandler;
 
-import java.io.ByteArrayInputStream;
-import java.io.DataInputStream;
-import java.io.IOException;
-
-public class BungeePluginMessage implements Listener {
-    private final LoriTimePlugin loriTimePlugin;
+public class BungeePluginMessage extends PluginMessaging implements Listener {
 
     public BungeePluginMessage(final LoriTimeBungee bungeePlugin) {
-        this.loriTimePlugin = bungeePlugin.getPlugin();
+        super(bungeePlugin.getPlugin());
     }
 
     @EventHandler
@@ -23,7 +17,8 @@ public class BungeePluginMessage implements Listener {
         if (!event.getTag().contains("loritime:")) {
             return;
         }
-        if (!(event.getReceiver() instanceof final ProxiedPlayer player)) {
+        if (event.getSender() instanceof final ProxiedPlayer player) {
+            loriTimePlugin.getLogger().severe(player.getName() + " tried to change the plugin message of LoriTime!");
             return;
         }
         if (event.isCancelled()) {
@@ -31,30 +26,6 @@ public class BungeePluginMessage implements Listener {
         }
 
         final byte[] data = event.getData();
-        final LoriTimePlayer loriTimePlayer = new LoriTimePlayer(player.getUniqueId(), player.getName());
-        loriTimePlugin.getScheduler().runAsyncOnce(() -> {
-            if (event.getTag().equals("loritime:afk")) {
-                setAfkStatus(data, loriTimePlayer);
-            }
-        });
-    }
-
-    private void setAfkStatus(final byte[] data, final LoriTimePlayer player) {
-        try (ByteArrayInputStream byteInputStream = new ByteArrayInputStream(data);
-             DataInputStream input = new DataInputStream(byteInputStream)) {
-
-            switch (input.readUTF()) {
-                case "true":
-                    loriTimePlugin.getAfkStatusProvider().getAfkPlayerHandling().executePlayerAfk(player, input.readLong());
-                    break;
-                case "false":
-                    loriTimePlugin.getAfkStatusProvider().getAfkPlayerHandling().executePlayerResume(player);
-                    break;
-                default:
-                    loriTimePlugin.getLogger().warning("received invalid afk status!");
-            }
-        } catch (final IOException e) {
-            throw new RuntimeException(e);
-        }
+        processPluginMessage(event.getTag(), data);
     }
 }

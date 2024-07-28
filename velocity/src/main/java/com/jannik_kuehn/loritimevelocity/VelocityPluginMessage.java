@@ -1,20 +1,14 @@
 package com.jannik_kuehn.loritimevelocity;
 
-import com.jannik_kuehn.common.LoriTimePlugin;
-import com.jannik_kuehn.common.api.LoriTimePlayer;
+import com.jannik_kuehn.common.module.messaging.PluginMessaging;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.connection.PluginMessageEvent;
-import com.velocitypowered.api.proxy.Player;
+import com.velocitypowered.api.proxy.ServerConnection;
 
-import java.io.ByteArrayInputStream;
-import java.io.DataInputStream;
-import java.io.IOException;
-
-public class VelocityPluginMessage {
-    private final LoriTimePlugin plugin;
+public class VelocityPluginMessage extends PluginMessaging {
 
     public VelocityPluginMessage(final LoriTimeVelocity velocityPlugin) {
-        this.plugin = velocityPlugin.getPlugin();
+        super(velocityPlugin.getPlugin());
     }
 
     @Subscribe
@@ -22,7 +16,7 @@ public class VelocityPluginMessage {
         if (!event.getIdentifier().getId().contains("loritime:")) {
             return;
         }
-        if (!(event.getTarget() instanceof final Player player)) {
+        if (!(event.getSource() instanceof ServerConnection)) {
             return;
         }
         if (event.getResult().equals(PluginMessageEvent.ForwardResult.handled())) {
@@ -30,33 +24,7 @@ public class VelocityPluginMessage {
         }
 
         final byte[] data = event.getData();
-        final LoriTimePlayer loriTimePlayer = new LoriTimePlayer(player.getUniqueId(), player.getUsername());
-
-        plugin.getScheduler().runAsyncOnce(() -> {
-            if (event.getIdentifier().getId().equals("loritime:afk")) {
-                setAfkStatus(data, loriTimePlayer);
-            }
-        });
+        processPluginMessage(event.getIdentifier().getId(), data);
         event.setResult(PluginMessageEvent.ForwardResult.handled());
     }
-
-    private void setAfkStatus(final byte[] data, final LoriTimePlayer player) {
-        try (ByteArrayInputStream byteInputStream = new ByteArrayInputStream(data);
-             DataInputStream input = new DataInputStream(byteInputStream)) {
-
-            switch (input.readUTF()) {
-                case "true":
-                    plugin.getAfkStatusProvider().getAfkPlayerHandling().executePlayerAfk(player, input.readLong());
-                    break;
-                case "false":
-                    plugin.getAfkStatusProvider().getAfkPlayerHandling().executePlayerResume(player);
-                    break;
-                default:
-                    plugin.getLogger().warning("received invalid afk status!");
-            }
-        } catch (final IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
 }

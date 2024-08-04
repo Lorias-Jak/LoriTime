@@ -10,7 +10,10 @@ import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import org.bukkit.OfflinePlayer;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.OptionalLong;
+import java.util.UUID;
 
 @SuppressFBWarnings("HE_INHERITS_EQUALS_USE_HASHCODE")
 public class LoriTimePlaceholder extends PlaceholderExpansion {
@@ -19,10 +22,13 @@ public class LoriTimePlaceholder extends PlaceholderExpansion {
 
     private final TimeStorage timeStorage;
 
+    private final Map<UUID, Long> offlinePlayerTime;
+
     public LoriTimePlaceholder(final LoriTimePlugin plugin, final TimeStorage timeStorage) {
         super();
         this.plugin = plugin;
         this.timeStorage = timeStorage;
+        this.offlinePlayerTime = new HashMap<>();
     }
 
     @Override
@@ -49,6 +55,11 @@ public class LoriTimePlaceholder extends PlaceholderExpansion {
 
     private long getUnformattedOnlineTime(final OfflinePlayer player) {
         long onlineTime = 0;
+        if (!player.isOnline() && offlinePlayerTime.containsKey(player.getUniqueId())) {
+            return offlinePlayerTime.get(player.getUniqueId());
+        } else if (offlinePlayerTime.containsKey(player.getUniqueId()) && player.isOnline()) {
+            offlinePlayerTime.remove(player.getUniqueId());
+        }
         try {
             final OptionalLong optionalLong = timeStorage.getTime(player.getUniqueId());
             if (optionalLong.isPresent()) {
@@ -56,6 +67,9 @@ public class LoriTimePlaceholder extends PlaceholderExpansion {
             }
         } catch (final StorageException e) {
             plugin.getLogger().error("Error while getting the online time placeholder of player " + player.getName(), e);
+        }
+        if (!player.isOnline()) {
+            offlinePlayerTime.put(player.getUniqueId(), onlineTime);
         }
         return onlineTime;
     }

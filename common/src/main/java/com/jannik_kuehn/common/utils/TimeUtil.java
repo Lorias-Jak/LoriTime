@@ -3,7 +3,6 @@ package com.jannik_kuehn.common.utils;
 import com.jannik_kuehn.common.config.localization.Localization;
 import org.joda.time.Duration;
 import org.joda.time.Period;
-import org.joda.time.PeriodType;
 import org.joda.time.format.PeriodFormatter;
 import org.joda.time.format.PeriodFormatterBuilder;
 
@@ -12,13 +11,14 @@ import java.util.Objects;
 public final class TimeUtil {
 
     private TimeUtil() {
+        // Empty
     }
 
     public static String formatTime(final long seconds, final Localization localization) {
         Objects.requireNonNull(localization);
 
         final Duration duration = Duration.standardSeconds(seconds);
-        final Period period = duration.toPeriodFrom(new org.joda.time.Instant(0)).normalizedStandard(PeriodType.yearMonthDayTime());
+        final Period period = duration.toPeriodFrom(new org.joda.time.Instant(0)).normalizedStandard();
 
         final PeriodFormatter formatter = new PeriodFormatterBuilder()
                 .appendYears()
@@ -46,45 +46,45 @@ public final class TimeUtil {
         return (value == 0 ? "" : " ") + unitString + (value == 0 ? "" : " ");
     }
 
-    public static String getSeconds(final long totalSeconds) {
-        final Duration duration = Duration.standardSeconds(totalSeconds);
-        final Period period = duration.toPeriodFrom(new org.joda.time.Instant(0)).normalizedStandard(PeriodType.standard());
+    public static String getSeconds(final long seconds) {
+        final Duration duration = Duration.standardSeconds(seconds);
+        final Period period = duration.toPeriodFrom(new org.joda.time.Instant(0)).normalizedStandard();
         return String.valueOf(period.getSeconds());
     }
 
-    public static String getMinutes(final long totalSeconds) {
-        final Duration duration = Duration.standardSeconds(totalSeconds);
-        final Period period = duration.toPeriodFrom(new org.joda.time.Instant(0)).normalizedStandard(PeriodType.standard());
+    public static String getMinutes(final long seconds) {
+        final Duration duration = Duration.standardSeconds(seconds);
+        final Period period = duration.toPeriodFrom(new org.joda.time.Instant(0)).normalizedStandard();
         return String.valueOf(period.getMinutes());
     }
 
-    public static String getHours(final long totalSeconds) {
-        final Duration duration = Duration.standardSeconds(totalSeconds);
-        final Period period = duration.toPeriodFrom(new org.joda.time.Instant(0)).normalizedStandard(PeriodType.standard());
+    public static String getHours(final long seconds) {
+        final Duration duration = Duration.standardSeconds(seconds);
+        final Period period = duration.toPeriodFrom(new org.joda.time.Instant(0)).normalizedStandard();
         return String.valueOf(period.getHours());
     }
 
-    public static String getDays(final long totalSeconds) {
-        final Duration duration = Duration.standardSeconds(totalSeconds);
-        final Period period = duration.toPeriodFrom(new org.joda.time.Instant(0)).normalizedStandard(PeriodType.standard());
+    public static String getDays(final long seconds) {
+        final Duration duration = Duration.standardSeconds(seconds);
+        final Period period = duration.toPeriodFrom(new org.joda.time.Instant(0)).normalizedStandard();
         return String.valueOf(period.getDays());
     }
 
-    public static String getWeeks(final long totalSeconds) {
-        final Duration duration = Duration.standardSeconds(totalSeconds);
-        final Period period = duration.toPeriodFrom(new org.joda.time.Instant(0)).normalizedStandard(PeriodType.weeks());
+    public static String getWeeks(final long seconds) {
+        final Duration duration = Duration.standardSeconds(seconds);
+        final Period period = duration.toPeriodFrom(new org.joda.time.Instant(0)).normalizedStandard();
         return String.valueOf(period.getWeeks());
     }
 
-    public static String getMonths(final long totalSeconds) {
-        final Duration duration = Duration.standardSeconds(totalSeconds);
-        final Period period = duration.toPeriodFrom(new org.joda.time.Instant(0)).normalizedStandard(PeriodType.yearMonthDayTime());
+    public static String getMonths(final long seconds) {
+        final Duration duration = Duration.standardSeconds(seconds);
+        final Period period = duration.toPeriodFrom(new org.joda.time.Instant(0)).normalizedStandard();
         return String.valueOf(period.getMonths());
     }
 
-    public static String getYears(final long totalSeconds) {
-        final Duration duration = Duration.standardSeconds(totalSeconds);
-        final Period period = duration.toPeriodFrom(new org.joda.time.Instant(0)).normalizedStandard(PeriodType.yearMonthDayTime());
+    public static String getYears(final long seconds) {
+        final Duration duration = Duration.standardSeconds(seconds);
+        final Period period = duration.toPeriodFrom(new org.joda.time.Instant(0)).normalizedStandard();
         return String.valueOf(period.getYears());
     }
 }

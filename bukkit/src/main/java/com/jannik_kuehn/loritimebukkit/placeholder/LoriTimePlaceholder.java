@@ -30,6 +30,13 @@ public class LoriTimePlaceholder extends PlaceholderExpansion {
         return switch (params) {
             case "unformatted_onlinetime" -> String.valueOf(getUnformattedOnlineTime(player));
             case "formatted_onlinetime" -> getFormattedOnlineTime(player);
+            case "seconds" -> TimeUtil.getSeconds(getUnformattedOnlineTime(player));
+            case "minutes" -> TimeUtil.getMinutes(getUnformattedOnlineTime(player));
+            case "hours" -> TimeUtil.getHours(getUnformattedOnlineTime(player));
+            case "days" -> TimeUtil.getDays(getUnformattedOnlineTime(player));
+            case "weeks" -> TimeUtil.getWeeks(getUnformattedOnlineTime(player));
+            case "months" -> TimeUtil.getMonths(getUnformattedOnlineTime(player));
+            case "years" -> TimeUtil.getYears(getUnformattedOnlineTime(player));
             case "afk" -> {
                 if (plugin.isAfkEnabled()) {
                     yield String.valueOf(plugin.getAfkStatusProvider().getRealPlayer(new LoriTimePlayer(player.getUniqueId(), player.getName())).isAfk());

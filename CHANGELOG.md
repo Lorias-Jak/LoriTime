@@ -6,6 +6,7 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased] - ${maven.build.timestamp}
 ### Added
+- new Placeholder `%loritime_seconds%`, `%loritime_minutes%`, `%loritime_hours%`, `%loritime_days%`, `%loritime_weeks%`, `%loritime_months%`, `%loritime_years%`
 ### Changed
 - the way how the PluginMessaging is working within the plugin.
 ### Deprecated

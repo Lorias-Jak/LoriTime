@@ -1,7 +1,8 @@
-package com.jannik_kuehn.loritimebukkit.util;
+package com.jannik_kuehn.loritimebukkit.placeholder;
 
 import com.jannik_kuehn.common.LoriTimePlugin;
 import com.jannik_kuehn.common.api.LoriTimePlayer;
+import com.jannik_kuehn.common.api.storage.TimeStorage;
 import com.jannik_kuehn.common.exception.StorageException;
 import com.jannik_kuehn.common.utils.TimeUtil;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
@@ -16,9 +17,12 @@ public class LoriTimePlaceholder extends PlaceholderExpansion {
 
     private final LoriTimePlugin plugin;
 
-    public LoriTimePlaceholder(final LoriTimePlugin plugin) {
+    private final TimeStorage timeStorage;
+
+    public LoriTimePlaceholder(final LoriTimePlugin plugin, final TimeStorage timeStorage) {
         super();
         this.plugin = plugin;
+        this.timeStorage = timeStorage;
     }
 
     @Override
@@ -39,7 +43,7 @@ public class LoriTimePlaceholder extends PlaceholderExpansion {
     private long getUnformattedOnlineTime(final OfflinePlayer player) {
         long onlineTime = 0;
         try {
-            final OptionalLong optionalLong = plugin.getTimeStorage().getTime(player.getUniqueId());
+            final OptionalLong optionalLong = timeStorage.getTime(player.getUniqueId());
             if (optionalLong.isPresent()) {
                 onlineTime = optionalLong.getAsLong();
             }

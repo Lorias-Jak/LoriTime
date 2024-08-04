@@ -11,10 +11,11 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Deprecated
 ### Removed
 ### Fixed
+- Placeholder not properly working on multisetup
 ### Security
 ### To update
 
-## [1.4.1] - 2024-07-08
+## [1.4.2] - 2024-07-08
 ### Added
 - more metrics for better tracking what features are used
 ### Changed

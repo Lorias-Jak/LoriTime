@@ -32,11 +32,6 @@
       <scope>compile</scope>
     </dependency>
     <dependency>
-      <groupId>joda-time</groupId>
-      <artifactId>joda-time</artifactId>
-      <scope>compile</scope>
-    </dependency>
-    <dependency>
       <groupId>org.yaml</groupId>
       <artifactId>snakeyaml</artifactId>
       <scope>compile</scope>
@@ -71,7 +66,6 @@
                   <include>com.google.guava</include>
                   <include>org.apache.commons</include>
                   <include>com.zaxxer</include>
-                  <include>joda-time</include>
                   <include>org.yaml</include>
                   <include>com.mysql</include>
                 </includes>

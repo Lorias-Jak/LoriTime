@@ -7,9 +7,9 @@ import com.jannik_kuehn.common.api.storage.NameStorage;
 import com.jannik_kuehn.common.config.localization.Localization;
 import com.jannik_kuehn.common.exception.StorageException;
 import com.jannik_kuehn.common.utils.TimeUtil;
-import org.joda.time.LocalDate;
-import org.joda.time.LocalTime;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -71,7 +71,7 @@ public class LoriTimeTopCommand implements CommonCommand {
             timeEntriesList = rawTimeEntries.entrySet()
                     .stream()
                     .sorted(Map.Entry.<String, Long>comparingByValue().reversed())
-                    .collect(Collectors.toList());
+                    .toList();
         } catch (final StorageException e) {
             throw new RuntimeException(e);
         }

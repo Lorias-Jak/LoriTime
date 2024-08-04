@@ -77,6 +77,7 @@ public class LoriTimeBungee extends Plugin {
     private void enableRemainingFeatures() {
         if (loriTimePlugin.isAfkEnabled()) {
             getProxy().registerChannel("loritime:afk");
+            getProxy().registerChannel("loritime:storage");
             getProxy().getPluginManager().registerListener(this, new BungeePluginMessenger(this));
             loriTimePlugin.enableAfkFeature(new MasteredAfkPlayerHandling(loriTimePlugin));
         }

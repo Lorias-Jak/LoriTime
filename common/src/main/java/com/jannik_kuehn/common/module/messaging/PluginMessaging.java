@@ -3,6 +3,7 @@ package com.jannik_kuehn.common.module.messaging;
 import com.jannik_kuehn.common.LoriTimePlugin;
 import com.jannik_kuehn.common.api.LoriTimePlayer;
 import com.jannik_kuehn.common.api.common.CommonSender;
+import com.jannik_kuehn.common.exception.StorageException;
 import com.jannik_kuehn.common.utils.UuidUtil;
 
 import java.io.ByteArrayInputStream;
@@ -11,16 +12,21 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.Optional;
+import java.util.OptionalLong;
 import java.util.UUID;
 
 public abstract class PluginMessaging {
-    private static final String AFK_IDENTIFIER = "loritime:afk";
+    protected static final String AFK_IDENTIFIER = "loritime:afk";
+
+    protected static final String SLAVED_TIME_STORAGE = "loritime:storage";
 
     protected final LoriTimePlugin loriTimePlugin;
 
     public PluginMessaging(final LoriTimePlugin loriTimePlugin) {
         this.loriTimePlugin = loriTimePlugin;
     }
+
+    public abstract void sendPluginMessage(String channelIdentifier, Object... message);
 
     protected byte[] getDataAsByte(final Object... message) {
         try (ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
@@ -55,6 +61,8 @@ public abstract class PluginMessaging {
         loriTimePlugin.getScheduler().runAsyncOnce(() -> {
             if (identifier.equalsIgnoreCase(AFK_IDENTIFIER)) {
                 setAfkStatus(data);
+            } else if (identifier.equalsIgnoreCase(SLAVED_TIME_STORAGE)) {
+                slavedTimeStorageHandling(data);
             }
         });
     }
@@ -85,5 +93,43 @@ public abstract class PluginMessaging {
         } catch (final IOException e) {
             loriTimePlugin.getLogger().error("could not deserialize plugin message", e);
         }
+    }
+
+    private void slavedTimeStorageHandling(final byte[] data) {
+        try (ByteArrayInputStream byteInputStream = new ByteArrayInputStream(data);
+             DataInputStream input = new DataInputStream(byteInputStream)) {
+
+            final byte[] uuidBytes = new byte[16];
+            input.readFully(uuidBytes);
+            final UUID playerUUID = UuidUtil.fromBytes(uuidBytes);
+            final String inputString = input.readUTF();
+            switch (inputString) {
+                case "get":
+                    sendPluginMessage(SLAVED_TIME_STORAGE, playerUUID, "send", getTime(playerUUID));
+                    break;
+                case "add":
+                    loriTimePlugin.getTimeStorage().addTime(playerUUID, input.readLong());
+                    break;
+                default:
+                    loriTimePlugin.getLogger().warning("received invalid status: " + inputString);
+            }
+        } catch (final IOException e) {
+            loriTimePlugin.getLogger().error("could not deserialize plugin message", e);
+        } catch (final StorageException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private long getTime(final UUID playerUUID) {
+        OptionalLong time = OptionalLong.empty();
+        try {
+            time = loriTimePlugin.getTimeStorage().getTime(playerUUID);
+        } catch (final StorageException e) {
+            loriTimePlugin.getLogger().error("could not get time for " + playerUUID, e);
+        }
+        if (time.isPresent()) {
+            return time.getAsLong();
+        }
+        return 0L;
     }
 }

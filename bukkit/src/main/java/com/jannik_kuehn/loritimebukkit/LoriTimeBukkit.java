@@ -3,6 +3,7 @@ package com.jannik_kuehn.loritimebukkit;
 import com.jannik_kuehn.common.LoriTimePlugin;
 import com.jannik_kuehn.common.api.LoriTimeAPI;
 import com.jannik_kuehn.common.api.common.CommonLogger;
+import com.jannik_kuehn.common.api.storage.TimeStorage;
 import com.jannik_kuehn.common.command.LoriTimeAdminCommand;
 import com.jannik_kuehn.common.command.LoriTimeAfkCommand;
 import com.jannik_kuehn.common.command.LoriTimeCommand;
@@ -15,14 +16,18 @@ import com.jannik_kuehn.loritimebukkit.listener.BukkitPlayerAfkListener;
 import com.jannik_kuehn.loritimebukkit.listener.PlayerNameBukkitListener;
 import com.jannik_kuehn.loritimebukkit.listener.TimeAccumulatorBukkitListener;
 import com.jannik_kuehn.loritimebukkit.listener.UpdateNotificationBukkitListener;
+import com.jannik_kuehn.loritimebukkit.messenger.BukkitPluginMessenger;
+import com.jannik_kuehn.loritimebukkit.messenger.SlavedTimeStorageCache;
+import com.jannik_kuehn.loritimebukkit.placeholder.LoriTimePlaceholder;
 import com.jannik_kuehn.loritimebukkit.schedule.BukkitScheduleAdapter;
 import com.jannik_kuehn.loritimebukkit.util.BukkitLogger;
 import com.jannik_kuehn.loritimebukkit.util.BukkitMetrics;
 import com.jannik_kuehn.loritimebukkit.util.BukkitServer;
-import com.jannik_kuehn.loritimebukkit.util.LoriTimePlaceholder;
 import org.bstats.bukkit.Metrics;
 import org.bukkit.Bukkit;
+import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.plugin.messaging.PluginMessageListener;
 
 public class LoriTimeBukkit extends JavaPlugin {
 
@@ -55,7 +60,6 @@ public class LoriTimeBukkit extends JavaPlugin {
             loriTimePlugin.disable();
         }
         enableRemainingFeatures();
-        new BukkitMetrics(this, new Metrics(this, 22500));
     }
 
     private void enableAsMaster() {
@@ -71,6 +75,10 @@ public class LoriTimeBukkit extends JavaPlugin {
         new BukkitCommand(this, new LoriTimeCommand(loriTimePlugin, loriTimePlugin.getLocalization()));
         new BukkitCommand(this, new LoriTimeInfoCommand(loriTimePlugin, loriTimePlugin.getLocalization()));
         new BukkitCommand(this, new LoriTimeTopCommand(loriTimePlugin, loriTimePlugin.getLocalization()));
+
+        if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null && loriTimePlugin.getConfig().getBoolean("integrations.PlaceholderAPI", true)) {
+            new LoriTimePlaceholder(loriTimePlugin, loriTimePlugin.getTimeStorage()).register();
+        }
     }
 
     private void enableAsSlave() {
@@ -79,6 +87,14 @@ public class LoriTimeBukkit extends JavaPlugin {
         if (loriTimePlugin.isAfkEnabled()) {
             loriTimePlugin.enableAfkFeature(new BukkitSlavedAfkHandling(this));
         }
+        final TimeStorage slavedTimeStorage = new SlavedTimeStorageCache(this, bukkitPluginMessenger,
+                loriTimePlugin.getConfig().getInt("general.saveInterval"));
+        Bukkit.getPluginManager().registerEvents((Listener) slavedTimeStorage, this);
+        Bukkit.getServer().getMessenger().registerIncomingPluginChannel(this, "loritime:storage", (PluginMessageListener) slavedTimeStorage);
+        Bukkit.getServer().getMessenger().registerOutgoingPluginChannel(this, "loritime:storage");
+        if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null && loriTimePlugin.getConfig().getBoolean("integrations.PlaceholderAPI", true)) {
+            new LoriTimePlaceholder(loriTimePlugin, slavedTimeStorage).register();
+        }
     }
 
     private void enableRemainingFeatures() {
@@ -86,9 +102,7 @@ public class LoriTimeBukkit extends JavaPlugin {
             Bukkit.getPluginManager().registerEvents(new BukkitPlayerAfkListener(loriTimePlugin), this);
             new BukkitCommand(this, new LoriTimeAfkCommand(loriTimePlugin, loriTimePlugin.getLocalization()));
         }
-        if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null && loriTimePlugin.getConfig().getBoolean("integrations.PlaceholderAPI", true)) {
-            new LoriTimePlaceholder(loriTimePlugin).register();
-        }
+        new BukkitMetrics(this, new Metrics(this, 22500));
     }
 
     @Override

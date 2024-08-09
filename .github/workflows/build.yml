@@ -110,3 +110,45 @@ jobs:
             bukkit/target/LoriTimeBukkit.jar
             bungee/target/LoriTimeBungee.jar
             velocity/target/LoriTimeVelocity.jar
+
+  update-wiki:
+    name: Update GitHub Wiki
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      - name: Setup Git
+        run: |
+          git config --global user.name "${{ github.actor }}"
+          git config --global user.email "${{ github.actor }}@users.noreply.github.com"
+
+      - name: Checkout Wiki
+        run: |
+          git clone https://github.com/${{ github.repository }}.wiki.git
+          cd $(basename "${{ github.repository }}.wiki.git")
+
+      - name: Copy Docs to Wiki
+        run: |
+          cp -r ../docs/* $(basename "${{ github.repository }}.wiki.git")/
+
+      - name: Check for Changes
+        run: |
+          cd $(basename "${{ github.repository }}.wiki.git")
+          if git diff --quiet; then
+            echo "No changes to commit"
+            echo "no_changes=true" >> $GITHUB_ENV
+          else
+            echo "Changes detected"
+            echo "no_changes=false" >> $GITHUB_ENV
+          fi
+
+      - name: Commit and Push Changes to Wiki
+        if: env.no_changes == 'false'
+        run: |
+          cd $(basename "${{ github.repository }}.wiki.git")
+          git add .
+          git commit -m "Update wiki content from docs on push to main"
+          git push origin main

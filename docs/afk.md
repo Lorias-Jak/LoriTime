@@ -4,9 +4,10 @@
 
 * Set `afk.enabled` to `true`
 * Set `afk.after` to the wishing time of you, after wich time the player should be kicked. You should use the [TimeString](https://github.com/Lorias-Jak/LoriTime/wiki/Commands-&-Permissions#timestring-examples).
-* RemoveTime is for removing the time after wich the player is considered afk. So if the player is AFK for 15 minutes, the time will be taken from his online time.
-* If `afk.autoKick` is on `true`, the player will automatically gets kicked when he is considered afk.
-* `afk.repeatedCheck` is the time, after wich the server will check the time the player hasnt moved, interacted or written a message in the chat. Default its 30 seconds. It's recommendet to not put it under 10 seconds.
+* RemoveTime is for removing the time after which the player is considered afk. So if the player is AFK for 15 minutes, the time will be taken from his online time.
+* If `afk.autoKick` is on `true`, the player will automatically get kicked when he is considered afk.
+* `afk.repeatedCheck` is the time, after wich the server will check the time the player hasn't moved, interacted or written a message in the chat. Default its 30 seconds. It's recommended
+* to not put it under 10 seconds.
 
 ## The config part
 <details>
@@ -25,10 +26,10 @@ afk:
   enabled: false
 
   # The time after which a player is considered AFK. You can use the unit-modifier for this.
-  # Currently the player will be considered afk after 15 minutes.
+  # Currently, the player will be considered afk after 15 minutes.
   after: '15m'
 
-  # If true, the time that the player is afk, will be removed.
+  # If true, the time that the player is afk will be removed.
   removeTime: true
 
   # If true, the player will be kicked after the time specified in 'kick.after'.
@@ -43,10 +44,10 @@ afk:
 
 ## Permissions
 
-| Feature| Permission |
-|---------|--------|
-| The time will not be removed in case he is afk and the removeTime feature is enabled| `loritime.afk.bypass.timeRemove` |
-| Prevents the kick if the player went afk | `loritime.afk.bypass.kick` |
-| If the player goes afk, the time will be stoped counting | `loritime.afk.bypass.stopCount` |
-| Sends a message to all player with the permission, that the player went afk | `loritime.afk.announce.afkAnnounce` |
-| Sends a kick message to alle the player with the permission, that the player were kicked because he were afk for time xy | `loritime.afk.announce.kick` |
+| Feature                                                                                                                  | Permission                          |
+|--------------------------------------------------------------------------------------------------------------------------|-------------------------------------|
+| The time will not be removed in case he is afk and the removeTime feature is enabled                                     | `loritime.afk.bypass.timeRemove`    |
+| Prevents the kick if the player went afk                                                                                 | `loritime.afk.bypass.kick`          |
+| If the player goes afk, the time will be stopped counting                                                                | `loritime.afk.bypass.stopCount`     |
+| Sends a message to all player with the permission, that the player went afk                                              | `loritime.afk.announce.afkAnnounce` |
+| Sends a kick message to alle the player with the permission, that the player were kicked because he were afk for time xy | `loritime.afk.announce.kick`        |

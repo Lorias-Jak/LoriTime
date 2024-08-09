@@ -62,11 +62,11 @@ The TimeString is a special way to set, add or remove the time on the player. Th
 * multiple combinations of amount with unit <br>
 <br>
 
-| TimeString examples| Effect |
-|---------|--------|
-| `77` | 77 seconds or 1 minute and 17 seconds. |
-| `4h 3min` | 4 hours and 3 minutes |
-| `28d 1h` | 28 days and 1 hour |
-| `2w1d` | 2 weeks and one day |
-| `1h -5min` | 1 hour minus 5 minutes or 55 minutes |
-| `-6d` | minus 6 days (only for modify usage) |
+| TimeString examples | Effect                                 |
+|---------------------|----------------------------------------|
+| `77`                | 77 seconds or 1 minute and 17 seconds. |
+| `4h 3min`           | 4 hours and 3 minutes                  |
+| `28d 1h`            | 28 days and 1 hour                     |
+| `2w1d`              | 2 weeks and one day                    |
+| `1h -5min`          | 1 hour minus 5 minutes or 55 minutes   |
+| `-6d`               | minus 6 days (only for modify usage)   |

@@ -127,20 +127,18 @@ jobs:
 
       - name: Checkout Wiki
         run: |
-          git clone https://github.com/${{ github.repository }}.wiki.git wiki-repo
-          cd wiki-repo
+          mkdir -p temp_wiki
+          cd temp_wiki
+          git clone https://github.com/${{ github.repository }}.wiki.git .
+          git remote -v  # Show the remotes to verify the repository
 
       - name: Copy Docs to Wiki
         run: |
-          if [ -d docs ]; then
-            cp -r docs/* .
-          else
-            echo "Docs directory does not exist"
-            exit 1
-          fi
+          cp -r docs/* .
 
       - name: Commit and Push Changes to Wiki
         run: |
           git add .
+          git status  # Show what changes are being staged
           git commit -m "Update wiki content from docs on push to main"
-          git push origin main
+          git push origin main || { echo "Push failed"; exit 1; }

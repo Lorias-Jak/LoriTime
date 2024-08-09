@@ -139,18 +139,7 @@ jobs:
             exit 1
           fi
 
-      - name: Check for Changes
-        run: |
-          if git diff --quiet; then
-            echo "No changes to commit"
-            echo "no_changes=true" >> $GITHUB_ENV
-          else
-            echo "Changes detected"
-            echo "no_changes=false" >> $GITHUB_ENV
-          fi
-
       - name: Commit and Push Changes to Wiki
-        if: env.no_changes == 'false'
         run: |
           git add .
           git commit -m "Update wiki content from docs on push to main"

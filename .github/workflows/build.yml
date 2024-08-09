@@ -1,4 +1,4 @@
-name: Build
+name: Build and Publish Wiki
 
 on:
   push:
@@ -117,28 +117,13 @@ jobs:
     if: github.ref == 'refs/heads/main'
 
     steps:
-      - name: Checkout source code
+      - name: Checkout repository content
         uses: actions/checkout@v4
 
-      - name: Setup Git
-        run: |
-          git config --global user.name "${{ github.actor }}"
-          git config --global user.email "${{ github.actor }}@users.noreply.github.com"
-
-      - name: Checkout Wiki
-        run: |
-          mkdir -p temp_wiki
-          cd temp_wiki
-          git clone https://github.com/${{ github.repository }}.wiki.git .
-          git remote -v  # Show the remotes to verify the repository
-
-      - name: Copy Docs to Wiki
-        run: |
-          cp -r docs/* .
-
-      - name: Commit and Push Changes to Wiki
-        run: |
-          git add .
-          git status  # Show what changes are being staged
-          git commit -m "Update wiki content from docs on push to main"
-          git push origin main || { echo "Push failed"; exit 1; }
+      - name: Publish to Wiki
+        uses: Andrew-Chen-Wang/github-wiki-action@v4
+        with:
+          strategy: 'init'
+          token: ${{ github.token }}
+          path: 'docs/'
+          ignore: ''

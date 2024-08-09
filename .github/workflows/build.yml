@@ -132,7 +132,12 @@ jobs:
 
       - name: Copy Docs to Wiki
         run: |
-          cp -r ../docs/* .
+          if [ -d docs ]; then
+            cp -r docs/* .
+          else
+            echo "Docs directory does not exist"
+            exit 1
+          fi
 
       - name: Check for Changes
         run: |

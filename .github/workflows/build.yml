@@ -127,16 +127,15 @@ jobs:
 
       - name: Checkout Wiki
         run: |
-          git clone https://github.com/${{ github.repository }}.wiki.git
-          cd $(basename "${{ github.repository }}.wiki.git")
+          git clone https://github.com/${{ github.repository }}.wiki.git wiki-repo
+          cd wiki-repo
 
       - name: Copy Docs to Wiki
         run: |
-          cp -r ../docs/* $(basename "${{ github.repository }}.wiki.git")/
+          cp -r ../docs/* .
 
       - name: Check for Changes
         run: |
-          cd $(basename "${{ github.repository }}.wiki.git")
           if git diff --quiet; then
             echo "No changes to commit"
             echo "no_changes=true" >> $GITHUB_ENV
@@ -148,7 +147,6 @@ jobs:
       - name: Commit and Push Changes to Wiki
         if: env.no_changes == 'false'
         run: |
-          cd $(basename "${{ github.repository }}.wiki.git")
           git add .
           git commit -m "Update wiki content from docs on push to main"
           git push origin main

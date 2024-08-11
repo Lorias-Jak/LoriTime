@@ -10,6 +10,6 @@ Documentation
 - [Storage](https://github.com/Lorias-Jak/LoriTime/wiki/Storage)
 - [Localization](https://github.com/Lorias-Jak/LoriTime/wiki/Localization)
 - [AFK](https://github.com/Lorias-Jak/LoriTime/wiki/AFK)
-- [Placeholder](https://github.com/Lorias-Jak/LoriTime/wiki/Placeholder#placeholder)
+- [Placeholder](https://github.com/Lorias-Jak/LoriTime/wiki/Placeholder)
 - [API](https://github.com/Lorias-Jak/LoriTime/wiki/API)
 

@@ -12,39 +12,31 @@
   </tr>
   <tr>
     <th class="tg-0pky"><a href="https://getbukkit.org/">Bukkit</a></th>
-    <th class="tg-0pky">✔️ [1.18-1.20]</th>
+    <th class="tg-0pky">✅ [1.18-1.21]</th>
   </tr>
   <tr>
     <th class="tg-0lax"><a href="https://papermc.io/software/paper">Paper</a></th>
-    <th class="tg-0lax">❗ [1.18-1.20]*</th>
-  </tr>
-  <tr>
-    <th class="tg-0lax"></th>
-    <th class="tg-0lax"></th>
+    <th class="tg-0lax">❗ [1.18-1.21]*</th>
   </tr>
 </thead>
 <tbody>
   <tr>
     <th class="tg-lboi" rowspan="4">Proxy's</th>
     <th class="tg-0pky"><a href="https://papermc.io/software/velocity">Velocity</a></th>
-    <th class="tg-0pky">✔️ 3.2.0</th>
+    <th class="tg-0pky">✅ 3.2.0</th>
   </tr>
   <tr>
     <th class="tg-0pky"><a href="https://ci.md-5.net/job/BungeeCord/">BungeeCord</a></th>
-    <th class="tg-0pky">✔️</th>
-  </tr>
-  <tr>
-    <th class="tg-0pky"><a href="https://papermc.io/software/waterfall">Waterfall</a></th>
-    <th class="tg-0pky">❗ **</th>
-  </tr>
-  <tr>
-    <th class="tg-0pky"></th>
-    <th class="tg-0pky"></th>
+    <th class="tg-0pky">✅ lts</th>
   </tr>
 </tbody>
 </table>
 * Loaded via Bukkit<br>
-** Loaded via Bungee, deprecated<br>
 
 ## Integrations
-LoriTime currently has no integrations
+LoriTime hooks into PlaceHolderAPI!
+You can find the supported [Placeholders here](https://github.com/Lorias-Jak/LoriTime/wiki/Placeholder).
+<br>
+<br>
+If there's need for a new Integration,
+open a [suggestion on GitHub](https://github.com/Lorias-Jak/LoriTime/issues/new/choose).

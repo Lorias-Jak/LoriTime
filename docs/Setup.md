@@ -4,6 +4,23 @@ This will walk you through installing HuskHomes on your Spigot, Fabric or Sponge
 * To see all requirements pls checkout the [compatibility](https://github.com/Lorias-Jak/LoriTime/wiki/Compatibility) page.
 * Download the jar file for your server from the [latest release](https://github.com/Lorias-Jak/LoriTime/releases/latest).
 
+## When to use on MultiSetup?
+The MultiSetup is a realization for networks within a single-proxy and subserver system. 
+LoriTime is communicating with between the proxy and subservers to send data between them.
+Not every data is available on the proxy for every feature.
+<br>
+<br>
+You **should not** use MultiSetup if:
+- You're only having a Bukkit server without a proxy
+- You dont need Placeholder on your Subserver
+- You dont want to use the afk feature
+
+You **should** use MultiSetup if:
+- You want to use Placeholder
+- You want to use the AFK feature
+
+> **Note:** There is currently no support for multi-proxy setups!
+
 ## Setup Instructions - Single Server
 ### 1. install the jar file
 - Put the jar file of the plugin in the `plugins` directory on your server.

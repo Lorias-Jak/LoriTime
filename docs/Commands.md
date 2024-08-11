@@ -52,8 +52,53 @@ LoriTime provides a number of different commands that you can use. This page lis
     <td class="tg-9wq8">/loritimeadmin [reload]</td>
     <td class="tg-9wq8">Reloads the LoriTime plugin and config</td>
   </tr>
+  <tr>
+      <td class="tg-9wq8">/afk</td>
+      <td class="tg-9wq8">/</td>
+      <td class="tg-9wq8">Set yourself AFK or not</td>
+      <td class="tg-9wq8">loritime.afk</td>
+  </tr>
+  
 </tbody>
 </table>
+
+<br>
+
+> **Note:** You can customize the plugin commands by adding an alias or removing them in the config
+<details>
+<summary>Custom command alias</summary>
+
+```yml
+##############
+#  Commands  #
+##############
+
+# In case you want to add some aliases to the commands, you can do it here.
+# There are some given aliases, but you can add or remove them.
+command:
+  LoriTimeAdmin:
+    alias:
+      - 'lta'
+      - 'ltadmin'
+      - 'loritimea'
+  LoriTime:
+    alias:
+      - 'lt'
+      - 'loritime'
+      - 'lorit'
+  LoriTimeTop:
+    alias:
+      - "ttop"
+      - "lttop"
+      - "ltop"
+      - "toptimes"
+  Afk:
+    alias: [ ]
+```
+
+</details>
+
+<br>
 
 
 ## TimeString Examples

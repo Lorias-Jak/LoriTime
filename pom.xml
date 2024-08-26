@@ -198,13 +198,13 @@
       <dependency>
         <groupId>org.bstats</groupId>
         <artifactId>bstats-bungeecord</artifactId>
-        <version>3.0.2</version>
+        <version>3.0.3</version>
         <scope>provided</scope>
       </dependency>
       <dependency>
         <groupId>org.bstats</groupId>
         <artifactId>bstats-velocity</artifactId>
-        <version>3.0.2</version>
+        <version>3.0.3</version>
         <scope>provided</scope>
       </dependency>
       <dependency>

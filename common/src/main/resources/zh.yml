@@ -1,0 +1,91 @@
+# 请参阅 https://docs.advntr.dev/minimessage/format.html
+# 您可以通过复制语言文件 (eg. en) 并修改它们的值来新增语言。在配置文件中也要更改对应键值！
+# 如果您将消息翻译成了您的语言，请自由地创建一个拉取请求来添加您的语言！
+unit:
+  second:
+    singular: '秒'
+    plural: '秒'
+    identifier:
+      - 's'
+      - 'sec'
+  minute:
+    singular: '分'
+    plural: '分'
+    identifier:
+      - 'min'
+      - 'm'
+  hour:
+    singular: '时'
+    plural: '时'
+    identifier:
+      - 'h'
+  day:
+    singular: '天'
+    plural: '天'
+    identifier:
+      - 'd'
+  week:
+    singular: '周'
+    plural: '周'
+    identifier:
+      - 'w'
+  month:
+    singular: '月'
+    plural: '月'
+    identifier:
+      - 'mo'
+  year:
+    singular: '年'
+    plural: '年'
+    identifier:
+      - 'y'
+      - 'yhr'
+
+message:
+  nopermission: '<#FF3232>您没有执行这个操作所需的权限。'
+  command:
+    loritime:
+      usage: '<#A4A4A4>使用 <red>/loritime [玩家] <#A4A4A4>来查看一个玩家的在线时间。'
+      notfound: '<#A4A4A4>玩家 <#50CBAB>[player] <#A4A4A4>还没有在这个服务器上游玩过。'
+      consoleself: '<#FF3232>在控制台中，您无法查看自己的游戏时间！'
+      timeseen:
+        self: '<#A4A4A4>您已经在这个服务器上玩了 <#50CBAB>[time] <#A4A4A4>。'
+        other: '<#A4A4A4>玩家 <#50CBAB>[player] <#A4A4A4>已经在这个服务器上玩了 <#50CBAB>[time] <#A4A4A4>。'
+    loritimeadmin:
+      usage: '<#A4A4A4>使用 <red>/loritimeadmin [set | mod | reset] [玩家] [时间] <#A4A4A4>来编辑一个玩家的在线时间。<newline>其它命令：<red>/loritimeadmin [reload | info]'
+      missinguuid: '<#A4A4A4>玩家 <#50CBAB>[player] <#A4A4A4>是未知的。'
+      nottime: '<#A4A4A4>给出的参数 <red>[argument] <#FF3232>不是有效的。'
+      set:
+        usage: '<#A4A4A4>使用 <red>/loritimeadmin set [玩家] [时间] <#A4A4A4>来设置一个玩家的游戏时间。'
+        success: '<#A4A4A4>玩家 <#50CBAB>[player] <#A4A4A4>的在线时间成功设置为 <#50CBAB>[time]<#A4A4A4>。'
+        negativetime: '<red>给出的时间 <#50CBAB>[time] <red>是不可用的，但必须为零。'
+      modify:
+        usage: '<#A4A4A4>使用 <red>/onlinetimeadmin mod [玩家] [时间] <#A4A4A4>来修改一个玩家的在线时间。'
+        success: '<#A4A4A4>玩家 <#50CBAB>[player] <#A4A4A4>的在线时间已成功修改为 <#50CBAB>[time]<#A4A4A4>。'
+        negativetimesum: '<red>给出的时间 <#50CBAB>[time] <red>是不可用的，但必须为零。'
+      reset:
+        usage: '<#A4A4A4>使用 <red>/onlinetimeadmin reset [玩家] <#A4A4A4>来重置一个玩家的在线时间。'
+        success: '<#A4A4A4>玩家 <#50CBAB>[player] <#A4A4A4>的在线时间已重置。'
+      reload:
+        usage: '<#A4A4A4>使用 <red>/onlinetimeadmin reload <#A4A4A4>来重新加载这个插件。'
+        success: '<#A4A4A4>您已 <#1AFA29>成功 <#A4A4A4>重新加载了这个插件。'
+        issue: '<#FF3232>在插件重新加载时发生了一个错误，插件将停止运行！'
+    top:
+      usage: '<#A4A4A4>使用 <red>/onlinetimetop [页数] <#A4A4A4>来查看在线时间排行榜。'
+      gatheringdata: '<#A4A4A4>收集数据并开始计算……'
+      headline: '<#A4A4A4><newline>在线时间排行榜 <#50CBAB>[dateAndTime] <newline><#A4A4A4>---- 在线时间排行榜 -- 第 <#50CBAB>[pages] 页<#A4A4A4>----<newline>服务器总计游玩时间：<#50CBAB>[totalTime]'
+      user: '<#A4A4A4>[place]: [player] <#50CBAB>[time]'
+      wrongpage: '<#A4A4A4>请在 <#FF3232>[pages] 中选择一个正确的页数。'
+      nonumber: '<#FF3232>指定页数不是一个数字。'
+  afk:
+    kick: '<#50CBAB>您因为挂机了 <#FF3232>[time] 被踢出游戏。'
+    kickAnnounce: '<#50CBAB>[player] <#A4A4A4>因为挂机了 <#50CBAB>[time] 被踢出游戏。'
+    afkAnnounce: '<#50CBAB>[player] <#A4A4A4>正在挂机。'
+    resumeAnnounce: '<#50CBAB>[player] <#A4A4A4>退出挂机。'
+    afkSelf: '<#A4A4A4>您现在正在挂机。'
+    afkResume: '<#A4A4A4>您现在退出了挂机。'
+  update:
+    available: |
+      <#A4A4A4>一个该插件的更新可用！
+      当前版本！<#50CBAB>[currentVersion]<#A4A4A4> | 最新版本：<#50CBAB>[newVersion]
+      <#A4A4A4>您可以在 <#50CBAB>[url] 处下载并更新该插件！

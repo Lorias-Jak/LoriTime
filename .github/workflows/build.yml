@@ -49,11 +49,16 @@ jobs:
           java-version: 17
           cache: 'maven'
 
-      - name: Cache target folder
+      - name: Cache Maven dependencies and target folder
         uses: actions/cache@v4
         with:
-          path: target
-          key: ${{ runner.os }}-target-${{ github.run_number }}
+          path: |
+            ~/.m2/repository
+            target
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}-target-${{ github.run_number }}
+          restore-keys: |
+            ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}-target-
+            ${{ runner.os }}-maven-
 
       - name: Activate lf line ending check in editorconfig
         run: |
@@ -84,7 +89,7 @@ jobs:
         with:
           name: LoriTimeArtifacts
           path: |
-            **/target/*.jar
+            target/*.jar
             !config/target/*.jar
 
   deploy:
@@ -97,15 +102,17 @@ jobs:
       - name: Checkout source code
         uses: actions/checkout@v4
 
+      - name: Download built artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: LoriTimeArtifacts
+
       - name: List Files and Folders in Root and One Level Below
         shell: bash --noprofile --norc -euo pipefail {0}
         run: |
           echo "Listing files and folders in root directory:"
-          # List files and directories in the root
           ls -l
-
           echo "Listing files and folders one level below:"
-          # List files and directories one level below
           find . -mindepth 1 -maxdepth 2 -type d -o -type f | sort
 
       - name: Set CHANGELOG.md version

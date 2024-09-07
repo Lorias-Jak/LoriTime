@@ -96,6 +96,27 @@ jobs:
     steps:
       - name: Checkout source code
         uses: actions/checkout@v4
+      - name: Check for Artifact Folders
+        shell: bash --noprofile --norc -euo pipefail {0}
+        run: |
+          # Array of artifact directories
+          ARTIFACT_DIRS=("target/artifacts/LoriTimeBukkit.jar" "target/artifacts/LoriTimeBungee.jar" "target/artifacts/LoriTimeVelocity.jar")
+          
+          # Check if each artifact exists
+          for DIR in "${ARTIFACT_DIRS[@]}"; do
+            if [ -f "$DIR" ]; then
+              echo "Found artifact: $DIR"
+            else
+              echo "Artifact not found: $DIR"
+            fi
+          done
+
+      - name: Set CHANGELOG.md version
+        shell: bash --noprofile --norc -euo pipefail {0}
+        run: |
+          sed -i "s~## \[Unreleased\]~## \[${VERSION}\]~g" ./CHANGELOG.md
+          DATE="$(date +%Y-%m-%d)"
+          sed -i "s~\${maven\.build\.timestamp}~$DATE~g" ./CHANGELOG.md
 
       - name: Release
         uses: anton-yurchenko/git-release@v6.0.0
@@ -107,9 +128,9 @@ jobs:
           RELEASE_NAME: "LoriTime-${{ needs.setup-version.outputs.VERSION }}"
         with:
           args: |
-            **/target/LoriTimeBukkit.jar
-            **/target/LoriTimeBungee.jar
-            **/target/LoriTimeVelocity.jar
+            target/artifacts/LoriTimeBukkit.jar
+            target/artifacts/LoriTimeBungee.jar
+            target/artifacts/LoriTimeVelocity.jar
 
   update-wiki:
     name: Update GitHub Wiki

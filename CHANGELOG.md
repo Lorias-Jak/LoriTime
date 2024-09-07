@@ -11,7 +11,6 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Removed
 ### Fixed
 ### Security
-### To update
 
 ## [1.4.3] - 2024-09-07
 ### Added
@@ -25,7 +24,6 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Fixed
 - Placeholder not properly working on multisetup
 ### Security
-### To update
 
 ## [1.4.2] - 2024-07-08
 ### Added

@@ -49,11 +49,16 @@ jobs:
           java-version: 17
           cache: 'maven'
 
-      - name: Cache target folder
+      - name: Cache Maven dependencies and target folder
         uses: actions/cache@v4
         with:
-          path: target
-          key: ${{ runner.os }}-target-${{ github.run_number }}
+          path: |
+            ~/.m2/repository
+            target
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}-target-${{ github.run_number }}
+          restore-keys: |
+            ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}-target-
+            ${{ runner.os }}-maven-
 
       - name: Activate lf line ending check in editorconfig
         run: |
@@ -96,30 +101,29 @@ jobs:
     steps:
       - name: Checkout source code
         uses: actions/checkout@v4
-      - name: Check for Artifact Folders
+
+      - name: Download built artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: LoriTimeArtifacts
+
+      - name: List Files and Folders in Root and One Level Below
         shell: bash --noprofile --norc -euo pipefail {0}
         run: |
-          # Array of artifact directories
-          ARTIFACT_DIRS=("target/artifacts/LoriTimeBukkit.jar" "target/artifacts/LoriTimeBungee.jar" "target/artifacts/LoriTimeVelocity.jar")
-          
-          # Check if each artifact exists
-          for DIR in "${ARTIFACT_DIRS[@]}"; do
-            if [ -f "$DIR" ]; then
-              echo "Found artifact: $DIR"
-            else
-              echo "Artifact not found: $DIR"
-            fi
-          done
+          echo "Listing files and folders in root directory:"
+          ls -l
+          echo "Listing files and folders one level below:"
+          find . -mindepth 1 -maxdepth 2 -type d -o -type f | sort
 
       - name: Set CHANGELOG.md version
         shell: bash --noprofile --norc -euo pipefail {0}
         run: |
-          sed -i "s~## \[Unreleased\]~## \[${VERSION}\]~g" ./CHANGELOG.md
+          sed -i "s~## \[Unreleased\]~## \[${{ needs.setup-version.outputs.VERSION }}\]~g" ./CHANGELOG.md
           DATE="$(date +%Y-%m-%d)"
           sed -i "s~\${maven\.build\.timestamp}~$DATE~g" ./CHANGELOG.md
 
       - name: Release
-        uses: anton-yurchenko/git-release@v6.0.0
+        uses: docker://antonyurchenko/git-release:v6
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           DRAFT_RELEASE: false
@@ -128,9 +132,9 @@ jobs:
           RELEASE_NAME: "LoriTime-${{ needs.setup-version.outputs.VERSION }}"
         with:
           args: |
-            target/artifacts/LoriTimeBukkit.jar
-            target/artifacts/LoriTimeBungee.jar
-            target/artifacts/LoriTimeVelocity.jar
+            **/target/LoriTimeBukkit.jar
+            **/target/LoriTimeBungee.jar
+            **/target/LoriTimeVelocity.jar
 
   update-wiki:
     name: Update GitHub Wiki

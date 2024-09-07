@@ -8,8 +8,9 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Added
 - new Placeholder `%loritime_seconds%`, `%loritime_minutes%`, `%loritime_hours%`, `%loritime_days%`, `%loritime_weeks%`, `%loritime_months%`, `%loritime_years%`
 - automatic docs build
+- zh-cn translation (thanks to cygbs)
 ### Changed
-- the way how the PluginMessaging is working within the plugin.
+- the way how the PluginMessaging is working within the plugin. No notable changes for the user
 ### Deprecated
 ### Removed
 ### Fixed

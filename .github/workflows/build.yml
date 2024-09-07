@@ -89,7 +89,7 @@ jobs:
         with:
           name: LoriTimeArtifacts
           path: |
-            target/*.jar
+            **/target/*.jar
             !config/target/*.jar
 
   deploy:

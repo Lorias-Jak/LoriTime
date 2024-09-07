@@ -123,7 +123,7 @@ jobs:
           sed -i "s~\${maven\.build\.timestamp}~$DATE~g" ./CHANGELOG.md
 
       - name: Release
-        uses: anton-yurchenko/git-release@v6.0.0
+        uses: docker://antonyurchenko/git-release:v6
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           DRAFT_RELEASE: false
@@ -132,9 +132,9 @@ jobs:
           RELEASE_NAME: "LoriTime-${{ needs.setup-version.outputs.VERSION }}"
         with:
           args: |
-            target/artifacts/LoriTimeBukkit.jar
-            target/artifacts/LoriTimeBungee.jar
-            target/artifacts/LoriTimeVelocity.jar
+            **/target/LoriTimeBukkit.jar
+            **/target/LoriTimeBungee.jar
+            **/target/LoriTimeVelocity.jar
 
   update-wiki:
     name: Update GitHub Wiki

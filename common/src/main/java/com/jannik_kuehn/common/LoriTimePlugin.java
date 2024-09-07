@@ -17,13 +17,19 @@ import com.jannik_kuehn.common.module.updater.UpdateCheck;
 import com.jannik_kuehn.common.storage.DataStorageManager;
 import com.jannik_kuehn.common.utils.TimeParser;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 @SuppressWarnings({"PMD.CommentRequired", "PMD.AvoidDuplicateLiterals", "PMD.UseProperClassLoader",
@@ -198,23 +204,113 @@ public class LoriTimePlugin {
                 log.error("An exception occurred while creating the file '" + fileName + "' on startup.", e);
             }
         }
+
         final Configuration configurationFile = new YamlConfiguration(file.toString());
         if (!configurationFile.isLoaded()) {
             log.error("An issue occurred while loading the file '" + fileName + "'. The File is null, there should be data.");
             return null;
         }
+
         if (created) {
             log.info("The file '" + fileName + "' was created successfully.");
+            logger.info("The file '" + fileName + "' was created successfully.");
+        } else {
+            // Aktualisiere die Konfiguration, indem fehlende Schlüssel ergänzt werden, ohne benutzerdefinierte Werte zu überschreiben
+            try {
+                updateConfigFromResource(file.getPath(), fileName);
+            } catch (final IOException e) {
+                logger.error("An error occurred while updating the configuration file '" + fileName + "'.", e);
+            }
         }
         log.info("Successfully loaded '" + fileName + "'.");
+
+        logger.info("Successfully loaded '" + fileName + "'.");
         return configurationFile;
     }
 
     private void copyDataFromResource(final Path configFile, final String nameFromSourceOfReplacement) {
         try {
             Files.copy(this.getClass().getClassLoader().getResource(nameFromSourceOfReplacement).openStream(), configFile, StandardCopyOption.REPLACE_EXISTING);
+            logger.info("Successfully copied data from resource to '" + configFile.getFileName() + "'.");
         } catch (final IOException e) {
             log.error("Could not copy the file content to the file '" + nameFromSourceOfReplacement + "'. Pls delete the file and try again.", e);
+            logger.error("Could not copy the file content to the file '" + nameFromSourceOfReplacement + "'. Please delete the file and try again.", e);
+        }
+    }
+
+    private void updateConfigFromResource(final String oldConfigPath, final String resourceFileName) throws IOException {
+        final File oldConfigFile = new File(oldConfigPath);
+
+        // Schritt 1: Lese die alte Konfiguration und speichere die Key-Value-Paare in einer Map
+        final Map<String, Object> oldConfig = loadConfigToMap(oldConfigFile);
+
+        // Schritt 2: Lese die neue Konfiguration aus der Ressource zeilenweise
+        List<String> newConfigLines;
+        final Path tempFile = Files.createTempFile("temp", ".yml");
+        try (InputStream resourceStream = this.getClass().getClassLoader().getResourceAsStream(resourceFileName)) {
+            if (resourceStream == null) {
+                throw new IOException("Resource file '" + resourceFileName + "' not found.");
+            }
+            Files.copy(resourceStream, tempFile, StandardCopyOption.REPLACE_EXISTING);
+            newConfigLines = Files.readAllLines(tempFile);
+        } finally {
+            Files.deleteIfExists(tempFile);
+        }
+
+        // Schritt 3: Aktualisiere die neue Konfiguration, ohne benutzerdefinierte Werte zu überschreiben
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(oldConfigFile))) {
+            for (final String line : newConfigLines) {
+                final String trimmedLine = line.trim();
+
+                if (trimmedLine.isEmpty() || trimmedLine.startsWith("#")) {
+                    // Schreibe Kommentare und Leerzeilen unverändert
+                    writer.write(line);
+                } else if (trimmedLine.contains(":")) {
+                    // Splitte die Zeile in Key und (evtl.) Value
+                    final String[] keyValue = trimmedLine.split(":", 2);
+                    final String key = keyValue[0].trim();
+
+                    if (oldConfig.containsKey(key)) {
+                        // Behalte den benutzerdefinierten Wert bei
+                        writer.write(key + ": " + oldConfig.get(key));
+                    } else {
+                        // Schreibe den Standardwert aus der neuen Konfiguration
+                        writer.write(line);
+                    }
+                } else {
+                    // Schreibe Zeilen, die keinen Key-Value-Paar darstellen, unverändert
+                    writer.write(line);
+                }
+                writer.newLine();
+            }
+        }
+    }
+
+    private Map<String, Object> loadConfigToMap(final File configFile) throws IOException {
+        final Yaml yaml = new Yaml();
+        final Map<String, Object> configMap = new HashMap<>();
+
+        try (FileInputStream fis = new FileInputStream(configFile)) {
+            final Map<String, Object> yamlMap = yaml.load(fis);
+
+            if (yamlMap != null) {
+                flattenMap("", yamlMap, configMap);
+            }
+        }
+
+        return configMap;
+    }
+
+    @SuppressWarnings("unchecked")
+    private void flattenMap(final String prefix, final Map<String, Object> source, final Map<String, Object> target) {
+        for (final Map.Entry<String, Object> entry : source.entrySet()) {
+            final String key = prefix.isEmpty() ? entry.getKey() : prefix + "." + entry.getKey();
+
+            if (entry.getValue() instanceof Map) {
+                flattenMap(key, (Map<String, Object>) entry.getValue(), target);
+            } else {
+                target.put(key, entry.getValue());
+            }
         }
     }
 

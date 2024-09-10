@@ -82,10 +82,10 @@ public abstract class PluginMessaging {
 
             switch (input.readUTF()) {
                 case "true":
-                    loriTimePlugin.getAfkStatusProvider().getAfkPlayerHandling().executePlayerAfk(player, input.readLong());
+                    loriTimePlugin.getAfkStatusProvider().setPlayerAFK(player, input.readLong());
                     break;
                 case "false":
-                    loriTimePlugin.getAfkStatusProvider().getAfkPlayerHandling().executePlayerResume(player);
+                    loriTimePlugin.getAfkStatusProvider().resumePlayerAFK(player);
                     break;
                 default:
                     loriTimePlugin.getLogger().warning("received invalid afk status!");

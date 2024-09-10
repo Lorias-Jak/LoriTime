@@ -10,6 +10,8 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Deprecated
 ### Removed
 ### Fixed
+- AFK feature on multi-setup sending as much messages as players are online
+- AFK feature removing to much of the online time if the player went afk 
 ### Security
 
 ## [1.4.3] - 2024-09-07

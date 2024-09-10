@@ -2,6 +2,9 @@ package com.jannik_kuehn.loritimebukkit.messenger;
 
 import com.jannik_kuehn.common.module.messaging.PluginMessaging;
 import com.jannik_kuehn.loritimebukkit.LoriTimeBukkit;
+import org.bukkit.entity.Player;
+
+import java.util.UUID;
 
 public class BukkitPluginMessenger extends PluginMessaging {
 
@@ -14,10 +17,14 @@ public class BukkitPluginMessenger extends PluginMessaging {
 
     @Override
     public void sendPluginMessage(final String channelIdentifier, final Object... message) {
+        final UUID uuid = (UUID) message[0];
         final byte[] data = getDataAsByte(message);
 
         if (data != null) {
-            bukkitPlugin.getServer().sendPluginMessage(bukkitPlugin, channelIdentifier, data);
+            final Player bukkitPlayer = bukkitPlugin.getServer().getPlayer(uuid);
+            if (bukkitPlayer != null) {
+                bukkitPlayer.sendPluginMessage(bukkitPlugin, channelIdentifier, data);
+            }
         } else {
             loriTimePlugin.getLogger().warning("could not send plugin message, data is null");
         }

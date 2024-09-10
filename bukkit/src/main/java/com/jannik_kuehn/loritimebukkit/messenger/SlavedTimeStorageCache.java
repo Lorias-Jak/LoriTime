@@ -95,7 +95,10 @@ public class SlavedTimeStorageCache extends PluginMessaging implements TimeStora
     public void sendPluginMessage(final String channelIdentifier, final Object... message) {
         final byte[] data = getDataAsByte(message);
         if (data != null) {
-            loriTimeBukkit.getServer().sendPluginMessage(loriTimeBukkit, channelIdentifier, data);
+            final Player player = loriTimeBukkit.getServer().getPlayer((UUID) message[0]);
+            if (player != null) {
+                player.sendPluginMessage(loriTimeBukkit, channelIdentifier, data);
+            }
         } else {
             loriTimePlugin.getLogger().warning("could not send plugin message, data is null");
         }
@@ -104,7 +107,8 @@ public class SlavedTimeStorageCache extends PluginMessaging implements TimeStora
     @EventHandler
     public void onPlayerJoin(final PlayerJoinEvent event) {
         trackedPlayers.put(event.getPlayer().getUniqueId().toString(), 0L);
-        loriTimePlugin.getScheduler().runAsyncOnceLater(1L, () -> sendPluginMessage(SLAVED_TIME_STORAGE, event.getPlayer().getUniqueId(), "get"));
+        loriTimePlugin.getScheduler().runAsyncOnceLater(1L, () -> sendPluginMessage(SLAVED_TIME_STORAGE,
+                event.getPlayer().getUniqueId(), "get"));
     }
 
     @EventHandler

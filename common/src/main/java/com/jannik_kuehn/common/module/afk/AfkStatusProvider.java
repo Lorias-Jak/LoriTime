@@ -102,6 +102,7 @@ public class AfkStatusProvider {
                 playerToReturn = loriTimePlayer;
             }
         }
+        afkCheckedPlayers.put(playerToReturn, System.currentTimeMillis());
         return playerToReturn;
     }
 
@@ -113,7 +114,11 @@ public class AfkStatusProvider {
         return afkPlayerHandling;
     }
 
-    public void setPlayerAfk(final LoriTimePlayer player) {
+    public void switchPlayerAfk(final LoriTimePlayer player) {
+        switchPlayerAFK(player, 0);
+    }
+
+    public void switchPlayerAFK(final LoriTimePlayer player, final long timeToRemove) {
         final LoriTimePlayer target = getRealPlayer(player);
         if (!target.isAfk()) {
             target.setAFk(true);
@@ -122,5 +127,23 @@ public class AfkStatusProvider {
             target.setAFk(false);
             afkPlayerHandling.executePlayerResume(target);
         }
+    }
+
+    public void setPlayerAFK(final LoriTimePlayer player, final long timeToRemove) {
+        final LoriTimePlayer target = getRealPlayer(player);
+        if (target.isAfk()) {
+            return;
+        }
+        target.setAFk(true);
+        afkPlayerHandling.executePlayerAfk(target, timeToRemove);
+    }
+
+    public void resumePlayerAFK(final LoriTimePlayer player) {
+        final LoriTimePlayer target = getRealPlayer(player);
+        if (!target.isAfk()) {
+            return;
+        }
+        target.setAFk(false);
+        afkPlayerHandling.executePlayerResume(target);
     }
 }

@@ -64,11 +64,6 @@ jobs:
         run: |
           find . -type f -name ".editorconfig" -exec sed -i "s~#end_of_line = ~end_of_line = ~g" {} \;
 
-      - name: Debugging Version Output
-        run: |
-          echo "Debugging: VERSION is ${{ needs.setup-version.outputs.VERSION }}"
-          echo "Debugging: VERSION_TYPE is ${{ needs.setup-version.outputs.VERSION_TYPE }}"
-
       - name: Set temporary version in all pom.xml files
         run: |
           find . -name 'pom.xml' -exec sed -i "s/<loritime.version>.*<\/loritime.version>/<loritime.version>${{ needs.setup-version.outputs.VERSION }}<\/loritime.version>/" {} +
@@ -107,14 +102,6 @@ jobs:
         with:
           name: LoriTimeArtifacts
 
-      - name: List Files and Folders in Root and One Level Below
-        shell: bash --noprofile --norc -euo pipefail {0}
-        run: |
-          echo "Listing files and folders in root directory:"
-          ls -l
-          echo "Listing files and folders one level below:"
-          find . -mindepth 1 -maxdepth 2 -type d -o -type f | sort
-
       - name: Set CHANGELOG.md version
         shell: bash --noprofile --norc -euo pipefail {0}
         run: |
@@ -122,7 +109,7 @@ jobs:
           DATE="$(date +%Y-%m-%d)"
           sed -i "s~\${maven\.build\.timestamp}~$DATE~g" ./CHANGELOG.md
 
-      - name: Release
+      - name: GH-Release
         uses: docker://antonyurchenko/git-release:v6
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -136,6 +123,29 @@ jobs:
             **/target/LoriTimeBungee.jar
             **/target/LoriTimeVelocity.jar
 
+      - name: Modrinth Release
+        uses: Kir-Antipov/mc-publish@v3.3
+        with:
+          modrinth-id: LoriTime
+          modrinth-featured: true
+          modrinth-unfeature-mode: subset
+          modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
+
+          files: "**/target/LoriTimeBukkit.jar"
+          name: LoriTimeBukkit ${{ needs.setup-version.outputs.VERSION }}
+          version: ${{ needs.setup-version.outputs.VERSION }}
+          version-type: release
+          changelog-file: CHANGELOG.md
+          loaders: |
+            "bukkit"
+            "paper"
+          game-versions: |
+            >=1.19
+          game-version-filter: 'releases'
+          retry-attempts: 2
+          retry-delay: 10000
+          fail-mode: fail
+  
   update-wiki:
     name: Update GitHub Wiki
     runs-on: ubuntu-latest

@@ -522,40 +522,39 @@
           <artifactId>maven-shade-plugin</artifactId>
           <version>3.6.0</version>
         </plugin>
-        <!--        ToDO PMD-->
-        <!--        <plugin>-->
-        <!--          <groupId>org.apache.maven.plugins</groupId>-->
-        <!--          <artifactId>maven-pmd-plugin</artifactId>-->
-        <!--          <version>3.21.2</version>-->
-        <!--          <dependencies>-->
-        <!--            <dependency>-->
-        <!--              <groupId>net.sourceforge.pmd</groupId>-->
-        <!--              <artifactId>pmd-core</artifactId>-->
-        <!--              <version>6.55.0</version>-->
-        <!--            </dependency>-->
-        <!--            <dependency>-->
-        <!--              <groupId>net.sourceforge.pmd</groupId>-->
-        <!--              <artifactId>pmd-java</artifactId>-->
-        <!--              <version>6.55.0</version>-->
-        <!--            </dependency>-->
-        <!--            <dependency>-->
-        <!--              <groupId>com.jannik_kuehn</groupId>-->
-        <!--              <artifactId>config</artifactId>-->
-        <!--              <version>1.0.0</version>-->
-        <!--            </dependency>-->
-        <!--          </dependencies>-->
-        <!--          <configuration>-->
-        <!--            <analysisCache>true</analysisCache>-->
-        <!--            <rulesets>-->
-        <!--              <ruleset>config/pmd-ruleset.xml</ruleset>-->
-        <!--            </rulesets>-->
-        <!--            <includeTests>true</includeTests>-->
-        <!--          </configuration>-->
-        <!--        </plugin>-->
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-pmd-plugin</artifactId>
+          <version>3.21.2</version>
+          <dependencies>
+            <dependency>
+              <groupId>net.sourceforge.pmd</groupId>
+              <artifactId>pmd-core</artifactId>
+              <version>6.55.0</version>
+            </dependency>
+            <dependency>
+              <groupId>net.sourceforge.pmd</groupId>
+              <artifactId>pmd-java</artifactId>
+              <version>6.55.0</version>
+            </dependency>
+            <dependency>
+              <groupId>com.jannik_kuehn</groupId>
+              <artifactId>config</artifactId>
+              <version>1.0.0</version>
+            </dependency>
+          </dependencies>
+          <configuration>
+            <analysisCache>true</analysisCache>
+            <rulesets>
+              <ruleset>config/pmd-ruleset.xml</ruleset>
+            </rulesets>
+            <includeTests>true</includeTests>
+          </configuration>
+        </plugin>
         <plugin>
           <groupId>com.github.spotbugs</groupId>
           <artifactId>spotbugs-maven-plugin</artifactId>
-          <version>4.8.2.0</version>
+          <version>4.8.6.3</version>
           <dependencies>
             <dependency>
               <groupId>com.jannik_kuehn</groupId>

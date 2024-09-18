@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.OptionalLong;
 import java.util.UUID;
 
+@SuppressWarnings("PMD.CommentRequired")
 public interface TimeStorage extends AutoCloseable {
 
     OptionalLong getTime(UUID uniqueId) throws StorageException;

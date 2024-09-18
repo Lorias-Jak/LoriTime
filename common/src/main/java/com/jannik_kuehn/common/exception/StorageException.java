@@ -2,6 +2,7 @@ package com.jannik_kuehn.common.exception;
 
 import java.io.Serial;
 
+@SuppressWarnings("PMD.CommentRequired")
 public class StorageException extends Exception {
 
     @Serial

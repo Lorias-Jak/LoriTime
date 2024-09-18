@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+@SuppressWarnings("PMD.CommentRequired")
 public class YamlConfiguration extends Configuration {
 
     public YamlConfiguration(final String name) {

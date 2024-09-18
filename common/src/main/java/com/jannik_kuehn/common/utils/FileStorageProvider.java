@@ -12,13 +12,30 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+/**
+ * File storage provider.
+ */
 public class FileStorageProvider implements FileStorage {
+    /**
+     * The {@link Configuration} as storage.
+     */
     private final Configuration storage;
 
+    /**
+     * The {@link ReadWriteLock}.
+     */
     private final ReadWriteLock rwLock;
 
+    /**
+     * The closed state.
+     */
     private final AtomicBoolean closed;
 
+    /**
+     * Creates a new file storage provider.
+     *
+     * @param file the file
+     */
     public FileStorageProvider(final Configuration file) {
         this.storage = file;
         this.rwLock = new ReentrantReadWriteLock();
@@ -116,7 +133,8 @@ public class FileStorageProvider implements FileStorage {
 
     @Override
     public void writeAll(final Map<String, ?> data, final boolean overwrite) throws StorageException {
-
+        // ToDo Was ist hier los?
+        // Empty
     }
 
     @Override

@@ -11,12 +11,26 @@ import java.time.temporal.ChronoUnit;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+/**
+ * Utility class for formatting time.
+ */
+@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 public final class TimeUtil {
 
+    /**
+     * Private constructor to prevent instantiation.
+     */
     private TimeUtil() {
         // Empty
     }
 
+    /**
+     * Formats the given time in seconds to a human-readable string.
+     *
+     * @param seconds      the time in seconds
+     * @param localization the localization
+     * @return the formatted time
+     */
     public static String formatTime(final long seconds, @NotNull final Localization localization) {
         final Map<String, Long> timeUnits = calculateTimeUnits(seconds);
         final StringBuilder formattedTime = new StringBuilder();
@@ -52,30 +66,72 @@ public final class TimeUtil {
         return timeUnits;
     }
 
+    /**
+     * Returns the seconds of the given time in seconds.
+     *
+     * @param seconds the time in seconds
+     * @return the seconds
+     */
     public static String getSeconds(final long seconds) {
         return String.valueOf(calculateTimeUnits(seconds).get("unit.second"));
     }
 
+    /**
+     * Returns the minutes of the given time in seconds.
+     *
+     * @param seconds the time in seconds
+     * @return the minutes
+     */
     public static String getMinutes(final long seconds) {
         return String.valueOf(calculateTimeUnits(seconds).get("unit.minute"));
     }
 
+    /**
+     * Returns the hours of the given time in seconds.
+     *
+     * @param seconds the time in seconds
+     * @return the hours
+     */
     public static String getHours(final long seconds) {
         return String.valueOf(calculateTimeUnits(seconds).get("unit.hour"));
     }
 
+    /**
+     * Returns the days of the given time in seconds.
+     *
+     * @param seconds the time in seconds
+     * @return the days
+     */
     public static String getDays(final long seconds) {
         return String.valueOf(calculateTimeUnits(seconds).get("unit.day"));
     }
 
+    /**
+     * Returns the weeks of the given time in seconds.
+     *
+     * @param seconds the time in seconds
+     * @return the weeks
+     */
     public static String getWeeks(final long seconds) {
         return String.valueOf(calculateTimeUnits(seconds).get("unit.week"));
     }
 
+    /**
+     * Returns the months of the given time in seconds.
+     *
+     * @param seconds the time in seconds
+     * @return the months
+     */
     public static String getMonths(final long seconds) {
         return String.valueOf(calculateTimeUnits(seconds).get("unit.month"));
     }
 
+    /**
+     * Returns the years of the given time in seconds.
+     *
+     * @param seconds the time in seconds
+     * @return the years
+     */
     public static String getYears(final long seconds) {
         return String.valueOf(calculateTimeUnits(seconds).get("unit.year"));
     }

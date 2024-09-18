@@ -11,10 +11,20 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
+/**
+ * Name storage implementation using a file storage provider.
+ */
 public class FileNameStorage implements NameStorage {
-
+    /**
+     * The {@link FileStorage}.
+     */
     private final FileStorage storageProvider;
 
+    /**
+     * Creates a new file name storage.
+     *
+     * @param storageProvider the {@link FileStorage} provider
+     */
     public FileNameStorage(final FileStorage storageProvider) {
         this.storageProvider = Objects.requireNonNull(storageProvider);
     }

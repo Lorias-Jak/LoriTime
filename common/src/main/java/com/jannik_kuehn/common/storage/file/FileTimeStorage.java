@@ -10,9 +10,20 @@ import java.util.Objects;
 import java.util.OptionalLong;
 import java.util.UUID;
 
+/**
+ * Time storage implementation using a file storage provider.
+ */
 public class FileTimeStorage implements TimeStorage {
+    /**
+     * The file storage provider.
+     */
     private final FileStorage storageProvider;
 
+    /**
+     * Creates a new file time storage.
+     *
+     * @param storageProvider the {@link FileStorage} provider
+     */
     public FileTimeStorage(final FileStorage storageProvider) {
         this.storageProvider = Objects.requireNonNull(storageProvider);
     }

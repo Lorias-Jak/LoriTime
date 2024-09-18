@@ -25,6 +25,7 @@ import java.util.UUID;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+@SuppressWarnings({"PMD.CommentRequired", "PMD.TooManyMethods"})
 public class DatabaseStorage implements NameStorage, TimeStorage {
 
     private final MySQL mySQL;

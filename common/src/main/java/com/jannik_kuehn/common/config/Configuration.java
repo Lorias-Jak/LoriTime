@@ -1,9 +1,9 @@
 package com.jannik_kuehn.common.config;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+@SuppressWarnings("PMD.CommentRequired")
 public abstract class Configuration {
     protected KeyValueStore keyValueStore;
 
@@ -31,7 +31,7 @@ public abstract class Configuration {
 
     public abstract boolean getBoolean(String key, boolean def);
 
-    public abstract ArrayList<?> getArrayList(String key);
+    public abstract List<?> getArrayList(String key);
 
     public abstract Object getObject(String key);
 

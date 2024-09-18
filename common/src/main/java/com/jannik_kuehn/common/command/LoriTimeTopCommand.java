@@ -18,6 +18,8 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+@SuppressWarnings({"PMD.CommentRequired", "PMD.TooManyMethods", "PMD.AvoidLiteralsInIfCondition", "PMD.CognitiveComplexity",
+        "PMD.CyclomaticComplexity", "PMD.NPathComplexity"})
 public class LoriTimeTopCommand implements CommonCommand {
 
     private static final double PLAYER_AMOUNT_PER_PAGE = 8;
@@ -73,7 +75,8 @@ public class LoriTimeTopCommand implements CommonCommand {
                     .sorted(Map.Entry.<String, Long>comparingByValue().reversed())
                     .toList();
         } catch (final StorageException e) {
-            throw new RuntimeException(e);
+            plugin.getLogger().error("Could not load time entries.", e);
+            return;
         }
         final int amountOfPlayers = rawTimeEntries.size();
 
@@ -113,8 +116,8 @@ public class LoriTimeTopCommand implements CommonCommand {
                 .replace("[pages]", usedSite + " / " + amountOfMaxPages)
                 .replace("[totalTime]", TimeUtil.formatTime(totalTimeSum, localization))
         ));
-        try {
-            final NameStorage nameStorage = plugin.getNameStorage();
+        // ToDo Info beachten bevor push!
+        try (NameStorage nameStorage = plugin.getNameStorage()) {
             int place = minValue;
             for (final Map.Entry<String, Long> topEntry : timeEntriesList.subList(minValue, maxValue)) {
                 place++;
@@ -132,7 +135,7 @@ public class LoriTimeTopCommand implements CommonCommand {
                 ));
             }
         } catch (final StorageException e) {
-            throw new RuntimeException(e);
+            plugin.getLogger().error("Could not load name from NameStorage!", e);
         }
     }
 

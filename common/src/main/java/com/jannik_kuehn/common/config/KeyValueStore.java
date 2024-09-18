@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+@SuppressWarnings("PMD.CommentRequired")
 public interface KeyValueStore {
     void set(String key, Object value);
 

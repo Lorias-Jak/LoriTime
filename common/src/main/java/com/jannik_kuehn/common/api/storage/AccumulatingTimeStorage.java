@@ -11,6 +11,7 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+@SuppressWarnings("PMD.CommentRequired")
 public class AccumulatingTimeStorage implements TimeStorage, TimeAccumulator {
 
     private final TimeStorage storage;

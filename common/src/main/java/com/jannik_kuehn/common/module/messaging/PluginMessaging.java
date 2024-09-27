@@ -27,12 +27,13 @@ public abstract class PluginMessaging {
 
     public PluginMessaging(final LoriTimePlugin loriTimePlugin) {
         this.loriTimePlugin = loriTimePlugin;
-        this.log = loriTimePlugin.getLoggerFactory().create(PluginMessaging.class);
+        this.log = loriTimePlugin.getLoggerFactory().create(PluginMessaging.class, "PluginMessaging");
     }
 
     public abstract void sendPluginMessage(String channelIdentifier, Object... message);
 
     protected byte[] getDataAsByte(final Object... message) {
+        log.debug("Converting Data for PluginMessage");
         try (ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
              DataOutputStream out = new DataOutputStream(byteOut)) {
             for (final Object part : message) {
@@ -62,6 +63,7 @@ public abstract class PluginMessaging {
     }
 
     protected void processPluginMessage(final String identifier, final byte[] data) {
+        log.debug("Processing PluginMessage with identifier: " + identifier);
         loriTimePlugin.getScheduler().runAsyncOnce(() -> {
             if (identifier.equalsIgnoreCase(AFK_IDENTIFIER)) {
                 setAfkStatus(data);
@@ -72,6 +74,7 @@ public abstract class PluginMessaging {
     }
 
     private void setAfkStatus(final byte[] data) {
+        log.debug("Setting AFK Status");
         try (ByteArrayInputStream byteInputStream = new ByteArrayInputStream(data);
              DataInputStream input = new DataInputStream(byteInputStream)) {
 
@@ -80,15 +83,18 @@ public abstract class PluginMessaging {
             final UUID playerUUID = UuidUtil.fromBytes(uuidBytes);
             final Optional<CommonSender> optionalPlayer = loriTimePlugin.getServer().getPlayer(playerUUID);
             if (optionalPlayer.isEmpty()) {
+                log.debug("Player with the uuid '" + playerUUID + "' is not online or cant be found");
                 return;
             }
             final LoriTimePlayer player = new LoriTimePlayer(playerUUID, optionalPlayer.get().getName());
 
             switch (input.readUTF()) {
                 case "true":
+                    log.debug("Setting player '" + player.getName() + "' to AFK");
                     loriTimePlugin.getAfkStatusProvider().setPlayerAFK(player, input.readLong());
                     break;
                 case "false":
+                    log.debug("Resuming player '" + player.getName() + "' from AFK");
                     loriTimePlugin.getAfkStatusProvider().resumePlayerAFK(player);
                     break;
                 default:
@@ -100,6 +106,7 @@ public abstract class PluginMessaging {
     }
 
     private void slavedTimeStorageHandling(final byte[] data) {
+        log.debug("Handling Slaved Time Storage");
         try (ByteArrayInputStream byteInputStream = new ByteArrayInputStream(data);
              DataInputStream input = new DataInputStream(byteInputStream)) {
 
@@ -109,9 +116,11 @@ public abstract class PluginMessaging {
             final String inputString = input.readUTF();
             switch (inputString) {
                 case "get":
+                    log.debug("Sending time for player '" + playerUUID + "'");
                     sendPluginMessage(SLAVED_TIME_STORAGE, playerUUID, "send", getTime(playerUUID));
                     break;
                 case "add":
+                    log.debug("Adding time for player '" + playerUUID + "'");
                     loriTimePlugin.getTimeStorage().addTime(playerUUID, input.readLong());
                     break;
                 default:

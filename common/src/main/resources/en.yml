@@ -77,6 +77,9 @@ message:
       user: '<#A4A4A4>[place]: [player] <#50CBAB>[time]'
       wrongpage: '<#A4A4A4>Please choose a page between <#FF3232>[pages].'
       nonumber: '<#FF3232>The specified value was not a number.'
+    debug:
+      enabled: '<#A4A4A4>Debugging <#1AFA29>started.'
+      disabled: '<#A4A4A4>Debugging <#FF3232>stopped.'
   afk:
     kick: '<#50CBAB>You were kicked for being AFK for <#FF3232>[time].'
     kickAnnounce: '<#50CBAB>[player] <#A4A4A4>was kicked for being AFK for <#50CBAB>[time].'

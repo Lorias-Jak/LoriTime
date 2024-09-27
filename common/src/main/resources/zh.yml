@@ -77,6 +77,9 @@ message:
       user: '<#A4A4A4>[place]: [player] <#50CBAB>[time]'
       wrongpage: '<#A4A4A4>请在 <#FF3232>[pages] 中选择一个正确的页数。'
       nonumber: '<#FF3232>指定页数不是一个数字。'
+    debug:
+      enabled: '<#A4A4A4>Debugging <#1AFA29>started.'
+      disabled: '<#A4A4A4>Debugging <#FF3232>stopped.'
   afk:
     kick: '<#50CBAB>您因为挂机了 <#FF3232>[time] 被踢出游戏。'
     kickAnnounce: '<#50CBAB>[player] <#A4A4A4>因为挂机了 <#50CBAB>[time] 被踢出游戏。'

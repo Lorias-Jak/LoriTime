@@ -7,6 +7,8 @@ import java.util.Set;
 public interface KeyValueStore {
     void set(String key, Object value);
 
+    void setTemporary(String key, Object value);
+
     Object get(String key);
 
     Object get(String key, Object defaultValue);

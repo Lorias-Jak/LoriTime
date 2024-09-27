@@ -16,17 +16,19 @@ public class BukkitPluginMessenger extends PluginMessaging {
     public BukkitPluginMessenger(final LoriTimeBukkit bukkitPlugin) {
         super(bukkitPlugin.getPlugin());
         this.bukkitPlugin = bukkitPlugin;
-        this.log = bukkitPlugin.getPlugin().getLoggerFactory().create(BukkitPluginMessenger.class);
+        this.log = bukkitPlugin.getPlugin().getLoggerFactory().create(BukkitPluginMessenger.class, "BukkitPluginMessenger");
     }
 
     @Override
     public void sendPluginMessage(final String channelIdentifier, final Object... message) {
+        log.debug("Sending PluginMessage with channel: " + channelIdentifier);
         final UUID uuid = (UUID) message[0];
         final byte[] data = getDataAsByte(message);
 
         if (data != null) {
             final Player bukkitPlayer = bukkitPlugin.getServer().getPlayer(uuid);
             if (bukkitPlayer != null) {
+                log.debug("Sending PluginMessage to player: " + bukkitPlayer.getName());
                 bukkitPlayer.sendPluginMessage(bukkitPlugin, channelIdentifier, data);
             }
         } else {

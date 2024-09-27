@@ -5,6 +5,7 @@ import com.jannik_kuehn.common.api.LoriTimeAPI;
 import com.jannik_kuehn.common.api.logger.LoriTimeLogger;
 import com.jannik_kuehn.common.command.LoriTimeAdminCommand;
 import com.jannik_kuehn.common.command.LoriTimeCommand;
+import com.jannik_kuehn.common.command.LoriTimeDebugCommand;
 import com.jannik_kuehn.common.command.LoriTimeInfoCommand;
 import com.jannik_kuehn.common.command.LoriTimeTopCommand;
 import com.jannik_kuehn.common.module.afk.MasteredAfkPlayerHandling;
@@ -68,6 +69,7 @@ public class LoriTimeBungee extends Plugin {
         new BungeeCommand(this, audiences, new LoriTimeCommand(loriTimePlugin, loriTimePlugin.getLocalization()));
         new BungeeCommand(this, audiences, new LoriTimeInfoCommand(loriTimePlugin, loriTimePlugin.getLocalization()));
         new BungeeCommand(this, audiences, new LoriTimeTopCommand(loriTimePlugin, loriTimePlugin.getLocalization()));
+        new BungeeCommand(this, audiences, new LoriTimeDebugCommand(loriTimePlugin, loriTimePlugin.getLocalization()));
     }
 
     private void enableAsSlave() {

@@ -44,6 +44,11 @@ public class YamlKeyValueStore implements KeyValueStore {
     }
 
     @Override
+    public void setTemporary(final String key, final Object value) {
+        data.put(key, value);
+    }
+
+    @Override
     public Object get(final String key) {
         return data.get(key);
     }

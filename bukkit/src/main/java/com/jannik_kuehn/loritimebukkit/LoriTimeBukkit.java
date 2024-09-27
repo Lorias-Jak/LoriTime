@@ -7,6 +7,7 @@ import com.jannik_kuehn.common.api.storage.TimeStorage;
 import com.jannik_kuehn.common.command.LoriTimeAdminCommand;
 import com.jannik_kuehn.common.command.LoriTimeAfkCommand;
 import com.jannik_kuehn.common.command.LoriTimeCommand;
+import com.jannik_kuehn.common.command.LoriTimeDebugCommand;
 import com.jannik_kuehn.common.command.LoriTimeInfoCommand;
 import com.jannik_kuehn.common.command.LoriTimeTopCommand;
 import com.jannik_kuehn.common.module.afk.MasteredAfkPlayerHandling;
@@ -103,6 +104,7 @@ public class LoriTimeBukkit extends JavaPlugin {
             Bukkit.getPluginManager().registerEvents(new BukkitPlayerAfkListener(loriTimePlugin), this);
             new BukkitCommand(this, new LoriTimeAfkCommand(loriTimePlugin, loriTimePlugin.getLocalization()));
         }
+        new BukkitCommand(this, new LoriTimeDebugCommand(loriTimePlugin, loriTimePlugin.getLocalization()));
         new BukkitMetrics(this, new Metrics(this, 22500));
     }
 

@@ -16,6 +16,11 @@ public class YamlConfiguration extends Configuration {
     }
 
     @Override
+    public void setTemporaryValue(final String key, final Object value) {
+        keyValueStore.setTemporary(key, value);
+    }
+
+    @Override
     public String getString(final String key) {
         return (String) keyValueStore.get(key);
     }

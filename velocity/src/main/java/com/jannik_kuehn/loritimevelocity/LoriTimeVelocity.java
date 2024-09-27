@@ -5,6 +5,7 @@ import com.jannik_kuehn.common.api.LoriTimeAPI;
 import com.jannik_kuehn.common.api.logger.LoriTimeLogger;
 import com.jannik_kuehn.common.command.LoriTimeAdminCommand;
 import com.jannik_kuehn.common.command.LoriTimeCommand;
+import com.jannik_kuehn.common.command.LoriTimeDebugCommand;
 import com.jannik_kuehn.common.command.LoriTimeInfoCommand;
 import com.jannik_kuehn.common.command.LoriTimeTopCommand;
 import com.jannik_kuehn.common.module.afk.MasteredAfkPlayerHandling;
@@ -101,6 +102,7 @@ public class LoriTimeVelocity {
         commands.add(new VelocityCommand(this, new LoriTimeCommand(loriTimePlugin, loriTimePlugin.getLocalization())));
         commands.add(new VelocityCommand(this, new LoriTimeInfoCommand(loriTimePlugin, loriTimePlugin.getLocalization())));
         commands.add(new VelocityCommand(this, new LoriTimeTopCommand(loriTimePlugin, loriTimePlugin.getLocalization())));
+        commands.add(new VelocityCommand(this, new LoriTimeDebugCommand(loriTimePlugin, loriTimePlugin.getLocalization())));
     }
 
     private void enableAsSlave() {

@@ -25,7 +25,7 @@ public class AfkStatusProvider {
 
     public AfkStatusProvider(final LoriTimePlugin loriTimePlugin, final AfkHandling afkHandling) {
         this.loriTimePlugin = loriTimePlugin;
-        this.log = loriTimePlugin.getLoggerFactory().create(AfkStatusProvider.class);
+        this.log = loriTimePlugin.getLoggerFactory().create(AfkStatusProvider.class, "AfkStatusProvider");
         this.afkCheckedPlayers = new ConcurrentHashMap<>();
         this.afkPlayerHandling = afkHandling;
 
@@ -34,6 +34,7 @@ public class AfkStatusProvider {
     }
 
     public void reloadConfigValues() {
+        log.debug("Reloading config values of AfkStatusProvider");
         afkPlayerHandling.reloadConfigValues();
         final OptionalLong afkConfigOptional = loriTimePlugin.getParser().parseToSeconds(loriTimePlugin.getConfig().getString("afk.after", "15m"));
         if (afkConfigOptional.isEmpty()) {
@@ -41,11 +42,14 @@ public class AfkStatusProvider {
             return;
         }
         afkConfigTime = afkConfigOptional.getAsLong() * 1000L;
+        log.debug("Reloaded afkConfigTime. New value: " + afkConfigTime);
     }
 
     public void restartAfkCheck() {
+        log.debug("Restarting afk-check");
         stopAfkCheck();
         final boolean afkEnabled = loriTimePlugin.getConfig().getBoolean("afk.enabled", false);
+        log.debug("Afk enabled: " + afkEnabled);
         if (afkEnabled) {
             startAfkCheck();
         }
@@ -56,12 +60,15 @@ public class AfkStatusProvider {
             log.error("afk.after time needs to be at least 1! Disabling afk feature...");
             return;
         }
+        log.debug("Starting afk-check");
         final int repeatTime = loriTimePlugin.getConfig().getInt("afk.repeatCheck", 30);
         afkCheck = loriTimePlugin.getScheduler().scheduleAsync(repeatTime / 2L, repeatTime, this::repeatedTimeCheck);
     }
 
     private void stopAfkCheck() {
+        log.debug("Check for afk-check running");
         if (afkCheck != null) {
+            log.debug("Stopped afk-check");
             afkCheck.cancel();
             afkCheck = null;
         }
@@ -74,13 +81,16 @@ public class AfkStatusProvider {
             final long playerAfkTime = entry.getValue();
             final long currentTime = System.currentTimeMillis();
             if (loriTimePlugin.getServer().getPlayer(player.getUniqueId()).isEmpty()) {
+                log.debug("Player is not online anymore. Removing player from afk-check. Continue with next player");
                 afkCheckedPlayers.remove(player);
                 continue;
             }
             if (getRealPlayer(player).isAfk()) {
+                log.debug("Player is already afk. Continue with next player");
                 continue;
             }
             if (currentTime - playerAfkTime >= afkConfigTime) {
+                log.debug("Player is afk now. Setting player to afk");
                 getRealPlayer(player).setAFk(true);
                 final long timeToRemove = (currentTime - playerAfkTime) / 1000L;
                 afkPlayerHandling.executePlayerAfk(player, timeToRemove);
@@ -91,11 +101,10 @@ public class AfkStatusProvider {
 
     public void resetTimer(final LoriTimePlayer player) {
         if (player.isAfk()) {
+            log.debug("Player is afk. Resuming player cause of reset");
             player.setAFk(false);
             afkPlayerHandling.executePlayerResume(player);
         }
-
-        afkCheckedPlayers.remove(player);
         afkCheckedPlayers.put(player, System.currentTimeMillis());
     }
 
@@ -123,19 +132,24 @@ public class AfkStatusProvider {
     }
 
     public void switchPlayerAFK(final LoriTimePlayer player, final long timeToRemove) {
+        log.debug("Switching player afk status from '" + player.getName() + "'");
         final LoriTimePlayer target = getRealPlayer(player);
         if (!target.isAfk()) {
+            log.debug("Setting player" + target.getName() + "to afk");
             target.setAFk(true);
-            afkPlayerHandling.executePlayerAfk(target, 0);
+            afkPlayerHandling.executePlayerAfk(target, timeToRemove);
         } else {
+            log.debug("Resuming player '" + target.getName() + "'");
             target.setAFk(false);
             afkPlayerHandling.executePlayerResume(target);
         }
     }
 
     public void setPlayerAFK(final LoriTimePlayer player, final long timeToRemove) {
+        log.debug("Setting player '" + player.getName() + "' to afk");
         final LoriTimePlayer target = getRealPlayer(player);
         if (target.isAfk()) {
+            log.debug("Player '" + target.getName() + "' is already afk. Skipping the process...");
             return;
         }
         target.setAFk(true);
@@ -143,8 +157,10 @@ public class AfkStatusProvider {
     }
 
     public void resumePlayerAFK(final LoriTimePlayer player) {
+        log.debug("Resuming player '" + player.getName() + "'");
         final LoriTimePlayer target = getRealPlayer(player);
         if (!target.isAfk()) {
+            log.debug("Player '" + target.getName() + "' is not afk. Skipping the resuming");
             return;
         }
         target.setAFk(false);

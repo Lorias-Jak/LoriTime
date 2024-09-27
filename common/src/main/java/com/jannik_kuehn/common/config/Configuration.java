@@ -13,6 +13,8 @@ public abstract class Configuration {
 
     public abstract void setValue(String key, Object value);
 
+    public abstract void setTemporaryValue(String key, Object value);
+
     public abstract String getString(String key);
 
     public abstract String getString(String key, String def);

@@ -5,7 +5,13 @@ general:
   # If true, the plugin debugger will be enabled.
   # This will print out more information in the console.
   # Do not let this enabled, it will spam your console.
+  # This Config option has to be set manually! You cant change this via the in-game command!
   debug: false
+
+  # The time after wich the debugger will be disabled automatically.
+  # Set this to -1 to disable the auto-disable function of the debugger.
+  # The unit for this is minutes.
+  debugAutoDisableTime: 30
 
   # Default Language of the unit-modifier and the command responses for the player.
   # To see all available options see: https://github.com/Lorias-Jak/LoriTime/tree/main/src/main/resources/localization

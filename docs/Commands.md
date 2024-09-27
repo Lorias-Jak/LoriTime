@@ -53,6 +53,12 @@ LoriTime provides a number of different commands that you can use. This page lis
     <td class="tg-9wq8">Reloads the LoriTime plugin and config</td>
   </tr>
   <tr>
+      <td class="tg-9wq8">/ltdebug</td>
+      <td class="tg-9wq8">loritimedebug</td>
+      <td class="tg-9wq8">Enable or disable the debugger.</td>
+      <td class="tg-9wq8">loritime.debug</td>
+  </tr>
+  <tr>
       <td class="tg-9wq8">/afk</td>
       <td class="tg-9wq8">/</td>
       <td class="tg-9wq8">Set yourself AFK or not</td>
@@ -64,7 +70,9 @@ LoriTime provides a number of different commands that you can use. This page lis
 
 <br>
 
-> **Note:** You can customize the plugin commands by adding an alias or removing them in the config
+> **Note:** The debugger will be turned off automatically after the configured time. Be aware that you need to enable the debugger via the console if you use MultiSetup.<br>
+
+> **Note:** You can customize the plugin commands by adding an alias or removing them in the config.
 <details>
 <summary>Custom command alias</summary>
 

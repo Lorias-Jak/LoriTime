@@ -12,38 +12,39 @@ import net.md_5.bungee.api.connection.ProxiedPlayer;
 
 import java.util.Optional;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 public class BungeeServer implements CommonServer {
+    private final Logger bungeeLogger;
+
+    private final ProxyServer proxyServer;
+
     private final String version;
 
     private final BungeeAudiences audiences;
 
-    private ProxyServer server;
-
     private String serverMode;
 
-    public BungeeServer(final String version, final BungeeAudiences audiences) {
+    public BungeeServer(final Logger bungeeLogger, final ProxyServer proxyServer, final String version, final BungeeAudiences audiences) {
+        this.bungeeLogger = bungeeLogger;
+        this.proxyServer = proxyServer;
         this.version = version;
         this.audiences = audiences;
     }
 
-    public void enable(final ProxyServer server) {
-        this.server = server;
-    }
-
     @Override
     public Optional<CommonSender> getPlayer(final UUID uniqueId) {
-        return Optional.of(new BungeePlayer(server.getPlayer(uniqueId)));
+        return Optional.of(new BungeePlayer(proxyServer.getPlayer(uniqueId)));
     }
 
     @Override
     public Optional<CommonSender> getPlayer(final String name) {
-        return Optional.of(new BungeePlayer(server.getPlayer(name)));
+        return Optional.of(new BungeePlayer(proxyServer.getPlayer(name)));
     }
 
     @Override
     public CommonSender[] getOnlinePlayers() {
-        return server.getPlayers().stream()
+        return proxyServer.getPlayers().stream()
                 .map(BungeePlayer::new)
                 .toList().toArray(new BungeePlayer[0]);
     }
@@ -52,21 +53,21 @@ public class BungeeServer implements CommonServer {
     public boolean dispatchCommand(final CommonSender sender, final String command) {
         final CommandSender commandSource;
         if (sender.isConsole()) {
-            commandSource = server.getConsole();
+            commandSource = proxyServer.getConsole();
         } else {
             if (getPlayer(sender.getUniqueId()).isPresent()) {
-                commandSource = server.getPlayer(sender.getUniqueId());
+                commandSource = proxyServer.getPlayer(sender.getUniqueId());
             } else {
                 return false;
             }
         }
-        server.getPluginManager().dispatchCommand(commandSource, command);
+        proxyServer.getPluginManager().dispatchCommand(commandSource, command);
         return true;
     }
 
     @Override
     public String getServerVersion() {
-        return server.getVersion();
+        return proxyServer.getVersion();
     }
 
     @Override
@@ -90,17 +91,27 @@ public class BungeeServer implements CommonServer {
         if (optionalUUID.isEmpty()) {
             return;
         }
-        final ProxiedPlayer proxiedPlayer = server.getPlayer(player.getUniqueId());
+        final ProxiedPlayer proxiedPlayer = proxyServer.getPlayer(player.getUniqueId());
         proxiedPlayer.disconnect(BungeeComponentSerializer.get().serialize(message));
     }
 
     @Override
     public void sendMessageToConsole(final TextComponent message) {
-        audiences.sender(server.getConsole()).sendMessage(message);
+        audiences.sender(proxyServer.getConsole()).sendMessage(message);
     }
 
     @Override
     public String getPluginVersion() {
         return version;
+    }
+
+    @Override
+    public Logger getJavaLogger() {
+        return bungeeLogger;
+    }
+
+    @Override
+    public org.slf4j.Logger getSl4jLogger() {
+        return null;
     }
 }

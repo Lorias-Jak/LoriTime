@@ -1,5 +1,6 @@
 package com.jannik_kuehn.loritimebukkit.messenger;
 
+import com.jannik_kuehn.common.api.logger.LoriTimeLogger;
 import com.jannik_kuehn.common.module.messaging.PluginMessaging;
 import com.jannik_kuehn.loritimebukkit.LoriTimeBukkit;
 import org.bukkit.entity.Player;
@@ -10,9 +11,12 @@ public class BukkitPluginMessenger extends PluginMessaging {
 
     private final LoriTimeBukkit bukkitPlugin;
 
+    private final LoriTimeLogger log;
+
     public BukkitPluginMessenger(final LoriTimeBukkit bukkitPlugin) {
         super(bukkitPlugin.getPlugin());
         this.bukkitPlugin = bukkitPlugin;
+        this.log = bukkitPlugin.getPlugin().getLoggerFactory().create(BukkitPluginMessenger.class);
     }
 
     @Override
@@ -26,7 +30,7 @@ public class BukkitPluginMessenger extends PluginMessaging {
                 bukkitPlayer.sendPluginMessage(bukkitPlugin, channelIdentifier, data);
             }
         } else {
-            loriTimePlugin.getLogger().warning("could not send plugin message, data is null");
+            log.warn("could not send plugin message, data is null");
         }
     }
 }

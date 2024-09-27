@@ -2,6 +2,7 @@ package com.jannik_kuehn.loritimebukkit.placeholder;
 
 import com.jannik_kuehn.common.LoriTimePlugin;
 import com.jannik_kuehn.common.api.LoriTimePlayer;
+import com.jannik_kuehn.common.api.logger.LoriTimeLogger;
 import com.jannik_kuehn.common.api.storage.TimeStorage;
 import com.jannik_kuehn.common.exception.StorageException;
 import com.jannik_kuehn.common.utils.TimeUtil;
@@ -18,16 +19,20 @@ import java.util.UUID;
 @SuppressFBWarnings("HE_INHERITS_EQUALS_USE_HASHCODE")
 public class LoriTimePlaceholder extends PlaceholderExpansion {
 
-    private final LoriTimePlugin plugin;
+    private final LoriTimePlugin loriTimePlugin;
 
     private final TimeStorage timeStorage;
+
+    private final LoriTimeLogger log;
 
     private final Map<UUID, Long> offlinePlayerTime;
 
     public LoriTimePlaceholder(final LoriTimePlugin plugin, final TimeStorage timeStorage) {
         super();
-        this.plugin = plugin;
+        this.loriTimePlugin = plugin;
         this.timeStorage = timeStorage;
+
+        this.log = loriTimePlugin.getLoggerFactory().create(LoriTimePlaceholder.class);
         this.offlinePlayerTime = new HashMap<>();
     }
 
@@ -44,8 +49,8 @@ public class LoriTimePlaceholder extends PlaceholderExpansion {
             case "months" -> TimeUtil.getMonths(getUnformattedOnlineTime(player));
             case "years" -> TimeUtil.getYears(getUnformattedOnlineTime(player));
             case "afk" -> {
-                if (plugin.isAfkEnabled()) {
-                    yield String.valueOf(plugin.getAfkStatusProvider().getRealPlayer(new LoriTimePlayer(player.getUniqueId(), player.getName())).isAfk());
+                if (loriTimePlugin.isAfkEnabled()) {
+                    yield String.valueOf(loriTimePlugin.getAfkStatusProvider().getRealPlayer(new LoriTimePlayer(player.getUniqueId(), player.getName())).isAfk());
                 }
                 yield "Feature not enabled!";
             }
@@ -66,7 +71,7 @@ public class LoriTimePlaceholder extends PlaceholderExpansion {
                 onlineTime = optionalLong.getAsLong();
             }
         } catch (final StorageException e) {
-            plugin.getLogger().error("Error while getting the online time placeholder of player " + player.getName(), e);
+            log.error("Error while getting the online time placeholder of player " + player.getName(), e);
         }
         if (!player.isOnline()) {
             offlinePlayerTime.put(player.getUniqueId(), onlineTime);
@@ -75,7 +80,7 @@ public class LoriTimePlaceholder extends PlaceholderExpansion {
     }
 
     private String getFormattedOnlineTime(final OfflinePlayer player) {
-        return TimeUtil.formatTime(getUnformattedOnlineTime(player), plugin.getLocalization());
+        return TimeUtil.formatTime(getUnformattedOnlineTime(player), loriTimePlugin.getLocalization());
     }
 
     @Override
@@ -95,6 +100,6 @@ public class LoriTimePlaceholder extends PlaceholderExpansion {
 
     @Override
     public @NotNull String getVersion() {
-        return plugin.getServer().getPluginVersion();
+        return loriTimePlugin.getServer().getPluginVersion();
     }
 }

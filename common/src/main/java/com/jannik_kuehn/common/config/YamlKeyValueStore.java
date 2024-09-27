@@ -1,6 +1,7 @@
 package com.jannik_kuehn.common.config;
 
 import com.jannik_kuehn.common.LoriTimePlugin;
+import com.jannik_kuehn.common.api.logger.LoriTimeLogger;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 
@@ -20,7 +21,7 @@ import java.util.Set;
 public class YamlKeyValueStore implements KeyValueStore {
     private final String filePath;
 
-    private final LoriTimePlugin loriTimePlugin;
+    private final LoriTimeLogger log;
 
     private final Map<String, Object> data;
 
@@ -28,7 +29,8 @@ public class YamlKeyValueStore implements KeyValueStore {
 
     public YamlKeyValueStore(final String filePath) {
         this.filePath = filePath;
-        this.loriTimePlugin = LoriTimePlugin.getInstance();
+        final LoriTimePlugin loriTimePlugin = LoriTimePlugin.getInstance();
+        this.log = loriTimePlugin.getLoggerFactory().create(YamlKeyValueStore.class);
         this.data = new HashMap<>();
         loaded = false;
 
@@ -81,7 +83,7 @@ public class YamlKeyValueStore implements KeyValueStore {
             final Map<String, Object> loadedData = yaml.load(input);
             if (loadedData == null) {
                 loaded = true;
-                LoriTimePlugin.getInstance().getLogger().warning("Your file '" + filePath + "' seems to be empty. Is this right?");
+                log.warn("Your file '" + filePath + "' seems to be empty. Is this right?");
                 return;
             }
             data.clear();
@@ -90,10 +92,10 @@ public class YamlKeyValueStore implements KeyValueStore {
             loaded = true;
         } catch (final FileNotFoundException e) {
             loaded = false;
-            LoriTimePlugin.getInstance().getLogger().error("Failed to load data from file: " + filePath, e);
+            log.error("Failed to load data from file: " + filePath, e);
         } catch (final IOException e) {
             loaded = false;
-            LoriTimePlugin.getInstance().getLogger().error("IO Exception while loading data from file: " + filePath, e);
+            log.error("IO Exception while loading data from file: " + filePath, e);
         }
     }
 
@@ -121,7 +123,7 @@ public class YamlKeyValueStore implements KeyValueStore {
         try (OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(filePath), StandardCharsets.UTF_8)) {
             yaml.dump(data, writer);
         } catch (final IOException e) {
-            loriTimePlugin.getLogger().error("Failed to save data to file: " + filePath, e);
+            log.error("Failed to save data to file: " + filePath, e);
         }
     }
 

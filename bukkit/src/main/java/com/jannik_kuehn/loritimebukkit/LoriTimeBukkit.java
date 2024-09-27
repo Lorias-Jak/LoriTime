@@ -2,7 +2,7 @@ package com.jannik_kuehn.loritimebukkit;
 
 import com.jannik_kuehn.common.LoriTimePlugin;
 import com.jannik_kuehn.common.api.LoriTimeAPI;
-import com.jannik_kuehn.common.api.common.CommonLogger;
+import com.jannik_kuehn.common.api.logger.LoriTimeLogger;
 import com.jannik_kuehn.common.api.storage.TimeStorage;
 import com.jannik_kuehn.common.command.LoriTimeAdminCommand;
 import com.jannik_kuehn.common.command.LoriTimeAfkCommand;
@@ -20,7 +20,6 @@ import com.jannik_kuehn.loritimebukkit.messenger.BukkitPluginMessenger;
 import com.jannik_kuehn.loritimebukkit.messenger.SlavedTimeStorageCache;
 import com.jannik_kuehn.loritimebukkit.placeholder.LoriTimePlaceholder;
 import com.jannik_kuehn.loritimebukkit.schedule.BukkitScheduleAdapter;
-import com.jannik_kuehn.loritimebukkit.util.BukkitLogger;
 import com.jannik_kuehn.loritimebukkit.util.BukkitMetrics;
 import com.jannik_kuehn.loritimebukkit.util.BukkitServer;
 import org.bstats.bukkit.Metrics;
@@ -31,23 +30,25 @@ import org.bukkit.plugin.messaging.PluginMessageListener;
 
 public class LoriTimeBukkit extends JavaPlugin {
 
+    private LoriTimeLogger log;
+
     private LoriTimePlugin loriTimePlugin;
 
     private BukkitPluginMessenger bukkitPluginMessenger;
 
     @Override
     public void onEnable() {
-        final CommonLogger logger = new BukkitLogger(getLogger());
         final BukkitScheduleAdapter scheduleAdapter = new BukkitScheduleAdapter(this, Bukkit.getScheduler());
-        final BukkitServer bukkitServer = new BukkitServer(getDescription().getVersion());
-        this.loriTimePlugin = new LoriTimePlugin(logger, this.getDataFolder(), scheduleAdapter, bukkitServer);
-        bukkitServer.enable(this);
+        final BukkitServer bukkitServer = new BukkitServer(this, getDescription().getVersion());
+        this.loriTimePlugin = new LoriTimePlugin(this.getDataFolder(), scheduleAdapter, bukkitServer, null);
+        this.log = loriTimePlugin.getLoggerFactory().create(LoriTimeBukkit.class);
+
         try {
             loriTimePlugin.enable();
             LoriTimeAPI.setPlugin(loriTimePlugin);
         } catch (final Exception e) {
             loriTimePlugin.disable();
-            logger.warning("Error while enabling the plugin! Disabling the plugin...", e);
+            log.warn("Error while enabling the plugin! Disabling the plugin...", e);
             return;
         }
 
@@ -56,7 +57,7 @@ public class LoriTimeBukkit extends JavaPlugin {
         } else if (bukkitServer.getServerMode().equalsIgnoreCase("slave")) {
             enableAsSlave();
         } else {
-            logger.severe("Server mode is not set correctly! Please set the server mode to 'master' or 'slave' in the config.yml. Disabling the plugin...");
+            log.error("Server mode is not set correctly! Please set the server mode to 'master' or 'slave' in the config.yml. Disabling the plugin...");
             loriTimePlugin.disable();
         }
         enableRemainingFeatures();

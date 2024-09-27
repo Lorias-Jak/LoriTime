@@ -1,6 +1,7 @@
 package com.jannik_kuehn.loritimebukkit.listener;
 
 import com.jannik_kuehn.common.LoriTimePlugin;
+import com.jannik_kuehn.common.api.logger.LoriTimeLogger;
 import com.jannik_kuehn.common.exception.StorageException;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -13,8 +14,11 @@ public class TimeAccumulatorBukkitListener implements Listener {
 
     private final LoriTimePlugin plugin;
 
+    private final LoriTimeLogger log;
+
     public TimeAccumulatorBukkitListener(final LoriTimePlugin plugin) {
         this.plugin = plugin;
+        this.log = plugin.getLoggerFactory().create(TimeAccumulatorBukkitListener.class);
     }
 
     @EventHandler
@@ -25,7 +29,7 @@ public class TimeAccumulatorBukkitListener implements Listener {
             try {
                 plugin.getTimeStorage().startAccumulating(uuid, now);
             } catch (final StorageException e) {
-                plugin.getLogger().warning("could not start accumulating online time for player " + uuid, e);
+                log.warn("could not start accumulating online time for player " + uuid, e);
             }
         });
     }
@@ -38,7 +42,7 @@ public class TimeAccumulatorBukkitListener implements Listener {
             try {
                 plugin.getTimeStorage().stopAccumulatingAndSaveOnlineTime(uuid, now);
             } catch (final StorageException e) {
-                plugin.getLogger().warning("error while stopping accumulation of online time for player " + uuid, e);
+                log.warn("error while stopping accumulation of online time for player " + uuid, e);
             }
         });
     }

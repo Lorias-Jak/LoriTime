@@ -2,6 +2,10 @@
 # General #
 ###########
 general:
+  # If true, the plugin debugger will be enabled.
+  # This will print out more information in the console.
+  # Do not let this enabled, it will spam your console.
+  debug: false
 
   # Default Language of the unit-modifier and the command responses for the player.
   # To see all available options see: https://github.com/Lorias-Jak/LoriTime/tree/main/src/main/resources/localization

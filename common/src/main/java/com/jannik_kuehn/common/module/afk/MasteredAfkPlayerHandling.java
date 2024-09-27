@@ -2,13 +2,16 @@ package com.jannik_kuehn.common.module.afk;
 
 import com.jannik_kuehn.common.LoriTimePlugin;
 import com.jannik_kuehn.common.api.LoriTimePlayer;
+import com.jannik_kuehn.common.api.logger.LoriTimeLogger;
 import com.jannik_kuehn.common.exception.StorageException;
 import com.jannik_kuehn.common.utils.TimeUtil;
 
 public class MasteredAfkPlayerHandling extends AfkHandling {
+    private final LoriTimeLogger log;
 
     public MasteredAfkPlayerHandling(final LoriTimePlugin plugin) {
         super(plugin);
+        this.log = plugin.getLoggerFactory().create(MasteredAfkPlayerHandling.class);
     }
 
     @Override
@@ -22,7 +25,7 @@ public class MasteredAfkPlayerHandling extends AfkHandling {
                 loriTimePlugin.getTimeStorage().flushOnlineTimeCache();
                 loriTimePlugin.getTimeStorage().addTime(loriTimePlayer.getUniqueId(), -timeToRemove);
             } catch (final Exception e) {
-                loriTimePlugin.getLogger().warning("Error while removing online time while afk for player " + loriTimePlayer.getUniqueId(), e);
+                log.warn("Error while removing online time while afk for player " + loriTimePlayer.getUniqueId(), e);
             }
         }
 
@@ -55,7 +58,7 @@ public class MasteredAfkPlayerHandling extends AfkHandling {
         try {
             loriTimePlugin.getTimeStorage().stopAccumulatingAndSaveOnlineTime(loriTimePlayer.getUniqueId(), now);
         } catch (final StorageException e) {
-            loriTimePlugin.getLogger().error("error while stopping accumulation of online time for player " + loriTimePlayer.getName(), e);
+            log.error("error while stopping accumulation of online time for player " + loriTimePlayer.getName(), e);
         }
     }
 
@@ -64,7 +67,7 @@ public class MasteredAfkPlayerHandling extends AfkHandling {
         try {
             loriTimePlugin.getTimeStorage().startAccumulating(loriTimePlayer.getUniqueId(), now);
         } catch (final StorageException e) {
-            loriTimePlugin.getLogger().error("error while starting accumulation of online time for player " + loriTimePlayer, e);
+            log.error("error while starting accumulation of online time for player " + loriTimePlayer, e);
         }
     }
 }

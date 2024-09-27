@@ -2,6 +2,7 @@ package com.jannik_kuehn.loritimebukkit.command;
 
 import com.jannik_kuehn.common.api.common.CommonCommand;
 import com.jannik_kuehn.common.api.common.CommonSender;
+import com.jannik_kuehn.common.api.logger.LoriTimeLogger;
 import com.jannik_kuehn.loritimebukkit.LoriTimeBukkit;
 import com.jannik_kuehn.loritimebukkit.util.BukkitPlayer;
 import com.jannik_kuehn.loritimebukkit.util.BukkitSender;
@@ -28,9 +29,12 @@ public class BukkitCommand implements CommandExecutor, TabExecutor {
 
     private final CommonCommand command;
 
+    private final LoriTimeLogger log;
+
     public BukkitCommand(final LoriTimeBukkit bukkitPlugin, final CommonCommand command) {
         this.bukkitPlugin = bukkitPlugin;
         this.command = command;
+        this.log = bukkitPlugin.getPlugin().getLoggerFactory().create(BukkitCommand.class);
 
         register();
     }
@@ -65,7 +69,7 @@ public class BukkitCommand implements CommandExecutor, TabExecutor {
             commandMapField.setAccessible(true);
             return (CommandMap) commandMapField.get(craftServer);
         } catch (final Exception e) {
-            bukkitPlugin.getPlugin().getLogger().error("Error while getting the CommandMap!", e);
+            log.error("Error while getting the CommandMap!", e);
         }
         return null;
     }
@@ -77,7 +81,7 @@ public class BukkitCommand implements CommandExecutor, TabExecutor {
             constructor.setAccessible(true);
             command = constructor.newInstance(name, plugin);
         } catch (final Exception e) {
-            bukkitPlugin.getPlugin().getLogger().error("Error while creating a plugin Command", e);
+            log.error("Error while creating a plugin Command", e);
         }
         return command;
     }
@@ -86,7 +90,7 @@ public class BukkitCommand implements CommandExecutor, TabExecutor {
     private void register() {
         final CommandMap commandMap = getCommandMap();
         if (commandMap == null) {
-            bukkitPlugin.getPlugin().getLogger().severe("Can not register the command '" + command.getCommandName() + "'! Skipping the registration...");
+            log.error("Can not register the command '" + command.getCommandName() + "'! Skipping the registration...");
             return;
         }
         final PluginCommand pluginCommand = createPluginCommand(command.getCommandName(), bukkitPlugin);

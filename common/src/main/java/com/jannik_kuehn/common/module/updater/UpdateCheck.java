@@ -4,8 +4,8 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.jannik_kuehn.common.LoriTimePlugin;
-import com.jannik_kuehn.common.api.common.CommonLogger;
 import com.jannik_kuehn.common.api.common.CommonSender;
+import com.jannik_kuehn.common.api.logger.LoriTimeLogger;
 import com.jannik_kuehn.common.api.scheduler.PluginTask;
 import com.jannik_kuehn.common.config.localization.Localization;
 import net.kyori.adventure.text.TextComponent;
@@ -34,7 +34,7 @@ public class UpdateCheck {
     /**
      * The logger to log messages.
      */
-    private final CommonLogger log;
+    private final LoriTimeLogger log;
 
     /**
      * The localization class to get messages.
@@ -73,7 +73,7 @@ public class UpdateCheck {
      */
     public UpdateCheck(final LoriTimePlugin loriTime) {
         this.loriTime = loriTime;
-        this.log = loriTime.getLogger();
+        this.log = loriTime.getLoggerFactory().create(UpdateCheck.class);
         this.localization = loriTime.getLocalization();
         this.currentVersion = loriTime.getServer().getPluginVersion();
     }
@@ -116,7 +116,7 @@ public class UpdateCheck {
         log.info("Checking for updates...");
         final JsonArray jsonArray = getLatestVersion();
         if (jsonArray == null || jsonArray.isEmpty()) {
-            log.warning("Could not check for updates, got an empty result from Web-API!");
+            log.warn("Could not check for updates, got an empty result from Web-API!");
             return;
         }
         final JsonObject latestVersionInfo = jsonArray.get(0).getAsJsonObject();
@@ -144,7 +144,7 @@ public class UpdateCheck {
             }
             return new Gson().fromJson(buffer.toString(), JsonArray.class);
         } catch (IOException | URISyntaxException e) {
-            log.warning("Could not check for updates: " + e.getMessage());
+            log.warn("Could not check for updates: " + e.getMessage());
             return null;
         }
     }

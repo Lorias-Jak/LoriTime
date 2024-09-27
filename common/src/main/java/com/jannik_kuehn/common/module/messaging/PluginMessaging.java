@@ -3,6 +3,7 @@ package com.jannik_kuehn.common.module.messaging;
 import com.jannik_kuehn.common.LoriTimePlugin;
 import com.jannik_kuehn.common.api.LoriTimePlayer;
 import com.jannik_kuehn.common.api.common.CommonSender;
+import com.jannik_kuehn.common.api.logger.LoriTimeLogger;
 import com.jannik_kuehn.common.exception.StorageException;
 import com.jannik_kuehn.common.utils.UuidUtil;
 
@@ -22,8 +23,11 @@ public abstract class PluginMessaging {
 
     protected final LoriTimePlugin loriTimePlugin;
 
+    private final LoriTimeLogger log;
+
     public PluginMessaging(final LoriTimePlugin loriTimePlugin) {
         this.loriTimePlugin = loriTimePlugin;
+        this.log = loriTimePlugin.getLoggerFactory().create(PluginMessaging.class);
     }
 
     public abstract void sendPluginMessage(String channelIdentifier, Object... message);
@@ -52,7 +56,7 @@ public abstract class PluginMessaging {
             }
             return byteOut.toByteArray();
         } catch (final IOException e) {
-            loriTimePlugin.getLogger().warning("could not serialize plugin message", e);
+            log.warn("could not serialize plugin message", e);
         }
         return null;
     }
@@ -88,10 +92,10 @@ public abstract class PluginMessaging {
                     loriTimePlugin.getAfkStatusProvider().resumePlayerAFK(player);
                     break;
                 default:
-                    loriTimePlugin.getLogger().warning("received invalid afk status!");
+                    log.warn("received invalid afk status!");
             }
         } catch (final IOException e) {
-            loriTimePlugin.getLogger().error("could not deserialize plugin message", e);
+            log.error("could not deserialize plugin message", e);
         }
     }
 
@@ -111,10 +115,10 @@ public abstract class PluginMessaging {
                     loriTimePlugin.getTimeStorage().addTime(playerUUID, input.readLong());
                     break;
                 default:
-                    loriTimePlugin.getLogger().warning("received invalid status: " + inputString);
+                    log.warn("received invalid status: " + inputString);
             }
         } catch (final IOException e) {
-            loriTimePlugin.getLogger().error("could not deserialize plugin message", e);
+            log.error("could not deserialize plugin message", e);
         } catch (final StorageException e) {
             throw new RuntimeException(e);
         }
@@ -125,7 +129,7 @@ public abstract class PluginMessaging {
         try {
             time = loriTimePlugin.getTimeStorage().getTime(playerUUID);
         } catch (final StorageException e) {
-            loriTimePlugin.getLogger().error("could not get time for " + playerUUID, e);
+            log.error("could not get time for " + playerUUID, e);
         }
         if (time.isPresent()) {
             return time.getAsLong();

@@ -2,6 +2,7 @@ package com.jannik_kuehn.common.storage.database;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.jannik_kuehn.common.LoriTimePlugin;
+import com.jannik_kuehn.common.api.logger.LoriTimeLogger;
 import com.jannik_kuehn.common.config.Configuration;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
@@ -35,14 +36,16 @@ public class MySQL implements Closeable, AutoCloseable {
 
     private final String tablePrefix;
 
-    private final LoriTimePlugin plugin;
+    private final LoriTimeLogger log;
 
     private HikariDataSource hikari;
 
     /**
      * @param config The {@link Configuration} for the connection
      */
-    public MySQL(final Configuration config, final LoriTimePlugin plugin) {
+    public MySQL(final Configuration config, final LoriTimePlugin loriTimePlugin) {
+        this.log = loriTimePlugin.getLoggerFactory().create(MySQL.class);
+
         this.mySqlHost = config.getString("mysql.host", "localhost");
         this.mySqlPort = config.getInt("mysql.port", 3306);
         this.mySqlDatabase = config.getString("mysql.database");
@@ -53,11 +56,11 @@ public class MySQL implements Closeable, AutoCloseable {
                 || uncheckedTablePrefix.toLowerCase(Locale.ROOT).contains("insert")
                 || uncheckedTablePrefix.toLowerCase(Locale.ROOT).contains("drop")
                 || uncheckedTablePrefix.toLowerCase(Locale.ROOT).contains("create")) {
-            plugin.getLogger().severe("Unsafe database table name detected! Going back to default.");
+            log.error("Unsafe database table name detected! Going back to default.");
             uncheckedTablePrefix = "lori_time";
         }
         this.tablePrefix = uncheckedTablePrefix;
-        this.plugin = plugin;
+
     }
 
     public boolean isClosed() {
@@ -66,28 +69,28 @@ public class MySQL implements Closeable, AutoCloseable {
 
     public void open() {
         if (!loadedJDBCDriver) {
-            plugin.getLogger().severe("JDBC Driver was not loaded!");
+            log.error("JDBC Driver was not loaded!");
             return;
         }
         if (isClosed()) {
-            plugin.getLogger().info("Connecting to (" + mySqlHost + ", " + mySqlPort + " ," + mySqlDatabase + ")...");
+            log.info("Connecting to (" + mySqlHost + ", " + mySqlPort + " ," + mySqlDatabase + ")...");
             final HikariConfig databaseConfig = getHikariConfig();
 
             try {
                 hikari = new HikariDataSource(databaseConfig);
             } catch (final Exception e) {
-                plugin.getLogger().severe("Probably wrong login data for MySQL-Server!");
+                log.error("Probably wrong login data for MySQL-Server!");
                 return;
             }
 
             if (!hikari.isClosed()) {
-                plugin.getLogger().info("Successfully connected to the MySQL-Server!");
+                log.info("Successfully connected to the MySQL-Server!");
                 return;
             }
-            plugin.getLogger().severe("Could not connect to the MySQL-Server!");
+            log.error("Could not connect to the MySQL-Server!");
             return;
         }
-        plugin.getLogger().severe("The MySQL connection is already open!");
+        log.error("The MySQL connection is already open!");
     }
 
     private HikariConfig getHikariConfig() {
@@ -113,13 +116,13 @@ public class MySQL implements Closeable, AutoCloseable {
     @Override
     public void close() {
         if (hikari != null) {
-            plugin.getLogger().info("Closing connection to (" + mySqlHost + ", " + mySqlPort + " ," + mySqlDatabase + ")...");
+            log.info("Closing connection to (" + mySqlHost + ", " + mySqlPort + " ," + mySqlDatabase + ")...");
             hikari.close();
             hikari = null;
-            plugin.getLogger().info("Successfully closed the connection to the MySQL-Server!");
+            log.info("Successfully closed the connection to the MySQL-Server!");
             return;
         }
-        plugin.getLogger().severe("Could not disconnect from the MySQL-Server!");
+        log.error("Could not disconnect from the MySQL-Server!");
     }
 
     public String getTablePrefix() {

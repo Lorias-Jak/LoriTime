@@ -1,5 +1,6 @@
 package com.jannik_kuehn.loritimebukkit.messenger;
 
+import com.jannik_kuehn.common.api.logger.LoriTimeLogger;
 import com.jannik_kuehn.common.api.scheduler.PluginTask;
 import com.jannik_kuehn.common.api.storage.TimeStorage;
 import com.jannik_kuehn.common.module.messaging.PluginMessaging;
@@ -26,6 +27,8 @@ public class SlavedTimeStorageCache extends PluginMessaging implements TimeStora
 
     private final BukkitPluginMessenger pluginMessenger;
 
+    private final LoriTimeLogger log;
+
     private final Map<String, Long> trackedPlayers;
 
     PluginTask fetchTask;
@@ -34,6 +37,8 @@ public class SlavedTimeStorageCache extends PluginMessaging implements TimeStora
         super(loriTimeBukkit.getPlugin());
         this.loriTimeBukkit = loriTimeBukkit;
         this.pluginMessenger = pluginMessenger;
+
+        this.log = loriTimeBukkit.getPlugin().getLoggerFactory().create(SlavedTimeStorageCache.class);
         this.trackedPlayers = new HashMap<>();
         this.fetchTask = loriTimePlugin.getScheduler().scheduleAsync(0, updateInterval, this::fetchOnlineTime);
     }
@@ -86,7 +91,7 @@ public class SlavedTimeStorageCache extends PluginMessaging implements TimeStora
                     trackedPlayers.put(playerUUID.toString(), input.readLong());
                 }
             } catch (final IOException e) {
-                loriTimePlugin.getLogger().error("could not deserialize plugin message", e);
+                log.error("could not deserialize plugin message", e);
             }
         }
     }
@@ -100,7 +105,7 @@ public class SlavedTimeStorageCache extends PluginMessaging implements TimeStora
                 player.sendPluginMessage(loriTimeBukkit, channelIdentifier, data);
             }
         } else {
-            loriTimePlugin.getLogger().warning("could not send plugin message, data is null");
+            log.warn("could not send plugin message, data is null");
         }
     }
 

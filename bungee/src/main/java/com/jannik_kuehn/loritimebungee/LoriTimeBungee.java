@@ -2,9 +2,10 @@ package com.jannik_kuehn.loritimebungee;
 
 import com.jannik_kuehn.common.LoriTimePlugin;
 import com.jannik_kuehn.common.api.LoriTimeAPI;
-import com.jannik_kuehn.common.api.common.CommonLogger;
+import com.jannik_kuehn.common.api.logger.LoriTimeLogger;
 import com.jannik_kuehn.common.command.LoriTimeAdminCommand;
 import com.jannik_kuehn.common.command.LoriTimeCommand;
+import com.jannik_kuehn.common.command.LoriTimeDebugCommand;
 import com.jannik_kuehn.common.command.LoriTimeInfoCommand;
 import com.jannik_kuehn.common.command.LoriTimeTopCommand;
 import com.jannik_kuehn.common.module.afk.MasteredAfkPlayerHandling;
@@ -13,7 +14,6 @@ import com.jannik_kuehn.loritimebungee.listener.PlayerNameBungeeListener;
 import com.jannik_kuehn.loritimebungee.listener.TimeAccumulatorBungeeListener;
 import com.jannik_kuehn.loritimebungee.listener.UpdateNotificationBungeeListener;
 import com.jannik_kuehn.loritimebungee.schedule.BungeeScheduleAdapter;
-import com.jannik_kuehn.loritimebungee.util.BungeeLogger;
 import com.jannik_kuehn.loritimebungee.util.BungeeMetrics;
 import com.jannik_kuehn.loritimebungee.util.BungeeServer;
 import net.kyori.adventure.platform.bungeecord.BungeeAudiences;
@@ -29,18 +29,20 @@ public class LoriTimeBungee extends Plugin {
 
     @Override
     public void onEnable() {
-        final CommonLogger logger = new BungeeLogger(getProxy().getLogger());
-        final BungeeScheduleAdapter scheduleAdapter = new BungeeScheduleAdapter(this, getProxy().getScheduler());
         audiences = BungeeAudiences.create(this);
-        final BungeeServer bungeeServer = new BungeeServer(getDescription().getVersion(), audiences);
-        this.loriTimePlugin = new LoriTimePlugin(logger, this.getDataFolder(), scheduleAdapter, bungeeServer);
-        bungeeServer.enable(getProxy());
+        final BungeeScheduleAdapter scheduleAdapter = new BungeeScheduleAdapter(this, getProxy().getScheduler());
+        final BungeeServer bungeeServer = new BungeeServer(getLogger(), getProxy(), getDescription().getVersion(), audiences);
+        final String loggerTopic = "LoriTimeBungee";
+        this.loriTimePlugin = new LoriTimePlugin(this.getDataFolder(), scheduleAdapter, bungeeServer, loggerTopic);
+
+        final LoriTimeLogger log = loriTimePlugin.getLoggerFactory().create(LoriTimeBungee.class, loggerTopic);
+
         try {
             loriTimePlugin.enable();
             LoriTimeAPI.setPlugin(loriTimePlugin);
         } catch (final Exception e) {
             loriTimePlugin.disable();
-            logger.warning("Error while enabling the plugin! Disabling the plugin...", e);
+            log.warn("Error while enabling the plugin! Disabling the plugin...", e);
             return;
         }
 
@@ -49,7 +51,7 @@ public class LoriTimeBungee extends Plugin {
         } else if (bungeeServer.getServerMode().equalsIgnoreCase("slave")) {
             enableAsSlave();
         } else {
-            logger.severe("Server mode is not set correctly! Please set the server mode to 'master' or 'slave' in the config.yml. Disabling the plugin...");
+            log.error("Server mode is not set correctly! Please set the server mode to 'master' or 'slave' in the config.yml. Disabling the plugin...");
             loriTimePlugin.disable();
         }
         enableRemainingFeatures();
@@ -67,6 +69,7 @@ public class LoriTimeBungee extends Plugin {
         new BungeeCommand(this, audiences, new LoriTimeCommand(loriTimePlugin, loriTimePlugin.getLocalization()));
         new BungeeCommand(this, audiences, new LoriTimeInfoCommand(loriTimePlugin, loriTimePlugin.getLocalization()));
         new BungeeCommand(this, audiences, new LoriTimeTopCommand(loriTimePlugin, loriTimePlugin.getLocalization()));
+        new BungeeCommand(this, audiences, new LoriTimeDebugCommand(loriTimePlugin, loriTimePlugin.getLocalization()));
     }
 
     private void enableAsSlave() {

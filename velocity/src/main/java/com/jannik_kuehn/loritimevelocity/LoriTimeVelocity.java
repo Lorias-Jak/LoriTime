@@ -2,9 +2,10 @@ package com.jannik_kuehn.loritimevelocity;
 
 import com.jannik_kuehn.common.LoriTimePlugin;
 import com.jannik_kuehn.common.api.LoriTimeAPI;
-import com.jannik_kuehn.common.api.common.CommonLogger;
+import com.jannik_kuehn.common.api.logger.LoriTimeLogger;
 import com.jannik_kuehn.common.command.LoriTimeAdminCommand;
 import com.jannik_kuehn.common.command.LoriTimeCommand;
+import com.jannik_kuehn.common.command.LoriTimeDebugCommand;
 import com.jannik_kuehn.common.command.LoriTimeInfoCommand;
 import com.jannik_kuehn.common.command.LoriTimeTopCommand;
 import com.jannik_kuehn.common.module.afk.MasteredAfkPlayerHandling;
@@ -13,7 +14,6 @@ import com.jannik_kuehn.loritimevelocity.listener.PlayerNameVelocityListener;
 import com.jannik_kuehn.loritimevelocity.listener.TimeAccumulatorVelocityListener;
 import com.jannik_kuehn.loritimevelocity.listener.UpdateNotificationVelocityListener;
 import com.jannik_kuehn.loritimevelocity.schedule.VelocityScheduleAdapter;
-import com.jannik_kuehn.loritimevelocity.util.VelocityLogger;
 import com.jannik_kuehn.loritimevelocity.util.VelocityMetrics;
 import com.jannik_kuehn.loritimevelocity.util.VelocityServer;
 import com.velocitypowered.api.event.EventManager;
@@ -35,20 +35,22 @@ import java.util.ArrayList;
 public class LoriTimeVelocity {
     private final Path dataDirectory;
 
-    private final CommonLogger logger;
-
     private final ProxyServer proxyServer;
 
     private final ArrayList<VelocityCommand> commands;
 
     private final Metrics.Factory metricsFactory;
 
+    private final Logger pluginLogger;
+
     private LoriTimePlugin loriTimePlugin;
+
+    private LoriTimeLogger log;
 
     @Inject
     public LoriTimeVelocity(final ProxyServer server, final Logger logger, @DataDirectory final Path dataDirectory, final Metrics.Factory metricsFactory) {
         this.proxyServer = server;
-        this.logger = new VelocityLogger(logger);
+        this.pluginLogger = logger;
         this.dataDirectory = dataDirectory;
         this.metricsFactory = metricsFactory;
         this.commands = new ArrayList<>();
@@ -56,21 +58,23 @@ public class LoriTimeVelocity {
 
     @Subscribe
     public void onInitialize(final ProxyInitializeEvent event) {
+        final VelocityServer velocityServer = new VelocityServer(pluginLogger);
+        this.loriTimePlugin = new LoriTimePlugin(dataDirectory.toFile(), new VelocityScheduleAdapter(this,
+                proxyServer.getScheduler()), velocityServer, null);
+        this.log = loriTimePlugin.getLoggerFactory().create(LoriTimeVelocity.class);
+
         final PluginContainer container = proxyServer.getPluginManager().ensurePluginContainer(this);
         if (container.getDescription().getVersion().isEmpty()) {
-            logger.severe("Could not get the version of the plugin! Pls report this to the dev!");
+            log.error("Could not get the version of the plugin! Pls report this to the dev!");
         }
         final String version = container.getDescription().getVersion().get();
-
-        final VelocityServer velocityServer = new VelocityServer(version);
-        this.loriTimePlugin = new LoriTimePlugin(logger, dataDirectory.toFile(), new VelocityScheduleAdapter(this, proxyServer.getScheduler()), velocityServer);
-        velocityServer.enable(proxyServer);
+        velocityServer.enable(proxyServer, version);
         try {
             loriTimePlugin.enable();
             LoriTimeAPI.setPlugin(loriTimePlugin);
         } catch (final Exception e) {
             loriTimePlugin.disable();
-            logger.error("Error while enabling the plugin! Disabling the plugin...", e);
+            log.error("Error while enabling the plugin! Disabling the plugin...", e);
         }
 
         if (velocityServer.getServerMode().equalsIgnoreCase("master")) {
@@ -78,12 +82,13 @@ public class LoriTimeVelocity {
         } else if (velocityServer.getServerMode().equalsIgnoreCase("slave")) {
             enableAsSlave();
         } else {
-            logger.severe("Server mode is not set correctly! Please set the server mode to 'master' or 'slave' in the config.yml. Disabling the plugin...");
+            log.error("Server mode is not set correctly! Please set the server mode to 'master' or 'slave' in the config.yml. Disabling the plugin...");
             loriTimePlugin.disable();
         }
         enableRemainingFeatures();
 
         new VelocityMetrics(this, metricsFactory.make(this, 22484));
+        log.debug("LoriTime enabled to its complete!");
     }
 
     private void enableAsMaster() {
@@ -97,10 +102,11 @@ public class LoriTimeVelocity {
         commands.add(new VelocityCommand(this, new LoriTimeCommand(loriTimePlugin, loriTimePlugin.getLocalization())));
         commands.add(new VelocityCommand(this, new LoriTimeInfoCommand(loriTimePlugin, loriTimePlugin.getLocalization())));
         commands.add(new VelocityCommand(this, new LoriTimeTopCommand(loriTimePlugin, loriTimePlugin.getLocalization())));
+        commands.add(new VelocityCommand(this, new LoriTimeDebugCommand(loriTimePlugin, loriTimePlugin.getLocalization())));
     }
 
     private void enableAsSlave() {
-        logger.warning("Slave mode is not supported on Proxys! Disabling the plugin...");
+        log.warn("Slave mode is not supported on Proxys! Disabling the plugin...");
         loriTimePlugin.disable();
     }
 

@@ -7,23 +7,27 @@ import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
 import net.kyori.adventure.text.TextComponent;
+import org.slf4j.Logger;
 
 import java.util.Optional;
 import java.util.UUID;
 
 public class VelocityServer implements CommonServer {
-    private final String version;
+    private final Logger logger;
 
     private ProxyServer server;
 
+    private String version;
+
     private String serverMode;
 
-    public VelocityServer(final String version) {
-        this.version = version;
+    public VelocityServer(final Logger logger) {
+        this.logger = logger;
     }
 
-    public void enable(final ProxyServer server) {
+    public void enable(final ProxyServer server, final String version) {
         this.server = server;
+        this.version = version;
     }
 
     @Override
@@ -102,5 +106,15 @@ public class VelocityServer implements CommonServer {
     @Override
     public String getPluginVersion() {
         return version;
+    }
+
+    @Override
+    public java.util.logging.Logger getJavaLogger() {
+        return null;
+    }
+
+    @Override
+    public Logger getSl4jLogger() {
+        return logger;
     }
 }

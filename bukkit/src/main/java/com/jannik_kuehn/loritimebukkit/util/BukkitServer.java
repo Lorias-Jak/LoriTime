@@ -1,6 +1,5 @@
 package com.jannik_kuehn.loritimebukkit.util;
 
-import com.jannik_kuehn.common.LoriTimePlugin;
 import com.jannik_kuehn.common.api.LoriTimePlayer;
 import com.jannik_kuehn.common.api.common.CommonSender;
 import com.jannik_kuehn.common.api.common.CommonServer;
@@ -10,26 +9,24 @@ import org.bukkit.Bukkit;
 import org.bukkit.Server;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.slf4j.Logger;
 
 import java.util.Optional;
 import java.util.UUID;
 
 public class BukkitServer implements CommonServer {
+    private final LoriTimeBukkit loriTimeBukkit;
+
     private final String version;
 
-    private LoriTimePlugin loriTimePlugin;
+    private final Server server;
 
     private String serverMode;
 
-    private Server server;
-
-    public BukkitServer(final String version) {
-        this.version = version;
-    }
-
-    public void enable(final LoriTimeBukkit bukkitPlugin) {
-        this.loriTimePlugin = bukkitPlugin.getPlugin();
+    public BukkitServer(final LoriTimeBukkit loriTimeBukkit, final String version) {
+        this.loriTimeBukkit = loriTimeBukkit;
         this.server = Bukkit.getServer();
+        this.version = version;
     }
 
     @Override
@@ -101,7 +98,7 @@ public class BukkitServer implements CommonServer {
         if (player == null) {
             return;
         }
-        loriTimePlugin.getScheduler().scheduleSync(() -> kickPlayer(player, message));
+        loriTimeBukkit.getPlugin().getScheduler().scheduleSync(() -> kickPlayer(player, message));
     }
 
     @Override
@@ -112,6 +109,16 @@ public class BukkitServer implements CommonServer {
     @Override
     public String getPluginVersion() {
         return version;
+    }
+
+    @Override
+    public java.util.logging.Logger getJavaLogger() {
+        return null;
+    }
+
+    @Override
+    public Logger getSl4jLogger() {
+        return loriTimeBukkit.getSLF4JLogger();
     }
 
     private void kickPlayer(final Player player, final TextComponent message) {

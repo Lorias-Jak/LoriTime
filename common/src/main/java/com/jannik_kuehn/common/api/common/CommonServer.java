@@ -29,4 +29,8 @@ public interface CommonServer {
     void sendMessageToConsole(TextComponent message);
 
     String getPluginVersion();
+
+    java.util.logging.Logger getJavaLogger();
+
+    org.slf4j.Logger getSl4jLogger();
 }

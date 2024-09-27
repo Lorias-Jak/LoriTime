@@ -1,7 +1,7 @@
 package com.jannik_kuehn.common.storage;
 
 import com.jannik_kuehn.common.LoriTimePlugin;
-import com.jannik_kuehn.common.api.common.CommonLogger;
+import com.jannik_kuehn.common.api.logger.LoriTimeLogger;
 import com.jannik_kuehn.common.api.scheduler.PluginTask;
 import com.jannik_kuehn.common.api.storage.AccumulatingTimeStorage;
 import com.jannik_kuehn.common.api.storage.NameStorage;
@@ -19,7 +19,7 @@ public class DataStorageManager {
 
     private final LoriTimePlugin loriTime;
 
-    private final CommonLogger log;
+    private final LoriTimeLogger log;
 
     private final File dataFolder;
 
@@ -33,14 +33,14 @@ public class DataStorageManager {
 
     public DataStorageManager(final LoriTimePlugin loriTime, final File dataFolder) {
         this.loriTime = loriTime;
-        this.log = loriTime.getLogger();
+        this.log = loriTime.getLoggerFactory().create(DataStorageManager.class);
         this.dataFolder = dataFolder;
         this.externalStorage = false;
     }
 
     public void injectCustomStorage(final NameStorage nameStorage, final AccumulatingTimeStorage timeStorage) {
         if (nameStorage == null || timeStorage == null) {
-            log.severe("Custom storage injection failed: nameStorage and timeStorage must not be null!");
+            log.error("Custom storage injection failed: nameStorage and timeStorage must not be null!");
             return;
         }
         this.nameStorage = nameStorage;
@@ -70,7 +70,7 @@ public class DataStorageManager {
         switch (storageMethod.toLowerCase(Locale.ROOT)) {
             case "yml" -> loadFileStorage();
             case "sql", "mysql" -> loadDatabaseStorage();
-            default -> log.severe("illegal storage method " + storageMethod);
+            default -> log.error("illegal storage method " + storageMethod);
         }
     }
 
@@ -119,7 +119,7 @@ public class DataStorageManager {
         if (!directory.exists()) {
             final boolean created = directory.mkdir();
             if (!created) {
-                log.severe("Exception while creating the data directory. Could not create data directory for saving player data!");
+                log.error("Exception while creating the data directory. Could not create data directory for saving player data!");
             }
         }
 

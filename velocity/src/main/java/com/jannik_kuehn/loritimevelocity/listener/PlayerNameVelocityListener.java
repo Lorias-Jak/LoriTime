@@ -1,6 +1,7 @@
 package com.jannik_kuehn.loritimevelocity.listener;
 
 import com.jannik_kuehn.common.LoriTimePlugin;
+import com.jannik_kuehn.common.api.logger.LoriTimeLogger;
 import com.jannik_kuehn.common.exception.StorageException;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.connection.PostLoginEvent;
@@ -11,8 +12,11 @@ import java.util.UUID;
 public class PlayerNameVelocityListener {
     private final LoriTimePlugin plugin;
 
+    private final LoriTimeLogger log;
+
     public PlayerNameVelocityListener(final LoriTimePlugin plugin) {
         this.plugin = plugin;
+        this.log = plugin.getLoggerFactory().create(PlayerNameVelocityListener.class);
     }
 
     @Subscribe
@@ -24,7 +28,7 @@ public class PlayerNameVelocityListener {
             try {
                 plugin.getNameStorage().setEntry(uuid, name, true);
             } catch (final StorageException ex) {
-                plugin.getLogger().warning("could not save player name and uuid " + name, ex);
+                log.warn("could not save player name and uuid " + name, ex);
             }
         });
     }

@@ -1,6 +1,7 @@
 package com.jannik_kuehn.common.storage.database;
 
 import com.jannik_kuehn.common.LoriTimePlugin;
+import com.jannik_kuehn.common.api.logger.LoriTimeLogger;
 import com.jannik_kuehn.common.api.storage.NameStorage;
 import com.jannik_kuehn.common.api.storage.TimeStorage;
 import com.jannik_kuehn.common.config.Configuration;
@@ -30,10 +31,11 @@ public class DatabaseStorage implements NameStorage, TimeStorage {
 
     private final ReadWriteLock poolLock;
 
-    public DatabaseStorage(final Configuration config, final LoriTimePlugin plugin) {
-        this.mySQL = new MySQL(config, plugin);
+    public DatabaseStorage(final Configuration config, final LoriTimePlugin loriTimePlugin) {
+        this.mySQL = new MySQL(config, loriTimePlugin);
         mySQL.open();
         this.poolLock = new ReentrantReadWriteLock();
+        final LoriTimeLogger log = loriTimePlugin.getLoggerFactory().create(DatabaseStorage.class);
 
         try (
                 Connection connection = mySQL.getConnection();
@@ -41,7 +43,7 @@ public class DatabaseStorage implements NameStorage, TimeStorage {
         ) {
             statement.execute(createTable());
         } catch (final SQLException ex) {
-            plugin.getLogger().error("Error creating table", ex);
+            log.error("Error creating table", ex);
         }
     }
 

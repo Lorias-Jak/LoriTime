@@ -1,7 +1,8 @@
 package com.jannik_kuehn.common;
 
-import com.jannik_kuehn.common.api.common.CommonLogger;
 import com.jannik_kuehn.common.api.common.CommonServer;
+import com.jannik_kuehn.common.api.logger.LoggerFactory;
+import com.jannik_kuehn.common.api.logger.LoriTimeLogger;
 import com.jannik_kuehn.common.api.scheduler.PluginScheduler;
 import com.jannik_kuehn.common.api.storage.AccumulatingTimeStorage;
 import com.jannik_kuehn.common.api.storage.NameStorage;
@@ -14,8 +15,6 @@ import com.jannik_kuehn.common.module.afk.AfkStatusProvider;
 import com.jannik_kuehn.common.module.updater.UpdateCheck;
 import com.jannik_kuehn.common.storage.DataStorageManager;
 import com.jannik_kuehn.common.utils.TimeParser;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -27,11 +26,11 @@ import java.util.List;
 import java.util.Set;
 
 public class LoriTimePlugin {
-    private static final Logger log = LoggerFactory.getLogger(LoriTimePlugin.class);
-
     private static LoriTimePlugin instance;
 
-    private final CommonLogger logger;
+    private final LoggerFactory loggerFactory;
+
+    private final LoriTimeLogger log;
 
     private final CommonServer server;
 
@@ -53,13 +52,16 @@ public class LoriTimePlugin {
 
     private UpdateCheck updateCheck;
 
-    public LoriTimePlugin(final CommonLogger logger, final File dataFolder, final PluginScheduler scheduler, final CommonServer server) {
+    public LoriTimePlugin(final File dataFolder, final PluginScheduler scheduler, final CommonServer server, final String loggerTopic) {
         instance = this;
-        this.logger = logger;
         this.dataFolder = dataFolder;
         this.scheduler = scheduler;
         this.server = server;
         this.errorDisable = false;
+
+        this.loggerFactory = new LoggerFactory(this);
+        this.log = loggerFactory.create(LoriTimePlugin.class, loggerTopic);
+
         this.dataStorageManager = new DataStorageManager(this, dataFolder);
     }
 
@@ -69,25 +71,28 @@ public class LoriTimePlugin {
 
     public void enable() {
         loadOrCreateConfigs();
+        log.debug("Enabling LoriTime main class");
         server.setServerMode(getServerModeFromConfig());
         updateCheck = new UpdateCheck(this);
 
         if (server.getServerMode().equalsIgnoreCase("master")) {
             enableAsMaster();
         }
+
+        log.debug("Enabled main class of the plugin, enabling the rest of the plugin..");
     }
 
     private void enableAsMaster() {
         try {
             dataStorageManager.loadStorages();
         } catch (final StorageException e) {
-            logger.error("An error occurred while enabling the storage", e);
+            log.error("An error occurred while enabling the storage", e);
             errorDisable = true;
             return;
         }
 
         if (errorDisable) {
-            logger.severe("Disabling the plugin because of an issue.");
+            log.error("Disabling the plugin because of an issue.");
             disable();
             return;
         }
@@ -154,7 +159,7 @@ public class LoriTimePlugin {
         this.localization = new Localization(localizationFile);
 
         if (!config.isLoaded() || !localization.getLangFile().isLoaded()) {
-            logger.severe("The plugins localization and config didn't load correctly. Pls delete the files and try again! Stop starting plugin..");
+            log.error("The plugins localization and config didn't load correctly. Pls delete the files and try again! Stop starting plugin..");
             errorDisable = true;
             return;
         }
@@ -169,7 +174,7 @@ public class LoriTimePlugin {
                     .addUnit(60 * 60 * 24 * 30 * 12, getUnits(localization, "year"))
                     .build();
         } catch (final IllegalArgumentException ex) {
-            logger.error("Could not create time parser.", ex);
+            log.error("Could not create time parser.", ex);
         }
     }
 
@@ -179,23 +184,23 @@ public class LoriTimePlugin {
         if (!file.exists()) {
             try {
                 created = file.createNewFile();
-                logger.info("Creating new File '" + fileName + "'.");
+                log.info("Creating new File '" + fileName + "'.");
                 if (needCopy) {
                     copyDataFromResource(file.toPath(), fileName);
                 }
             } catch (final IOException e) {
-                logger.error("An exception occurred while creating the file '" + fileName + "' on startup.", e);
+                log.error("An exception occurred while creating the file '" + fileName + "' on startup.", e);
             }
         }
         final Configuration configurationFile = new YamlConfiguration(file.toString());
         if (!configurationFile.isLoaded()) {
-            logger.severe("An issue occurred while loading the file '" + fileName + "'. The File is null, there should be data.");
+            log.error("An issue occurred while loading the file '" + fileName + "'. The File is null, there should be data.");
             return null;
         }
         if (created) {
-            logger.info("The file '" + fileName + "' was created successfully.");
+            log.info("The file '" + fileName + "' was created successfully.");
         }
-        logger.info("Successfully loaded '" + fileName + "'.");
+        log.info("Successfully loaded '" + fileName + "'.");
         return configurationFile;
     }
 
@@ -203,7 +208,7 @@ public class LoriTimePlugin {
         try {
             Files.copy(this.getClass().getClassLoader().getResource(nameFromSourceOfReplacement).openStream(), configFile, StandardCopyOption.REPLACE_EXISTING);
         } catch (final IOException e) {
-            logger.error("Could not copy the file content to the file '" + nameFromSourceOfReplacement + "'. Pls delete the file and try again.", e);
+            log.error("Could not copy the file content to the file '" + nameFromSourceOfReplacement + "'. Pls delete the file and try again.", e);
         }
     }
 
@@ -218,15 +223,15 @@ public class LoriTimePlugin {
             if (content instanceof String) {
                 units.add((String) content);
             } else {
-                logger.warning("dangerous identifier definition in language file. Path: " + "unit." + unit + "identifier: " + content.toString());
+                log.warn("dangerous identifier definition in language file. Path: " + "unit." + unit + "identifier: " + content.toString());
                 units.add(content.toString());
             }
         }
         return units.toArray(new String[0]);
     }
 
-    public CommonLogger getLogger() {
-        return logger;
+    public LoggerFactory getLoggerFactory() {
+        return loggerFactory;
     }
 
     public PluginScheduler getScheduler() {

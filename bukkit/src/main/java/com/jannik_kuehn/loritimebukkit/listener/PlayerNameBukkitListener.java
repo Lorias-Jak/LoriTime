@@ -1,6 +1,7 @@
 package com.jannik_kuehn.loritimebukkit.listener;
 
 import com.jannik_kuehn.common.LoriTimePlugin;
+import com.jannik_kuehn.common.api.logger.LoriTimeLogger;
 import com.jannik_kuehn.common.exception.StorageException;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -13,8 +14,11 @@ public class PlayerNameBukkitListener implements Listener {
 
     private final LoriTimePlugin plugin;
 
+    private final LoriTimeLogger log;
+
     public PlayerNameBukkitListener(final LoriTimePlugin plugin) {
         this.plugin = plugin;
+        this.log = plugin.getLoggerFactory().create(PlayerNameBukkitListener.class);
     }
 
     @EventHandler
@@ -26,7 +30,7 @@ public class PlayerNameBukkitListener implements Listener {
             try {
                 plugin.getNameStorage().setEntry(uuid, name, true);
             } catch (final StorageException e) {
-                plugin.getLogger().warning("could not save player name and uuid " + name, e);
+                log.warn("could not save player name and uuid " + name, e);
             }
         });
     }

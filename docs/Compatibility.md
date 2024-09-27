@@ -12,11 +12,11 @@
   </tr>
   <tr>
     <th class="tg-0pky"><a href="https://getbukkit.org/">Bukkit</a></th>
-    <th class="tg-0pky">✅ [1.18-1.21]</th>
+    <th class="tg-0pky">❌*</th>
   </tr>
   <tr>
     <th class="tg-0lax"><a href="https://papermc.io/software/paper">Paper</a></th>
-    <th class="tg-0lax">❗ [1.18-1.21]*</th>
+    <th class="tg-0lax">❗ [1.18-1.21]**</th>
   </tr>
 </thead>
 <tbody>
@@ -31,7 +31,8 @@
   </tr>
 </tbody>
 </table>
-* Loaded via Bukkit<br>
+* No plain Bukkit support<br>
+** Loaded via the Bukkit loader<br>
 
 ## Integrations
 LoriTime hooks into PlaceHolderAPI!

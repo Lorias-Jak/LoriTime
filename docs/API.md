@@ -5,9 +5,12 @@ The LoriTime API offers various methods for querying and managing the online tim
 ## Compatibility
 | Plattform | Version         | Supported |
 |-----------|-----------------|-----------|
-| bukkit    | 1.4.0 - current | ✅         |
+| paper     | 1.4.0 - current | ❗*        |
 | velocity  | 1.4.0 - current | ✅         |
 | bungee    | 1.4.0 - current | ✅         |
+
+> **\*❗:** Plain Spigot / Bukkit support got dropped. Paper is supported via the Bukkit loader.
+
 
 ## API Introduction
 

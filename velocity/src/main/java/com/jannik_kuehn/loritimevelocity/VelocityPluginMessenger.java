@@ -1,6 +1,7 @@
 package com.jannik_kuehn.loritimevelocity;
 
 import com.jannik_kuehn.common.api.common.CommonSender;
+import com.jannik_kuehn.common.api.logger.LoriTimeLogger;
 import com.jannik_kuehn.common.module.messaging.PluginMessaging;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.connection.PluginMessageEvent;
@@ -14,9 +15,12 @@ import java.util.UUID;
 public class VelocityPluginMessenger extends PluginMessaging {
     private final LoriTimeVelocity loriTimeVelocity;
 
+    private final LoriTimeLogger log;
+
     public VelocityPluginMessenger(final LoriTimeVelocity loriTimeVelocity) {
         super(loriTimeVelocity.getPlugin());
         this.loriTimeVelocity = loriTimeVelocity;
+        this.log = loriTimeVelocity.getPlugin().getLoggerFactory().create(VelocityPluginMessenger.class, "VelocityPluginMessenger");
     }
 
     @Subscribe
@@ -24,13 +28,16 @@ public class VelocityPluginMessenger extends PluginMessaging {
         if (!event.getIdentifier().getId().contains("loritime:")) {
             return;
         }
+        log.debug("Received PluginMessage from Channel: " + event.getIdentifier().getId());
         if (!(event.getSource() instanceof ServerConnection)) {
+            log.debug("Received PluginMessage from a non ServerConnection");
             return;
         }
         if (event.getResult().equals(PluginMessageEvent.ForwardResult.handled())) {
+            log.debug("Received PluginMessage was already handled");
             return;
         }
-
+        log.debug("Received PluginMessage was not handled yet, continue processing");
         final byte[] data = event.getData();
         processPluginMessage(event.getIdentifier().getId(), data);
         event.setResult(PluginMessageEvent.ForwardResult.handled());
@@ -40,11 +47,13 @@ public class VelocityPluginMessenger extends PluginMessaging {
     public void sendPluginMessage(final String channelIdentifier, final Object... message) {
         final ServerConnection connection = getConnection(message);
         if (connection == null) {
+            log.debug("Could not find a connection to send the PluginMessage");
             return;
         }
 
         final MinecraftChannelIdentifier identifier = MinecraftChannelIdentifier.from(channelIdentifier);
         final byte[] data = getDataAsByte(message);
+        log.debug("Sending PluginMessage with channel: " + channelIdentifier);
         connection.sendPluginMessage(identifier, data);
     }
 

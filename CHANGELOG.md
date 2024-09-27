@@ -6,9 +6,12 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased] - ${maven.build.timestamp}
 ### Added
+- `/ltdebug` command to enable or disable the console debugger.
 ### Changed
+- Reworked the plugin logger for better logging
 ### Deprecated
 ### Removed
+- Bukkit compatibility to remove bloated code. Only Paper is supported via the Bukkit loader.
 ### Fixed
 ### Security
 

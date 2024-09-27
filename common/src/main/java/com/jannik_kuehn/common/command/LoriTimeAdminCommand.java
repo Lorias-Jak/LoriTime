@@ -4,6 +4,7 @@ import com.jannik_kuehn.common.LoriTimePlugin;
 import com.jannik_kuehn.common.api.LoriTimePlayer;
 import com.jannik_kuehn.common.api.common.CommonCommand;
 import com.jannik_kuehn.common.api.common.CommonSender;
+import com.jannik_kuehn.common.api.logger.LoriTimeLogger;
 import com.jannik_kuehn.common.config.localization.Localization;
 import com.jannik_kuehn.common.exception.StorageException;
 import com.jannik_kuehn.common.utils.TimeParser;
@@ -19,14 +20,17 @@ import java.util.stream.Collectors;
 
 public class LoriTimeAdminCommand implements CommonCommand {
 
-    private final LoriTimePlugin plugin;
+    private final LoriTimePlugin loriTimePlugin;
+
+    private final LoriTimeLogger log;
 
     private final Localization localization;
 
     private final TimeParser parser;
 
     public LoriTimeAdminCommand(final LoriTimePlugin plugin, final Localization localization, final TimeParser parser) {
-        this.plugin = plugin;
+        this.loriTimePlugin = plugin;
+        this.log = plugin.getLoggerFactory().create(LoriTimeAdminCommand.class);
         this.localization = localization;
         this.parser = parser;
     }
@@ -41,7 +45,7 @@ public class LoriTimeAdminCommand implements CommonCommand {
             printUtilityMessage(sender, "message.command.loritimeadmin.usage");
             return;
         }
-        plugin.getScheduler().runAsyncOnce(() -> {
+        loriTimePlugin.getScheduler().runAsyncOnce(() -> {
             final String[] subCommandArgs = new String[args.length - 1];
             System.arraycopy(args, 1, subCommandArgs, 0, subCommandArgs.length);
 
@@ -54,7 +58,7 @@ public class LoriTimeAdminCommand implements CommonCommand {
                     default -> printUtilityMessage(sender, "message.command.loritimeadmin.usage");
                 }
             } catch (final StorageException e) {
-                plugin.getLogger().error("An exception ocurred during LoriTimeAdminCommand!", e);
+                log.error("An exception ocurred during LoriTimeAdminCommand!", e);
             }
         });
     }
@@ -85,9 +89,9 @@ public class LoriTimeAdminCommand implements CommonCommand {
         if (args.length == 2 && !args[0].equalsIgnoreCase("reload")) {
             final ArrayList<String> completions = new ArrayList<>();
             try {
-                completions.addAll(plugin.getNameStorage().getNameEntries().stream().toList());
+                completions.addAll(loriTimePlugin.getNameStorage().getNameEntries().stream().toList());
             } catch (final StorageException e) {
-                plugin.getLogger().error("Could not load entries from NameStorage for tab completion in LoriTimeAdminCommand!", e);
+                log.error("Could not load entries from NameStorage for tab completion in LoriTimeAdminCommand!", e);
             }
             return filterCompletion(completions, args[1]);
         }
@@ -101,7 +105,7 @@ public class LoriTimeAdminCommand implements CommonCommand {
 
     @Override
     public List<String> getAliases() {
-        return plugin.getConfig().getArrayList("command.LoriTimeAdmin.alias").stream()
+        return loriTimePlugin.getConfig().getArrayList("command.LoriTimeAdmin.alias").stream()
                 .filter(item -> item instanceof String)
                 .map(item -> (String) item)
                 .collect(Collectors.toList());
@@ -117,7 +121,7 @@ public class LoriTimeAdminCommand implements CommonCommand {
             printUtilityMessage(sender, "message.command.loritimeadmin.set.usage");
             return;
         }
-        final Optional<UUID> optionalUUID = plugin.getNameStorage().getUuid(args[0]);
+        final Optional<UUID> optionalUUID = loriTimePlugin.getNameStorage().getUuid(args[0]);
         if (optionalUUID.isEmpty()) {
             printMissingUuidMessage(sender, args[0]);
             return;
@@ -142,7 +146,7 @@ public class LoriTimeAdminCommand implements CommonCommand {
 
         final long currentTime;
         try {
-            final OptionalLong optionalCurrentTime = plugin.getTimeStorage().getTime(player.getUniqueId());
+            final OptionalLong optionalCurrentTime = loriTimePlugin.getTimeStorage().getTime(player.getUniqueId());
             if (optionalCurrentTime.isPresent()) {
                 currentTime = optionalCurrentTime.getAsLong();
             } else {
@@ -151,7 +155,7 @@ public class LoriTimeAdminCommand implements CommonCommand {
                 return;
             }
         } catch (final StorageException ex) {
-            plugin.getLogger().warning("could not load online time", ex);
+            log.warn("could not load online time", ex);
             printUtilityMessage(sender, "message.error");
             return;
         }
@@ -170,7 +174,7 @@ public class LoriTimeAdminCommand implements CommonCommand {
             return;
         }
 
-        final Optional<UUID> optionalUUID = plugin.getNameStorage().getUuid(args[0]);
+        final Optional<UUID> optionalUUID = loriTimePlugin.getNameStorage().getUuid(args[0]);
         if (optionalUUID.isEmpty()) {
             printMissingUuidMessage(sender, args[0]);
             return;
@@ -188,7 +192,7 @@ public class LoriTimeAdminCommand implements CommonCommand {
         final long time = optionalTime.getAsLong();
         final long currentTime;
         try {
-            final OptionalLong optionalCurrentTime = plugin.getTimeStorage().getTime(player.getUniqueId());
+            final OptionalLong optionalCurrentTime = loriTimePlugin.getTimeStorage().getTime(player.getUniqueId());
             if (optionalCurrentTime.isPresent()) {
                 currentTime = optionalCurrentTime.getAsLong();
             } else {
@@ -197,7 +201,7 @@ public class LoriTimeAdminCommand implements CommonCommand {
                 return;
             }
         } catch (final StorageException ex) {
-            plugin.getLogger().warning("could not load online time", ex);
+            log.warn("could not load online time", ex);
             printUtilityMessage(sender, "message.error");
             return;
         }
@@ -221,7 +225,7 @@ public class LoriTimeAdminCommand implements CommonCommand {
             return;
         }
 
-        final Optional<UUID> optionalUUID = plugin.getNameStorage().getUuid(args[0]);
+        final Optional<UUID> optionalUUID = loriTimePlugin.getNameStorage().getUuid(args[0]);
         if (optionalUUID.isEmpty()) {
             printMissingUuidMessage(sender, args[0]);
             return;
@@ -230,7 +234,7 @@ public class LoriTimeAdminCommand implements CommonCommand {
 
         final long currentTime;
         try {
-            final OptionalLong optionalCurrentTime = plugin.getTimeStorage().getTime(player.getUniqueId());
+            final OptionalLong optionalCurrentTime = loriTimePlugin.getTimeStorage().getTime(player.getUniqueId());
             if (optionalCurrentTime.isPresent()) {
                 currentTime = optionalCurrentTime.getAsLong();
             } else {
@@ -239,7 +243,7 @@ public class LoriTimeAdminCommand implements CommonCommand {
                 return;
             }
         } catch (final StorageException ex) {
-            plugin.getLogger().warning("could not load online time", ex);
+            log.warn("could not load online time", ex);
             printUtilityMessage(sender, "message.error");
             return;
         }
@@ -255,17 +259,17 @@ public class LoriTimeAdminCommand implements CommonCommand {
             printUtilityMessage(sender, "message.command.loritimeadmin.reload.usage");
             return;
         }
-        plugin.getLocalization().reloadTranslation();
+        loriTimePlugin.getLocalization().reloadTranslation();
 
-        plugin.reload();
+        loriTimePlugin.reload();
         printUtilityMessage(sender, "message.command.loritimeadmin.reload.success");
     }
 
     public void modifyOnlineTime(final UUID uuid, final long modifyBy) {
         try {
-            plugin.getTimeStorage().addTime(uuid, modifyBy);
+            loriTimePlugin.getTimeStorage().addTime(uuid, modifyBy);
         } catch (final StorageException ex) {
-            plugin.getLogger().error("could not modify online time of " + uuid.toString(), ex);
+            log.error("could not modify online time of " + uuid.toString(), ex);
         }
     }
 

@@ -4,6 +4,7 @@ import com.jannik_kuehn.common.LoriTimePlugin;
 import com.jannik_kuehn.common.api.common.CommonCommand;
 import com.jannik_kuehn.common.api.common.CommonSender;
 import com.jannik_kuehn.common.api.logger.LoriTimeLogger;
+import com.jannik_kuehn.common.api.scheduler.PluginTask;
 import com.jannik_kuehn.common.config.localization.Localization;
 
 import java.util.List;
@@ -16,6 +17,8 @@ public class LoriTimeDebugCommand implements CommonCommand {
     private final LoriTimeLogger log;
 
     private boolean isDebugging;
+
+    private PluginTask autoDisableTask;
 
     public LoriTimeDebugCommand(final LoriTimePlugin loriTimePlugin, final Localization localization) {
         this.loriTimePlugin = loriTimePlugin;
@@ -39,6 +42,7 @@ public class LoriTimeDebugCommand implements CommonCommand {
     private void changeDebugMode(final CommonSender sender) {
         final boolean configValue = loriTimePlugin.getConfig().getBoolean("general.debug");
         if (configValue) {
+            autoDisableTask.cancel();
             stopDebugging();
             sender.sendMessage(localization.formatTextComponent(localization.getRawMessage("message.command.debug.disabled")));
         } else {
@@ -66,7 +70,7 @@ public class LoriTimeDebugCommand implements CommonCommand {
             return;
         }
         final long timeToDisable = configTimeToDisable * 60L;
-        loriTimePlugin.getScheduler().runAsyncOnceLater(timeToDisable, () -> {
+        autoDisableTask = loriTimePlugin.getScheduler().runAsyncOnceLater(timeToDisable, () -> {
             if (isDebugging) {
                 log.debug("Auto disabling the debug mode.");
                 stopDebugging();

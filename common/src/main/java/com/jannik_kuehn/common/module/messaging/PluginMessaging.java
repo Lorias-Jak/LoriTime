@@ -87,13 +87,12 @@ public abstract class PluginMessaging {
                 } else if (part instanceof UUID) {
                     out.write(UuidUtil.toBytes((UUID) part));
                 } else {
-                    throw new IOException("invalid data " + part.toString());
+                    log.error("could not serialize plugin message. Invalid data: " + part.toString());
                 }
             }
             return byteOut.toByteArray();
         } catch (final IOException e) {
-            final PluginMessageException pluginMessageException = new PluginMessageException(e);
-            log.warn("could not serialize plugin message", pluginMessageException);
+            log.error("could not serialize plugin message", new PluginMessageException(e));
         }
         return new byte[0];
     }

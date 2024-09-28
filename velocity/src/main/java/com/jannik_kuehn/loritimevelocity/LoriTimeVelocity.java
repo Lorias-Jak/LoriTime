@@ -59,7 +59,7 @@ public class LoriTimeVelocity {
     }
 
     @Subscribe
-    @SuppressWarnings("PMD.UseUnderscoresInNumericLiterals")
+    @SuppressWarnings({"PMD.UseUnderscoresInNumericLiterals", "PMD.AvoidLiteralsInIfCondition"})
     public void onInitialize(final ProxyInitializeEvent event) {
         final VelocityServer velocityServer = new VelocityServer(pluginLogger);
         this.loriTimePlugin = new LoriTimePlugin(dataDirectory.toFile(), new VelocityScheduleAdapter(this,

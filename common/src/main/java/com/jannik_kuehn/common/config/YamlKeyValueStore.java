@@ -85,7 +85,7 @@ public class YamlKeyValueStore implements KeyValueStore {
         return data.entrySet();
     }
 
-    @SuppressWarnings("PMD.AvoidFileStream")
+    @SuppressWarnings({"PMD.AvoidFileStream", "PMD.UnusedAssignment"})
     private void loadFromFile() {
         try (FileInputStream input = new FileInputStream(filePath)) {  // try-with-resources Block
             final Yaml yaml = new Yaml();

@@ -22,7 +22,7 @@ public final class VersionUtil {
      * @param newVersion the new version
      * @return {@code true} if the new version is newer than the old version, {@code false} otherwise
      */
-    @SuppressWarnings("PMD.CyclomaticComplexity")
+    @SuppressWarnings({"PMD.CyclomaticComplexity", "PMD.SimplifyBooleanReturns"})
     public static boolean isNewerVersion(final String oldVersion, final String newVersion) {
         final String oldVersionNumber = extractVersionNumber(oldVersion);
         final String newVersionNumber = extractVersionNumber(newVersion);

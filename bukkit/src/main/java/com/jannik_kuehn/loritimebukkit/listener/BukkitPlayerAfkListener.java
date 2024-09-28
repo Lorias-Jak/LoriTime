@@ -81,6 +81,7 @@ public class BukkitPlayerAfkListener implements Listener {
      *
      * @param event The {@link PlayerCommandPreprocessEvent}.
      */
+    @SuppressWarnings("PMD.AvoidLiteralsInIfCondition")
     @EventHandler(ignoreCancelled = true)
     public void onPlayerCommand(final PlayerCommandPreprocessEvent event) {
         if ("/afk".equalsIgnoreCase(event.getMessage())) {

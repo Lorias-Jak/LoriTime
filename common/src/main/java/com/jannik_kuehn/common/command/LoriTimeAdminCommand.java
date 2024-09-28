@@ -72,7 +72,7 @@ public class LoriTimeAdminCommand implements CommonCommand {
             return new ArrayList<>();
         }
         if (args.length == 0) {
-            final ArrayList<String> completions = new ArrayList<>();
+            final List<String> completions = new ArrayList<>();
             completions.add("set");
             completions.add("modify");
             completions.add("add");
@@ -81,7 +81,7 @@ public class LoriTimeAdminCommand implements CommonCommand {
             return completions;
         }
         if (args.length == 1) {
-            final ArrayList<String> completions = new ArrayList<>();
+            final List<String> completions = new ArrayList<>();
             completions.add("set");
             completions.add("modify");
             completions.add("add");
@@ -90,7 +90,7 @@ public class LoriTimeAdminCommand implements CommonCommand {
             return filterCompletion(completions, args[0]);
         }
         if (args.length == 2 && !args[0].equalsIgnoreCase("reload")) {
-            final ArrayList<String> completions = new ArrayList<>();
+            final List<String> completions = new ArrayList<>();
             try {
                 completions.addAll(loriTimePlugin.getNameStorage().getNameEntries().stream().toList());
             } catch (final StorageException e) {

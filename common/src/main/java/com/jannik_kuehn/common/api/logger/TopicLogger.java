@@ -24,13 +24,13 @@ public class TopicLogger extends Logger {
      * @param clazz        The calling class.
      * @param topic        The topic to add or null.
      */
+    @SuppressWarnings({"PMD.ConstructorCallsOverridableMethod", "PMD.AvoidThrowingRawExceptionTypes"})
     public TopicLogger(@NotNull final Logger parentLogger, @NotNull final Class<?> clazz, @Nullable final String topic) {
         super(clazz.getCanonicalName(), null);
         try {
             initLogger(parentLogger);
-            initLogger(parentLogger);
         } catch (final LoggerException e) {
-            log(Level.SEVERE, "Failed to initialize logger", e);
+            parentLogger.log(Level.SEVERE, "Failed to initialize logger on creation.", e);
         }
         this.topic = topic == null ? "" : "(" + topic + ") ";
     }

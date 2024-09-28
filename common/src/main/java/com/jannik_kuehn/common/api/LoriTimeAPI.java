@@ -24,6 +24,7 @@ public final class LoriTimeAPI {
      *
      * @param plugin The {@link LoriTimePlugin} instance.
      */
+    @SuppressWarnings("PMD.AvoidSynchronizedStatement")
     public static void setPlugin(final LoriTimePlugin plugin) {
         synchronized (LoriTimeAPI.class) {
             if (loriTimePlugin == null) {

@@ -97,6 +97,7 @@ public class AccumulatingTimeStorage implements TimeStorage, TimeAccumulator {
     }
 
     @Override
+    @SuppressWarnings("PMD.UseTryWithResources")
     public void close() throws StorageException {
         try {
             if (!onlineSince.isEmpty()) {

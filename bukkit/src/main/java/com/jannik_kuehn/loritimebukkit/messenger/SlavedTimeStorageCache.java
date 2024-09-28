@@ -103,8 +103,9 @@ public class SlavedTimeStorageCache extends PluginMessaging implements TimeStora
     }
 
     @Override
+    @SuppressWarnings("PMD.AvoidLiteralsInIfCondition")
     public void onPluginMessageReceived(@NotNull final String channel, @NotNull final Player player, final byte @NotNull [] message) {
-        if (channel.equalsIgnoreCase(SLAVED_TIME_STORAGE)) {
+        if (SLAVED_TIME_STORAGE.equalsIgnoreCase(channel)) {
             log.debug("Received PluginMessage from " + player.getName() + " with channel " + channel);
             try (ByteArrayInputStream byteInputStream = new ByteArrayInputStream(message);
                  DataInputStream input = new DataInputStream(byteInputStream)) {

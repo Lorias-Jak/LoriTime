@@ -29,7 +29,7 @@ public class LoriTimeBungee extends Plugin {
     private BungeeAudiences audiences;
 
     @Override
-    @SuppressWarnings("PMD.UseUnderscoresInNumericLiterals")
+    @SuppressWarnings({"PMD.UseUnderscoresInNumericLiterals", "PMD.AvoidLiteralsInIfCondition"})
     public void onEnable() {
         audiences = BungeeAudiences.create(this);
         final BungeeScheduleAdapter scheduleAdapter = new BungeeScheduleAdapter(this, getProxy().getScheduler());

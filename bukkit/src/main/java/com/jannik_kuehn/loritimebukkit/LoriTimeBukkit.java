@@ -37,6 +37,7 @@ public class LoriTimeBukkit extends JavaPlugin {
     private BukkitPluginMessenger bukkitPluginMessenger;
 
     @Override
+    @SuppressWarnings("PMD.AvoidLiteralsInIfCondition")
     public void onEnable() {
         final BukkitScheduleAdapter scheduleAdapter = new BukkitScheduleAdapter(this, Bukkit.getScheduler());
         final BukkitServer bukkitServer = new BukkitServer(this, getDescription().getVersion());

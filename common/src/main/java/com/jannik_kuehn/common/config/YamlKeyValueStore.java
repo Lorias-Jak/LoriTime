@@ -2,6 +2,7 @@ package com.jannik_kuehn.common.config;
 
 import com.jannik_kuehn.common.LoriTimePlugin;
 import com.jannik_kuehn.common.api.logger.LoriTimeLogger;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 
@@ -28,13 +29,15 @@ public class YamlKeyValueStore implements KeyValueStore {
 
     private boolean loaded;
 
+    @SuppressFBWarnings("CT_CONSTRUCTOR_THROW")
     public YamlKeyValueStore(final String filePath) {
         this.filePath = filePath;
         final LoriTimePlugin loriTimePlugin = LoriTimePlugin.getInstance();
         this.log = loriTimePlugin.getLoggerFactory().create(YamlKeyValueStore.class);
         this.data = new HashMap<>();
         loaded = false;
-        loriTimePlugin.getScheduler().scheduleSync(this::loadFromFile);
+
+        loadFromFile();
     }
 
     @Override
@@ -65,6 +68,11 @@ public class YamlKeyValueStore implements KeyValueStore {
     @Override
     public Map<String, ?> getAll() {
         return data;
+    }
+
+    public void setAll(final Map<String, ?> dataMap) {
+        data.putAll(dataMap);
+        saveToFile();
     }
 
     @Override

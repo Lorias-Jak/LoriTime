@@ -40,7 +40,7 @@ public class LoggerFactory {
      * @return The decorated Logger.
      */
     public LoriTimeLogger create(final Class<?> clazz, final String topic) {
-        if (!isSlf4jAvailable()) {
+        if (isSlf4jAvailable()) {
             final org.slf4j.Logger slf4jLogger = loriTimePlugin.getServer().getSl4jLogger();
             return new Slf4jLoggerAdapter(slf4jLogger, topic);
         }

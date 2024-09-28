@@ -10,22 +10,22 @@ import com.velocitypowered.api.event.connection.PostLoginEvent;
 import java.util.UUID;
 
 public class TimeAccumulatorVelocityListener {
-    private final LoriTimePlugin plugin;
+    private final LoriTimePlugin loriTimePlugin;
 
     private final LoriTimeLogger log;
 
-    public TimeAccumulatorVelocityListener(final LoriTimePlugin plugin) {
-        this.plugin = plugin;
-        this.log = plugin.getLoggerFactory().create(TimeAccumulatorVelocityListener.class);
+    public TimeAccumulatorVelocityListener(final LoriTimePlugin loriTimePlugin) {
+        this.loriTimePlugin = loriTimePlugin;
+        this.log = loriTimePlugin.getLoggerFactory().create(TimeAccumulatorVelocityListener.class);
     }
 
     @Subscribe
     public void onPostLogin(final PostLoginEvent event) {
         final UUID uuid = event.getPlayer().getUniqueId();
         final long now = System.currentTimeMillis();
-        plugin.getScheduler().runAsyncOnce(() -> {
+        loriTimePlugin.getScheduler().runAsyncOnce(() -> {
             try {
-                plugin.getTimeStorage().startAccumulating(uuid, now);
+                loriTimePlugin.getTimeStorage().startAccumulating(uuid, now);
             } catch (final StorageException ex) {
                 log.warn("could not start accumulating online time for player " + uuid, ex);
             }
@@ -36,9 +36,10 @@ public class TimeAccumulatorVelocityListener {
     public void onDisconnect(final DisconnectEvent event) {
         final UUID uuid = event.getPlayer().getUniqueId();
         final long now = System.currentTimeMillis();
-        plugin.getScheduler().runAsyncOnce(() -> {
+        loriTimePlugin.getScheduler().runAsyncOnce(() -> {
             try {
-                plugin.getTimeStorage().stopAccumulatingAndSaveOnlineTime(uuid, now);
+                loriTimePlugin.getTimeStorage().stopAccumulatingAndSaveOnlineTime(uuid, now);
+                loriTimePlugin.getPlayerConverter().removePlayerFromCache(uuid);
             } catch (final StorageException ex) {
                 log.warn("error while stopping accumulation of online time for player " + uuid, ex);
             }

@@ -1,5 +1,6 @@
 package com.jannik_kuehn.common;
 
+import com.jannik_kuehn.common.api.LoriTimePlayerConverter;
 import com.jannik_kuehn.common.api.common.CommonServer;
 import com.jannik_kuehn.common.api.logger.LoggerFactory;
 import com.jannik_kuehn.common.api.logger.LoriTimeLogger;
@@ -52,6 +53,8 @@ public class LoriTimePlugin {
 
     private UpdateCheck updateCheck;
 
+    private final LoriTimePlayerConverter playerConverter;
+
     public LoriTimePlugin(final File dataFolder, final PluginScheduler scheduler, final CommonServer server, final String loggerTopic) {
         instance = this;
         this.dataFolder = dataFolder;
@@ -63,6 +66,7 @@ public class LoriTimePlugin {
         this.log = loggerFactory.create(LoriTimePlugin.class, loggerTopic);
 
         this.dataStorageManager = new DataStorageManager(this, dataFolder);
+        this.playerConverter = new LoriTimePlayerConverter(loggerFactory, this);
     }
 
     public static LoriTimePlugin getInstance() {
@@ -272,5 +276,9 @@ public class LoriTimePlugin {
 
     public DataStorageManager getDataStorageManager() {
         return dataStorageManager;
+    }
+
+    public LoriTimePlayerConverter getPlayerConverter() {
+        return playerConverter;
     }
 }

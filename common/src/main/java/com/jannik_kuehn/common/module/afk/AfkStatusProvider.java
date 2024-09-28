@@ -5,17 +5,12 @@ import com.jannik_kuehn.common.api.LoriTimePlayer;
 import com.jannik_kuehn.common.api.logger.LoriTimeLogger;
 import com.jannik_kuehn.common.api.scheduler.PluginTask;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.OptionalLong;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class AfkStatusProvider {
     private final LoriTimePlugin loriTimePlugin;
 
     private final LoriTimeLogger log;
-
-    private final ConcurrentHashMap<LoriTimePlayer, Long> afkCheckedPlayers;
 
     private final AfkHandling afkPlayerHandling;
 
@@ -26,7 +21,6 @@ public class AfkStatusProvider {
     public AfkStatusProvider(final LoriTimePlugin loriTimePlugin, final AfkHandling afkHandling) {
         this.loriTimePlugin = loriTimePlugin;
         this.log = loriTimePlugin.getLoggerFactory().create(AfkStatusProvider.class, "AfkStatusProvider");
-        this.afkCheckedPlayers = new ConcurrentHashMap<>();
         this.afkPlayerHandling = afkHandling;
 
         reloadConfigValues();
@@ -75,50 +69,33 @@ public class AfkStatusProvider {
     }
 
     private void repeatedTimeCheck() {
-        final HashMap<LoriTimePlayer, Long> playersToCheck = new HashMap<>(afkCheckedPlayers);
         log.debug("RepeatedTimeCheck started, checking for player afk status");
-        for (final Map.Entry<LoriTimePlayer, Long> entry : playersToCheck.entrySet()) {
-            final LoriTimePlayer player = entry.getKey();
-            final long playerAfkTime = entry.getValue();
-            final long currentTime = System.currentTimeMillis();
-            if (loriTimePlugin.getServer().getPlayer(player.getUniqueId()).isEmpty()) {
-                log.debug("Player is not online anymore. Removing player from afk-check. Continue with next player");
-                afkCheckedPlayers.remove(player);
-                continue;
-            }
-            if (getRealPlayer(player).isAfk()) {
-                log.debug("Player is already afk. Continue with next player");
-                continue;
-            }
-            if (currentTime - playerAfkTime >= afkConfigTime) {
-                log.debug("Player is afk now. Setting player to afk");
-                final long timeToRemove = (currentTime - playerAfkTime) / 1000L;
-                setPlayerAFK(player, timeToRemove);
-            }
-        }
+        loriTimePlugin.getPlayerConverter().getOnlinePlayers().forEach(this::computeAfkPlayers);
+    }
 
+    private void computeAfkPlayers(final LoriTimePlayer loriTimePlayer) {
+        final long playerAfkTime = loriTimePlayer.getLastResumeTime();
+        final long currentTime = System.currentTimeMillis();
+        if (loriTimePlugin.getServer().getPlayer(loriTimePlayer.getUniqueId()).isEmpty()) {
+            log.debug("Player is not online anymore. Continue with next player");
+            return;
+        }
+        if (loriTimePlayer.isAfk()) {
+            log.debug("Player is already afk. Continue with next player");
+            return;
+        }
+        if (currentTime - playerAfkTime >= afkConfigTime) {
+            log.debug("Player is afk now. Setting player to afk");
+            final long timeToRemove = (currentTime - playerAfkTime) / 1000L;
+            setPlayerAFK(loriTimePlayer, timeToRemove);
+        }
     }
 
     public void resetTimer(final LoriTimePlayer player) {
         if (player.isAfk()) {
             resumePlayerAFK(player);
         }
-        afkCheckedPlayers.put(player, System.currentTimeMillis());
-    }
-
-    public LoriTimePlayer getRealPlayer(final LoriTimePlayer player) {
-        LoriTimePlayer playerToReturn = player;
-        for (final LoriTimePlayer loriTimePlayer : afkCheckedPlayers.keySet()) {
-            if (player.equals(loriTimePlayer)) {
-                playerToReturn = loriTimePlayer;
-            }
-        }
-        afkCheckedPlayers.put(playerToReturn, System.currentTimeMillis());
-        return playerToReturn;
-    }
-
-    public void playerLeft(final LoriTimePlayer player) {
-        afkCheckedPlayers.remove(player);
+        player.setLastResumeTime();
     }
 
     public void switchPlayerAfk(final LoriTimePlayer player) {
@@ -127,37 +104,34 @@ public class AfkStatusProvider {
 
     public void switchPlayerAFK(final LoriTimePlayer player, final long timeToRemove) {
         log.debug("Switching player afk status from '" + player.getName() + "'");
-        final LoriTimePlayer target = getRealPlayer(player);
-        if (!target.isAfk()) {
-            log.debug("Setting player" + target.getName() + "to afk");
-            target.setAFk(true);
-            afkPlayerHandling.executePlayerAfk(target, timeToRemove);
+        if (!player.isAfk()) {
+            log.debug("Setting player" + player.getName() + "to afk");
+            player.setAFk(true);
+            afkPlayerHandling.executePlayerAfk(player, timeToRemove);
         } else {
-            log.debug("Resuming player '" + target.getName() + "'");
-            target.setAFk(false);
-            afkPlayerHandling.executePlayerResume(target);
+            log.debug("Resuming player '" + player.getName() + "'");
+            player.setAFk(false);
+            afkPlayerHandling.executePlayerResume(player);
         }
     }
 
     public void setPlayerAFK(final LoriTimePlayer player, final long timeToRemove) {
         log.debug("Setting player '" + player.getName() + "' to afk");
-        final LoriTimePlayer target = getRealPlayer(player);
-        if (target.isAfk()) {
-            log.debug("Player '" + target.getName() + "' is already afk. Skipping the process...");
+        if (player.isAfk()) {
+            log.debug("Player '" + player.getName() + "' is already afk. Skipping the process...");
             return;
         }
-        target.setAFk(true);
-        afkPlayerHandling.executePlayerAfk(target, timeToRemove);
+        player.setAFk(true);
+        afkPlayerHandling.executePlayerAfk(player, timeToRemove);
     }
 
     public void resumePlayerAFK(final LoriTimePlayer player) {
         log.debug("Resuming player '" + player.getName() + "'");
-        final LoriTimePlayer target = getRealPlayer(player);
-        if (!target.isAfk()) {
-            log.debug("Player '" + target.getName() + "' is not afk. Skipping the resuming");
+        if (!player.isAfk()) {
+            log.debug("Player '" + player.getName() + "' is not afk. Skipping the resuming");
             return;
         }
-        target.setAFk(false);
-        afkPlayerHandling.executePlayerResume(target);
+        player.setAFk(false);
+        afkPlayerHandling.executePlayerResume(player);
     }
 }

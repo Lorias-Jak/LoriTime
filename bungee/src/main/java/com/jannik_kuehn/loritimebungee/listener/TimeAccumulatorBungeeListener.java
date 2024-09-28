@@ -12,22 +12,22 @@ import java.util.UUID;
 
 public class TimeAccumulatorBungeeListener implements Listener {
 
-    private final LoriTimePlugin plugin;
+    private final LoriTimePlugin loriTimePlugin;
 
     private final LoriTimeLogger log;
 
-    public TimeAccumulatorBungeeListener(final LoriTimePlugin plugin) {
-        this.plugin = plugin;
-        this.log = plugin.getLoggerFactory().create(TimeAccumulatorBungeeListener.class);
+    public TimeAccumulatorBungeeListener(final LoriTimePlugin loriTimePlugin) {
+        this.loriTimePlugin = loriTimePlugin;
+        this.log = loriTimePlugin.getLoggerFactory().create(TimeAccumulatorBungeeListener.class);
     }
 
     @EventHandler
     public void onPostLogin(final PostLoginEvent event) {
         final UUID uuid = event.getPlayer().getUniqueId();
         final long now = System.currentTimeMillis();
-        plugin.getScheduler().runAsyncOnce(() -> {
+        loriTimePlugin.getScheduler().runAsyncOnce(() -> {
             try {
-                plugin.getTimeStorage().startAccumulating(uuid, now);
+                loriTimePlugin.getTimeStorage().startAccumulating(uuid, now);
             } catch (final StorageException ex) {
                 log.warn("could not start accumulating online time for player " + uuid, ex);
             }
@@ -38,9 +38,10 @@ public class TimeAccumulatorBungeeListener implements Listener {
     public void onDisconnect(final PlayerDisconnectEvent event) {
         final UUID uuid = event.getPlayer().getUniqueId();
         final long now = System.currentTimeMillis();
-        plugin.getScheduler().runAsyncOnce(() -> {
+        loriTimePlugin.getScheduler().runAsyncOnce(() -> {
             try {
-                plugin.getTimeStorage().stopAccumulatingAndSaveOnlineTime(uuid, now);
+                loriTimePlugin.getTimeStorage().stopAccumulatingAndSaveOnlineTime(uuid, now);
+                loriTimePlugin.getPlayerConverter().removePlayerFromCache(uuid);
             } catch (final StorageException ex) {
                 log.warn("error while stopping accumulation of online time for player " + uuid, ex);
             }

@@ -126,7 +126,7 @@ public class LoriTimeAdminCommand implements CommonCommand {
             printMissingUuidMessage(sender, args[0]);
             return;
         }
-        final LoriTimePlayer player = new LoriTimePlayer(optionalUUID.get(), args[0]);
+        final LoriTimePlayer player = loriTimePlugin.getPlayerConverter().getOnlinePlayer(optionalUUID.get());
 
         final String[] timeArgs = new String[args.length - 1];
         System.arraycopy(args, 1, timeArgs, 0, timeArgs.length);
@@ -179,7 +179,7 @@ public class LoriTimeAdminCommand implements CommonCommand {
             printMissingUuidMessage(sender, args[0]);
             return;
         }
-        final LoriTimePlayer player = new LoriTimePlayer(optionalUUID.get(), args[0]);
+        final LoriTimePlayer player = loriTimePlugin.getPlayerConverter().getOnlinePlayer(optionalUUID.get());
 
         final String[] timeArgs = new String[args.length - 1];
         System.arraycopy(args, 1, timeArgs, 0, timeArgs.length);
@@ -230,7 +230,7 @@ public class LoriTimeAdminCommand implements CommonCommand {
             printMissingUuidMessage(sender, args[0]);
             return;
         }
-        final LoriTimePlayer player = new LoriTimePlayer(optionalUUID.get(), args[0]);
+        final LoriTimePlayer player = loriTimePlugin.getPlayerConverter().getOnlinePlayer(optionalUUID.get());
 
         final long currentTime;
         try {

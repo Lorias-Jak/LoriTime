@@ -86,7 +86,7 @@ public abstract class PluginMessaging {
                 log.debug("Player with the uuid '" + playerUUID + "' is not online or cant be found");
                 return;
             }
-            final LoriTimePlayer player = new LoriTimePlayer(playerUUID, optionalPlayer.get().getName());
+            final LoriTimePlayer player = loriTimePlugin.getPlayerConverter().getOnlinePlayer(playerUUID);
 
             switch (input.readUTF()) {
                 case "true":

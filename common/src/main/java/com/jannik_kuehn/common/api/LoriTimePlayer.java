@@ -12,10 +12,13 @@ public class LoriTimePlayer {
 
     private boolean afkStatus;
 
-    public LoriTimePlayer(UUID uuid, String name) {
+    private long lastResumeTime;
+
+    public LoriTimePlayer(final UUID uuid, final String name) {
         this.uuid = uuid;
         this.name = name;
         this.afkStatus = false;
+        this.lastResumeTime = System.currentTimeMillis();
     }
 
     public UUID getUniqueId() {
@@ -34,21 +37,29 @@ public class LoriTimePlayer {
         this.afkStatus = afk;
     }
 
+    public void setLastResumeTime() {
+        this.lastResumeTime = System.currentTimeMillis();
+    }
+
+    public long getLastResumeTime() {
+        return lastResumeTime;
+    }
+
     @Override
     @SuppressFBWarnings("EC_UNRELATED_TYPES")
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
         if (this == obj) {
             return true;
         }
         if (obj == null || getClass() != obj.getClass()) {
             return false;
         }
-        LoriTimePlayer that = (LoriTimePlayer) obj;
+        final LoriTimePlayer that = (LoriTimePlayer) obj;
         return uuid.equals(that.uuid);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(uuid);
+        return Objects.hash(uuid, name);
     }
 }

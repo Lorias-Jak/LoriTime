@@ -50,7 +50,8 @@ public class LoriTimePlaceholder extends PlaceholderExpansion {
             case "years" -> TimeUtil.getYears(getUnformattedOnlineTime(player));
             case "afk" -> {
                 if (loriTimePlugin.isAfkEnabled()) {
-                    yield String.valueOf(loriTimePlugin.getAfkStatusProvider().getRealPlayer(new LoriTimePlayer(player.getUniqueId(), player.getName())).isAfk());
+                    final LoriTimePlayer loriTimePlayer = loriTimePlugin.getPlayerConverter().getOnlinePlayer(player.getUniqueId());
+                    yield String.valueOf(loriTimePlayer.isAfk());
                 }
                 yield "Feature not enabled!";
             }

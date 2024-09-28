@@ -32,7 +32,7 @@ public class LoriTimeAfkCommand implements CommonCommand {
             return;
         }
         plugin.getScheduler().runAsyncOnce(() -> {
-            final LoriTimePlayer player = new LoriTimePlayer(sender.getUniqueId(), sender.getName());
+            final LoriTimePlayer player = plugin.getPlayerConverter().getOnlinePlayer(sender.getUniqueId());
             plugin.getAfkStatusProvider().switchPlayerAfk(player);
         });
     }

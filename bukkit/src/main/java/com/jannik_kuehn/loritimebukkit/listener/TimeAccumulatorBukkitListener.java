@@ -12,22 +12,22 @@ import java.util.UUID;
 
 public class TimeAccumulatorBukkitListener implements Listener {
 
-    private final LoriTimePlugin plugin;
+    private final LoriTimePlugin loriTimePlugin;
 
     private final LoriTimeLogger log;
 
-    public TimeAccumulatorBukkitListener(final LoriTimePlugin plugin) {
-        this.plugin = plugin;
-        this.log = plugin.getLoggerFactory().create(TimeAccumulatorBukkitListener.class);
+    public TimeAccumulatorBukkitListener(final LoriTimePlugin loriTimePlugin) {
+        this.loriTimePlugin = loriTimePlugin;
+        this.log = loriTimePlugin.getLoggerFactory().create(TimeAccumulatorBukkitListener.class);
     }
 
     @EventHandler
     public void playerJoin(final PlayerJoinEvent event) {
         final UUID uuid = event.getPlayer().getUniqueId();
         final long now = System.currentTimeMillis();
-        plugin.getScheduler().runAsyncOnce(() -> {
+        loriTimePlugin.getScheduler().runAsyncOnce(() -> {
             try {
-                plugin.getTimeStorage().startAccumulating(uuid, now);
+                loriTimePlugin.getTimeStorage().startAccumulating(uuid, now);
             } catch (final StorageException e) {
                 log.warn("could not start accumulating online time for player " + uuid, e);
             }
@@ -38,9 +38,10 @@ public class TimeAccumulatorBukkitListener implements Listener {
     public void playerQuit(final PlayerQuitEvent event) {
         final UUID uuid = event.getPlayer().getUniqueId();
         final long now = System.currentTimeMillis();
-        plugin.getScheduler().runAsyncOnce(() -> {
+        loriTimePlugin.getScheduler().runAsyncOnce(() -> {
             try {
-                plugin.getTimeStorage().stopAccumulatingAndSaveOnlineTime(uuid, now);
+                loriTimePlugin.getTimeStorage().stopAccumulatingAndSaveOnlineTime(uuid, now);
+                loriTimePlugin.getPlayerConverter().removePlayerFromCache(uuid);
             } catch (final StorageException e) {
                 log.warn("error while stopping accumulation of online time for player " + uuid, e);
             }

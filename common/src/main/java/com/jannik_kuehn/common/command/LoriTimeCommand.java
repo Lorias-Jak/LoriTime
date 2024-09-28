@@ -49,7 +49,7 @@ public class LoriTimeCommand implements CommonCommand {
                         throw new RuntimeException(e);
                     }
                     if (optionalPlayer.isPresent()) {
-                        targetPlayer = new LoriTimePlayer(optionalPlayer.get(), args[0]);
+                        targetPlayer = loriTimePlugin.getPlayerConverter().getOnlinePlayer(optionalPlayer.get());
                     } else {
                         sender.sendMessage(localization.formatTextComponent(localization.getRawMessage("message.command.loritime.notfound")
                                 .replace("[player]", args[0])));
@@ -57,7 +57,7 @@ public class LoriTimeCommand implements CommonCommand {
                     }
                 } else {
                     if (!sender.isConsole()) {
-                        targetPlayer = new LoriTimePlayer(sender.getUniqueId(), sender.getName());
+                        targetPlayer = loriTimePlugin.getPlayerConverter().getOnlinePlayer(sender.getUniqueId());
                     } else {
                         sender.sendMessage(localization.formatTextComponent(localization.getRawMessage("message.command.loritime.consoleself")));
                         return;

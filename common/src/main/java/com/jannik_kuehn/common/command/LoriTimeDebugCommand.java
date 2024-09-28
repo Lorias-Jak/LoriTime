@@ -9,7 +9,10 @@ import com.jannik_kuehn.common.config.localization.Localization;
 
 import java.util.List;
 
+@SuppressWarnings("PMD.CommentRequired")
 public class LoriTimeDebugCommand implements CommonCommand {
+    private static final String DEBUG_CONFIG_PATH = "general.debug";
+
     private final LoriTimePlugin loriTimePlugin;
 
     private final Localization localization;
@@ -24,7 +27,7 @@ public class LoriTimeDebugCommand implements CommonCommand {
         this.loriTimePlugin = loriTimePlugin;
         this.localization = localization;
         this.log = loriTimePlugin.getLoggerFactory().create(LoriTimeDebugCommand.class, "LoriTimeDebugCommand");
-        this.isDebugging = loriTimePlugin.getConfig().getBoolean("general.debug");
+        this.isDebugging = loriTimePlugin.getConfig().getBoolean(DEBUG_CONFIG_PATH);
 
         loriTimePlugin.getScheduler().runAsyncOnce(this::autoDisableCheck);
     }
@@ -40,7 +43,7 @@ public class LoriTimeDebugCommand implements CommonCommand {
     }
 
     private void changeDebugMode(final CommonSender sender) {
-        final boolean configValue = loriTimePlugin.getConfig().getBoolean("general.debug");
+        final boolean configValue = loriTimePlugin.getConfig().getBoolean(DEBUG_CONFIG_PATH);
         if (configValue) {
             autoDisableTask.cancel();
             stopDebugging();
@@ -53,13 +56,13 @@ public class LoriTimeDebugCommand implements CommonCommand {
 
     private void startDebugging() {
         isDebugging = true;
-        loriTimePlugin.getConfig().setTemporaryValue("general.debug", true);
+        loriTimePlugin.getConfig().setTemporaryValue(DEBUG_CONFIG_PATH, true);
         log.info("Debug mode has been enabled.");
     }
 
     private void stopDebugging() {
         isDebugging = false;
-        loriTimePlugin.getConfig().setTemporaryValue("general.debug", false);
+        loriTimePlugin.getConfig().setTemporaryValue(DEBUG_CONFIG_PATH, false);
         log.info("Debug mode has been disabled.");
     }
 

@@ -7,6 +7,7 @@ import com.jannik_kuehn.common.api.scheduler.PluginTask;
 
 import java.util.OptionalLong;
 
+@SuppressWarnings({"PMD.CommentRequired", "PMD.TooManyMethods"})
 public class AfkStatusProvider {
     private final LoriTimePlugin loriTimePlugin;
 
@@ -27,7 +28,7 @@ public class AfkStatusProvider {
         restartAfkCheck();
     }
 
-    public void reloadConfigValues() {
+    public final void reloadConfigValues() {
         log.debug("Reloading config values of AfkStatusProvider");
         afkPlayerHandling.reloadConfigValues();
         final OptionalLong afkConfigOptional = loriTimePlugin.getParser().parseToSeconds(loriTimePlugin.getConfig().getString("afk.after", "15m"));
@@ -39,7 +40,7 @@ public class AfkStatusProvider {
         log.debug("Reloaded afkConfigTime. New value: " + afkConfigTime);
     }
 
-    public void restartAfkCheck() {
+    public final void restartAfkCheck() {
         log.debug("Restarting afk-check");
         stopAfkCheck();
         final boolean afkEnabled = loriTimePlugin.getConfig().getBoolean("afk.enabled", false) && !loriTimePlugin.getServer().isProxy();
@@ -74,8 +75,6 @@ public class AfkStatusProvider {
     }
 
     private void computeAfkPlayers(final LoriTimePlayer loriTimePlayer) {
-        final long playerAfkTime = loriTimePlayer.getLastResumeTime();
-        final long currentTime = System.currentTimeMillis();
         if (loriTimePlugin.getServer().getPlayer(loriTimePlayer.getUniqueId()).isEmpty()) {
             log.debug("Player is not online anymore. Continue with next player");
             return;
@@ -84,6 +83,8 @@ public class AfkStatusProvider {
             log.debug("Player is already afk. Continue with next player");
             return;
         }
+        final long playerAfkTime = loriTimePlayer.getLastResumeTime();
+        final long currentTime = System.currentTimeMillis();
         if (currentTime - playerAfkTime >= afkConfigTime) {
             log.debug("Player is afk now. Setting player to afk");
             final long timeToRemove = (currentTime - playerAfkTime) / 1000L;
@@ -104,15 +105,15 @@ public class AfkStatusProvider {
 
     public void switchPlayerAFK(final LoriTimePlayer player, final long timeToRemove) {
         log.debug("Switching player afk status from '" + player.getName() + "'");
-        if (!player.isAfk()) {
-            log.debug("Setting player" + player.getName() + "to afk");
-            player.setAFk(true);
-            afkPlayerHandling.executePlayerAfk(player, timeToRemove);
-        } else {
+        if (player.isAfk()) {
             log.debug("Resuming player '" + player.getName() + "'");
             player.setAFk(false);
             afkPlayerHandling.executePlayerResume(player);
+            return;
         }
+        log.debug("Setting player" + player.getName() + "to afk");
+        player.setAFk(true);
+        afkPlayerHandling.executePlayerAfk(player, timeToRemove);
     }
 
     public void setPlayerAFK(final LoriTimePlayer player, final long timeToRemove) {

@@ -17,7 +17,9 @@ import java.util.OptionalLong;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-@SuppressWarnings({"PMD.CommentRequired", "PMD.TooManyMethods", "PMD.CognitiveComplexity", "PMD.NPathComplexity", "PMD.AvoidLiteralsInIfCondition"})
+@SuppressWarnings({"PMD.CommentRequired", "PMD.TooManyMethods", "PMD.AvoidLiteralsInIfCondition", "PMD.CognitiveComplexity",
+        "PMD.CyclomaticComplexity", "PMD.NPathComplexity", "PMD.AvoidThrowingRawExceptionTypes", "PMD.CloseResource",
+        "PMD.AvoidDuplicateLiterals", "PMD.ConfusingTernary"})
 public class LoriTimeCommand implements CommonCommand {
 
     private final LoriTimePlugin loriTimePlugin;
@@ -33,7 +35,6 @@ public class LoriTimeCommand implements CommonCommand {
     }
 
     @Override
-    @SuppressWarnings("PMD.ConfusingTernary")
     public void execute(final CommonSender sender, final String... args) {
         if (!sender.hasPermission("loritime.see")) {
             printUtilityMessage(sender, "message.nopermission");
@@ -48,8 +49,7 @@ public class LoriTimeCommand implements CommonCommand {
                     try {
                         optionalPlayer = loriTimePlugin.getNameStorage().getUuid(args[0]);
                     } catch (final StorageException e) {
-                        plugin.getLogger().error("Could not load UUID from NameStorage in LoriTimeCommand!", e);
-                        return;
+                        throw new RuntimeException(e);
                     }
                     if (optionalPlayer.isPresent()) {
                         targetPlayer = loriTimePlugin.getPlayerConverter().getOnlinePlayer(optionalPlayer.get());
@@ -97,7 +97,7 @@ public class LoriTimeCommand implements CommonCommand {
                                 .replace("[player]", loriTimePlugin.getNameStorage().getName(targetPlayer.getUniqueId()).get())
                                 .replace("[time]", TimeUtil.formatTime(time, localization))));
                     } catch (final StorageException e) {
-                        plugin.getLogger().error("Could not load name from NameStorage!", e);
+                        throw new RuntimeException(e);
                     }
                 }
             });

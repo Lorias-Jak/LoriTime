@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+@SuppressWarnings("PMD.CommentRequired")
 public class YamlKeyValueStore implements KeyValueStore {
     private final String filePath;
 
@@ -33,8 +34,7 @@ public class YamlKeyValueStore implements KeyValueStore {
         this.log = loriTimePlugin.getLoggerFactory().create(YamlKeyValueStore.class);
         this.data = new HashMap<>();
         loaded = false;
-
-        loadFromFile();
+        loriTimePlugin.getScheduler().scheduleSync(this::loadFromFile);
     }
 
     @Override
@@ -67,11 +67,6 @@ public class YamlKeyValueStore implements KeyValueStore {
         return data;
     }
 
-    public void setAll(final Map<String, ?> dataMap) {
-        data.putAll(dataMap);
-        saveToFile();
-    }
-
     @Override
     public List<String> getKeys() {
         return new ArrayList<>(data.keySet());
@@ -82,6 +77,7 @@ public class YamlKeyValueStore implements KeyValueStore {
         return data.entrySet();
     }
 
+    @SuppressWarnings("PMD.AvoidFileStream")
     private void loadFromFile() {
         try (FileInputStream input = new FileInputStream(filePath)) {  // try-with-resources Block
             final Yaml yaml = new Yaml();
@@ -119,6 +115,7 @@ public class YamlKeyValueStore implements KeyValueStore {
         return dataMap;
     }
 
+    @SuppressWarnings("PMD.AvoidFileStream")
     private void saveToFile() {
         final DumperOptions options = new DumperOptions();
         options.setPrettyFlow(true);
@@ -132,10 +129,12 @@ public class YamlKeyValueStore implements KeyValueStore {
         }
     }
 
+    @Override
     public boolean isLoaded() {
         return loaded;
     }
 
+    @Override
     public void reload() {
         loadFromFile();
     }

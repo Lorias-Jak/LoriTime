@@ -10,8 +10,18 @@ import java.util.logging.Logger;
  */
 public class JavaUtilLoggerAdapter implements LoriTimeLogger {
 
+    /**
+     * The parent {@link TopicLogger} instance.
+     */
     private final TopicLogger logger;
 
+    /**
+     * Creates a new {@link JavaUtilLoggerAdapter} instance.
+     *
+     * @param parentLogger the parent {@link Logger} instance
+     * @param clazz        the class to create a logger for
+     * @param topic        the topic of the logger
+     */
     public JavaUtilLoggerAdapter(final Logger parentLogger, final Class<?> clazz, final String topic) {
         this.logger = new TopicLogger(parentLogger, clazz, topic);  // TopicLogger is used here
     }

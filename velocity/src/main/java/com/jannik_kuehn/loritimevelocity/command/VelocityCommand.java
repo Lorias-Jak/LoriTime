@@ -12,6 +12,7 @@ import com.velocitypowered.api.proxy.Player;
 
 import java.util.List;
 
+@SuppressWarnings("PMD.CommentRequired")
 public class VelocityCommand implements SimpleCommand {
 
     private final LoriTimeVelocity velocityPlugin;
@@ -36,6 +37,7 @@ public class VelocityCommand implements SimpleCommand {
         this.command.execute(commonSender, args);
     }
 
+    @Override
     public List<String> suggest(final Invocation invocation) {
         final CommonSender commandSource = getSender(invocation.source());
         final String[] args = invocation.arguments();

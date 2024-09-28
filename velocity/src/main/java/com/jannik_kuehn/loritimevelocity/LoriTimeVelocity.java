@@ -31,13 +31,15 @@ import javax.inject.Inject;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.List;
 
+@SuppressWarnings({"PMD.CommentRequired"})
 public class LoriTimeVelocity {
     private final Path dataDirectory;
 
     private final ProxyServer proxyServer;
 
-    private final ArrayList<VelocityCommand> commands;
+    private final List<VelocityCommand> commands;
 
     private final Metrics.Factory metricsFactory;
 
@@ -57,6 +59,7 @@ public class LoriTimeVelocity {
     }
 
     @Subscribe
+    @SuppressWarnings("PMD.UseUnderscoresInNumericLiterals")
     public void onInitialize(final ProxyInitializeEvent event) {
         final VelocityServer velocityServer = new VelocityServer(pluginLogger);
         this.loriTimePlugin = new LoriTimePlugin(dataDirectory.toFile(), new VelocityScheduleAdapter(this,
@@ -69,17 +72,13 @@ public class LoriTimeVelocity {
         }
         final String version = container.getDescription().getVersion().get();
         velocityServer.enable(proxyServer, version);
-        try {
-            loriTimePlugin.enable();
-            LoriTimeAPI.setPlugin(loriTimePlugin);
-        } catch (final Exception e) {
-            loriTimePlugin.disable();
-            log.error("Error while enabling the plugin! Disabling the plugin...", e);
-        }
 
-        if (velocityServer.getServerMode().equalsIgnoreCase("master")) {
+        loriTimePlugin.enable();
+        LoriTimeAPI.setPlugin(loriTimePlugin);
+
+        if ("master".equalsIgnoreCase(velocityServer.getServerMode())) {
             enableAsMaster();
-        } else if (velocityServer.getServerMode().equalsIgnoreCase("slave")) {
+        } else if ("slave".equalsIgnoreCase(velocityServer.getServerMode())) {
             enableAsSlave();
         } else {
             log.error("Server mode is not set correctly! Please set the server mode to 'master' or 'slave' in the config.yml. Disabling the plugin...");

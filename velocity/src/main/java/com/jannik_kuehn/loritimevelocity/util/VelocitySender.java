@@ -8,6 +8,7 @@ import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 
 import java.util.UUID;
 
+@SuppressWarnings("PMD.CommentRequired")
 public class VelocitySender implements CommonSender {
     private final CommandSource source;
 

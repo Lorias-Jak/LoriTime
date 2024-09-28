@@ -7,11 +7,26 @@ import com.velocitypowered.api.scheduler.Scheduler;
 
 import java.util.concurrent.TimeUnit;
 
+/**
+ * A {@link PluginScheduler} implementation for Velocity.
+ */
 public class VelocityScheduleAdapter implements PluginScheduler {
+    /**
+     * The {@link LoriTimeVelocity} instance.
+     */
     private final LoriTimeVelocity plugin;
 
+    /**
+     * The {@link Scheduler} instance.
+     */
     private final Scheduler scheduler;
 
+    /**
+     * Creates a new {@link VelocityScheduleAdapter} instance.
+     *
+     * @param plugin    The {@link LoriTimeVelocity} instance.
+     * @param scheduler The {@link Scheduler} instance.
+     */
     public VelocityScheduleAdapter(final LoriTimeVelocity plugin, final Scheduler scheduler) {
         this.plugin = plugin;
         this.scheduler = scheduler;

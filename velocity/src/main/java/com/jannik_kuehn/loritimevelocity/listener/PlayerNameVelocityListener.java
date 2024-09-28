@@ -9,24 +9,44 @@ import com.velocitypowered.api.proxy.Player;
 
 import java.util.UUID;
 
+/**
+ * Listener for saving player names and UUIDs.
+ */
 public class PlayerNameVelocityListener {
-    private final LoriTimePlugin plugin;
+    /**
+     * The {@link LoriTimePlugin} instance.
+     */
+    private final LoriTimePlugin loriTimePlugin;
 
+    /**
+     * The {@link LoriTimeLogger} instance.
+     */
     private final LoriTimeLogger log;
 
-    public PlayerNameVelocityListener(final LoriTimePlugin plugin) {
-        this.plugin = plugin;
-        this.log = plugin.getLoggerFactory().create(PlayerNameVelocityListener.class);
+    /**
+     * The default constructor.
+     *
+     * @param loriTimePlugin The {@link LoriTimePlugin} instance.
+     */
+    public PlayerNameVelocityListener(final LoriTimePlugin loriTimePlugin) {
+        this.loriTimePlugin = loriTimePlugin;
+        this.log = loriTimePlugin.getLoggerFactory().create(PlayerNameVelocityListener.class);
     }
 
+    /**
+     * Saves the player name and UUID when a player joins the server.
+     * It also does a lookup to check if the player name has changed.
+     *
+     * @param event The {@link PostLoginEvent} event.
+     */
     @Subscribe
     public void postLogin(final PostLoginEvent event) {
         final Player player = event.getPlayer();
         final UUID uuid = player.getUniqueId();
         final String name = player.getUsername();
-        plugin.getScheduler().runAsyncOnce(() -> {
+        loriTimePlugin.getScheduler().runAsyncOnce(() -> {
             try {
-                plugin.getNameStorage().setEntry(uuid, name, true);
+                loriTimePlugin.getNameStorage().setEntry(uuid, name, true);
             } catch (final StorageException ex) {
                 log.warn("could not save player name and uuid " + name, ex);
             }

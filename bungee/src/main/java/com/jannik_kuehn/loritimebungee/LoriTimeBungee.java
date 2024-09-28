@@ -39,14 +39,8 @@ public class LoriTimeBungee extends Plugin {
 
         final LoriTimeLogger log = loriTimePlugin.getLoggerFactory().create(LoriTimeBungee.class, loggerTopic);
 
-        try {
-            loriTimePlugin.enable();
-            LoriTimeAPI.setPlugin(loriTimePlugin);
-        } catch (final Exception e) {
-            loriTimePlugin.disable();
-            log.warn("Error while enabling the plugin! Disabling the plugin...", e);
-            return;
-        }
+        loriTimePlugin.enable();
+        LoriTimeAPI.setPlugin(loriTimePlugin);
 
         if ("master".equalsIgnoreCase(bungeeServer.getServerMode())) {
             enableAsMaster();

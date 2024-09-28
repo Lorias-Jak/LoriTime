@@ -42,7 +42,7 @@ public class AfkStatusProvider {
     public void restartAfkCheck() {
         log.debug("Restarting afk-check");
         stopAfkCheck();
-        final boolean afkEnabled = loriTimePlugin.getConfig().getBoolean("afk.enabled", false);
+        final boolean afkEnabled = loriTimePlugin.getConfig().getBoolean("afk.enabled", false) && !loriTimePlugin.getServer().isProxy();
         log.debug("Afk enabled: " + afkEnabled);
         if (afkEnabled) {
             startAfkCheck();

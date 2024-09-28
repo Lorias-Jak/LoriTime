@@ -12,17 +12,37 @@ import net.md_5.bungee.event.EventHandler;
 import java.util.Optional;
 import java.util.UUID;
 
+/**
+ * The BungeePluginMessenger class that sends and receives the PluginMessages between Proxy and Subserver.
+ */
+@SuppressWarnings({"PMD.AvoidLiteralsInIfCondition"})
 public class BungeePluginMessenger extends PluginMessaging implements Listener {
+    /**
+     * The {@link LoriTimeBungee} instance.
+     */
     private final LoriTimeBungee loriTimeBungee;
 
+    /**
+     * The {@link LoriTimeLogger} instance.
+     */
     private final LoriTimeLogger log;
 
+    /**
+     * The default constructor.
+     *
+     * @param loriTimeBungee The {@link LoriTimeBungee} instance.
+     */
     public BungeePluginMessenger(final LoriTimeBungee loriTimeBungee) {
         super(loriTimeBungee.getPlugin());
         this.loriTimeBungee = loriTimeBungee;
         this.log = loriTimeBungee.getPlugin().getLoggerFactory().create(BungeePluginMessenger.class, "BungeePluginMessenger");
     }
 
+    /**
+     * Handles the PluginMessage event and processes the data.
+     *
+     * @param event The {@link PluginMessageEvent} event.
+     */
     @EventHandler
     public void onPluginMessage(final PluginMessageEvent event) {
         if (!event.getTag().contains("loritime:")) {

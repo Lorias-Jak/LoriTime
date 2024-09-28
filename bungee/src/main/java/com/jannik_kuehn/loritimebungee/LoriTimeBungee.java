@@ -21,6 +21,7 @@ import net.md_5.bungee.api.plugin.Plugin;
 import net.md_5.bungee.api.plugin.PluginManager;
 import org.bstats.bungeecord.Metrics;
 
+@SuppressWarnings({"PMD.CommentRequired", "PMD.AvoidCatchingGenericException", "PMD.AtLeastOneConstructor"})
 public class LoriTimeBungee extends Plugin {
 
     private LoriTimePlugin loriTimePlugin;
@@ -28,6 +29,7 @@ public class LoriTimeBungee extends Plugin {
     private BungeeAudiences audiences;
 
     @Override
+    @SuppressWarnings("PMD.UseUnderscoresInNumericLiterals")
     public void onEnable() {
         audiences = BungeeAudiences.create(this);
         final BungeeScheduleAdapter scheduleAdapter = new BungeeScheduleAdapter(this, getProxy().getScheduler());
@@ -46,9 +48,9 @@ public class LoriTimeBungee extends Plugin {
             return;
         }
 
-        if (bungeeServer.getServerMode().equalsIgnoreCase("master")) {
+        if ("master".equalsIgnoreCase(bungeeServer.getServerMode())) {
             enableAsMaster();
-        } else if (bungeeServer.getServerMode().equalsIgnoreCase("slave")) {
+        } else if ("slave".equalsIgnoreCase(bungeeServer.getServerMode())) {
             enableAsSlave();
         } else {
             log.error("Server mode is not set correctly! Please set the server mode to 'master' or 'slave' in the config.yml. Disabling the plugin...");

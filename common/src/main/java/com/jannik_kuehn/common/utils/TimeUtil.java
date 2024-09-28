@@ -3,6 +3,8 @@ package com.jannik_kuehn.common.utils;
 import com.jannik_kuehn.common.config.localization.Localization;
 import org.jetbrains.annotations.NotNull;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
@@ -76,5 +78,45 @@ public final class TimeUtil {
 
     public static String getYears(final long seconds) {
         return String.valueOf(calculateTimeUnits(seconds).get("unit.year"));
+    }
+
+    public static String getTotalSeconds(final long seconds) {
+        return formatDecimal(seconds, 0);  // Keine Umrechnung, da es bereits Sekunden sind
+    }
+
+    public static String getTotalMinutes(final long seconds) {
+        final double totalMinutes = seconds / 60.0;
+        return formatDecimal(totalMinutes, 2);  // Sekunden in Minuten umwandeln
+    }
+
+    public static String getTotalHours(final long seconds) {
+        final double totalHours = seconds / 3600.0;
+        return formatDecimal(totalHours, 2);  // Sekunden in Stunden umwandeln
+    }
+
+    public static String getTotalDays(final long seconds) {
+        final double totalDays = seconds / 86400.0;
+        return formatDecimal(totalDays, 2);  // Sekunden in Tage umwandeln
+    }
+
+    public static String getTotalWeeks(final long seconds) {
+        final double totalWeeks = seconds / (86400.0 * 7);
+        return formatDecimal(totalWeeks, 2);  // Sekunden in Wochen umwandeln
+    }
+
+    public static String getTotalMonths(final long seconds) {
+        final double totalMonths = seconds / (86400.0 * 30.4375);  // Durchschnittliche Länge eines Monats
+        return formatDecimal(totalMonths, 2);
+    }
+
+    public static String getTotalYears(final long seconds) {
+        final double totalYears = seconds / (86400.0 * 365.25);  // Durchschnittliche Länge eines Jahres (mit Schaltjahren)
+        return formatDecimal(totalYears, 2);
+    }
+
+    private static String formatDecimal(final double value, final int decimalPlaces) {
+        BigDecimal bd = new BigDecimal(Double.toString(value));
+        bd = bd.setScale(decimalPlaces, RoundingMode.HALF_UP);
+        return bd.toPlainString();
     }
 }

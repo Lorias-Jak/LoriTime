@@ -7,6 +7,14 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## [Unreleased] - ${maven.build.timestamp}
 ### Added
 - `/ltdebug` command to enable or disable the console debugger.
+- new placeholder representing the total amount of time the player has been online. The values are rounded to two decimal places. 
+  - `%loritime_seconds_total%`
+  - `%loritime_minutes_total%`
+  - `%loritime_hours_total%`
+  - `%loritime_days_total%`
+  - `%loritime_weeks_total%`
+  - `%loritime_months_total%`
+  - `%loritime_years_total%`
 ### Changed
 - Reworked the plugin logger for better logging
 ### Deprecated

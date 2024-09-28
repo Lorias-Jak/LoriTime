@@ -48,6 +48,13 @@ public class LoriTimePlaceholder extends PlaceholderExpansion {
             case "weeks" -> TimeUtil.getWeeks(getUnformattedOnlineTime(player));
             case "months" -> TimeUtil.getMonths(getUnformattedOnlineTime(player));
             case "years" -> TimeUtil.getYears(getUnformattedOnlineTime(player));
+            case "seconds_total" -> TimeUtil.getTotalSeconds(getUnformattedOnlineTime(player));
+            case "minutes_total" -> TimeUtil.getTotalMinutes(getUnformattedOnlineTime(player));
+            case "hours_total" -> TimeUtil.getTotalHours(getUnformattedOnlineTime(player));
+            case "days_total" -> TimeUtil.getTotalDays(getUnformattedOnlineTime(player));
+            case "weeks_total" -> TimeUtil.getTotalWeeks(getUnformattedOnlineTime(player));
+            case "months_total" -> TimeUtil.getTotalMonths(getUnformattedOnlineTime(player));
+            case "years_total" -> TimeUtil.getTotalYears(getUnformattedOnlineTime(player));
             case "afk" -> {
                 if (loriTimePlugin.isAfkEnabled()) {
                     final LoriTimePlayer loriTimePlayer = loriTimePlugin.getPlayerConverter().getOnlinePlayer(player.getUniqueId());

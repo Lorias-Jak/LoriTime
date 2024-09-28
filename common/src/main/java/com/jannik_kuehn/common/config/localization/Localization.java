@@ -4,9 +4,10 @@ import com.jannik_kuehn.common.config.Configuration;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 
-import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
+@SuppressWarnings("PMD.CommentRequired")
 public class Localization {
     private static final String PLUGIN_PREFIX = "<#808080>[<#08A51D>LoriTime<#808080>]<reset> ";
 
@@ -35,7 +36,7 @@ public class Localization {
         return Objects.requireNonNullElseGet(langFile.getString(key), () -> "Message not found: " + key);
     }
 
-    public ArrayList<?> getLangArray(final String key) {
+    public List<?> getLangArray(final String key) {
         return langFile.getArrayList(key);
     }
 

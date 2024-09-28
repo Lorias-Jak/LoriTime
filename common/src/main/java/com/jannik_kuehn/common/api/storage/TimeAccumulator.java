@@ -4,6 +4,7 @@ import com.jannik_kuehn.common.exception.StorageException;
 
 import java.util.UUID;
 
+@SuppressWarnings("PMD.CommentRequired")
 public interface TimeAccumulator extends AutoCloseable {
 
     void startAccumulating(UUID uuid, long when) throws StorageException;

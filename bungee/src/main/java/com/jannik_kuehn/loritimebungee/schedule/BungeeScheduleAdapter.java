@@ -5,12 +5,26 @@ import com.jannik_kuehn.common.api.scheduler.PluginTask;
 import com.jannik_kuehn.loritimebungee.LoriTimeBungee;
 import net.md_5.bungee.api.scheduler.TaskScheduler;
 
+/**
+ * An adapter for the {@link PluginScheduler} interface for BungeeCord.
+ */
 public class BungeeScheduleAdapter implements PluginScheduler {
-
+    /**
+     * The {@link LoriTimeBungee} instance.
+     */
     private final LoriTimeBungee plugin;
 
+    /**
+     * The {@link TaskScheduler} instance.
+     */
     private final TaskScheduler scheduler;
 
+    /**
+     * Creates a new {@link BungeeScheduleAdapter} instance.
+     *
+     * @param plugin    The {@link LoriTimeBungee} instance.
+     * @param scheduler The {@link TaskScheduler} instance.
+     */
     public BungeeScheduleAdapter(final LoriTimeBungee plugin, final TaskScheduler scheduler) {
         this.plugin = plugin;
         this.scheduler = scheduler;

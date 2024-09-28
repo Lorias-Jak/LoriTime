@@ -29,33 +29,27 @@ import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.plugin.messaging.PluginMessageListener;
 
+@SuppressWarnings({"PMD.CommentRequired", "PMD.AtLeastOneConstructor"})
 public class LoriTimeBukkit extends JavaPlugin {
-
-    private LoriTimeLogger log;
 
     private LoriTimePlugin loriTimePlugin;
 
     private BukkitPluginMessenger bukkitPluginMessenger;
 
     @Override
+    @SuppressWarnings("PMD.AvoidLiteralsInIfCondition")
     public void onEnable() {
         final BukkitScheduleAdapter scheduleAdapter = new BukkitScheduleAdapter(this, Bukkit.getScheduler());
         final BukkitServer bukkitServer = new BukkitServer(this, getDescription().getVersion());
         this.loriTimePlugin = new LoriTimePlugin(this.getDataFolder(), scheduleAdapter, bukkitServer, null);
-        this.log = loriTimePlugin.getLoggerFactory().create(LoriTimeBukkit.class);
+        final LoriTimeLogger log = loriTimePlugin.getLoggerFactory().create(LoriTimeBukkit.class);
 
-        try {
-            loriTimePlugin.enable();
-            LoriTimeAPI.setPlugin(loriTimePlugin);
-        } catch (final Exception e) {
-            loriTimePlugin.disable();
-            log.warn("Error while enabling the plugin! Disabling the plugin...", e);
-            return;
-        }
+        loriTimePlugin.enable();
+        LoriTimeAPI.setPlugin(loriTimePlugin);
 
-        if (bukkitServer.getServerMode().equalsIgnoreCase("master")) {
+        if ("master".equalsIgnoreCase(bukkitServer.getServerMode())) {
             enableAsMaster();
-        } else if (bukkitServer.getServerMode().equalsIgnoreCase("slave")) {
+        } else if ("slave".equalsIgnoreCase(bukkitServer.getServerMode())) {
             enableAsSlave();
         } else {
             log.error("Server mode is not set correctly! Please set the server mode to 'master' or 'slave' in the config.yml. Disabling the plugin...");
@@ -83,6 +77,7 @@ public class LoriTimeBukkit extends JavaPlugin {
         }
     }
 
+    @SuppressWarnings("PMD.CloseResource")
     private void enableAsSlave() {
         Bukkit.getServer().getMessenger().registerOutgoingPluginChannel(this, "loritime:afk");
         bukkitPluginMessenger = new BukkitPluginMessenger(this);
@@ -99,6 +94,7 @@ public class LoriTimeBukkit extends JavaPlugin {
         }
     }
 
+    @SuppressWarnings("PMD.UseUnderscoresInNumericLiterals")
     private void enableRemainingFeatures() {
         if (loriTimePlugin.isAfkEnabled()) {
             Bukkit.getPluginManager().registerEvents(new BukkitPlayerAfkListener(loriTimePlugin), this);

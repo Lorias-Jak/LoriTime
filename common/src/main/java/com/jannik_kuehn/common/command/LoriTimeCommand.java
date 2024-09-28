@@ -17,6 +17,9 @@ import java.util.OptionalLong;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+@SuppressWarnings({"PMD.CommentRequired", "PMD.TooManyMethods", "PMD.AvoidLiteralsInIfCondition", "PMD.CognitiveComplexity",
+        "PMD.CyclomaticComplexity", "PMD.NPathComplexity", "PMD.AvoidThrowingRawExceptionTypes", "PMD.CloseResource",
+        "PMD.AvoidDuplicateLiterals", "PMD.ConfusingTernary"})
 public class LoriTimeCommand implements CommonCommand {
 
     private final LoriTimePlugin loriTimePlugin;
@@ -113,12 +116,11 @@ public class LoriTimeCommand implements CommonCommand {
             return new ArrayList<>();
         }
 
-        List<String> namesList;
+        final List<String> namesList = new ArrayList<>();
         try {
-            namesList = new ArrayList<>(loriTimePlugin.getNameStorage().getNameEntries().stream().toList());
+            namesList.addAll(loriTimePlugin.getNameStorage().getNameEntries().stream().toList());
         } catch (final StorageException e) {
-            namesList = new ArrayList<>();
-            log.error("Could not load entries from NameStorage for tab completion in LoriTimeAdminCommand!", e);
+            log.warn("could not load name entries on tab completion", e);
         }
         if (args.length == 0) {
             return namesList;

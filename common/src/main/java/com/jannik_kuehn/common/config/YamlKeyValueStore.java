@@ -2,6 +2,7 @@ package com.jannik_kuehn.common.config;
 
 import com.jannik_kuehn.common.LoriTimePlugin;
 import com.jannik_kuehn.common.api.logger.LoriTimeLogger;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 
@@ -18,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+@SuppressWarnings("PMD.CommentRequired")
 public class YamlKeyValueStore implements KeyValueStore {
     private final String filePath;
 
@@ -27,6 +29,7 @@ public class YamlKeyValueStore implements KeyValueStore {
 
     private boolean loaded;
 
+    @SuppressFBWarnings("CT_CONSTRUCTOR_THROW")
     public YamlKeyValueStore(final String filePath) {
         this.filePath = filePath;
         final LoriTimePlugin loriTimePlugin = LoriTimePlugin.getInstance();
@@ -82,6 +85,7 @@ public class YamlKeyValueStore implements KeyValueStore {
         return data.entrySet();
     }
 
+    @SuppressWarnings({"PMD.AvoidFileStream", "PMD.UnusedAssignment"})
     private void loadFromFile() {
         try (FileInputStream input = new FileInputStream(filePath)) {  // try-with-resources Block
             final Yaml yaml = new Yaml();
@@ -119,6 +123,7 @@ public class YamlKeyValueStore implements KeyValueStore {
         return dataMap;
     }
 
+    @SuppressWarnings("PMD.AvoidFileStream")
     private void saveToFile() {
         final DumperOptions options = new DumperOptions();
         options.setPrettyFlow(true);
@@ -132,10 +137,12 @@ public class YamlKeyValueStore implements KeyValueStore {
         }
     }
 
+    @Override
     public boolean isLoaded() {
         return loaded;
     }
 
+    @Override
     public void reload() {
         loadFromFile();
     }

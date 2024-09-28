@@ -121,7 +121,7 @@ public class UpdateCheck {
         }
         final JsonObject latestVersionInfo = jsonArray.get(0).getAsJsonObject();
         newVersion = latestVersionInfo.get("version_number").getAsString();
-        isRelease = latestVersionInfo.get("version_type").getAsString().equalsIgnoreCase("release");
+        isRelease = "release".equalsIgnoreCase(latestVersionInfo.get("version_type").getAsString());
 
         if (!hasUpdate(newVersion)) {
             log.info("You are using the latest version of LoriTime!");
@@ -134,6 +134,7 @@ public class UpdateCheck {
                 .replace("[url]", "https://modrinth.com/plugin/loritime/changelog"));
     }
 
+    @SuppressWarnings("PMD.AssignmentInOperand")
     private JsonArray getLatestVersion() {
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(new URI(MODRINTH_URL).toURL().openStream(), StandardCharsets.UTF_8))) {
             final StringBuilder buffer = new StringBuilder();

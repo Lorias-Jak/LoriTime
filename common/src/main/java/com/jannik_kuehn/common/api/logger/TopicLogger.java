@@ -1,5 +1,6 @@
 package com.jannik_kuehn.common.api.logger;
 
+import com.jannik_kuehn.common.exception.LoggerException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -23,11 +24,24 @@ public class TopicLogger extends Logger {
      * @param clazz        The calling class.
      * @param topic        The topic to add or null.
      */
+    @SuppressWarnings({"PMD.ConstructorCallsOverridableMethod", "PMD.AvoidThrowingRawExceptionTypes"})
     public TopicLogger(@NotNull final Logger parentLogger, @NotNull final Class<?> clazz, @Nullable final String topic) {
         super(clazz.getCanonicalName(), null);
-        setParent(parentLogger);
-        setLevel(Level.ALL);
+        try {
+            initLogger(parentLogger);
+        } catch (final LoggerException e) {
+            parentLogger.log(Level.SEVERE, "Failed to initialize logger on creation.", e);
+        }
         this.topic = topic == null ? "" : "(" + topic + ") ";
+    }
+
+    private void initLogger(final Logger parentLogger) throws LoggerException {
+        try {
+            setParent(parentLogger);
+            setLevel(Level.ALL);
+        } catch (final SecurityException e) {
+            throw new LoggerException("Failed to initialize logger", e);
+        }
     }
 
     /**

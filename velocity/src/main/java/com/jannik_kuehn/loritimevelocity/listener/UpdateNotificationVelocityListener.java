@@ -6,14 +6,30 @@ import com.jannik_kuehn.loritimevelocity.util.VelocitySender;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.connection.PostLoginEvent;
 
+/**
+ * A listener for sending update notifications to players when they join the server.
+ */
 public class UpdateNotificationVelocityListener {
-
+    /**
+     * The {@link LoriTimePlugin} instance.
+     */
     private final LoriTimePlugin loriTime;
 
+    /**
+     * Creates a new {@link UpdateNotificationVelocityListener} instance.
+     *
+     * @param loriTime The {@link LoriTimePlugin} instance.
+     */
     public UpdateNotificationVelocityListener(final LoriTimePlugin loriTime) {
         this.loriTime = loriTime;
     }
 
+    /**
+     * Sends an update notification to the player when they join the server.
+     * The notification is sent asynchronously to prevent any lag.
+     *
+     * @param event The {@link PostLoginEvent} event.
+     */
     @Subscribe
     public void onPostLogin(final PostLoginEvent event) {
         final CommonSender sender = new VelocitySender(event.getPlayer());

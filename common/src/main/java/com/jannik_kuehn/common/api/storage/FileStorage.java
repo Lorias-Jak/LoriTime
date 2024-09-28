@@ -5,6 +5,7 @@ import com.jannik_kuehn.common.exception.StorageException;
 import java.util.Map;
 import java.util.Set;
 
+@SuppressWarnings("PMD.CommentRequired")
 public interface FileStorage extends AutoCloseable {
 
     Object read(String path) throws StorageException;
@@ -23,5 +24,6 @@ public interface FileStorage extends AutoCloseable {
 
     void writeAll(Map<String, ?> data, boolean overwrite) throws StorageException;
 
+    @Override
     void close() throws StorageException;
 }

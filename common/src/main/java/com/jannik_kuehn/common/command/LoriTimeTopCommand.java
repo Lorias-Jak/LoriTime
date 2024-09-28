@@ -18,6 +18,9 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+@SuppressWarnings({"PMD.CommentRequired", "PMD.TooManyMethods", "PMD.AvoidLiteralsInIfCondition", "PMD.CognitiveComplexity",
+        "PMD.CyclomaticComplexity", "PMD.NPathComplexity", "PMD.AvoidThrowingRawExceptionTypes", "PMD.CloseResource",
+        "PMD.AvoidDuplicateLiterals"})
 public class LoriTimeTopCommand implements CommonCommand {
 
     private static final double PLAYER_AMOUNT_PER_PAGE = 8;

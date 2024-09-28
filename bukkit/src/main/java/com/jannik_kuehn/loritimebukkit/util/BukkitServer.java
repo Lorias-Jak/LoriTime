@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import java.util.Optional;
 import java.util.UUID;
 
+@SuppressWarnings("PMD.CommentRequired")
 public class BukkitServer implements CommonServer {
     private final LoriTimeBukkit loriTimeBukkit;
 

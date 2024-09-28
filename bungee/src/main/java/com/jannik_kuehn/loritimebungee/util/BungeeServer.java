@@ -14,6 +14,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.logging.Logger;
 
+@SuppressWarnings("PMD.CommentRequired")
 public class BungeeServer implements CommonServer {
     private final Logger bungeeLogger;
 

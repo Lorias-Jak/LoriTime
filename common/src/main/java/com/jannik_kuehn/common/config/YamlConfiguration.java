@@ -1,9 +1,9 @@
 package com.jannik_kuehn.common.config;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+@SuppressWarnings("PMD.CommentRequired")
 public class YamlConfiguration extends Configuration {
 
     public YamlConfiguration(final String name) {
@@ -61,8 +61,8 @@ public class YamlConfiguration extends Configuration {
     }
 
     @Override
-    public ArrayList<?> getArrayList(final String key) {
-        return (ArrayList<?>) keyValueStore.get(key);
+    public List<?> getArrayList(final String key) {
+        return (List<?>) keyValueStore.get(key);
     }
 
     @Override

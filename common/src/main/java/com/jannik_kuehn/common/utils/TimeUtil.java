@@ -11,12 +11,26 @@ import java.time.temporal.ChronoUnit;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+/**
+ * Utility class for formatting time.
+ */
+@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 public final class TimeUtil {
 
+    /**
+     * Private constructor to prevent instantiation.
+     */
     private TimeUtil() {
         // Empty
     }
 
+    /**
+     * Formats the given time in seconds to a human-readable string.
+     *
+     * @param seconds      the time in seconds
+     * @param localization the localization
+     * @return the formatted time
+     */
     public static String formatTime(final long seconds, @NotNull final Localization localization) {
         final Map<String, Long> timeUnits = calculateTimeUnits(seconds);
         final StringBuilder formattedTime = new StringBuilder();
@@ -52,71 +66,155 @@ public final class TimeUtil {
         return timeUnits;
     }
 
+    /**
+     * Returns the seconds of the given time in seconds.
+     *
+     * @param seconds the time in seconds
+     * @return the seconds
+     */
     public static String getSeconds(final long seconds) {
         return String.valueOf(calculateTimeUnits(seconds).get("unit.second"));
     }
 
+    /**
+     * Returns the minutes of the given time in seconds.
+     *
+     * @param seconds the time in seconds
+     * @return the minutes
+     */
     public static String getMinutes(final long seconds) {
         return String.valueOf(calculateTimeUnits(seconds).get("unit.minute"));
     }
 
+    /**
+     * Returns the hours of the given time in seconds.
+     *
+     * @param seconds the time in seconds
+     * @return the hours
+     */
     public static String getHours(final long seconds) {
         return String.valueOf(calculateTimeUnits(seconds).get("unit.hour"));
     }
 
+    /**
+     * Returns the days of the given time in seconds.
+     *
+     * @param seconds the time in seconds
+     * @return the days
+     */
     public static String getDays(final long seconds) {
         return String.valueOf(calculateTimeUnits(seconds).get("unit.day"));
     }
 
+    /**
+     * Returns the weeks of the given time in seconds.
+     *
+     * @param seconds the time in seconds
+     * @return the weeks
+     */
     public static String getWeeks(final long seconds) {
         return String.valueOf(calculateTimeUnits(seconds).get("unit.week"));
     }
 
+    /**
+     * Returns the months of the given time in seconds.
+     *
+     * @param seconds the time in seconds
+     * @return the months
+     */
     public static String getMonths(final long seconds) {
         return String.valueOf(calculateTimeUnits(seconds).get("unit.month"));
     }
 
+    /**
+     * Returns the years of the given time in seconds.
+     *
+     * @param seconds the time in seconds
+     * @return the years
+     */
     public static String getYears(final long seconds) {
         return String.valueOf(calculateTimeUnits(seconds).get("unit.year"));
     }
 
+    /**
+     * Returns the total seconds of the given time in seconds.
+     *
+     * @param seconds the time in seconds
+     * @return the total seconds
+     */
     public static String getTotalSeconds(final long seconds) {
-        return formatDecimal(seconds, 0);  // Keine Umrechnung, da es bereits Sekunden sind
+        return formatDecimal(seconds, 0);
     }
 
+    /**
+     * Returns the total minutes of the given time in seconds.
+     *
+     * @param seconds the time in seconds
+     * @return the total minutes
+     */
     public static String getTotalMinutes(final long seconds) {
         final double totalMinutes = seconds / 60.0;
-        return formatDecimal(totalMinutes, 2);  // Sekunden in Minuten umwandeln
+        return formatDecimal(totalMinutes, 2);
     }
 
+    /**
+     * Returns the total hours of the given time in seconds.
+     *
+     * @param seconds the time in seconds
+     * @return the total hours
+     */
     public static String getTotalHours(final long seconds) {
-        final double totalHours = seconds / 3600.0;
-        return formatDecimal(totalHours, 2);  // Sekunden in Stunden umwandeln
+        final double totalHours = seconds / 3_600.0;
+        return formatDecimal(totalHours, 2);
     }
 
+    /**
+     * Returns the total days of the given time in seconds.
+     *
+     * @param seconds the time in seconds
+     * @return the total days
+     */
     public static String getTotalDays(final long seconds) {
-        final double totalDays = seconds / 86400.0;
-        return formatDecimal(totalDays, 2);  // Sekunden in Tage umwandeln
+        final double totalDays = seconds / 86_400.0;
+        return formatDecimal(totalDays, 2);
     }
 
+    /**
+     * Returns the total weeks of the given time in seconds.
+     *
+     * @param seconds the time in seconds
+     * @return the total weeks
+     */
     public static String getTotalWeeks(final long seconds) {
-        final double totalWeeks = seconds / (86400.0 * 7);
-        return formatDecimal(totalWeeks, 2);  // Sekunden in Wochen umwandeln
+        final double totalWeeks = seconds / (86_400.0 * 7);
+        return formatDecimal(totalWeeks, 2);
     }
 
+    /**
+     * Returns the total months of the given time in seconds.
+     *
+     * @param seconds the time in seconds
+     * @return the total months
+     */
     public static String getTotalMonths(final long seconds) {
-        final double totalMonths = seconds / (86400.0 * 30.4375);  // Durchschnittliche Länge eines Monats
+        final double totalMonths = seconds / (86_400.0 * 30.4375);
         return formatDecimal(totalMonths, 2);
     }
 
+    /**
+     * Returns the total years of the given time in seconds.
+     *
+     * @param seconds the time in seconds
+     * @return the total years
+     */
     public static String getTotalYears(final long seconds) {
-        final double totalYears = seconds / (86400.0 * 365.25);  // Durchschnittliche Länge eines Jahres (mit Schaltjahren)
+        final double totalYears = seconds / (86_400.0 * 365.25);
         return formatDecimal(totalYears, 2);
     }
 
     private static String formatDecimal(final double value, final int decimalPlaces) {
-        BigDecimal bd = new BigDecimal(Double.toString(value));
-        bd = bd.setScale(decimalPlaces, RoundingMode.HALF_UP);
-        return bd.toPlainString();
+        BigDecimal bigDecimal = new BigDecimal(Double.toString(value));
+        bigDecimal = bigDecimal.setScale(decimalPlaces, RoundingMode.HALF_UP);
+        return bigDecimal.toPlainString();
     }
 }

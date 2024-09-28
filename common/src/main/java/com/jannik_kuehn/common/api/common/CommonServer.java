@@ -6,6 +6,7 @@ import net.kyori.adventure.text.TextComponent;
 import java.util.Optional;
 import java.util.UUID;
 
+@SuppressWarnings("PMD.CommentRequired")
 public interface CommonServer {
 
     Optional<CommonSender> getPlayer(UUID uniqueId);

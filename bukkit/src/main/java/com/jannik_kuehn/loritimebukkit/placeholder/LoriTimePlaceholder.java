@@ -16,6 +16,7 @@ import java.util.Map;
 import java.util.OptionalLong;
 import java.util.UUID;
 
+@SuppressWarnings("PMD.CommentRequired")
 @SuppressFBWarnings("HE_INHERITS_EQUALS_USE_HASHCODE")
 public class LoriTimePlaceholder extends PlaceholderExpansion {
 
@@ -36,6 +37,7 @@ public class LoriTimePlaceholder extends PlaceholderExpansion {
         this.offlinePlayerTime = new HashMap<>();
     }
 
+    @SuppressWarnings("PMD.CyclomaticComplexity")
     @Override
     public String onRequest(final OfflinePlayer player, @NotNull final String params) {
         return switch (params) {
@@ -67,12 +69,12 @@ public class LoriTimePlaceholder extends PlaceholderExpansion {
     }
 
     private long getUnformattedOnlineTime(final OfflinePlayer player) {
-        long onlineTime = 0;
         if (!player.isOnline() && offlinePlayerTime.containsKey(player.getUniqueId())) {
             return offlinePlayerTime.get(player.getUniqueId());
         } else if (offlinePlayerTime.containsKey(player.getUniqueId()) && player.isOnline()) {
             offlinePlayerTime.remove(player.getUniqueId());
         }
+        long onlineTime = 0;
         try {
             final OptionalLong optionalLong = timeStorage.getTime(player.getUniqueId());
             if (optionalLong.isPresent()) {

@@ -12,17 +12,37 @@ import com.velocitypowered.api.proxy.messages.MinecraftChannelIdentifier;
 import java.util.Optional;
 import java.util.UUID;
 
+/**
+ * The {@link PluginMessaging} implementation for Velocity.
+ * This class is responsible for sending and receiving PluginMessages.
+ */
 public class VelocityPluginMessenger extends PluginMessaging {
+    /**
+     * The {@link LoriTimeVelocity} instance.
+     */
     private final LoriTimeVelocity loriTimeVelocity;
 
+    /**
+     * The {@link LoriTimeLogger} instance.
+     */
     private final LoriTimeLogger log;
 
+    /**
+     * Creates a new {@link VelocityPluginMessenger} instance.
+     *
+     * @param loriTimeVelocity The {@link LoriTimeVelocity} instance.
+     */
     public VelocityPluginMessenger(final LoriTimeVelocity loriTimeVelocity) {
         super(loriTimeVelocity.getPlugin());
         this.loriTimeVelocity = loriTimeVelocity;
         this.log = loriTimeVelocity.getPlugin().getLoggerFactory().create(VelocityPluginMessenger.class, "VelocityPluginMessenger");
     }
 
+    /**
+     * Handles the received PluginMessage.
+     *
+     * @param event The {@link PluginMessageEvent} instance.
+     */
     @Subscribe
     public void onPluginMessage(final PluginMessageEvent event) {
         if (!event.getIdentifier().getId().contains("loritime:")) {
@@ -57,6 +77,7 @@ public class VelocityPluginMessenger extends PluginMessaging {
         connection.sendPluginMessage(identifier, data);
     }
 
+    @SuppressWarnings("PMD.AvoidLiteralsInIfCondition")
     private ServerConnection getConnection(final Object... message) {
         if (message.length <= 1) {
             return null;

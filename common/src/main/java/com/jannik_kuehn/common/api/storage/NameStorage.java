@@ -7,6 +7,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
+@SuppressWarnings("PMD.CommentRequired")
 public interface NameStorage extends AutoCloseable {
 
     Optional<UUID> getUuid(String playerName) throws StorageException;

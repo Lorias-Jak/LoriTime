@@ -18,6 +18,9 @@ import java.util.OptionalLong;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+@SuppressWarnings({"PMD.CommentRequired", "PMD.TooManyMethods", "PMD.AvoidLiteralsInIfCondition", "PMD.CognitiveComplexity",
+        "PMD.CyclomaticComplexity", "PMD.NPathComplexity", "PMD.AvoidThrowingRawExceptionTypes", "PMD.CloseResource",
+        "PMD.AvoidDuplicateLiterals", "PMD.ConfusingTernary", "PMD.LiteralsFirstInComparisons"})
 public class LoriTimeAdminCommand implements CommonCommand {
 
     private final LoriTimePlugin loriTimePlugin;
@@ -69,7 +72,7 @@ public class LoriTimeAdminCommand implements CommonCommand {
             return new ArrayList<>();
         }
         if (args.length == 0) {
-            final ArrayList<String> completions = new ArrayList<>();
+            final List<String> completions = new ArrayList<>();
             completions.add("set");
             completions.add("modify");
             completions.add("add");
@@ -78,7 +81,7 @@ public class LoriTimeAdminCommand implements CommonCommand {
             return completions;
         }
         if (args.length == 1) {
-            final ArrayList<String> completions = new ArrayList<>();
+            final List<String> completions = new ArrayList<>();
             completions.add("set");
             completions.add("modify");
             completions.add("add");
@@ -87,7 +90,7 @@ public class LoriTimeAdminCommand implements CommonCommand {
             return filterCompletion(completions, args[0]);
         }
         if (args.length == 2 && !args[0].equalsIgnoreCase("reload")) {
-            final ArrayList<String> completions = new ArrayList<>();
+            final List<String> completions = new ArrayList<>();
             try {
                 completions.addAll(loriTimePlugin.getNameStorage().getNameEntries().stream().toList());
             } catch (final StorageException e) {
@@ -126,7 +129,6 @@ public class LoriTimeAdminCommand implements CommonCommand {
             printMissingUuidMessage(sender, args[0]);
             return;
         }
-        final LoriTimePlayer player = loriTimePlugin.getPlayerConverter().getOnlinePlayer(optionalUUID.get());
 
         final String[] timeArgs = new String[args.length - 1];
         System.arraycopy(args, 1, timeArgs, 0, timeArgs.length);
@@ -137,6 +139,7 @@ public class LoriTimeAdminCommand implements CommonCommand {
         }
         final long time = optionalTime.getAsLong();
 
+        final LoriTimePlayer player = loriTimePlugin.getPlayerConverter().getOnlinePlayer(optionalUUID.get());
         if (time < 0) {
             sender.sendMessage(localization.formatTextComponent(localization.getRawMessage("message.command.loritimeadmin.set.negativetime")
                     .replace("[player]", player.getName())
@@ -179,7 +182,6 @@ public class LoriTimeAdminCommand implements CommonCommand {
             printMissingUuidMessage(sender, args[0]);
             return;
         }
-        final LoriTimePlayer player = loriTimePlugin.getPlayerConverter().getOnlinePlayer(optionalUUID.get());
 
         final String[] timeArgs = new String[args.length - 1];
         System.arraycopy(args, 1, timeArgs, 0, timeArgs.length);
@@ -189,8 +191,8 @@ public class LoriTimeAdminCommand implements CommonCommand {
             return;
         }
 
-        final long time = optionalTime.getAsLong();
         final long currentTime;
+        final LoriTimePlayer player = loriTimePlugin.getPlayerConverter().getOnlinePlayer(optionalUUID.get());
         try {
             final OptionalLong optionalCurrentTime = loriTimePlugin.getTimeStorage().getTime(player.getUniqueId());
             if (optionalCurrentTime.isPresent()) {
@@ -205,6 +207,7 @@ public class LoriTimeAdminCommand implements CommonCommand {
             printUtilityMessage(sender, "message.error");
             return;
         }
+        final long time = optionalTime.getAsLong();
         if (currentTime + time < 0) {
             sender.sendMessage(localization.formatTextComponent(localization.getRawMessage("message.command.loritimeadmin.modify.negativetimesum")
                     .replace("[player]", player.getName())

@@ -26,6 +26,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+@SuppressWarnings({"PMD.CommentRequired", "PMD.AvoidDuplicateLiterals", "PMD.UseProperClassLoader",
+        "PMD.ConfusingTernary", "PMD.LiteralsFirstInComparisons", "PMD.AssignmentToNonFinalStatic", "PMD.TooManyMethods"})
 public class LoriTimePlugin {
     private static LoriTimePlugin instance;
 
@@ -41,6 +43,8 @@ public class LoriTimePlugin {
 
     private final DataStorageManager dataStorageManager;
 
+    private final LoriTimePlayerConverter playerConverter;
+
     private Configuration config;
 
     private Localization localization;
@@ -52,8 +56,6 @@ public class LoriTimePlugin {
     private boolean errorDisable;
 
     private UpdateCheck updateCheck;
-
-    private final LoriTimePlayerConverter playerConverter;
 
     public LoriTimePlugin(final File dataFolder, final PluginScheduler scheduler, final CommonServer server, final String loggerTopic) {
         instance = this;

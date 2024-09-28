@@ -15,22 +15,55 @@ import com.jannik_kuehn.common.utils.FileStorageProvider;
 import java.io.File;
 import java.util.Locale;
 
+/**
+ * The {@link DataStorageManager} is responsible for holding the
+ * {@link NameStorage} and {@link AccumulatingTimeStorage}.
+ * It also manages the loading and reloading of the storages.
+ * You're able to inject custom storages by calling {@link #injectCustomStorage(NameStorage, AccumulatingTimeStorage)}.
+ * The {@link DataStorageManager} also handles the cache flushing for the time storage.
+ */
 public class DataStorageManager {
-
+    /**
+     * The {@link LoriTimePlugin} instance.
+     */
     private final LoriTimePlugin loriTime;
 
+    /**
+     * The {@link LoriTimeLogger} instance.
+     */
     private final LoriTimeLogger log;
 
+    /**
+     * The data folder of the plugin.
+     */
     private final File dataFolder;
 
+    /**
+     * The {@link NameStorage}.
+     */
     private NameStorage nameStorage;
 
+    /**
+     * The {@link AccumulatingTimeStorage}.
+     */
     private AccumulatingTimeStorage timeStorage;
 
+    /**
+     * {@code true} if an external storage is injected, otherwise {@code false}.
+     */
     private boolean externalStorage;
 
+    /**
+     * The {@link PluginTask} for the cache flushing.
+     */
     private PluginTask flushCacheTask;
 
+    /**
+     * Creates a new {@link DataStorageManager} instance.
+     *
+     * @param loriTime   the {@link LoriTimePlugin} instance.
+     * @param dataFolder the {@link File} of the data folder from the plugin.
+     */
     public DataStorageManager(final LoriTimePlugin loriTime, final File dataFolder) {
         this.loriTime = loriTime;
         this.log = loriTime.getLoggerFactory().create(DataStorageManager.class);
@@ -38,6 +71,17 @@ public class DataStorageManager {
         this.externalStorage = false;
     }
 
+    /**
+     * Injects a custom {@link NameStorage} and {@link AccumulatingTimeStorage} to the plugin.
+     * If the {@link NameStorage} or {@link AccumulatingTimeStorage} is {@code null}, the injection will fail.
+     * The {@link DataStorageManager} will use the injected storages instead of the default ones.
+     * The default storages will not be able to load or save data anymore.
+     * On plugin reload, the injected storages will not be reloaded on {@link #reloadStorages()}.
+     * Note that the {@link DataStorageManager} will not close the injected storages when the plugin is disabled.
+     *
+     * @param nameStorage the {@link NameStorage}.
+     * @param timeStorage the {@link AccumulatingTimeStorage}.
+     */
     public void injectCustomStorage(final NameStorage nameStorage, final AccumulatingTimeStorage timeStorage) {
         if (nameStorage == null || timeStorage == null) {
             log.error("Custom storage injection failed: nameStorage and timeStorage must not be null!");
@@ -48,11 +92,18 @@ public class DataStorageManager {
         externalStorage = true;
     }
 
+    /**
+     * Starts a {@link PluginTask} and repeatedly call the {@link #flushOnlineTimeCache()}.
+     * The calling interval is defined in the config.yml.
+     */
     public void startCache() {
         final int saveInterval = loriTime.getConfig().getInt("general.saveInterval");
         flushCacheTask = loriTime.getScheduler().scheduleAsync(saveInterval / 2L, saveInterval, this::flushOnlineTimeCache);
     }
 
+    /**
+     * Disables the cache flushing {@link PluginTask} and calls {@link #flushOnlineTimeCache()}.
+     */
     public void disableCache() {
         if (flushCacheTask != null) {
             flushCacheTask.cancel();
@@ -61,6 +112,13 @@ public class DataStorageManager {
         }
     }
 
+    /**
+     * Loads the default plugin storages.
+     * It will not load the storages if an external {@link NameStorage}
+     * or {@link AccumulatingTimeStorage} is injected.
+     *
+     * @throws StorageException if an exception occurred while loading the storages.
+     */
     public void loadStorages() throws StorageException {
         if (nameStorage != null || timeStorage != null) {
             log.info("External storage detected, skipping LoriTime's default storage loading.");
@@ -74,6 +132,9 @@ public class DataStorageManager {
         }
     }
 
+    /**
+     * Reloads the {@link NameStorage} and {@link AccumulatingTimeStorage} if no external storage is injected.
+     */
     public void reloadStorages() {
         if (externalStorage) {
             log.info("External storage detected, skipping storage reloading.");
@@ -87,6 +148,11 @@ public class DataStorageManager {
         }
     }
 
+    /**
+     * Closes the {@link NameStorage} and {@link AccumulatingTimeStorage}.
+     * External storages will be closed too.
+     * If you want to load the custom storages again, you have to inject them again.
+     */
     public void closeStorages() {
         if (nameStorage != null) {
             try {
@@ -106,6 +172,9 @@ public class DataStorageManager {
         timeStorage = null;
     }
 
+    /**
+     * Flushes the online time cache of the {@link AccumulatingTimeStorage}.
+     */
     public void flushOnlineTimeCache() {
         try {
             timeStorage.flushOnlineTimeCache();
@@ -129,16 +198,27 @@ public class DataStorageManager {
         this.timeStorage = new AccumulatingTimeStorage(new FileTimeStorage(new FileStorageProvider(timeFile)));
     }
 
+    @SuppressWarnings("PMD.CloseResource")
     private void loadDatabaseStorage() {
         final DatabaseStorage databaseStorage = new DatabaseStorage(loriTime.getConfig(), loriTime);
         this.nameStorage = databaseStorage;
         this.timeStorage = new AccumulatingTimeStorage(databaseStorage);
     }
 
+    /**
+     * Getter of the {@link NameStorage}.
+     *
+     * @return the {@link NameStorage}.
+     */
     public NameStorage getNameStorage() {
         return nameStorage;
     }
 
+    /**
+     * Getter of the {@link AccumulatingTimeStorage}.
+     *
+     * @return the {@link AccumulatingTimeStorage}.
+     */
     public AccumulatingTimeStorage getTimeStorage() {
         return timeStorage;
     }

@@ -8,10 +8,18 @@ import java.util.logging.Logger;
  * Factory for LoriTimeLogger instances.
  */
 public class LoggerFactory {
-    private final LoriTimePlugin plugin;
+    /**
+     * The {@link LoriTimePlugin}.
+     */
+    private final LoriTimePlugin loriTimePlugin;
 
-    public LoggerFactory(final LoriTimePlugin plugin) {
-        this.plugin = plugin;
+    /**
+     * Creates a new {@link LoggerFactory} instance.
+     *
+     * @param loriTimePlugin the {@link LoriTimePlugin}
+     */
+    public LoggerFactory(final LoriTimePlugin loriTimePlugin) {
+        this.loriTimePlugin = loriTimePlugin;
     }
 
     /**
@@ -32,16 +40,15 @@ public class LoggerFactory {
      * @return The decorated Logger.
      */
     public LoriTimeLogger create(final Class<?> clazz, final String topic) {
-        if (!isSlf4jAvailable()) {
-            final Logger julLogger = plugin.getServer().getJavaLogger();
-            return new JavaUtilLoggerAdapter(julLogger, clazz, topic);
-        } else {
-            final org.slf4j.Logger slf4jLogger = plugin.getServer().getSl4jLogger();
+        if (isSlf4jAvailable()) {
+            final org.slf4j.Logger slf4jLogger = loriTimePlugin.getServer().getSl4jLogger();
             return new Slf4jLoggerAdapter(slf4jLogger, topic);
         }
+        final Logger julLogger = loriTimePlugin.getServer().getJavaLogger();
+        return new JavaUtilLoggerAdapter(julLogger, clazz, topic);
     }
 
     private boolean isSlf4jAvailable() {
-        return plugin.getServer().getSl4jLogger() != null;
+        return loriTimePlugin.getServer().getSl4jLogger() != null;
     }
 }

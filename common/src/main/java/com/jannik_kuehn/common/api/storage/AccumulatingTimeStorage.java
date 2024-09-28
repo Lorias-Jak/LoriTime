@@ -11,6 +11,7 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+@SuppressWarnings("PMD.CommentRequired")
 public class AccumulatingTimeStorage implements TimeStorage, TimeAccumulator {
 
     private final TimeStorage storage;
@@ -96,6 +97,7 @@ public class AccumulatingTimeStorage implements TimeStorage, TimeAccumulator {
     }
 
     @Override
+    @SuppressWarnings("PMD.UseTryWithResources")
     public void close() throws StorageException {
         try {
             if (!onlineSince.isEmpty()) {

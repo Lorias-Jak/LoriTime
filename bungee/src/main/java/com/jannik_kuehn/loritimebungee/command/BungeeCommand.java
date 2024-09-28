@@ -11,6 +11,7 @@ import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.plugin.Command;
 import net.md_5.bungee.api.plugin.TabExecutor;
 
+@SuppressWarnings("PMD.CommentRequired")
 public class BungeeCommand extends Command implements TabExecutor {
 
     private final LoriTimeBungee bungeePlugin;

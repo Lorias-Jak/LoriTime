@@ -12,6 +12,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Locale;
 
+@SuppressWarnings("PMD.CommentRequired")
 public class MySQL implements Closeable, AutoCloseable {
 
     private static boolean loadedJDBCDriver = true;
@@ -67,6 +68,7 @@ public class MySQL implements Closeable, AutoCloseable {
         return hikari == null || hikari.isClosed();
     }
 
+    @SuppressWarnings("PMD.AvoidCatchingGenericException")
     public void open() {
         if (!loadedJDBCDriver) {
             log.error("JDBC Driver was not loaded!");

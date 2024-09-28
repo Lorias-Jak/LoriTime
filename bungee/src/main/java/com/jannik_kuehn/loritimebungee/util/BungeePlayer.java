@@ -7,6 +7,7 @@ import net.md_5.bungee.api.connection.ProxiedPlayer;
 
 import java.util.UUID;
 
+@SuppressWarnings("PMD.CommentRequired")
 public class BungeePlayer implements CommonSender {
 
     private final ProxiedPlayer player;

@@ -10,25 +10,44 @@ import org.bukkit.event.player.PlayerJoinEvent;
 
 import java.util.UUID;
 
+/**
+ * Listener for saving player names and UUIDs.
+ */
 public class PlayerNameBukkitListener implements Listener {
+    /**
+     * The {@link LoriTimePlugin} instance.
+     */
+    private final LoriTimePlugin loriTimePlugin;
 
-    private final LoriTimePlugin plugin;
-
+    /**
+     * The {@link LoriTimeLogger} instance.
+     */
     private final LoriTimeLogger log;
 
-    public PlayerNameBukkitListener(final LoriTimePlugin plugin) {
-        this.plugin = plugin;
-        this.log = plugin.getLoggerFactory().create(PlayerNameBukkitListener.class);
+    /**
+     * The default constructor.
+     *
+     * @param loriTimePlugin The {@link LoriTimePlugin} instance.
+     */
+    public PlayerNameBukkitListener(final LoriTimePlugin loriTimePlugin) {
+        this.loriTimePlugin = loriTimePlugin;
+        this.log = loriTimePlugin.getLoggerFactory().create(PlayerNameBukkitListener.class);
     }
 
+    /**
+     * Saves the player name and UUID when a player joins the server.
+     * It also does a lookup to check if the player name has changed.
+     *
+     * @param event The {@link PlayerJoinEvent} event.
+     */
     @EventHandler
     public void playerJoin(final PlayerJoinEvent event) {
         final Player player = event.getPlayer();
         final UUID uuid = player.getUniqueId();
         final String name = player.getName();
-        plugin.getScheduler().runAsyncOnce(() -> {
+        loriTimePlugin.getScheduler().runAsyncOnce(() -> {
             try {
-                plugin.getNameStorage().setEntry(uuid, name, true);
+                loriTimePlugin.getNameStorage().setEntry(uuid, name, true);
             } catch (final StorageException e) {
                 log.warn("could not save player name and uuid " + name, e);
             }

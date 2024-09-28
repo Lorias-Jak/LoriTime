@@ -6,6 +6,7 @@ import com.jannik_kuehn.common.api.logger.LoriTimeLogger;
 import com.jannik_kuehn.common.exception.StorageException;
 import com.jannik_kuehn.common.utils.TimeUtil;
 
+@SuppressWarnings("PMD.CommentRequired")
 public class MasteredAfkPlayerHandling extends AfkHandling {
     private final LoriTimeLogger log;
 
@@ -15,6 +16,7 @@ public class MasteredAfkPlayerHandling extends AfkHandling {
     }
 
     @Override
+    @SuppressWarnings("PMD.AvoidCatchingGenericException")
     public void executePlayerAfk(final LoriTimePlayer loriTimePlayer, final long timeToRemove) {
         log.debug("Executing AFK for player: " + loriTimePlayer.getName() + ". Time to remove: " + timeToRemove);
         if (!afkEnabled || !isOnline(loriTimePlayer.getUniqueId())) {

@@ -5,12 +5,25 @@ import com.jannik_kuehn.common.api.logger.LoriTimeLogger;
 import com.jannik_kuehn.common.module.afk.AfkHandling;
 import com.jannik_kuehn.loritimebukkit.LoriTimeBukkit;
 
+/**
+ * The {@link AfkHandling} implementation for the slaved servers.
+ */
 public class BukkitSlavedAfkHandling extends AfkHandling {
-
+    /**
+     * The {@link LoriTimeBukkit} instance.
+     */
     private final LoriTimeBukkit loriTimeBukkit;
 
+    /**
+     * The {@link LoriTimeLogger} instance.
+     */
     private final LoriTimeLogger log;
 
+    /**
+     * Creates a new instance of the {@link BukkitSlavedAfkHandling}.
+     *
+     * @param loriTimeBukkit The {@link LoriTimeBukkit} instance.
+     */
     public BukkitSlavedAfkHandling(final LoriTimeBukkit loriTimeBukkit) {
         super(loriTimeBukkit.getPlugin());
         this.loriTimeBukkit = loriTimeBukkit;

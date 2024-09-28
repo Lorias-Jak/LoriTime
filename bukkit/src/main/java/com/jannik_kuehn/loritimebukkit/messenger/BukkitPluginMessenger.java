@@ -7,12 +7,26 @@ import org.bukkit.entity.Player;
 
 import java.util.UUID;
 
+/**
+ * Messenger for the plugin messages.
+ * Extends the {@link PluginMessaging} class.
+ */
 public class BukkitPluginMessenger extends PluginMessaging {
-
+    /**
+     * The {@link LoriTimeBukkit} instance.
+     */
     private final LoriTimeBukkit bukkitPlugin;
 
+    /**
+     * The {@link LoriTimeLogger} instance.
+     */
     private final LoriTimeLogger log;
 
+    /**
+     * Creates a new instance of the {@link BukkitPluginMessenger}.
+     *
+     * @param bukkitPlugin The {@link LoriTimeBukkit} instance.
+     */
     public BukkitPluginMessenger(final LoriTimeBukkit bukkitPlugin) {
         super(bukkitPlugin.getPlugin());
         this.bukkitPlugin = bukkitPlugin;

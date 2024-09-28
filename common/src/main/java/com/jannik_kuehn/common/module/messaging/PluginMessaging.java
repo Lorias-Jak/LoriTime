@@ -4,6 +4,7 @@ import com.jannik_kuehn.common.LoriTimePlugin;
 import com.jannik_kuehn.common.api.LoriTimePlayer;
 import com.jannik_kuehn.common.api.common.CommonSender;
 import com.jannik_kuehn.common.api.logger.LoriTimeLogger;
+import com.jannik_kuehn.common.exception.PluginMessageException;
 import com.jannik_kuehn.common.exception.StorageException;
 import com.jannik_kuehn.common.utils.UuidUtil;
 
@@ -16,22 +17,56 @@ import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.UUID;
 
+/**
+ * The PluginMessaging class is responsible for sending and computing PluginMessages.
+ * Theyre used to communicate between proxy and subserver.
+ */
 public abstract class PluginMessaging {
+    /**
+     * The identifier for the afk-identifier channel.
+     */
     protected static final String AFK_IDENTIFIER = "loritime:afk";
 
+    /**
+     * The identifier for the storage-identifier channel.
+     */
     protected static final String SLAVED_TIME_STORAGE = "loritime:storage";
 
+    /**
+     * The {@link LoriTimePlugin} instance.
+     */
     protected final LoriTimePlugin loriTimePlugin;
 
+    /**
+     * The {@link LoriTimeLogger} instance.
+     */
     private final LoriTimeLogger log;
 
+    /**
+     * Creates a new PluginMessaging instance.
+     *
+     * @param loriTimePlugin the {@link LoriTimePlugin} instance
+     */
     public PluginMessaging(final LoriTimePlugin loriTimePlugin) {
         this.loriTimePlugin = loriTimePlugin;
         this.log = loriTimePlugin.getLoggerFactory().create(PluginMessaging.class, "PluginMessaging");
     }
 
+    /**
+     * Sends a PluginMessage to the given channel.
+     *
+     * @param channelIdentifier the identifier of the channel
+     * @param message           the objects to send
+     */
     public abstract void sendPluginMessage(String channelIdentifier, Object... message);
 
+    /**
+     * Converts the given objects to a byte array.
+     *
+     * @param message the objects to convert
+     * @return the byte array
+     */
+    @SuppressWarnings("PMD.CyclomaticComplexity")
     protected byte[] getDataAsByte(final Object... message) {
         log.debug("Converting Data for PluginMessage");
         try (ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
@@ -52,22 +87,30 @@ public abstract class PluginMessaging {
                 } else if (part instanceof UUID) {
                     out.write(UuidUtil.toBytes((UUID) part));
                 } else {
-                    throw new IOException("invalid data " + part.toString());
+                    log.error("could not serialize plugin message. Invalid data: " + part.toString());
                 }
             }
             return byteOut.toByteArray();
         } catch (final IOException e) {
-            log.warn("could not serialize plugin message", e);
+            log.error("could not serialize plugin message", new PluginMessageException(e));
         }
-        return null;
+        return new byte[0];
     }
 
+    /**
+     * Processes the received PluginMessage.
+     * The identifier is used to determine the type of the message.
+     * The data is used to extract the information from the message.
+     *
+     * @param identifier the identifier of the message
+     * @param data       the data of the message
+     */
     protected void processPluginMessage(final String identifier, final byte[] data) {
         log.debug("Processing PluginMessage with identifier: " + identifier);
         loriTimePlugin.getScheduler().runAsyncOnce(() -> {
-            if (identifier.equalsIgnoreCase(AFK_IDENTIFIER)) {
+            if (AFK_IDENTIFIER.equalsIgnoreCase(identifier)) {
                 setAfkStatus(data);
-            } else if (identifier.equalsIgnoreCase(SLAVED_TIME_STORAGE)) {
+            } else if (SLAVED_TIME_STORAGE.equalsIgnoreCase(identifier)) {
                 slavedTimeStorageHandling(data);
             }
         });
@@ -99,9 +142,11 @@ public abstract class PluginMessaging {
                     break;
                 default:
                     log.warn("received invalid afk status!");
+                    break;
             }
         } catch (final IOException e) {
-            log.error("could not deserialize plugin message", e);
+            final PluginMessageException pluginMessageException = new PluginMessageException(e);
+            log.error("could not deserialize plugin message", pluginMessageException);
         }
     }
 
@@ -125,11 +170,13 @@ public abstract class PluginMessaging {
                     break;
                 default:
                     log.warn("received invalid status: " + inputString);
+                    break;
             }
         } catch (final IOException e) {
-            log.error("could not deserialize plugin message", e);
+            final PluginMessageException pluginMessageException = new PluginMessageException(e);
+            log.error("could not deserialize plugin message", pluginMessageException);
         } catch (final StorageException e) {
-            throw new RuntimeException(e);
+            log.error("could not add time", e);
         }
     }
 

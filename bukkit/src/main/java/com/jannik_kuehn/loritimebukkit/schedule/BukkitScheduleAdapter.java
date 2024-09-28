@@ -5,11 +5,26 @@ import com.jannik_kuehn.common.api.scheduler.PluginTask;
 import com.jannik_kuehn.loritimebukkit.LoriTimeBukkit;
 import org.bukkit.scheduler.BukkitScheduler;
 
+/**
+ * A {@link PluginScheduler} implementation for Velocity.
+ */
 public class BukkitScheduleAdapter implements PluginScheduler {
+    /**
+     * The {@link LoriTimeBukkit} instance.
+     */
     private final LoriTimeBukkit plugin;
 
+    /**
+     * The {@link BukkitScheduler} instance.
+     */
     private final BukkitScheduler scheduler;
 
+    /**
+     * Creates a new {@link BukkitScheduleAdapter} instance.
+     *
+     * @param plugin    The {@link LoriTimeBukkit} instance.
+     * @param scheduler The {@link BukkitScheduler} instance.
+     */
     public BukkitScheduleAdapter(final LoriTimeBukkit plugin, final BukkitScheduler scheduler) {
         this.plugin = plugin;
         this.scheduler = scheduler;

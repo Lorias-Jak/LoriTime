@@ -3,12 +3,26 @@ package com.jannik_kuehn.common.module.updater;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class VersionUtil {
+/**
+ * Utility class for comparing versions.
+ */
+public final class VersionUtil {
 
+    /**
+     * Private constructor to prevent instantiation.
+     */
     private VersionUtil() {
         // Empty
     }
 
+    /**
+     * Compares two versions.
+     *
+     * @param oldVersion the old version
+     * @param newVersion the new version
+     * @return {@code true} if the new version is newer than the old version, {@code false} otherwise
+     */
+    @SuppressWarnings({"PMD.CyclomaticComplexity", "PMD.SimplifyBooleanReturns"})
     public static boolean isNewerVersion(final String oldVersion, final String newVersion) {
         final String oldVersionNumber = extractVersionNumber(oldVersion);
         final String newVersionNumber = extractVersionNumber(newVersion);

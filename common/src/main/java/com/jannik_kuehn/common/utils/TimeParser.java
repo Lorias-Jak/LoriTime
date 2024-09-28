@@ -7,16 +7,35 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+/**
+ * Utility class for parsing time representations.
+ */
 public final class TimeParser {
-
+    /**
+     * Pattern for long values.
+     */
     private static final Pattern LONG_PATTERN = Pattern.compile("(\\+|-)?[0-9]+");
 
+    /**
+     * Pattern for unit values.
+     */
     private static final Pattern UNIT_PATTERN = Pattern.compile("\\p{Alpha}+", Pattern.UNICODE_CHARACTER_CLASS);
 
+    /**
+     * The custom units.
+     */
     private final Map<String, Long> units;
 
+    /**
+     * The global pattern.
+     */
     private final Pattern globalPattern;
 
+    /**
+     * Private constructor to prevent instantiation.
+     *
+     * @param units the units
+     */
     private TimeParser(final Map<String, Long> units) {
         this.units = units;
         final String unitRegex = units.keySet().stream().collect(Collectors.joining("|", "(", ")"));
@@ -24,6 +43,12 @@ public final class TimeParser {
         this.globalPattern = Pattern.compile(globalRegex);
     }
 
+    /**
+     * Parses the given time representation to seconds.
+     *
+     * @param representation the time representation
+     * @return the time in seconds
+     */
     public OptionalLong parseToSeconds(final String representation) {
         final String raw = representation.trim();
         if (!globalPattern.matcher(raw).matches()) {
@@ -50,9 +75,22 @@ public final class TimeParser {
         return OptionalLong.of(time);
     }
 
+    /**
+     * Creates a new builder.
+     */
     public static class Builder {
+        /**
+         * The custom units.
+         */
         private final Map<String, Long> units = new HashMap<>();
 
+        /**
+         * Adds a unit.
+         *
+         * @param inSeconds   the time in seconds
+         * @param unitSymbols the unit symbols
+         * @return the builder
+         */
         public Builder addUnit(final long inSeconds, final String... unitSymbols) {
             if (unitSymbols != null) {
                 for (final String symbol : unitSymbols) {
@@ -68,6 +106,11 @@ public final class TimeParser {
             return this;
         }
 
+        /**
+         * Builds the time parser.
+         *
+         * @return the {@link TimeParser}
+         */
         public TimeParser build() {
             return new TimeParser(units);
         }

@@ -7,6 +7,7 @@ import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 
 import java.util.UUID;
 
+@SuppressWarnings("PMD.CommentRequired")
 public class VelocityPlayer implements CommonSender {
     private final Player player;
 

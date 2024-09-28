@@ -22,17 +22,42 @@ import java.util.Map;
 import java.util.OptionalLong;
 import java.util.UUID;
 
+/**
+ * Cache for the time storage of the slave servers.
+ */
 public class SlavedTimeStorageCache extends PluginMessaging implements TimeStorage, PluginMessageListener, Listener {
+    /**
+     * The channel identifier for the plugin messages.
+     */
     private final LoriTimeBukkit loriTimeBukkit;
 
+    /**
+     * The {@link BukkitPluginMessenger} instance.
+     */
     private final BukkitPluginMessenger pluginMessenger;
 
+    /**
+     * The {@link LoriTimeLogger} instance.
+     */
     private final LoriTimeLogger log;
 
+    /**
+     * The map of tracked players with their online time.
+     */
     private final Map<String, Long> trackedPlayers;
 
-    PluginTask fetchTask;
+    /**
+     * The {@link PluginTask} instance for fetching the online time.
+     */
+    private final PluginTask fetchTask;
 
+    /**
+     * Creates a new instance of the {@link SlavedTimeStorageCache}.
+     *
+     * @param loriTimeBukkit  The {@link LoriTimeBukkit} instance.
+     * @param pluginMessenger The {@link BukkitPluginMessenger} instance.
+     * @param updateInterval  The update interval for fetching the online time.
+     */
     public SlavedTimeStorageCache(final LoriTimeBukkit loriTimeBukkit, final BukkitPluginMessenger pluginMessenger, final long updateInterval) {
         super(loriTimeBukkit.getPlugin());
         this.loriTimeBukkit = loriTimeBukkit;
@@ -78,8 +103,9 @@ public class SlavedTimeStorageCache extends PluginMessaging implements TimeStora
     }
 
     @Override
+    @SuppressWarnings("PMD.AvoidLiteralsInIfCondition")
     public void onPluginMessageReceived(@NotNull final String channel, @NotNull final Player player, final byte @NotNull [] message) {
-        if (channel.equalsIgnoreCase(SLAVED_TIME_STORAGE)) {
+        if (SLAVED_TIME_STORAGE.equalsIgnoreCase(channel)) {
             log.debug("Received PluginMessage from " + player.getName() + " with channel " + channel);
             try (ByteArrayInputStream byteInputStream = new ByteArrayInputStream(message);
                  DataInputStream input = new DataInputStream(byteInputStream)) {
@@ -88,7 +114,7 @@ public class SlavedTimeStorageCache extends PluginMessaging implements TimeStora
                 input.readFully(uuidBytes);
                 final UUID playerUUID = UuidUtil.fromBytes(uuidBytes);
                 final String inputString = input.readUTF();
-                if (inputString.equals("send")) {
+                if ("send".equals(inputString)) {
                     trackedPlayers.put(playerUUID.toString(), input.readLong());
                 }
             } catch (final IOException e) {
@@ -110,6 +136,11 @@ public class SlavedTimeStorageCache extends PluginMessaging implements TimeStora
         }
     }
 
+    /**
+     * Handles the {@link PlayerJoinEvent} to add the player to the tracked players.
+     *
+     * @param event The {@link PlayerJoinEvent}.
+     */
     @EventHandler
     public void onPlayerJoin(final PlayerJoinEvent event) {
         trackedPlayers.put(event.getPlayer().getUniqueId().toString(), 0L);
@@ -117,6 +148,11 @@ public class SlavedTimeStorageCache extends PluginMessaging implements TimeStora
                 event.getPlayer().getUniqueId(), "get"));
     }
 
+    /**
+     * Handles the {@link PlayerQuitEvent} to remove the player from the tracked players.
+     *
+     * @param event The {@link PlayerQuitEvent}.
+     */
     @EventHandler
     public void onPlayerLeave(final PlayerQuitEvent event) {
         trackedPlayers.remove(event.getPlayer().getUniqueId().toString());

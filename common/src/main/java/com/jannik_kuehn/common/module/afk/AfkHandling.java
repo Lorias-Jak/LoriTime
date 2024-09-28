@@ -9,6 +9,7 @@ import com.jannik_kuehn.common.utils.TimeUtil;
 import java.util.Optional;
 import java.util.UUID;
 
+@SuppressWarnings("PMD.CommentRequired")
 public abstract class AfkHandling {
 
     protected final LoriTimePlugin loriTimePlugin;
@@ -21,6 +22,7 @@ public abstract class AfkHandling {
 
     protected boolean autoKickEnabled;
 
+    @SuppressWarnings("PMD.ConstructorCallsOverridableMethod")
     public AfkHandling(final LoriTimePlugin plugin) {
         this.loriTimePlugin = plugin;
         this.log = loriTimePlugin.getLoggerFactory().create(AfkHandling.class, "AfkHandling");

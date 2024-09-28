@@ -21,8 +21,10 @@ import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
+@SuppressWarnings("PMD.CommentRequired")
 public class BukkitCommand implements CommandExecutor, TabExecutor {
 
     private final LoriTimeBukkit bukkitPlugin;
@@ -60,42 +62,48 @@ public class BukkitCommand implements CommandExecutor, TabExecutor {
         }
     }
 
+    @SuppressWarnings("PMD.AvoidAccessibilityAlteration")
     private CommandMap getCommandMap() {
         try {
-            // Zugriff auf die Server-Instanz von Bukkit
             final Object craftServer = Bukkit.getServer();
-            // Reflektiere die CraftServer-Klasse (oder eine äquivalente Implementation), um das commandMap-Feld zu erhalten
             final Field commandMapField = craftServer.getClass().getDeclaredField("commandMap");
             commandMapField.setAccessible(true);
             return (CommandMap) commandMapField.get(craftServer);
-        } catch (final Exception e) {
+        } catch (NoSuchFieldException | IllegalAccessException e) {
             log.error("Error while getting the CommandMap!", e);
         }
         return null;
     }
 
+    @SuppressWarnings("PMD.AvoidAccessibilityAlteration")
     private PluginCommand createPluginCommand(final String name, final Plugin plugin) {
         PluginCommand command = null;
         try {
             final Constructor<PluginCommand> constructor = PluginCommand.class.getDeclaredConstructor(String.class, Plugin.class);
             constructor.setAccessible(true);
             command = constructor.newInstance(name, plugin);
-        } catch (final Exception e) {
-            log.error("Error while creating a plugin Command", e);
+        } catch (InvocationTargetException | IllegalAccessException | InstantiationException
+                 | NoSuchMethodException e) {
+            log.error("Error while creating the PluginCommand!", e);
         }
         return command;
     }
 
+    @SuppressWarnings("PMD.AvoidCatchingGenericException")
     @SuppressFBWarnings("NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE")
     private void register() {
-        final CommandMap commandMap = getCommandMap();
-        if (commandMap == null) {
-            log.error("Can not register the command '" + command.getCommandName() + "'! Skipping the registration...");
-            return;
+        try {
+            final CommandMap commandMap = getCommandMap();
+            if (commandMap == null) {
+                log.error("Can not register the command '" + command.getCommandName() + "'! Skipping the registration...");
+                return;
+            }
+            final PluginCommand pluginCommand = createPluginCommand(command.getCommandName(), bukkitPlugin);
+            pluginCommand.setAliases(this.command.getAliases());
+            pluginCommand.setExecutor(this);
+            commandMap.register(command.getCommandName(), pluginCommand);
+        } catch (final Exception e) {
+            log.error("Error while registering the command '" + command.getCommandName() + "'!", e);
         }
-        final PluginCommand pluginCommand = createPluginCommand(command.getCommandName(), bukkitPlugin);
-        pluginCommand.setAliases(this.command.getAliases());
-        pluginCommand.setExecutor(this);
-        commandMap.register(command.getCommandName(), pluginCommand);
     }
 }

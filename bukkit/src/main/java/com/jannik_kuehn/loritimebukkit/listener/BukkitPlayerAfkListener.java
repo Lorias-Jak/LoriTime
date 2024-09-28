@@ -10,19 +10,40 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 
+/**
+ * Listener for player actions to update the AFK status of the player.
+ */
 public class BukkitPlayerAfkListener implements Listener {
+    /**
+     * The {@link LoriTimePlugin} instance.
+     */
     private final LoriTimePlugin loriTimePlugin;
 
+    /**
+     * Creates a new instance of the {@link BukkitPlayerAfkListener}.
+     *
+     * @param loriTimePlugin The {@link LoriTimePlugin} instance.
+     */
     public BukkitPlayerAfkListener(final LoriTimePlugin loriTimePlugin) {
         this.loriTimePlugin = loriTimePlugin;
     }
 
+    /**
+     * Handles the {@link PlayerJoinEvent} to update the AFK status of the player.
+     *
+     * @param event The {@link PlayerJoinEvent}.
+     */
     @EventHandler(ignoreCancelled = true)
     public void onPlayerJoin(final PlayerJoinEvent event) {
         final LoriTimePlayer player = loriTimePlugin.getPlayerConverter().getOnlinePlayer(event.getPlayer().getUniqueId());
         updateAfkStatus(player);
     }
 
+    /**
+     * Handles the {@link PlayerMoveEvent} to update the AFK status of the player.
+     *
+     * @param event The {@link PlayerMoveEvent}.
+     */
     @EventHandler(ignoreCancelled = true)
     public void onPlayerMove(final PlayerMoveEvent event) {
         if (event.getFrom().getBlockX() == event.getTo().getBlockX() && event.getFrom().getBlockY() == event.getTo().getBlockY()
@@ -33,21 +54,36 @@ public class BukkitPlayerAfkListener implements Listener {
         updateAfkStatus(player);
     }
 
+    /**
+     * Handles the {@link AsyncChatEvent} to update the AFK status of the player.
+     *
+     * @param event The {@link AsyncChatEvent}.
+     */
     @EventHandler(ignoreCancelled = true)
     public void onPlayerChat(final AsyncChatEvent event) {
         final LoriTimePlayer player = loriTimePlugin.getPlayerConverter().getOnlinePlayer(event.getPlayer().getUniqueId());
         updateAfkStatus(player);
     }
 
+    /**
+     * Handles the {@link PlayerInteractEvent} to update the AFK status of the player.
+     *
+     * @param event The {@link PlayerInteractEvent}.
+     */
     @EventHandler(ignoreCancelled = true)
     public void onPlayerInteract(final PlayerInteractEvent event) {
         final LoriTimePlayer player = loriTimePlugin.getPlayerConverter().getOnlinePlayer(event.getPlayer().getUniqueId());
         updateAfkStatus(player);
     }
 
+    /**
+     * Handles the {@link PlayerCommandPreprocessEvent} to update the AFK status of the player.
+     *
+     * @param event The {@link PlayerCommandPreprocessEvent}.
+     */
     @EventHandler(ignoreCancelled = true)
     public void onPlayerCommand(final PlayerCommandPreprocessEvent event) {
-        if (event.getMessage().equalsIgnoreCase("/afk")) {
+        if ("/afk".equalsIgnoreCase(event.getMessage())) {
             return;
         }
         final LoriTimePlayer player = loriTimePlugin.getPlayerConverter().getOnlinePlayer(event.getPlayer().getUniqueId());

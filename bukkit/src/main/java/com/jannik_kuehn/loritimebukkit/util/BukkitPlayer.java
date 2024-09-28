@@ -7,6 +7,7 @@ import org.bukkit.entity.Player;
 
 import java.util.UUID;
 
+@SuppressWarnings("PMD.CommentRequired")
 public class BukkitPlayer implements CommonSender {
 
     private final Player player;

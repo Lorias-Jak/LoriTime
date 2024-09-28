@@ -76,6 +76,7 @@ public class AfkStatusProvider {
 
     private void repeatedTimeCheck() {
         final HashMap<LoriTimePlayer, Long> playersToCheck = new HashMap<>(afkCheckedPlayers);
+        log.debug("RepeatedTimeCheck started, checking for player afk status");
         for (final Map.Entry<LoriTimePlayer, Long> entry : playersToCheck.entrySet()) {
             final LoriTimePlayer player = entry.getKey();
             final long playerAfkTime = entry.getValue();
@@ -91,9 +92,8 @@ public class AfkStatusProvider {
             }
             if (currentTime - playerAfkTime >= afkConfigTime) {
                 log.debug("Player is afk now. Setting player to afk");
-                getRealPlayer(player).setAFk(true);
                 final long timeToRemove = (currentTime - playerAfkTime) / 1000L;
-                afkPlayerHandling.executePlayerAfk(player, timeToRemove);
+                setPlayerAFK(player, timeToRemove);
             }
         }
 
@@ -101,9 +101,7 @@ public class AfkStatusProvider {
 
     public void resetTimer(final LoriTimePlayer player) {
         if (player.isAfk()) {
-            log.debug("Player is afk. Resuming player cause of reset");
-            player.setAFk(false);
-            afkPlayerHandling.executePlayerResume(player);
+            resumePlayerAFK(player);
         }
         afkCheckedPlayers.put(player, System.currentTimeMillis());
     }
@@ -121,10 +119,6 @@ public class AfkStatusProvider {
 
     public void playerLeft(final LoriTimePlayer player) {
         afkCheckedPlayers.remove(player);
-    }
-
-    public AfkHandling getAfkPlayerHandling() {
-        return afkPlayerHandling;
     }
 
     public void switchPlayerAfk(final LoriTimePlayer player) {

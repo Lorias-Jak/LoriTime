@@ -6,6 +6,14 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased] - ${maven.build.timestamp}
 ### Added
+### Changed
+### Deprecated
+### Removed
+### Fixed
+### Security
+
+## [1.5.0] - 2024-09-29
+### Added
 - `/ltdebug` command to enable or disable the console debugger.
 - new placeholder representing the total amount of time the player has been online. The values are rounded to two decimal places. 
   - `%loritime_seconds_total%`

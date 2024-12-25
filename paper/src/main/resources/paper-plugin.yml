@@ -5,6 +5,7 @@ api-version: '${minecraft.api.version}'
 description: ${project.description}
 website: 'https://github.com/Lorias-Jak/LoriTime'
 authors: [ Lorias-Jak ]
+folia-supported: true
 dependencies:
   server:
     PlaceholderAPI:

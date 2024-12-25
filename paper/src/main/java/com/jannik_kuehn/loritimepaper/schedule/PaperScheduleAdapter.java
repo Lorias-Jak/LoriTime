@@ -17,8 +17,14 @@ public class PaperScheduleAdapter implements PluginScheduler {
      */
     private final LoriTimePaper plugin;
 
+    /**
+     * The {@link AsyncScheduler} instance.
+     */
     private final AsyncScheduler asyncScheduler;
 
+    /**
+     * The {@link GlobalRegionScheduler} instance.
+     */
     private final GlobalRegionScheduler globalRegionScheduler;
 
     /**

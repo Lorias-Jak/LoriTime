@@ -13,18 +13,18 @@ import org.bukkit.event.player.PlayerMoveEvent;
 /**
  * Listener for player actions to update the AFK status of the player.
  */
-public class BukkitPlayerAfkListener implements Listener {
+public class PaperPlayerAfkListener implements Listener {
     /**
      * The {@link LoriTimePlugin} instance.
      */
     private final LoriTimePlugin loriTimePlugin;
 
     /**
-     * Creates a new instance of the {@link BukkitPlayerAfkListener}.
+     * Creates a new instance of the {@link PaperPlayerAfkListener}.
      *
      * @param loriTimePlugin The {@link LoriTimePlugin} instance.
      */
-    public BukkitPlayerAfkListener(final LoriTimePlugin loriTimePlugin) {
+    public PaperPlayerAfkListener(final LoriTimePlugin loriTimePlugin) {
         this.loriTimePlugin = loriTimePlugin;
     }
 

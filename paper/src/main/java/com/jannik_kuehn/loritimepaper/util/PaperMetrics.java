@@ -7,7 +7,7 @@ import org.bstats.charts.SimplePie;
 /**
  * A class for adding custom metrics data to bStats.
  */
-public class BukkitMetrics {
+public class PaperMetrics {
     /**
      * The {@link LoriTimePaper} instance.
      */
@@ -19,12 +19,12 @@ public class BukkitMetrics {
     private final Metrics metrics;
 
     /**
-     * Creates a new {@link BukkitMetrics} instance.
+     * Creates a new {@link PaperMetrics} instance.
      *
      * @param loriTimePaper The {@link LoriTimePaper} instance.
      * @param metrics       The {@link Metrics} instance.
      */
-    public BukkitMetrics(final LoriTimePaper loriTimePaper, final Metrics metrics) {
+    public PaperMetrics(final LoriTimePaper loriTimePaper, final Metrics metrics) {
         this.loriTimePaper = loriTimePaper;
         this.metrics = metrics;
 

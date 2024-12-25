@@ -13,7 +13,7 @@ import java.util.UUID;
 /**
  * Listener for saving player names and UUIDs.
  */
-public class PlayerNameBukkitListener implements Listener {
+public class PlayerNamePaperListener implements Listener {
     /**
      * The {@link LoriTimePlugin} instance.
      */
@@ -29,9 +29,9 @@ public class PlayerNameBukkitListener implements Listener {
      *
      * @param loriTimePlugin The {@link LoriTimePlugin} instance.
      */
-    public PlayerNameBukkitListener(final LoriTimePlugin loriTimePlugin) {
+    public PlayerNamePaperListener(final LoriTimePlugin loriTimePlugin) {
         this.loriTimePlugin = loriTimePlugin;
-        this.log = loriTimePlugin.getLoggerFactory().create(PlayerNameBukkitListener.class);
+        this.log = loriTimePlugin.getLoggerFactory().create(PlayerNamePaperListener.class);
     }
 
     /**

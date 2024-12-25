@@ -32,9 +32,9 @@ public class SlavedTimeStorageCache extends PluginMessaging implements TimeStora
     private final LoriTimePaper loriTimePaper;
 
     /**
-     * The {@link BukkitPluginMessenger} instance.
+     * The {@link PaperPluginMessenger} instance.
      */
-    private final BukkitPluginMessenger pluginMessenger;
+    private final PaperPluginMessenger pluginMessenger;
 
     /**
      * The {@link LoriTimeLogger} instance.
@@ -55,10 +55,10 @@ public class SlavedTimeStorageCache extends PluginMessaging implements TimeStora
      * Creates a new instance of the {@link SlavedTimeStorageCache}.
      *
      * @param loriTimePaper   The {@link LoriTimePaper} instance.
-     * @param pluginMessenger The {@link BukkitPluginMessenger} instance.
+     * @param pluginMessenger The {@link PaperPluginMessenger} instance.
      * @param updateInterval  The update interval for fetching the online time.
      */
-    public SlavedTimeStorageCache(final LoriTimePaper loriTimePaper, final BukkitPluginMessenger pluginMessenger, final long updateInterval) {
+    public SlavedTimeStorageCache(final LoriTimePaper loriTimePaper, final PaperPluginMessenger pluginMessenger, final long updateInterval) {
         super(loriTimePaper.getPlugin());
         this.loriTimePaper = loriTimePaper;
         this.pluginMessenger = pluginMessenger;

@@ -13,7 +13,7 @@ import java.util.UUID;
 /**
  * Listener for accumulating online time of players.
  */
-public class TimeAccumulatorBukkitListener implements Listener {
+public class TimeAccumulatorPaperListener implements Listener {
     /**
      * The {@link LoriTimePlugin} instance.
      */
@@ -29,9 +29,9 @@ public class TimeAccumulatorBukkitListener implements Listener {
      *
      * @param loriTimePlugin The {@link LoriTimePlugin} instance.
      */
-    public TimeAccumulatorBukkitListener(final LoriTimePlugin loriTimePlugin) {
+    public TimeAccumulatorPaperListener(final LoriTimePlugin loriTimePlugin) {
         this.loriTimePlugin = loriTimePlugin;
-        this.log = loriTimePlugin.getLoggerFactory().create(TimeAccumulatorBukkitListener.class);
+        this.log = loriTimePlugin.getLoggerFactory().create(TimeAccumulatorPaperListener.class);
     }
 
     /**

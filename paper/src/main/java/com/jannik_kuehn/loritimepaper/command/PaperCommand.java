@@ -4,8 +4,8 @@ import com.jannik_kuehn.common.api.common.CommonCommand;
 import com.jannik_kuehn.common.api.common.CommonSender;
 import com.jannik_kuehn.common.api.logger.LoriTimeLogger;
 import com.jannik_kuehn.loritimepaper.LoriTimePaper;
-import com.jannik_kuehn.loritimepaper.util.BukkitPlayer;
-import com.jannik_kuehn.loritimepaper.util.BukkitSender;
+import com.jannik_kuehn.loritimepaper.util.PaperPlayer;
+import com.jannik_kuehn.loritimepaper.util.PaperSender;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
@@ -25,7 +25,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
 @SuppressWarnings("PMD.CommentRequired")
-public class BukkitCommand implements CommandExecutor, TabExecutor {
+public class PaperCommand implements CommandExecutor, TabExecutor {
 
     private final LoriTimePaper bukkitPlugin;
 
@@ -33,10 +33,10 @@ public class BukkitCommand implements CommandExecutor, TabExecutor {
 
     private final LoriTimeLogger log;
 
-    public BukkitCommand(final LoriTimePaper bukkitPlugin, final CommonCommand command) {
+    public PaperCommand(final LoriTimePaper bukkitPlugin, final CommonCommand command) {
         this.bukkitPlugin = bukkitPlugin;
         this.command = command;
-        this.log = bukkitPlugin.getPlugin().getLoggerFactory().create(BukkitCommand.class);
+        this.log = bukkitPlugin.getPlugin().getLoggerFactory().create(PaperCommand.class);
 
         register();
     }
@@ -56,9 +56,9 @@ public class BukkitCommand implements CommandExecutor, TabExecutor {
 
     private CommonSender getSender(final CommandSender source) {
         if (source instanceof Player) {
-            return new BukkitPlayer((Player) source);
+            return new PaperPlayer((Player) source);
         } else {
-            return new BukkitSender(source);
+            return new PaperSender(source);
         }
     }
 

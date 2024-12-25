@@ -8,7 +8,7 @@ import com.jannik_kuehn.loritimepaper.LoriTimePaper;
 /**
  * The {@link AfkHandling} implementation for the slaved servers.
  */
-public class BukkitSlavedAfkHandling extends AfkHandling {
+public class PaperSlavedAfkHandling extends AfkHandling {
     /**
      * The {@link LoriTimePaper} instance.
      */
@@ -20,14 +20,14 @@ public class BukkitSlavedAfkHandling extends AfkHandling {
     private final LoriTimeLogger log;
 
     /**
-     * Creates a new instance of the {@link BukkitSlavedAfkHandling}.
+     * Creates a new instance of the {@link PaperSlavedAfkHandling}.
      *
      * @param loriTimePaper The {@link LoriTimePaper} instance.
      */
-    public BukkitSlavedAfkHandling(final LoriTimePaper loriTimePaper) {
+    public PaperSlavedAfkHandling(final LoriTimePaper loriTimePaper) {
         super(loriTimePaper.getPlugin());
         this.loriTimePaper = loriTimePaper;
-        this.log = loriTimePaper.getPlugin().getLoggerFactory().create(BukkitSlavedAfkHandling.class, "SlavedAfkHandling");
+        this.log = loriTimePaper.getPlugin().getLoggerFactory().create(PaperSlavedAfkHandling.class, "SlavedAfkHandling");
     }
 
     @Override

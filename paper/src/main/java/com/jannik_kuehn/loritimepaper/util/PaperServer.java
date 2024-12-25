@@ -15,7 +15,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @SuppressWarnings("PMD.CommentRequired")
-public class BukkitServer implements CommonServer {
+public class PaperServer implements CommonServer {
     private final LoriTimePaper loriTimePaper;
 
     private final String version;
@@ -24,7 +24,7 @@ public class BukkitServer implements CommonServer {
 
     private String serverMode;
 
-    public BukkitServer(final LoriTimePaper loriTimePaper, final String version) {
+    public PaperServer(final LoriTimePaper loriTimePaper, final String version) {
         this.loriTimePaper = loriTimePaper;
         this.server = Bukkit.getServer();
         this.version = version;
@@ -33,20 +33,20 @@ public class BukkitServer implements CommonServer {
     @Override
     public Optional<CommonSender> getPlayer(final UUID uniqueId) {
         final Optional<Player> player = Optional.ofNullable(server.getPlayer(uniqueId));
-        return Optional.ofNullable(player.map(BukkitPlayer::new).orElse(null));
+        return Optional.ofNullable(player.map(PaperPlayer::new).orElse(null));
     }
 
     @Override
     public Optional<CommonSender> getPlayer(final String name) {
         final Optional<Player> player = Optional.ofNullable(server.getPlayer(name));
-        return Optional.ofNullable(player.map(BukkitPlayer::new).orElse(null));
+        return Optional.ofNullable(player.map(PaperPlayer::new).orElse(null));
     }
 
     @Override
     public CommonSender[] getOnlinePlayers() {
         return server.getOnlinePlayers().stream()
-                .map(BukkitPlayer::new)
-                .toList().toArray(new BukkitPlayer[0]);
+                .map(PaperPlayer::new)
+                .toList().toArray(new PaperPlayer[0]);
     }
 
     @Override

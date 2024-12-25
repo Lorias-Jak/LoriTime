@@ -11,7 +11,7 @@ import java.util.UUID;
  * Messenger for the plugin messages.
  * Extends the {@link PluginMessaging} class.
  */
-public class BukkitPluginMessenger extends PluginMessaging {
+public class PaperPluginMessenger extends PluginMessaging {
     /**
      * The {@link LoriTimePaper} instance.
      */
@@ -23,14 +23,14 @@ public class BukkitPluginMessenger extends PluginMessaging {
     private final LoriTimeLogger log;
 
     /**
-     * Creates a new instance of the {@link BukkitPluginMessenger}.
+     * Creates a new instance of the {@link PaperPluginMessenger}.
      *
      * @param bukkitPlugin The {@link LoriTimePaper} instance.
      */
-    public BukkitPluginMessenger(final LoriTimePaper bukkitPlugin) {
+    public PaperPluginMessenger(final LoriTimePaper bukkitPlugin) {
         super(bukkitPlugin.getPlugin());
         this.bukkitPlugin = bukkitPlugin;
-        this.log = bukkitPlugin.getPlugin().getLoggerFactory().create(BukkitPluginMessenger.class, "BukkitPluginMessenger");
+        this.log = bukkitPlugin.getPlugin().getLoggerFactory().create(PaperPluginMessenger.class, "BukkitPluginMessenger");
     }
 
     @Override

@@ -1,0 +1,13 @@
+name: ${project.name}
+main: ${project.groupId}.${project.artifactId}.${project.name}
+version: ${loritime.version}
+api-version: '${minecraft.api.version}'
+description: ${project.description}
+website: 'https://github.com/Lorias-Jak/LoriTime'
+authors: [ Lorias-Jak ]
+dependencies:
+  server:
+    PlaceholderAPI:
+      load: BEFORE
+      required: false
+      join-classpath: true

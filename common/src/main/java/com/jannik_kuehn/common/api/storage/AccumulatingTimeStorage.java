@@ -1,5 +1,6 @@
 package com.jannik_kuehn.common.api.storage;
 
+import com.jannik_kuehn.common.api.logger.LoriTimeLogger;
 import com.jannik_kuehn.common.exception.StorageException;
 
 import java.util.HashMap;
@@ -14,11 +15,14 @@ import java.util.concurrent.ConcurrentMap;
 @SuppressWarnings("PMD.CommentRequired")
 public class AccumulatingTimeStorage implements TimeStorage, TimeAccumulator {
 
+    private final LoriTimeLogger log;
+
     private final TimeStorage storage;
 
     private final ConcurrentMap<UUID, Long> onlineSince = new ConcurrentHashMap<>();
 
-    public AccumulatingTimeStorage(final TimeStorage timeStorage) {
+    public AccumulatingTimeStorage(final LoriTimeLogger log, final TimeStorage timeStorage) {
+        this.log = log;
         this.storage = Objects.requireNonNull(timeStorage);
     }
 
@@ -85,6 +89,7 @@ public class AccumulatingTimeStorage implements TimeStorage, TimeAccumulator {
         if (onlineSince.isEmpty()) {
             return;
         }
+        log.debug("Flushing online time cache");
         final Map<UUID, Long> onlineTime = new HashMap<>();
         final long now = System.currentTimeMillis();
         onlineSince.keySet().forEach(uuid -> {

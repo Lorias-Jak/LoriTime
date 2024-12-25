@@ -195,14 +195,15 @@ public class DataStorageManager {
         final Configuration nameFile = loriTime.getOrCreateFile(dataFolder + "/data/", "names.yml", false);
         final Configuration timeFile = loriTime.getOrCreateFile(dataFolder + "/data/", "time.yml", false);
         this.nameStorage = new FileNameStorage(new FileStorageProvider(nameFile));
-        this.timeStorage = new AccumulatingTimeStorage(new FileTimeStorage(new FileStorageProvider(timeFile)));
+        this.timeStorage = new AccumulatingTimeStorage(loriTime.getLoggerFactory().create(AccumulatingTimeStorage.class),
+                new FileTimeStorage(new FileStorageProvider(timeFile)));
     }
 
     @SuppressWarnings("PMD.CloseResource")
     private void loadDatabaseStorage() {
         final DatabaseStorage databaseStorage = new DatabaseStorage(loriTime.getConfig(), loriTime);
         this.nameStorage = databaseStorage;
-        this.timeStorage = new AccumulatingTimeStorage(databaseStorage);
+        this.timeStorage = new AccumulatingTimeStorage(loriTime.getLoggerFactory().create(AccumulatingTimeStorage.class), databaseStorage);
     }
 
     /**

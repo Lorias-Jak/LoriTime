@@ -71,7 +71,7 @@ public class PaperServer implements CommonServer {
 
     @Override
     public String getServerVersion() {
-        return Bukkit.getVersion();
+        return server.getVersion();
     }
 
     @Override

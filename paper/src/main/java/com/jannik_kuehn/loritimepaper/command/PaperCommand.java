@@ -6,8 +6,6 @@ import com.jannik_kuehn.common.api.logger.LoriTimeLogger;
 import com.jannik_kuehn.loritimepaper.LoriTimePaper;
 import com.jannik_kuehn.loritimepaper.util.PaperPlayer;
 import com.jannik_kuehn.loritimepaper.util.PaperSender;
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandMap;
@@ -20,23 +18,22 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
 @SuppressWarnings("PMD.CommentRequired")
 public class PaperCommand implements CommandExecutor, TabExecutor {
 
-    private final LoriTimePaper bukkitPlugin;
+    private final LoriTimePaper paperPlugin;
 
     private final CommonCommand command;
 
     private final LoriTimeLogger log;
 
-    public PaperCommand(final LoriTimePaper bukkitPlugin, final CommonCommand command) {
-        this.bukkitPlugin = bukkitPlugin;
+    public PaperCommand(final LoriTimePaper paperPlugin, final CommonCommand command) {
+        this.paperPlugin = paperPlugin;
         this.command = command;
-        this.log = bukkitPlugin.getPlugin().getLoggerFactory().create(PaperCommand.class);
+        this.log = paperPlugin.getPlugin().getLoggerFactory().create(PaperCommand.class);
 
         register();
     }
@@ -62,17 +59,8 @@ public class PaperCommand implements CommandExecutor, TabExecutor {
         }
     }
 
-    @SuppressWarnings("PMD.AvoidAccessibilityAlteration")
     private CommandMap getCommandMap() {
-        try {
-            final Object craftServer = Bukkit.getServer();
-            final Field commandMapField = craftServer.getClass().getDeclaredField("commandMap");
-            commandMapField.setAccessible(true);
-            return (CommandMap) commandMapField.get(craftServer);
-        } catch (NoSuchFieldException | IllegalAccessException e) {
-            log.error("Error while getting the CommandMap!", e);
-        }
-        return null;
+        return paperPlugin.getServer().getCommandMap();
     }
 
     @SuppressWarnings("PMD.AvoidAccessibilityAlteration")
@@ -90,15 +78,10 @@ public class PaperCommand implements CommandExecutor, TabExecutor {
     }
 
     @SuppressWarnings("PMD.AvoidCatchingGenericException")
-    @SuppressFBWarnings("NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE")
     private void register() {
         try {
             final CommandMap commandMap = getCommandMap();
-            if (commandMap == null) {
-                log.error("Can not register the command '" + command.getCommandName() + "'! Skipping the registration...");
-                return;
-            }
-            final PluginCommand pluginCommand = createPluginCommand(command.getCommandName(), bukkitPlugin);
+            final PluginCommand pluginCommand = createPluginCommand(command.getCommandName(), paperPlugin);
             pluginCommand.setAliases(this.command.getAliases());
             pluginCommand.setExecutor(this);
             commandMap.register(command.getCommandName(), pluginCommand);

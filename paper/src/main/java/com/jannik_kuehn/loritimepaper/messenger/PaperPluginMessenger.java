@@ -15,7 +15,7 @@ public class PaperPluginMessenger extends PluginMessaging {
     /**
      * The {@link LoriTimePaper} instance.
      */
-    private final LoriTimePaper bukkitPlugin;
+    private final LoriTimePaper paperPlugin;
 
     /**
      * The {@link LoriTimeLogger} instance.
@@ -25,12 +25,12 @@ public class PaperPluginMessenger extends PluginMessaging {
     /**
      * Creates a new instance of the {@link PaperPluginMessenger}.
      *
-     * @param bukkitPlugin The {@link LoriTimePaper} instance.
+     * @param paperPlugin The {@link LoriTimePaper} instance.
      */
-    public PaperPluginMessenger(final LoriTimePaper bukkitPlugin) {
-        super(bukkitPlugin.getPlugin());
-        this.bukkitPlugin = bukkitPlugin;
-        this.log = bukkitPlugin.getPlugin().getLoggerFactory().create(PaperPluginMessenger.class, "BukkitPluginMessenger");
+    public PaperPluginMessenger(final LoriTimePaper paperPlugin) {
+        super(paperPlugin.getPlugin());
+        this.paperPlugin = paperPlugin;
+        this.log = paperPlugin.getPlugin().getLoggerFactory().create(PaperPluginMessenger.class, "PaperPluginMessenger");
     }
 
     @Override
@@ -40,10 +40,10 @@ public class PaperPluginMessenger extends PluginMessaging {
         final byte[] data = getDataAsByte(message);
 
         if (data != null) {
-            final Player bukkitPlayer = bukkitPlugin.getServer().getPlayer(uuid);
-            if (bukkitPlayer != null) {
-                log.debug("Sending PluginMessage to player: " + bukkitPlayer.getName());
-                bukkitPlayer.sendPluginMessage(bukkitPlugin, channelIdentifier, data);
+            final Player paperPlayer = paperPlugin.getServer().getPlayer(uuid);
+            if (paperPlayer != null) {
+                log.debug("Sending PluginMessage to player: " + paperPlayer.getName());
+                paperPlayer.sendPluginMessage(paperPlugin, channelIdentifier, data);
             }
         } else {
             log.warn("could not send plugin message, data is null");

@@ -111,7 +111,7 @@ public class LoriTimePaper extends JavaPlugin {
         loriTimePlugin.disable();
     }
 
-    public PaperPluginMessenger getBukkitPluginMessenger() {
+    public PaperPluginMessenger getPaperPluginMessenger() {
         return paperPluginMessenger;
     }
 

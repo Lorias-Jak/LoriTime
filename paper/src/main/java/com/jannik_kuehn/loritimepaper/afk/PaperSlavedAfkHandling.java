@@ -34,14 +34,14 @@ public class PaperSlavedAfkHandling extends AfkHandling {
     public void executePlayerAfk(final LoriTimePlayer loriTimePlayer, final long timeToRemove) {
         log.debug("Executing AFK for player: " + loriTimePlayer.getName() + ". Time to remove: "
                 + timeToRemove + ". Sending PluginMessage");
-        loriTimePaper.getBukkitPluginMessenger().sendPluginMessage("loritime:afk",
+        loriTimePaper.getPaperPluginMessenger().sendPluginMessage("loritime:afk",
                 loriTimePlayer.getUniqueId(), "true", timeToRemove);
     }
 
     @Override
     public void executePlayerResume(final LoriTimePlayer loriTimePlayer) {
         log.debug("Executing resume for player: " + loriTimePlayer.getName() + ". Sending PluginMessage");
-        loriTimePaper.getBukkitPluginMessenger().sendPluginMessage("loritime:afk",
+        loriTimePaper.getPaperPluginMessenger().sendPluginMessage("loritime:afk",
                 loriTimePlayer.getUniqueId(), "false");
     }
 }

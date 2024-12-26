@@ -84,13 +84,12 @@ public class FileNameStorage implements NameStorage {
     @Override
     public void removeUser(final UUID uniqueId) throws StorageException {
         Objects.requireNonNull(uniqueId);
-        getName(uniqueId).ifPresent(name -> {
-            try {
-                storageProvider.delete(name);
-            } catch (final StorageException e) {
-                throw new RuntimeException(e);
-            }
-        });
+        final Optional<String> optionalName = getName(uniqueId);
+
+        if (optionalName.isPresent()) {
+            final String name = optionalName.get();
+            storageProvider.delete(name);
+        }
     }
 
     @Override

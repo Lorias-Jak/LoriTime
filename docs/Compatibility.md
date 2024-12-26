@@ -1,6 +1,6 @@
 ## Requirements
 > LoriTime has no dependency's as for now.<br>
-> It's compiled with Java 17!
+> It's compiled with Java 21!
 
 ## Supportet platforms
 <table class="tg">
@@ -20,11 +20,11 @@
   </tr>
   <tr>
     <th class="tg-0lax"><a href="https://papermc.io/software/paper">Paper</a></th>
-    <th class="tg-0lax">✅ [1.20-1.21]</th>
+    <th class="tg-0lax">✅ [1.21<]</th>
   </tr>
   <tr>
     <th class="tg-0lax"><a href="https://papermc.io/software/folia">Folia</a></th>
-    <th class="tg-0lax">✅ [1.20-1.21]</th>
+    <th class="tg-0lax">✅ [1.21<]</th>
   </tr>
 </thead>
 <tbody>

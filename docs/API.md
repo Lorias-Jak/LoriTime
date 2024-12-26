@@ -5,10 +5,10 @@ The LoriTime API offers various methods for querying and managing the online tim
 ## Compatibility
 | Plattform | Version         | Supported |
 |-----------|-----------------|-----------|
-| paper     | 1.6.0 - current | ✅         |
-| Folia     | 1.6.0 - current | ✅         |
-| velocity  | 1.6.0 - current | ✅         |
-| bungee    | 1.6.0 - current | ✅         |
+| paper     | 1.7.0 - current | ✅         |
+| Folia     | 1.7.0 - current | ✅         |
+| velocity  | 1.7.0 - current | ✅         |
+| bungee    | 1.7.0 - current | ✅         |
 
 ## API Introduction
 

@@ -6,24 +6,32 @@
 <table class="tg">
 <thead>
   <tr>
-    <th class="tg-9wq8" rowspan="4">(Sub)-Server</th>
+    <th class="tg-9wq8" rowspan="5">(Sub)-Server</th>
     <th class="tg-0pky">Platform name</th>
     <th class="tg-0pky">Supported Versions</th>
   </tr>
   <tr>
     <th class="tg-0pky"><a href="https://getbukkit.org/">Bukkit</a></th>
-    <th class="tg-0pky">❌*</th>
+    <th class="tg-0pky">❌</th>
+  </tr>
+  <tr>
+    <th class="tg-0pky"><a href="https://getbukkit.org/">Spigot</a></th>
+    <th class="tg-0pky">❌</th>
   </tr>
   <tr>
     <th class="tg-0lax"><a href="https://papermc.io/software/paper">Paper</a></th>
-    <th class="tg-0lax">❗ [1.18-1.21]**</th>
+    <th class="tg-0lax">✅ [1.20-1.21]</th>
+  </tr>
+  <tr>
+    <th class="tg-0lax"><a href="https://papermc.io/software/folia">Folia</a></th>
+    <th class="tg-0lax">✅ [1.20-1.21]</th>
   </tr>
 </thead>
 <tbody>
   <tr>
     <th class="tg-lboi" rowspan="4">Proxy's</th>
     <th class="tg-0pky"><a href="https://papermc.io/software/velocity">Velocity</a></th>
-    <th class="tg-0pky">✅ 3.2.0</th>
+    <th class="tg-0pky">✅ lts</th>
   </tr>
   <tr>
     <th class="tg-0pky"><a href="https://ci.md-5.net/job/BungeeCord/">BungeeCord</a></th>
@@ -31,8 +39,6 @@
   </tr>
 </tbody>
 </table>
-* No plain Bukkit support<br>
-** Loaded via the Bukkit loader<br>
 
 ## Integrations
 LoriTime hooks into PlaceHolderAPI!

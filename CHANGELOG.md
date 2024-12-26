@@ -6,6 +6,14 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased] - ${maven.build.timestamp}
 ### Added
+### Changed
+### Deprecated
+### Removed
+### Fixed
+### Security
+
+## [1.6.0] - 2024-12-26
+### Added
 - Paper plugin loader.
 - Folia platform loader.
 - `deleteUser` argument to `/lta` command to delete a user entirely from the plugin.

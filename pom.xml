@@ -24,7 +24,7 @@
     <module>common</module>
     <module>bungee</module>
     <module>velocity</module>
-    <module>bukkit</module>
+    <module>paper</module>
   </modules>
 
   <repositories>
@@ -98,7 +98,7 @@
 
       <dependency>
         <groupId>com.jannik_kuehn</groupId>
-        <artifactId>bukkit</artifactId>
+        <artifactId>paper</artifactId>
         <version>${project.version}</version>
         <scope>provided</scope>
       </dependency>

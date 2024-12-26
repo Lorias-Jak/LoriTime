@@ -5,16 +5,14 @@ The LoriTime API offers various methods for querying and managing the online tim
 ## Compatibility
 | Plattform | Version         | Supported |
 |-----------|-----------------|-----------|
-| paper     | 1.4.0 - current | ❗*        |
-| velocity  | 1.4.0 - current | ✅         |
-| bungee    | 1.4.0 - current | ✅         |
-
-> **\*❗:** Plain Spigot / Bukkit support got dropped. Paper is supported via the Bukkit loader.
-
+| paper     | 1.6.0 - current | ✅         |
+| Folia     | 1.6.0 - current | ✅         |
+| velocity  | 1.6.0 - current | ✅         |
+| bungee    | 1.6.0 - current | ✅         |
 
 ## API Introduction
 
-> **Note:** There is currently no Maven or Gradle repo! This could be added in the future, if its really needed
+> **Note:** There is currently no Maven or Gradle repo! This could be added in the future if it's really necessary.
 
 <details>
 <summary>1. Adding LoriTime as a dependency</summary>

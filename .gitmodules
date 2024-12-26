@@ -1,9 +1,9 @@
 [submodule "common"]
 	path = common
 	url = ../common
-[submodule "bukkit"]
-	path = bukkit
-	url = ../bukkit
+[submodule "paper"]
+	path = paper
+	url = ../paper
 [submodule "bungee"]
 	path = bungee
 	url = ../bungee

@@ -3,6 +3,7 @@ package com.jannik_kuehn.common.api.storage;
 import com.jannik_kuehn.common.api.logger.LoriTimeLogger;
 import com.jannik_kuehn.common.exception.StorageException;
 
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -62,6 +63,12 @@ public class AccumulatingTimeStorage implements TimeStorage, TimeAccumulator {
     @Override
     public Map<String, ?> getAllTimeEntries() throws StorageException {
         return storage.getAllTimeEntries();
+    }
+
+    @Override
+    public void removeTimeHolder(final UUID uniqueId) throws StorageException, SQLException {
+        onlineSince.remove(uniqueId);
+        storage.removeTimeHolder(uniqueId);
     }
 
     @Override

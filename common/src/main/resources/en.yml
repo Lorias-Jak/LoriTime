@@ -52,7 +52,7 @@ message:
         self: '<#A4A4A4>You have played for <#50CBAB>[time] <#A4A4A4>on the server.'
         other: '<#A4A4A4>The player <#50CBAB>[player] <#A4A4A4>has already played for <#50CBAB>[time] <#A4A4A4>on the server.'
     loritimeadmin:
-      usage: '<#A4A4A4>Use <red>/loritimeadmin [set | mod | reset] [player] [time] <#A4A4A4>to edit a players online time.<newline>Other commands: <red>/loritimeadmin [reload | info]'
+      usage: '<#A4A4A4>Use <red>/loritimeadmin [set | mod | reset] [player] [time] <#A4A4A4>to edit a players online time.<newline>Other commands: <red>/loritimeadmin [reload | info | delete]'
       missinguuid: '<#A4A4A4>The player <#50CBAB>[player] <#A4A4A4>is unknown.'
       nottime: '<#A4A4A4>The given time argument <red>[argument] <#FF3232>is not valid.'
       set:
@@ -66,6 +66,11 @@ message:
       reset:
         usage: '<#A4A4A4>Use <red>/onlinetimeadmin reset [player] <#A4A4A4>to reset a players online time.'
         success: '<#A4A4A4>The online time of player <#50CBAB>[player] <#A4A4A4>got successfully reset.'
+      deleteUser:
+        usage: '<#A4A4A4>Use <red>/onlinetimeadmin delete [player] confirm <#A4A4A4>to delete a user entirely from the plugin.'
+        success: '<#A4A4A4>The player <#50CBAB>[player] <#A4A4A4>was <#50CBAB>successfully <#A4A4A4>deleted.'
+        issue: '<#FF3232>An issue occurred during the deletion.'
+        userOnline: '<#FF3232>You can not delete a user that is online.'
       reload:
         usage: '<#A4A4A4> Use <red>/onlinetimeadmin reload <#A4A4A4>to reload the plugin.'
         success: '<#A4A4A4>You have <#1AFA29>successfully <#A4A4A4>reloaded the plugin.'

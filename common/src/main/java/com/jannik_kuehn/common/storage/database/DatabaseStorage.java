@@ -81,6 +81,10 @@ public class DatabaseStorage implements NameStorage, TimeStorage {
         return "INSERT INTO `" + mySQL.getTablePrefix() + "` (`uuid`, `name`, `time`) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE `name` = ?, `time` = `time` + ?";
     }
 
+    private String deleteByUuid() {
+        return "DELETE FROM `" + mySQL.getTablePrefix() + "` WHERE `uuid` = ?";
+    }
+
     @Override
     public Optional<UUID> getUuid(final String name) throws StorageException {
         Objects.requireNonNull(name);
@@ -307,6 +311,31 @@ public class DatabaseStorage implements NameStorage, TimeStorage {
         }
     }
 
+    @Override
+    public void removeUser(final UUID uniqueId) throws StorageException, SQLException {
+        deleteUser(uniqueId);
+    }
+
+    private void deleteUser(final UUID uuid) throws SQLException, StorageException {
+        if (uuid == null) {
+            return;
+        }
+        poolLock.readLock().lock();
+        try {
+            try (Connection connection = mySQL.getConnection()) {
+                try (PreparedStatement getByUuidStatement = connection.prepareStatement(deleteByUuid())) {
+                    getByUuidStatement.setBytes(1, UuidUtil.toBytes(uuid));
+                    getByUuidStatement.executeUpdate();
+                }
+            }
+        } catch (final SQLException ex) {
+            throw new StorageException(ex);
+        } finally {
+            poolLock.readLock().unlock();
+        }
+
+    }
+
     private Set<String> getNameEntries(final Connection connection) throws SQLException {
         try (PreparedStatement getByUuidStatement = connection.prepareStatement(getAllNameEntries())) {
             try (ResultSet result = getByUuidStatement.executeQuery()) {
@@ -332,6 +361,11 @@ public class DatabaseStorage implements NameStorage, TimeStorage {
         } finally {
             poolLock.readLock().unlock();
         }
+    }
+
+    @Override
+    public void removeTimeHolder(final UUID uniqueId) throws StorageException, SQLException {
+        deleteUser(uniqueId);
     }
 
     private Map<String, ?> getAllTimeEntries(final Connection connection) throws SQLException {

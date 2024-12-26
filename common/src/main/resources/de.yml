@@ -72,6 +72,11 @@ message:
       reset:
         usage: '<#A4A4A4>Benutze <red>/onlinetimeadmin reset [player] [time] <#A4A4A4>um die Spielzeit zu zurückzusetzen.'
         success: '<#A4A4A4>Die Spielzeit von <#50CBAB>[player] wurde zurückgesetzt.'
+      deleteUser:
+        usage: '<#A4A4A4>Nutze <red>/onlinetimeadmin delete [player] confirm <#A4A4A4>um einen Spieler komplett zu löschen.'
+        success: '<#A4A4A4>Der Spieler <#50CBAB>[player] <#A4A4A4>wurde <#50CBAB>erfolgreich <#A4A4A4>gelöscht.'
+        issue: '<#FF3232>Es ist ein Fehler beim Löschen der Daten aufgetreten.'
+        userOnline: '<#FF3232>Du kannst den User nicht löschen, so lange dieser online ist.'
       reload:
         usage: '<#A4A4A4> Benutze <red>/onlinetimeadmin reload <#A4A4A4>um das Plugin neu zu laden.'
         success: '<#A4A4A4>Du hast <#1AFA29>erfolgreich <#A4A4A4>das Plugin neu geladen.'

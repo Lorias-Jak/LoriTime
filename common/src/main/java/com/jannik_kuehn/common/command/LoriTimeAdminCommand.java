@@ -10,6 +10,7 @@ import com.jannik_kuehn.common.exception.StorageException;
 import com.jannik_kuehn.common.utils.TimeParser;
 import com.jannik_kuehn.common.utils.TimeUtil;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -54,10 +55,11 @@ public class LoriTimeAdminCommand implements CommonCommand {
 
             try {
                 switch (args[0].toLowerCase(Locale.ROOT)) {
-                    case "set" -> set(sender, subCommandArgs);
+                    case "deleteuser" -> deleteUser(sender, subCommandArgs);
                     case "modify", "mod", "add" -> modify(sender, subCommandArgs);
-                    case "reset", "delete", "del" -> reset(sender, subCommandArgs);
+                    case "reset" -> reset(sender, subCommandArgs);
                     case "reload" -> reload(sender, subCommandArgs);
+                    case "set" -> set(sender, subCommandArgs);
                     default -> printUtilityMessage(sender, "message.command.loritimeadmin.usage");
                 }
             } catch (final StorageException e) {
@@ -71,21 +73,13 @@ public class LoriTimeAdminCommand implements CommonCommand {
         if (!source.hasPermission("loritime.admin")) {
             return new ArrayList<>();
         }
-        if (args.length == 0) {
+        if (args.length <= 1) {
             final List<String> completions = new ArrayList<>();
-            completions.add("set");
-            completions.add("modify");
             completions.add("add");
-            completions.add("delete");
-            completions.add("reload");
-            return completions;
-        }
-        if (args.length == 1) {
-            final List<String> completions = new ArrayList<>();
-            completions.add("set");
             completions.add("modify");
-            completions.add("add");
-            completions.add("delete");
+            completions.add("set");
+            completions.add("reset");
+            completions.add("deleteUser");
             completions.add("reload");
             return filterCompletion(completions, args[0]);
         }
@@ -255,6 +249,37 @@ public class LoriTimeAdminCommand implements CommonCommand {
         }
         sender.sendMessage(localization.formatTextComponent(localization.getRawMessage("message.command.loritimeadmin.reset.success")
                 .replace("[player]", player.getName())));
+    }
+
+    private void deleteUser(final CommonSender sender, final String... args) throws StorageException {
+        if (args.length < 2) {
+            printUtilityMessage(sender, "message.command.loritimeadmin.deleteUser.usage");
+            return;
+        }
+
+        final Optional<UUID> optionalUUID = loriTimePlugin.getNameStorage().getUuid(args[0]);
+        if (optionalUUID.isEmpty()) {
+            printMissingUuidMessage(sender, args[0]);
+            return;
+        }
+
+        final Optional<CommonSender> onlinePlayer = loriTimePlugin.getServer().getPlayer(optionalUUID.get());
+        if (onlinePlayer.isPresent() && onlinePlayer.get().isOnline()) {
+            printUtilityMessage(sender, "message.command.loritimeadmin.deleteUser.userOnline");
+            return;
+        }
+
+        final LoriTimePlayer player = loriTimePlugin.getPlayerConverter().getOnlinePlayer(optionalUUID.get());
+        try {
+            loriTimePlugin.getNameStorage().removeUser(player.getUniqueId());
+            loriTimePlugin.getTimeStorage().removeTimeHolder(player.getUniqueId());
+            sender.sendMessage(localization.formatTextComponent(localization
+                    .getRawMessage("message.command.loritimeadmin.deleteUser.success")
+                    .replace("[player]", player.getName())));
+        } catch (StorageException | SQLException e) {
+            printUtilityMessage(sender, "message.command.loritimeadmin.deleteUser.issue");
+            log.error("An exception occurred while deleting the user from the Plugin!", e);
+        }
     }
 
     private void reload(final CommonSender sender, final String... args) {

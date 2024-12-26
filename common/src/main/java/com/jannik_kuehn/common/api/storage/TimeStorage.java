@@ -2,6 +2,7 @@ package com.jannik_kuehn.common.api.storage;
 
 import com.jannik_kuehn.common.exception.StorageException;
 
+import java.sql.SQLException;
 import java.util.Map;
 import java.util.OptionalLong;
 import java.util.UUID;
@@ -16,6 +17,8 @@ public interface TimeStorage extends AutoCloseable {
     void addTimes(Map<UUID, Long> additionalTimes) throws StorageException;
 
     Map<String, ?> getAllTimeEntries() throws StorageException;
+
+    void removeTimeHolder(UUID uniqueId) throws StorageException, SQLException;
 
     @Override
     void close() throws StorageException;

@@ -2,6 +2,7 @@ package com.jannik_kuehn.common.api.storage;
 
 import com.jannik_kuehn.common.exception.StorageException;
 
+import java.sql.SQLException;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -21,6 +22,8 @@ public interface NameStorage extends AutoCloseable {
     void setEntries(Map<UUID, String> entries) throws StorageException;
 
     Set<String> getNameEntries() throws StorageException;
+
+    void removeUser(UUID uuid) throws StorageException, SQLException;
 
     @Override
     void close() throws StorageException;

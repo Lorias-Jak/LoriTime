@@ -45,8 +45,12 @@ LoriTime provides a number of different commands that you can use. This page lis
     <td class="tg-9wq8">Adds or removes the time given in the time string</td>
   </tr>
   <tr>
-    <td class="tg-9wq8">/loritimeadmin [delete]</td>
-    <td class="tg-9wq8">Deletes all the time stored on a player</td>
+    <td class="tg-9wq8">/loritimeadmin [reset]</td>
+    <td class="tg-9wq8">Resets all the time stored on a player</td>
+  </tr>
+  <tr>
+    <td class="tg-9wq8">/loritimeadmin [deleteUser] [Playername] confirm</td>
+    <td class="tg-9wq8">Deletes the user entirely from LoriTime</td>
   </tr>
   <tr>
     <td class="tg-9wq8">/loritimeadmin [reload]</td>

@@ -3,6 +3,7 @@ package com.jannik_kuehn.loritimepaper.messenger;
 import com.jannik_kuehn.common.api.logger.LoriTimeLogger;
 import com.jannik_kuehn.common.api.scheduler.PluginTask;
 import com.jannik_kuehn.common.api.storage.TimeStorage;
+import com.jannik_kuehn.common.exception.StorageException;
 import com.jannik_kuehn.common.module.messaging.PluginMessaging;
 import com.jannik_kuehn.common.utils.UuidUtil;
 import com.jannik_kuehn.loritimepaper.LoriTimePaper;
@@ -12,11 +13,11 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.messaging.PluginMessageListener;
-import org.jetbrains.annotations.NotNull;
 
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.OptionalLong;
@@ -98,13 +99,18 @@ public class SlavedTimeStorageCache extends PluginMessaging implements TimeStora
     }
 
     @Override
+    public void removeTimeHolder(final UUID uniqueId) throws StorageException, SQLException {
+        trackedPlayers.remove(uniqueId.toString());
+    }
+
+    @Override
     public void close() {
         fetchTask.cancel();
     }
 
     @Override
     @SuppressWarnings("PMD.AvoidLiteralsInIfCondition")
-    public void onPluginMessageReceived(@NotNull final String channel, @NotNull final Player player, final byte @NotNull [] message) {
+    public void onPluginMessageReceived(final String channel, final Player player, final byte[] message) {
         if (SLAVED_TIME_STORAGE.equalsIgnoreCase(channel)) {
             log.debug("Received PluginMessage from " + player.getName() + " with channel " + channel);
             try (ByteArrayInputStream byteInputStream = new ByteArrayInputStream(message);

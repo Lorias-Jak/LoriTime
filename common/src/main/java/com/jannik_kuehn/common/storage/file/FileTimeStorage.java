@@ -76,6 +76,12 @@ public class FileTimeStorage implements TimeStorage {
     }
 
     @Override
+    public void removeTimeHolder(final UUID uniqueId) throws StorageException {
+        Objects.requireNonNull(uniqueId);
+        storageProvider.delete(uniqueId.toString());
+    }
+
+    @Override
     public void close() throws StorageException {
         storageProvider.close();
     }

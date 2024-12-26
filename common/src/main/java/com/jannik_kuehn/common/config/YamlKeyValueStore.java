@@ -150,5 +150,6 @@ public class YamlKeyValueStore implements KeyValueStore {
     @Override
     public void remove(final String key) {
         data.remove(key);
+        saveToFile();
     }
 }

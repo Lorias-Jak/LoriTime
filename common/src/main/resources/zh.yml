@@ -66,6 +66,11 @@ message:
       reset:
         usage: '<#A4A4A4>使用 <red>/onlinetimeadmin reset [玩家] <#A4A4A4>来重置一个玩家的在线时间。'
         success: '<#A4A4A4>玩家 <#50CBAB>[player] <#A4A4A4>的在线时间已重置。'
+      deleteUser:
+        usage: '<#A4A4A4>Use <red>/onlinetimeadmin delete [player] confirm <#A4A4A4>to delete a user entirely from the plugin.'
+        success: '<#A4A4A4>The player <#50CBAB>[player] <#A4A4A4>was <#50CBAB>successfully <#A4A4A4>deleted.'
+        issue: '<#FF3232>An issue occurred during the deletion.'
+        userOnline: '<#FF3232>You can not delete a user that is online.'
       reload:
         usage: '<#A4A4A4>使用 <red>/onlinetimeadmin reload <#A4A4A4>来重新加载这个插件。'
         success: '<#A4A4A4>您已 <#1AFA29>成功 <#A4A4A4>重新加载了这个插件。'

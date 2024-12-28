@@ -8,8 +8,9 @@ import com.jannik_kuehn.common.api.scheduler.PluginScheduler;
 import com.jannik_kuehn.common.api.storage.AccumulatingTimeStorage;
 import com.jannik_kuehn.common.api.storage.NameStorage;
 import com.jannik_kuehn.common.config.Configuration;
-import com.jannik_kuehn.common.config.YamlConfiguration;
+import com.jannik_kuehn.common.config.FileManager;
 import com.jannik_kuehn.common.config.localization.Localization;
+import com.jannik_kuehn.common.exception.ConfigurationException;
 import com.jannik_kuehn.common.exception.StorageException;
 import com.jannik_kuehn.common.module.afk.AfkHandling;
 import com.jannik_kuehn.common.module.afk.AfkStatusProvider;
@@ -17,52 +18,100 @@ import com.jannik_kuehn.common.module.updater.UpdateCheck;
 import com.jannik_kuehn.common.storage.DataStorageManager;
 import com.jannik_kuehn.common.utils.TimeParser;
 
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
-@SuppressWarnings({"PMD.CommentRequired", "PMD.AvoidDuplicateLiterals", "PMD.UseProperClassLoader",
+/**
+ * The {@link LoriTimePlugin} is the main class of the plugin.
+ */
+@SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.UseProperClassLoader",
         "PMD.ConfusingTernary", "PMD.LiteralsFirstInComparisons", "PMD.AssignmentToNonFinalStatic", "PMD.TooManyMethods"})
 public class LoriTimePlugin {
+    /**
+     * The {@link LoriTimePlugin} instance.
+     */
     private static LoriTimePlugin instance;
 
+    /**
+     * The {@link LoggerFactory} instance.
+     */
     private final LoggerFactory loggerFactory;
 
+    /**
+     * The {@link LoriTimeLogger} instance.
+     */
     private final LoriTimeLogger log;
 
+    /**
+     * The {@link CommonServer} instance.
+     */
     private final CommonServer server;
 
+    /**
+     * The {@link PluginScheduler} instance.
+     */
     private final PluginScheduler scheduler;
 
+    /**
+     * The data folder of the plugin.
+     */
     private final File dataFolder;
 
+    /**
+     * The {@link FileManager} instance.
+     */
+    private final FileManager fileManager;
+
+    /**
+     * The {@link DataStorageManager} instance.
+     */
     private final DataStorageManager dataStorageManager;
 
+    /**
+     * The {@link LoriTimePlayerConverter} instance.
+     */
     private final LoriTimePlayerConverter playerConverter;
 
+    /**
+     * The {@link Configuration} instance.
+     */
     private Configuration config;
 
+    /**
+     * The {@link Localization} instance.
+     */
     private Localization localization;
 
+    /**
+     * The {@link TimeParser} instance.
+     */
     private TimeParser parser;
 
+    /**
+     * The {@link AfkStatusProvider} instance.
+     */
     private AfkStatusProvider afkStatusProvider;
 
+    /**
+     * {@code true} if an error occurred and the plugin should be
+     */
     private boolean errorDisable;
 
+    /**
+     * The {@link UpdateCheck} instance.
+     */
     private UpdateCheck updateCheck;
 
+    /**
+     * Creates a new {@link LoriTimePlugin} instance.
+     *
+     * @param dataFolder  the {@link File} data folder where the plugin files will be.
+     * @param scheduler   the {@link PluginScheduler} instance.
+     * @param server      the {@link CommonServer} instance.
+     * @param loggerTopic the logger topic.
+     */
     public LoriTimePlugin(final File dataFolder, final PluginScheduler scheduler, final CommonServer server, final String loggerTopic) {
         instance = this;
         this.dataFolder = dataFolder;
@@ -73,14 +122,23 @@ public class LoriTimePlugin {
         this.loggerFactory = new LoggerFactory(this);
         this.log = loggerFactory.create(LoriTimePlugin.class, loggerTopic);
 
+        this.fileManager = new FileManager(loggerFactory, dataFolder);
         this.dataStorageManager = new DataStorageManager(this, dataFolder);
         this.playerConverter = new LoriTimePlayerConverter(loggerFactory, this);
     }
 
+    /**
+     * Getter of the {@link LoriTimePlugin} instance.
+     *
+     * @return the {@link LoriTimePlugin} instance.
+     */
     public static LoriTimePlugin getInstance() {
         return instance;
     }
 
+    /**
+     * Enables the plugin-Core.
+     */
     public void enable() {
         loadOrCreateConfigs();
         log.debug("Enabling LoriTime main class");
@@ -123,24 +181,45 @@ public class LoriTimePlugin {
         return serverMode;
     }
 
+    /**
+     * Enables the afk feature.
+     *
+     * @param afkHandling the {@link AfkHandling} to use.
+     */
     public void enableAfkFeature(final AfkHandling afkHandling) {
         afkStatusProvider = new AfkStatusProvider(this, afkHandling);
     }
 
+    /**
+     * Checks if the plugin is disabled due to an error.
+     *
+     * @return {@code true} if the plugin is disabled, otherwise {@code false}.
+     */
     public boolean isMultiSetupEnabled() {
         return config.getBoolean("multiSetup.enabled", false);
     }
 
+    /**
+     * Checks if the afk feature is enabled.
+     *
+     * @return {@code true} if the afk feature is enabled, otherwise {@code false}.
+     */
     public boolean isAfkEnabled() {
         return config.getBoolean("afk.enabled", false);
     }
 
+    /**
+     * Disables the plugin.
+     */
     public void disable() {
         updateCheck.stopCheck();
         dataStorageManager.disableCache();
         dataStorageManager.closeStorages();
     }
 
+    /**
+     * Reloads the plugin.
+     */
     public void reload() {
         updateCheck.stopCheck();
         config.reload();
@@ -166,8 +245,17 @@ public class LoriTimePlugin {
             }
         }
 
-        this.config = getOrCreateFile(dataFolder.toString(), "config.yml", true);
-        final Configuration localizationFile = getOrCreateFile(dataFolder.toString(), config.getString("general.language", "en") + ".yml", true);
+        final Configuration localizationFile;
+        try {
+            this.config = fileManager.getConfiguration(fileManager.getOrCreateFile(dataFolder.toString(), "config.yml", true));
+            localizationFile = fileManager.getConfiguration(fileManager.getOrCreateFile(dataFolder.toString(), config.getString("general.language", "en") + ".yml", true));
+            fileManager.startBackup();
+        } catch (final ConfigurationException e) {
+            log.error("An error occurred while loading the config file.", e);
+            errorDisable = true;
+            return;
+        }
+
         this.localization = new Localization(localizationFile);
 
         if (!config.isLoaded() || !localization.getLangFile().isLoaded()) {
@@ -190,130 +278,6 @@ public class LoriTimePlugin {
         }
     }
 
-    public Configuration getOrCreateFile(final String folder, final String fileName, final boolean needCopy) {
-        final File file = new File(folder, fileName);
-        boolean created = false;
-        if (!file.exists()) {
-            try {
-                created = file.createNewFile();
-                log.info("Creating new File '" + fileName + "'.");
-                if (needCopy) {
-                    copyDataFromResource(file.toPath(), fileName);
-                }
-            } catch (final IOException e) {
-                log.error("An exception occurred while creating the file '" + fileName + "' on startup.", e);
-            }
-        }
-
-        final Configuration configurationFile = new YamlConfiguration(file.toString());
-        if (!configurationFile.isLoaded()) {
-            log.error("An issue occurred while loading the file '" + fileName + "'. The File is null, there should be data.");
-            return null;
-        }
-
-        if (created) {
-            log.info("The file '" + fileName + "' was created successfully.");
-            logger.info("The file '" + fileName + "' was created successfully.");
-        } else {
-            // Aktualisiere die Konfiguration, indem fehlende Schlüssel ergänzt werden, ohne benutzerdefinierte Werte zu überschreiben
-            try {
-                updateConfigFromResource(file.getPath(), fileName);
-            } catch (final IOException e) {
-                logger.error("An error occurred while updating the configuration file '" + fileName + "'.", e);
-            }
-        }
-        log.info("Successfully loaded '" + fileName + "'.");
-
-        logger.info("Successfully loaded '" + fileName + "'.");
-        return configurationFile;
-    }
-
-    private void copyDataFromResource(final Path configFile, final String nameFromSourceOfReplacement) {
-        try {
-            Files.copy(this.getClass().getClassLoader().getResource(nameFromSourceOfReplacement).openStream(), configFile, StandardCopyOption.REPLACE_EXISTING);
-            logger.info("Successfully copied data from resource to '" + configFile.getFileName() + "'.");
-        } catch (final IOException e) {
-            log.error("Could not copy the file content to the file '" + nameFromSourceOfReplacement + "'. Pls delete the file and try again.", e);
-            logger.error("Could not copy the file content to the file '" + nameFromSourceOfReplacement + "'. Please delete the file and try again.", e);
-        }
-    }
-
-    private void updateConfigFromResource(final String oldConfigPath, final String resourceFileName) throws IOException {
-        final File oldConfigFile = new File(oldConfigPath);
-
-        // Schritt 1: Lese die alte Konfiguration und speichere die Key-Value-Paare in einer Map
-        final Map<String, Object> oldConfig = loadConfigToMap(oldConfigFile);
-
-        // Schritt 2: Lese die neue Konfiguration aus der Ressource zeilenweise
-        List<String> newConfigLines;
-        final Path tempFile = Files.createTempFile("temp", ".yml");
-        try (InputStream resourceStream = this.getClass().getClassLoader().getResourceAsStream(resourceFileName)) {
-            if (resourceStream == null) {
-                throw new IOException("Resource file '" + resourceFileName + "' not found.");
-            }
-            Files.copy(resourceStream, tempFile, StandardCopyOption.REPLACE_EXISTING);
-            newConfigLines = Files.readAllLines(tempFile);
-        } finally {
-            Files.deleteIfExists(tempFile);
-        }
-
-        // Schritt 3: Aktualisiere die neue Konfiguration, ohne benutzerdefinierte Werte zu überschreiben
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(oldConfigFile))) {
-            for (final String line : newConfigLines) {
-                final String trimmedLine = line.trim();
-
-                if (trimmedLine.isEmpty() || trimmedLine.startsWith("#")) {
-                    // Schreibe Kommentare und Leerzeilen unverändert
-                    writer.write(line);
-                } else if (trimmedLine.contains(":")) {
-                    // Splitte die Zeile in Key und (evtl.) Value
-                    final String[] keyValue = trimmedLine.split(":", 2);
-                    final String key = keyValue[0].trim();
-
-                    if (oldConfig.containsKey(key)) {
-                        // Behalte den benutzerdefinierten Wert bei
-                        writer.write(key + ": " + oldConfig.get(key));
-                    } else {
-                        // Schreibe den Standardwert aus der neuen Konfiguration
-                        writer.write(line);
-                    }
-                } else {
-                    // Schreibe Zeilen, die keinen Key-Value-Paar darstellen, unverändert
-                    writer.write(line);
-                }
-                writer.newLine();
-            }
-        }
-    }
-
-    private Map<String, Object> loadConfigToMap(final File configFile) throws IOException {
-        final Yaml yaml = new Yaml();
-        final Map<String, Object> configMap = new HashMap<>();
-
-        try (FileInputStream fis = new FileInputStream(configFile)) {
-            final Map<String, Object> yamlMap = yaml.load(fis);
-
-            if (yamlMap != null) {
-                flattenMap("", yamlMap, configMap);
-            }
-        }
-
-        return configMap;
-    }
-
-    @SuppressWarnings("unchecked")
-    private void flattenMap(final String prefix, final Map<String, Object> source, final Map<String, Object> target) {
-        for (final Map.Entry<String, Object> entry : source.entrySet()) {
-            final String key = prefix.isEmpty() ? entry.getKey() : prefix + "." + entry.getKey();
-
-            if (entry.getValue() instanceof Map) {
-                flattenMap(key, (Map<String, Object>) entry.getValue(), target);
-            } else {
-                target.put(key, entry.getValue());
-            }
-        }
-    }
-
     private String[] getUnits(final Localization langConfig, final String unit) {
         final String singular = langConfig.getRawMessage("unit." + unit + ".singular");
         final String plural = langConfig.getRawMessage("unit." + unit + ".plural");
@@ -332,50 +296,119 @@ public class LoriTimePlugin {
         return units.toArray(new String[0]);
     }
 
+    /**
+     * Getter of the {@link LoggerFactory}.
+     *
+     * @return the {@link LoggerFactory}.
+     */
     public LoggerFactory getLoggerFactory() {
         return loggerFactory;
     }
 
+    /**
+     * Getter of the {@link LoriTimeLogger}.
+     *
+     * @return the {@link LoriTimeLogger}.
+     */
     public PluginScheduler getScheduler() {
         return scheduler;
     }
 
+    /**
+     * Getter of the {@link LoriTimeLogger}.
+     *
+     * @return the {@link LoriTimeLogger}.
+     */
     public CommonServer getServer() {
         return server;
     }
 
+    /**
+     * Getter of the {@link LoriTimeLogger}.
+     *
+     * @return the {@link LoriTimeLogger}.
+     */
     public Configuration getConfig() {
         return config;
     }
 
+    /**
+     * Getter of the {@link Localization}.
+     *
+     * @return the {@link Localization}.
+     */
     public Localization getLocalization() {
         return localization;
     }
 
+    /**
+     * Getter of the {@link TimeParser}.
+     *
+     * @return the {@link TimeParser}.
+     */
     public TimeParser getParser() {
         return parser;
     }
 
+    /**
+     * Getter of the {@link NameStorage}.
+     *
+     * @return the {@link NameStorage}.
+     */
     public NameStorage getNameStorage() {
         return dataStorageManager.getNameStorage();
     }
 
+    /**
+     * Getter of the {@link AccumulatingTimeStorage}.
+     *
+     * @return the {@link AccumulatingTimeStorage}.
+     */
     public AccumulatingTimeStorage getTimeStorage() {
         return dataStorageManager.getTimeStorage();
     }
 
+    /**
+     * Getter of the {@link AfkStatusProvider}.
+     *
+     * @return the {@link AfkStatusProvider}.
+     */
     public AfkStatusProvider getAfkStatusProvider() {
         return afkStatusProvider;
     }
 
+    /**
+     * Getter of the {@link UpdateCheck}.
+     *
+     * @return the {@link UpdateCheck}.
+     */
     public UpdateCheck getUpdateCheck() {
         return updateCheck;
     }
 
+    /**
+     * Getter of the {@link FileManager}.
+     *
+     * @return the {@link FileManager}.
+     */
+    public FileManager getFileManager() {
+        return fileManager;
+    }
+
+    /**
+     * Getter of the {@link DataStorageManager}.
+     *
+     * @return the {@link DataStorageManager}.
+     */
     public DataStorageManager getDataStorageManager() {
         return dataStorageManager;
     }
 
+    /**
+     * Getter of the {@link LoriTimePlayerConverter}.
+     *
+     * @return the {@link LoriTimePlayerConverter}.
+     */
     public LoriTimePlayerConverter getPlayerConverter() {
         return playerConverter;
     }

@@ -2,6 +2,7 @@
 # General #
 ###########
 general:
+
   # If true, the plugin debugger will be enabled.
   # This will print out more information in the console.
   # Do not let this enabled, it will spam your console.
@@ -29,6 +30,13 @@ general:
   # In case you use the multi-setup this will only be checked on the master.
   # If you want to disable this feature, set this to false.
   checkForUpdates: true
+
+###########
+# Backups #
+###########
+backup:
+  enabled: true
+  maxBackups: 5
 
 ###########
 #  Mysql  #

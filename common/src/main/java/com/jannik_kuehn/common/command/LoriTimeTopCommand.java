@@ -10,6 +10,7 @@ import com.jannik_kuehn.common.utils.TimeUtil;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -112,7 +113,7 @@ public class LoriTimeTopCommand implements CommonCommand {
         }
 
         sender.sendMessage(localization.formatTextComponentWithoutPrefix(localization.getRawMessage("message.command.top.headline")
-                .replace("[dateAndTime]", LocalDate.now() + " " + LocalTime.now())
+                .replace("[dateAndTime]", LocalDate.now() + " " + LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss")))
                 .replace("[pages]", usedSite + " / " + amountOfMaxPages)
                 .replace("[totalTime]", TimeUtil.formatTime(totalTimeSum, localization))
         ));

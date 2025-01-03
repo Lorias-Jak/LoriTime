@@ -2,6 +2,7 @@
 # General #
 ###########
 general:
+
   # If true, the plugin debugger will be enabled.
   # This will print out more information in the console.
   # Do not let this enabled, it will spam your console.
@@ -29,6 +30,19 @@ general:
   # In case you use the multi-setup this will only be checked on the master.
   # If you want to disable this feature, set this to false.
   checkForUpdates: true
+
+###########
+# Backups #
+###########
+backup:
+
+  # If true, the plugin will create backups every time the config or language files got an update.
+  enabled: true
+
+  # The maximum number of backups that will be stored.
+  # If the number of backups exceeds this value, the oldest backup will be deleted.
+  # Set this to 0 to disable the deletion of old backups.
+  maxBackups: 5
 
 ###########
 #  Mysql  #
@@ -92,6 +106,7 @@ command:
       - 'loritimea'
   LoriTime:
     alias:
+      - 'ot'
       - 'lt'
       - 'loritime'
       - 'lorit'

@@ -6,6 +6,7 @@ import com.jannik_kuehn.common.api.scheduler.PluginTask;
 import com.jannik_kuehn.common.api.storage.AccumulatingTimeStorage;
 import com.jannik_kuehn.common.api.storage.NameStorage;
 import com.jannik_kuehn.common.config.Configuration;
+import com.jannik_kuehn.common.exception.ConfigurationException;
 import com.jannik_kuehn.common.exception.StorageException;
 import com.jannik_kuehn.common.storage.database.DatabaseStorage;
 import com.jannik_kuehn.common.storage.file.FileNameStorage;
@@ -191,12 +192,17 @@ public class DataStorageManager {
                 log.error("Exception while creating the data directory. Could not create data directory for saving player data!");
             }
         }
-
-        final Configuration nameFile = loriTime.getOrCreateFile(dataFolder + "/data/", "names.yml", false);
-        final Configuration timeFile = loriTime.getOrCreateFile(dataFolder + "/data/", "time.yml", false);
-        this.nameStorage = new FileNameStorage(new FileStorageProvider(nameFile));
-        this.timeStorage = new AccumulatingTimeStorage(loriTime.getLoggerFactory().create(AccumulatingTimeStorage.class),
-                new FileTimeStorage(new FileStorageProvider(timeFile)));
+        try {
+            final File nameFile = loriTime.getFileManager().getOrCreateFile(dataFolder + "/data/", "names.yml", false);
+            final File timeFile = loriTime.getFileManager().getOrCreateFile(dataFolder + "/data/", "time.yml", false);
+            final Configuration nameConfiguration = loriTime.getFileManager().getConfiguration(nameFile);
+            final Configuration timeConfiguration = loriTime.getFileManager().getConfiguration(timeFile);
+            this.nameStorage = new FileNameStorage(new FileStorageProvider(nameConfiguration));
+            this.timeStorage = new AccumulatingTimeStorage(loriTime.getLoggerFactory().create(AccumulatingTimeStorage.class),
+                    new FileTimeStorage(new FileStorageProvider(timeConfiguration)));
+        } catch (final ConfigurationException e) {
+            log.error("An exception occurred while loading the file storages", e);
+        }
     }
 
     @SuppressWarnings("PMD.CloseResource")

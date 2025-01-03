@@ -6,6 +6,10 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased] - ${maven.build.timestamp}
 ### Added
+- Auto updater for the plugin config and language file
+- Backup system for the plugin config and language file. New keys in the config file are automatically added to the backup file. The config will lose its style after the first automated config backup. This is a compromise to have an automated config update system.
+  - new key `backup.enabled` to enable or disable the backup system.
+  - new key `backup.maxBackups` to limit the amount of backups. Set to 0 to disable the backup limit.
 ### Changed
 ### Deprecated
 ### Removed

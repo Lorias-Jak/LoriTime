@@ -6,10 +6,11 @@ Guide
 - [Commands](https://github.com/Lorias-Jak/LoriTime/wiki/Commands)
 
 Documentation
-- [Compatibility](https://github.com/Lorias-Jak/LoriTime/wiki/Compatibility)
-- [Storage](https://github.com/Lorias-Jak/LoriTime/wiki/Storage)
-- [Localization](https://github.com/Lorias-Jak/LoriTime/wiki/Localization)
 - [AFK](https://github.com/Lorias-Jak/LoriTime/wiki/AFK)
-- [Placeholder](https://github.com/Lorias-Jak/LoriTime/wiki/Placeholder)
 - [API](https://github.com/Lorias-Jak/LoriTime/wiki/API)
+- [Backup](https://github.com/Lorias-Jak/LoriTime/wiki/Backup)
+- [Compatibility](https://github.com/Lorias-Jak/LoriTime/wiki/Compatibility)
+- [Localization](https://github.com/Lorias-Jak/LoriTime/wiki/Localization)
+- [Placeholder](https://github.com/Lorias-Jak/LoriTime/wiki/Placeholder)
+- [Storage](https://github.com/Lorias-Jak/LoriTime/wiki/Storage)
 

@@ -235,7 +235,7 @@
       <dependency>
         <groupId>com.zaxxer</groupId>
         <artifactId>HikariCP</artifactId>
-        <version>6.0.0</version>
+        <version>6.2.1</version>
         <scope>provided</scope>
       </dependency>
       <dependency>
@@ -525,7 +525,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-pmd-plugin</artifactId>
-          <version>3.25.0</version>
+          <version>3.26.0</version>
           <dependencies>
             <dependency>
               <groupId>net.sourceforge.pmd</groupId>
@@ -571,12 +571,12 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-checkstyle-plugin</artifactId>
-          <version>3.5.0</version>
+          <version>3.6.0</version>
           <dependencies>
             <dependency>
               <groupId>com.puppycrawl.tools</groupId>
               <artifactId>checkstyle</artifactId>
-              <version>10.18.2</version>
+              <version>10.21.1</version>
             </dependency>
             <dependency>
               <groupId>com.jannik_kuehn</groupId>
@@ -612,7 +612,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-javadoc-plugin</artifactId>
-          <version>3.10.1</version>
+          <version>3.11.2</version>
           <configuration>
             <failOnError>true</failOnError>
             <failOnWarnings>false</failOnWarnings>

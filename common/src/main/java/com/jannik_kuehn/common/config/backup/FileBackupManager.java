@@ -91,6 +91,7 @@ public class FileBackupManager {
         if (backupFiles.isEmpty() || !backupsEnabled) {
             return;
         }
+        log.info("Starting Backup Process...");
 
         final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH-mm-ss");
         final String currentDate = LocalDateTime.now().format(formatter);
@@ -105,6 +106,7 @@ public class FileBackupManager {
         }
         backupFiles.forEach(File::delete);
 
+        log.info("Backup process completed. Starting backup retention management...");
         manageBackupRetention();
     }
 
@@ -140,6 +142,7 @@ public class FileBackupManager {
      */
     public void manageBackupRetention() {
         if (!backupsEnabled || maxBackups <= 0) {
+            log.info("Either backups are disabled or the maximum number of backups is set to 0. Skipping backup retention management.");
             return;
         }
         final File[] backupFiles = backupDirectory.listFiles((dir, name) -> name.endsWith("Backup.zip"));
@@ -156,5 +159,6 @@ public class FileBackupManager {
                 log.error("An error occurred during the deletion of the Backup: " + backupFiles[i].getName());
             }
         }
+        log.info("Backup retention management completed.");
     }
 }

@@ -59,6 +59,9 @@ public class FileManager {
     }
 
     private Configuration tempLoadConfiguration() {
+        if (!dataFolder.exists() && !dataFolder.mkdirs()) {
+            log.error("An error occurred while creating the plugin folder.");
+        }
         Configuration tempConfig = null;
         File file = new File(dataFolder.toString(), "config.yml");
         try {
@@ -149,6 +152,7 @@ public class FileManager {
     private void createFile(final File file) throws ConfigurationException {
         try {
             file.createNewFile();
+            log.info("Created file '" + file.getName() + "'.");
         } catch (final IOException e) {
             throw new ConfigurationException("An exception occurred while creating the file '" + file.getName() + "' on startup.", e);
         }

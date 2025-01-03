@@ -44,7 +44,7 @@ public class UpdateCheck {
     /**
      * The current version of the plugin.
      */
-    private final String currentVersion;
+    private final Version currentVersion;
 
     /**
      * The task to check for updates.
@@ -54,7 +54,7 @@ public class UpdateCheck {
     /**
      * The new version of the plugin.
      */
-    private String newVersion;
+    private Version newVersion;
 
     /**
      * Is the newest Version a release version.
@@ -75,7 +75,7 @@ public class UpdateCheck {
         this.loriTime = loriTime;
         this.log = loriTime.getLoggerFactory().create(UpdateCheck.class);
         this.localization = loriTime.getLocalization();
-        this.currentVersion = loriTime.getServer().getPluginVersion();
+        this.currentVersion = new Version(loriTime.getServer().getPluginVersion());
     }
 
     /**
@@ -120,7 +120,7 @@ public class UpdateCheck {
             return;
         }
         final JsonObject latestVersionInfo = jsonArray.get(0).getAsJsonObject();
-        newVersion = latestVersionInfo.get("version_number").getAsString();
+        newVersion = new Version(latestVersionInfo.get("version_number").getAsString());
         isRelease = "release".equalsIgnoreCase(latestVersionInfo.get("version_type").getAsString());
 
         if (!hasUpdate(newVersion)) {
@@ -129,8 +129,8 @@ public class UpdateCheck {
         }
 
         sendUpdateNotificationToConsole(localization.getRawMessage("message.update.available")
-                .replace("[currentVersion]", currentVersion)
-                .replace("[newVersion]", newVersion)
+                .replace("[currentVersion]", currentVersion.getVersionString())
+                .replace("[newVersion]", newVersion.getVersionString())
                 .replace("[url]", "https://modrinth.com/plugin/loritime/changelog"));
     }
 
@@ -157,14 +157,15 @@ public class UpdateCheck {
     private TextComponent getMessage() {
         return localization.formatTextComponent(
                 localization.getRawMessage("message.update.available")
-                        .replace("[currentVersion]", currentVersion)
-                        .replace("[newVersion]", newVersion)
+                        .replace("[currentVersion]", currentVersion.getVersionString())
+                        .replace("[newVersion]", newVersion.getVersionString())
                         .replace("[url]", "https://modrinth.com/plugin/loritime/changelog")
         );
     }
 
-    private boolean hasUpdate(final String newVersion) {
-        return isRelease && VersionUtil.isNewerVersion(currentVersion, newVersion);
+    private boolean hasUpdate(final Version newVersion) {
+        final VersionComparator comp = new VersionComparator(Strategy.MINOR);
+        return isRelease && comp.isOtherNewerThanCurrent(currentVersion, newVersion);
     }
 
     private boolean hasPermission(final CommonSender sender) {

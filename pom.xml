@@ -367,6 +367,12 @@
                     <include>org/bstats/**</include>
                   </includes>
                 </filter>
+                <filter>
+                  <artifact>com.mysql</artifact>
+                  <includes>
+                    <include>com/mysql/cj/**</include>
+                  </includes>
+                </filter>
               </filters>
               <relocations>
                 <relocation>

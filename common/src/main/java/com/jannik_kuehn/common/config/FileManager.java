@@ -151,8 +151,9 @@ public class FileManager {
 
     private void createFile(final File file) throws ConfigurationException {
         try {
-            file.createNewFile();
-            log.info("Created file '" + file.getName() + "'.");
+            if (file.createNewFile()) {
+                log.info("Created file '" + file.getName() + "'.");
+            }
         } catch (final IOException e) {
             throw new ConfigurationException("An exception occurred while creating the file '" + file.getName() + "' on startup.", e);
         }

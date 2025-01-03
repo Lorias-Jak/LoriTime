@@ -79,7 +79,7 @@ public class FileBackupManager {
         try {
             Files.copy(fileToBackup.toPath(), new File(backupDirectory, fileToBackup.getName()).toPath(), StandardCopyOption.REPLACE_EXISTING);
         } catch (final IOException e) {
-            throw new ConfigurationException("Fehler beim Kopieren der Datei zum Backup-Verzeichnis.", e);
+            throw new ConfigurationException("Issue while copying file to backup directory.", e);
         }
         backupFiles.add(backupFile);
     }
@@ -89,7 +89,6 @@ public class FileBackupManager {
      */
     public void startBackup() {
         if (backupFiles.isEmpty() || !backupsEnabled) {
-            log.warn("Keine Dateien zum Backup hinzugefügt.");
             return;
         }
 
@@ -99,9 +98,9 @@ public class FileBackupManager {
 
         try {
             zipFiles(backupFile);
-            log.info("Backup erfolgreich erstellt: " + backupFile.getAbsolutePath());
+            log.info("Successfully created Backup: " + backupFile.getAbsolutePath());
         } catch (final IOException e) {
-            log.error("Fehler beim Erstellen des Backups.", e);
+            log.error("An error occurred while creating the backup.", e);
             return;
         }
         backupFiles.forEach(File::delete);
@@ -152,9 +151,9 @@ public class FileBackupManager {
 
         for (int i = 0; i < backupFiles.length - maxBackups; i++) {
             if (backupFiles[i].delete()) {
-                log.info("Backup-Datei gelöscht: " + backupFiles[i].getName());
+                log.info("Deleted backup: " + backupFiles[i].getName());
             } else {
-                log.error("Fehler beim Löschen der Backup-Datei: " + backupFiles[i].getName());
+                log.error("An error occurred during the deletion of the Backup: " + backupFiles[i].getName());
             }
         }
     }

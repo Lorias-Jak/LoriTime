@@ -14,6 +14,7 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Deprecated
 ### Removed
 ### Fixed
+- NullPointerException on LoriTimeBungee when the command `/lt <playerName>` is exectued via console.
 ### Security
 
 ## [1.6.0] - 2024-12-26

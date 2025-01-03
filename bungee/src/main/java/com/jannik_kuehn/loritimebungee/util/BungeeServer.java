@@ -35,7 +35,11 @@ public class BungeeServer implements CommonServer {
 
     @Override
     public Optional<CommonSender> getPlayer(final UUID uniqueId) {
-        return Optional.of(new BungeePlayer(proxyServer.getPlayer(uniqueId)));
+        final ProxiedPlayer player = proxyServer.getPlayer(uniqueId);
+        if (player == null) {
+            return Optional.empty();
+        }
+        return Optional.of(new BungeePlayer(player));
     }
 
     @Override

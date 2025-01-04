@@ -224,7 +224,9 @@ public class LoriTimePlugin {
         updateCheck.stopCheck();
         config.reload();
         localization.reloadTranslation();
-        afkStatusProvider.reloadConfigValues();
+        if (afkStatusProvider != null) {
+            afkStatusProvider.reloadConfigValues();
+        }
         updateCheck.startCheck();
 
         reloadMasteredFunctions();

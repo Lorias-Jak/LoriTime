@@ -7,7 +7,7 @@ import java.util.Map;
 /**
  * This interface is responsible for providing the versions of the plugin.
  */
-public interface ReleaseUpdateSource {
+public interface UpdateSource {
 
     /**
      * Returns a {@link Map} with the latest {@link Version} and the {@link String} download link.

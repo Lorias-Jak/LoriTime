@@ -1,4 +1,4 @@
-package com.jannik_kuehn.common.module.updater;
+package com.jannik_kuehn.common.module.updater.version;
 
 /**
  * The strategy for updating a version.

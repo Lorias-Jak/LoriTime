@@ -1,6 +1,7 @@
-package com.jannik_kuehn.common.module.updater;
+package com.jannik_kuehn.common.module.updater.version;
 
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
+
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

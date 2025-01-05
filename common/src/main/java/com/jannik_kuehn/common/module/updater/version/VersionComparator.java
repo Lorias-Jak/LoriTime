@@ -1,4 +1,4 @@
-package com.jannik_kuehn.common.module.updater;
+package com.jannik_kuehn.common.module.updater.version;
 
 import java.util.Arrays;
 import java.util.List;
@@ -7,10 +7,22 @@ import java.util.List;
  * Compares versions based on the chosen update strategy.
  */
 public class VersionComparator {
+    /**
+     * The chosen update strategy.
+     */
     private final Strategy updateStrategy;
 
+    /**
+     * List of qualifiers in prioritized order.
+     */
     private final List<String> qualifiers;
 
+    /**
+     * Creates a new {@link VersionComparator}.
+     *
+     * @param updateStrategy The chosen update strategy.
+     * @param qualifiers     The optional list of valid qualifiers in prioritized order (first entry has the highest priority).
+     */
     public VersionComparator(final Strategy updateStrategy, final String... qualifiers) {
         this.updateStrategy = updateStrategy;
         this.qualifiers = Arrays.stream(qualifiers).toList();
@@ -38,6 +50,13 @@ public class VersionComparator {
         return compareVersions(currentVersion, otherVersion) == 0;
     }
 
+    /**
+     * Checks if the other version is newer or equal than the current one.
+     *
+     * @param currentVersion The current {@link Version}.
+     * @param otherVersion   The other {@link Version}.
+     * @return {@code true} if the current {@link Version} is newer than the other {@link Version}, {@code false} otherwise.
+     */
     public boolean isCurrentNewerThanOther(final Version currentVersion, final Version otherVersion) {
         return compareVersions(currentVersion, otherVersion) > 0;
     }
@@ -49,6 +68,7 @@ public class VersionComparator {
      * @param otherVersion   the other {@link Version}.
      * @return 0 if equal, less than 0 if other is newer, more than 0 if current is newer.
      */
+    @SuppressWarnings({"PMD.NPathComplexity", "PMD.CyclomaticComplexity"})
     public int compareVersions(final Version currentVersion, final Version otherVersion) {
         if (currentVersion == null && otherVersion == null) {
             return 0;
@@ -90,6 +110,7 @@ public class VersionComparator {
         return compareByUpdateStrategy(majorVersion, minorVersion, patchVersion, buildNumber, qualifierNumber);
     }
 
+    @SuppressWarnings({"PMD.CyclomaticComplexity", "PMD.ImplicitSwitchFallThrough"})
     private int compareByUpdateStrategy(final int majorVersion, final int minorVersion, final int patchVersion,
                                         final int buildNumber, final int qualifierNumber) {
         switch (updateStrategy) {

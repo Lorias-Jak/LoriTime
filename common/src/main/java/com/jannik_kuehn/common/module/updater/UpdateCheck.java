@@ -8,6 +8,9 @@ import com.jannik_kuehn.common.api.common.CommonSender;
 import com.jannik_kuehn.common.api.logger.LoriTimeLogger;
 import com.jannik_kuehn.common.api.scheduler.PluginTask;
 import com.jannik_kuehn.common.config.localization.Localization;
+import com.jannik_kuehn.common.module.updater.version.Strategy;
+import com.jannik_kuehn.common.module.updater.version.Version;
+import com.jannik_kuehn.common.module.updater.version.VersionComparator;
 import net.kyori.adventure.text.TextComponent;
 
 import java.io.BufferedReader;

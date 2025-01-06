@@ -143,7 +143,7 @@ public class LoriTimePlugin {
         loadOrCreateConfigs();
         log.debug("Enabling LoriTime main class");
         server.setServerMode(getServerModeFromConfig());
-        updateCheck = new UpdateCheck(this);
+        setupUpdater();
 
         if (server.getServerMode().equalsIgnoreCase("master")) {
             enableAsMaster();
@@ -169,6 +169,12 @@ public class LoriTimePlugin {
 
         updateCheck.startCheck();
         dataStorageManager.startCache();
+    }
+
+    private void setupUpdater() {
+        if (!config.getBoolean("general.checkForUpdates", true)) {
+        }
+        // ToDo
     }
 
     private String getServerModeFromConfig() {

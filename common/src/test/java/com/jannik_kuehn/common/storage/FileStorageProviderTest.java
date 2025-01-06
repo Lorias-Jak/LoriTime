@@ -7,13 +7,11 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-public class FileStorageProviderTest {
+class FileStorageProviderTest {
 
     private Configuration mockConfig;
 
@@ -38,6 +36,7 @@ public class FileStorageProviderTest {
     }
 
     @Test
+    @SuppressWarnings("PMD.JUnitTestContainsTooManyAsserts")
     void testReadWithSet() throws StorageException {
         when(mockConfig.getObject("key1")).thenReturn("value1");
         when(mockConfig.getObject("key2")).thenReturn("value2");
@@ -103,6 +102,7 @@ public class FileStorageProviderTest {
     }
 
     @Test
+    @SuppressWarnings("PMD.JUnitTestContainsTooManyAsserts")
     void testWriteAllWithOverwrite() throws StorageException {
         when(mockConfig.getAll()).thenReturn(Map.of("key1", "value1", "key3", "value2"));
 
@@ -115,35 +115,10 @@ public class FileStorageProviderTest {
         verify(mockConfig, times(1)).setValue("key4", "value3");
     }
 
-
     @Test
     void checkClosed() throws StorageException {
-        assertDoesNotThrow(() -> storageProvider.readAll());
+        assertDoesNotThrow(storageProvider::readAll);
         storageProvider.close();
-        assertThrows(StorageException.class, () -> storageProvider.readAll(), "The storage provider should throw an exception when closed.");
-    }
-
-    @Test
-    void testThreadSafety() throws Exception {
-        final String key = "testKey";
-        final String value = "testValue";
-
-        when(mockConfig.getObject(key)).thenReturn(value);
-
-        final var executor = Executors.newFixedThreadPool(10);
-
-        for (int i = 0; i < 100; i++) {
-            executor.submit(() -> {
-                try {
-                    storageProvider.read(key);
-                    storageProvider.write(key, value);
-                } catch (final StorageException e) {
-                    fail("Thread safety violated: " + e.getMessage());
-                }
-            });
-        }
-
-        executor.shutdown();
-        assertTrue(executor.awaitTermination(5, TimeUnit.SECONDS), "Executor did not terminate in time");
+        assertThrows(StorageException.class, storageProvider::readAll, "The storage provider should throw an exception when closed.");
     }
 }

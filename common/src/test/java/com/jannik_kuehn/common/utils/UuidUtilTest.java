@@ -9,6 +9,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class UuidUtilTest {
 
     @Test
+    @SuppressWarnings("PMD.JUnitTestContainsTooManyAsserts")
     void testToBytesAndFromBytes() {
         final UUID originalUuid = UUID.randomUUID();
         final byte[] bytes = UuidUtil.toBytes(originalUuid);
@@ -22,7 +23,7 @@ class UuidUtilTest {
     void testFromBytesWithInvalidLength() {
         final byte[] invalidBytes = new byte[15];
         final Exception exception = assertThrows(IllegalArgumentException.class, () -> UuidUtil.fromBytes(invalidBytes));
-        assertEquals("Invalid byte array length for UUID: 15", exception.getMessage());
+        assertEquals("Invalid byte array length for UUID: 15", exception.getMessage(), "Exception message should match");
     }
 
     @Test

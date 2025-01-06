@@ -111,6 +111,11 @@ public class BungeeServer implements CommonServer {
     }
 
     @Override
+    public String getPluginJarName() {
+        return "LoriTimeBungee.jar";
+    }
+
+    @Override
     public Logger getJavaLogger() {
         return bungeeLogger;
     }

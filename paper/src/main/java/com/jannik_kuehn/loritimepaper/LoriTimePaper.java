@@ -13,10 +13,10 @@ import com.jannik_kuehn.common.command.LoriTimeTopCommand;
 import com.jannik_kuehn.common.module.afk.MasteredAfkPlayerHandling;
 import com.jannik_kuehn.loritimepaper.afk.PaperSlavedAfkHandling;
 import com.jannik_kuehn.loritimepaper.command.PaperCommand;
+import com.jannik_kuehn.loritimepaper.listener.LoriTimeUpdatePaperListener;
 import com.jannik_kuehn.loritimepaper.listener.PaperPlayerAfkListener;
 import com.jannik_kuehn.loritimepaper.listener.PlayerNamePaperListener;
 import com.jannik_kuehn.loritimepaper.listener.TimeAccumulatorPaperListener;
-import com.jannik_kuehn.loritimepaper.listener.UpdateNotificationPaperListener;
 import com.jannik_kuehn.loritimepaper.messenger.PaperPluginMessenger;
 import com.jannik_kuehn.loritimepaper.messenger.SlavedTimeStorageCache;
 import com.jannik_kuehn.loritimepaper.placeholder.LoriTimePlaceholder;
@@ -63,7 +63,6 @@ public class LoriTimePaper extends JavaPlugin {
     private void enableAsMaster() {
         Bukkit.getPluginManager().registerEvents(new PlayerNamePaperListener(loriTimePlugin), this);
         Bukkit.getPluginManager().registerEvents(new TimeAccumulatorPaperListener(loriTimePlugin), this);
-        Bukkit.getPluginManager().registerEvents(new UpdateNotificationPaperListener(loriTimePlugin), this);
 
         if (loriTimePlugin.isAfkEnabled()) {
             loriTimePlugin.enableAfkFeature(new MasteredAfkPlayerHandling(loriTimePlugin));
@@ -98,6 +97,8 @@ public class LoriTimePaper extends JavaPlugin {
 
     @SuppressWarnings("PMD.UseUnderscoresInNumericLiterals")
     private void enableRemainingFeatures() {
+        Bukkit.getPluginManager().registerEvents(new LoriTimeUpdatePaperListener(loriTimePlugin), this);
+
         if (loriTimePlugin.isAfkEnabled()) {
             Bukkit.getPluginManager().registerEvents(new PaperPlayerAfkListener(loriTimePlugin), this);
             new PaperCommand(this, new LoriTimeAfkCommand(loriTimePlugin, loriTimePlugin.getLocalization()));

@@ -34,6 +34,13 @@ public class JavaUtilLoggerAdapter implements LoriTimeLogger {
     }
 
     @Override
+    public void debug(final String msg, final Throwable thrown) {
+        if (LoriTimePlugin.getInstance().getConfig().getBoolean("general.debug", false)) {
+            logger.log(Level.INFO, msg, thrown);
+        }
+    }
+
+    @Override
     public void info(final String msg) {
         logger.log(Level.INFO, msg);
     }

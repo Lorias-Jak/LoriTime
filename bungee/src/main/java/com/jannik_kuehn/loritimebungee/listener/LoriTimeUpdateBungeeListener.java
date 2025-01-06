@@ -11,7 +11,7 @@ import net.md_5.bungee.event.EventHandler;
 /**
  * A listener for sending update notifications to players when they join the server.
  */
-public class UpdateNotificationBungeeListener implements Listener {
+public class LoriTimeUpdateBungeeListener implements Listener {
     /**
      * The {@link LoriTimePlugin} instance.
      */
@@ -23,12 +23,12 @@ public class UpdateNotificationBungeeListener implements Listener {
     private final BungeeAudiences bungeeAudiences;
 
     /**
-     * Creates a new {@link UpdateNotificationBungeeListener} instance.
+     * Creates a new {@link LoriTimeUpdateBungeeListener} instance.
      *
      * @param loriTime        The {@link LoriTimePlugin} instance.
      * @param bungeeAudiences The {@link BungeeAudiences} instance.
      */
-    public UpdateNotificationBungeeListener(final LoriTimePlugin loriTime, final BungeeAudiences bungeeAudiences) {
+    public LoriTimeUpdateBungeeListener(final LoriTimePlugin loriTime, final BungeeAudiences bungeeAudiences) {
         this.loriTime = loriTime;
         this.bungeeAudiences = bungeeAudiences;
     }
@@ -42,6 +42,7 @@ public class UpdateNotificationBungeeListener implements Listener {
     @EventHandler
     public void onPostLogin(final PostLoginEvent event) {
         final CommonSender sender = new BungeeSender(bungeeAudiences, event.getPlayer());
-        loriTime.getScheduler().runAsyncOnceLater(1L, () -> loriTime.getUpdateCheck().sendUpdateNotification(sender));
+        // ToDo
+//        loriTime.getScheduler().runAsyncOnceLater(1L, () -> loriTime.getUpdateCheck().sendUpdateNotification(sender));
     }
 }

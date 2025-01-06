@@ -94,7 +94,6 @@ public class LoriTimeTopCommand implements CommonCommand {
         final int maxValue;
         final int usedSite;
         if (site * 8 > amountOfPlayers && site < amountOfMaxPages) {
-
             usedSite = 1;
             minValue = 0;
             maxValue = amountOfPlayers;

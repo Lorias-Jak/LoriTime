@@ -10,9 +10,9 @@ import com.jannik_kuehn.common.command.LoriTimeInfoCommand;
 import com.jannik_kuehn.common.command.LoriTimeTopCommand;
 import com.jannik_kuehn.common.module.afk.MasteredAfkPlayerHandling;
 import com.jannik_kuehn.loritimebungee.command.BungeeCommand;
+import com.jannik_kuehn.loritimebungee.listener.LoriTimeUpdateBungeeListener;
 import com.jannik_kuehn.loritimebungee.listener.PlayerNameBungeeListener;
 import com.jannik_kuehn.loritimebungee.listener.TimeAccumulatorBungeeListener;
-import com.jannik_kuehn.loritimebungee.listener.UpdateNotificationBungeeListener;
 import com.jannik_kuehn.loritimebungee.schedule.BungeeScheduleAdapter;
 import com.jannik_kuehn.loritimebungee.util.BungeeMetrics;
 import com.jannik_kuehn.loritimebungee.util.BungeeServer;
@@ -58,7 +58,7 @@ public class LoriTimeBungee extends Plugin {
         final PluginManager pluginManager = getProxy().getPluginManager();
         pluginManager.registerListener(this, new PlayerNameBungeeListener(loriTimePlugin));
         pluginManager.registerListener(this, new TimeAccumulatorBungeeListener(loriTimePlugin));
-        pluginManager.registerListener(this, new UpdateNotificationBungeeListener(loriTimePlugin, audiences));
+        pluginManager.registerListener(this, new LoriTimeUpdateBungeeListener(loriTimePlugin, audiences));
 
         new BungeeCommand(this, audiences, new LoriTimeAdminCommand(loriTimePlugin, loriTimePlugin.getLocalization(),
                 loriTimePlugin.getParser()));

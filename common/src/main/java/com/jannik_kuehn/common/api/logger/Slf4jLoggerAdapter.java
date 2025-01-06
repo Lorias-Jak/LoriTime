@@ -39,6 +39,13 @@ public class Slf4jLoggerAdapter implements LoriTimeLogger {
             logger.info(EMPTY_FORMAT, topic, msg);
         }
     }
+    
+    @Override
+    public void debug(final String msg, final Throwable thrown) {
+        if (LoriTimePlugin.getInstance().getConfig().getBoolean("general.debug", false)) {
+            logger.info(EMPTY_FORMAT, topic, msg, thrown);
+        }
+    }
 
     @Override
     public void info(final String msg) {

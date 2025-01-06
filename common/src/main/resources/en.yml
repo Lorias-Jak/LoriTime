@@ -92,8 +92,15 @@ message:
     resumeAnnounce: '<#50CBAB>[player] <#A4A4A4>is no longer AFK.'
     afkSelf: '<#A4A4A4>You are now AFK.'
     afkResume: '<#A4A4A4>You are no longer AFK.'
-  update:
+  updater:
+    startUpdate: '<#A4A4A4>Started update process. Searching for a newer version than currently found.'
     available: |
       <#A4A4A4>An update is available for the plugin.
       Current version: <#50CBAB>[currentVersion]<#A4A4A4> | new Version: <#50CBAB>[newVersion]
-      <#A4A4A4>You can download it at: <#50CBAB>[url]
+    disabled: '<#FF3232>The update check is disabled. Please enable it to check for updates.'
+    newerVersionFound: |
+      <#FF3232>Aborted...
+      <#A4A4A4>A newer version is available. New version <#50CBAB>[newVersion]<#A4A4A4>. Please restart to apply the update.
+    alreadyDownloaded: '<#FF3232>The update has already been downloaded. Please restart the server to apply the update.'
+    notFound: '<#FF3232>No update was found.'
+    updateSuccess: '<#1AFA29>Updated successfuly to version: [newVersion]. <#A4A4A4>Restart the server to apply the update.'

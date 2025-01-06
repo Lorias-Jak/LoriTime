@@ -10,18 +10,18 @@ import org.bukkit.event.player.PlayerJoinEvent;
 /**
  * A listener for sending update notifications to players when they join the server.
  */
-public class UpdateNotificationPaperListener implements Listener {
+public class LoriTimeUpdatePaperListener implements Listener {
     /**
      * The {@link LoriTimePlugin} instance.
      */
     private final LoriTimePlugin loriTime;
 
     /**
-     * Creates a new {@link UpdateNotificationPaperListener} instance.
+     * Creates a new {@link LoriTimeUpdatePaperListener} instance.
      *
      * @param loriTime The {@link LoriTimePlugin} instance.
      */
-    public UpdateNotificationPaperListener(final LoriTimePlugin loriTime) {
+    public LoriTimeUpdatePaperListener(final LoriTimePlugin loriTime) {
         this.loriTime = loriTime;
     }
 
@@ -34,6 +34,7 @@ public class UpdateNotificationPaperListener implements Listener {
     @EventHandler
     public void onPlayerJoin(final PlayerJoinEvent event) {
         final CommonSender sender = new PaperPlayer(event.getPlayer());
-        loriTime.getScheduler().runAsyncOnceLater(1L, () -> loriTime.getUpdateCheck().sendUpdateNotification(sender));
+        //ToDo
+//        loriTime.getScheduler().runAsyncOnceLater(1L, () -> loriTime.getUpdateCheck().sendUpdateNotification(sender));
     }
 }

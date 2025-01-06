@@ -113,6 +113,11 @@ public class PaperServer implements CommonServer {
     }
 
     @Override
+    public String getPluginJarName() {
+        return "LoriTimePaper.jar";
+    }
+
+    @Override
     public java.util.logging.Logger getJavaLogger() {
         return null;
     }

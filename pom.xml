@@ -121,7 +121,7 @@
       <dependency>
         <groupId>com.google.guava</groupId>
         <artifactId>guava</artifactId>
-        <version>33.3.1-jre</version>
+        <version>33.4.0-jre</version>
         <scope>provided</scope>
       </dependency>
 
@@ -210,7 +210,7 @@
       <dependency>
         <groupId>net.kyori</groupId>
         <artifactId>adventure-text-minimessage</artifactId>
-        <version>4.17.0</version>
+        <version>4.18.0</version>
         <scope>provided</scope>
       </dependency>
       <dependency>
@@ -247,7 +247,7 @@
       <dependency>
         <groupId>org.json</groupId>
         <artifactId>json</artifactId>
-        <version>20240303</version>
+        <version>20241224</version>
         <scope>provided</scope>
       </dependency>
       <dependency>
@@ -262,7 +262,18 @@
         <version>2.3</version>
         <scope>provided</scope>
       </dependency>
-
+      <dependency>
+        <groupId>org.apache.maven</groupId>
+        <artifactId>maven-artifact</artifactId>
+        <version>4.0.0-beta-3</version>
+        <scope>provided</scope>
+        <exclusions>
+          <exclusion>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+          </exclusion>
+        </exclusions>
+      </dependency>
     </dependencies>
   </dependencyManagement>
 
@@ -378,6 +389,10 @@
                 <relocation>
                   <pattern>org.apache.commons.lang3</pattern>
                   <shadedPattern>${project.groupId}.dependencies.org.apache.commons.lang3</shadedPattern>
+                </relocation>
+                <relocation>
+                  <pattern>org.apache.maven</pattern>
+                  <shadedPattern>${project.groupId}.dependencies.org.apache.maven</shadedPattern>
                 </relocation>
                 <relocation>
                   <pattern>com.zaxxer.hikari</pattern>
@@ -662,12 +677,12 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-project-info-reports-plugin</artifactId>
-          <version>3.7.0</version>
+          <version>3.8.0</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-jxr-plugin</artifactId>
-          <version>3.5.0</version>
+          <version>3.6.0</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>

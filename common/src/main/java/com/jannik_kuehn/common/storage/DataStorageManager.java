@@ -11,7 +11,6 @@ import com.jannik_kuehn.common.exception.StorageException;
 import com.jannik_kuehn.common.storage.database.DatabaseStorage;
 import com.jannik_kuehn.common.storage.file.FileNameStorage;
 import com.jannik_kuehn.common.storage.file.FileTimeStorage;
-import com.jannik_kuehn.common.utils.FileStorageProvider;
 
 import java.io.File;
 import java.util.Locale;

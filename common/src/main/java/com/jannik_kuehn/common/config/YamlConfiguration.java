@@ -86,7 +86,7 @@ public class YamlConfiguration extends Configuration {
     }
 
     @Override
-    public Map<String, ?> getAll() {
+    public Map<String, Object> getAll() {
         return keyValueStore.getAll();
     }
 

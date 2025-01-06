@@ -10,7 +10,7 @@ public interface FileStorage extends AutoCloseable {
 
     Object read(String path) throws StorageException;
 
-    Map<String, ?> read(Set<String> paths) throws StorageException;
+    Map<String, Object> read(Set<String> paths) throws StorageException;
 
     void write(String path, Object data) throws StorageException;
 

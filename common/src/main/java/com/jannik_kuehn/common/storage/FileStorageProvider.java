@@ -1,4 +1,4 @@
-package com.jannik_kuehn.common.utils;
+package com.jannik_kuehn.common.storage;
 
 import com.jannik_kuehn.common.api.storage.FileStorage;
 import com.jannik_kuehn.common.config.Configuration;
@@ -56,7 +56,7 @@ public class FileStorageProvider implements FileStorage {
     }
 
     @Override
-    public Map<String, ?> read(final Set<String> paths) throws StorageException {
+    public Map<String, Object> read(final Set<String> paths) throws StorageException {
         Objects.requireNonNull(paths);
         checkClosed();
         rwLock.readLock().lock();
@@ -98,7 +98,7 @@ public class FileStorageProvider implements FileStorage {
         rwLock.writeLock().lock();
         String sameKey = null;
         try {
-            final Map<String, Object> all = (Map<String, Object>) storage.getAll();
+            final Map<String, Object> all = storage.getAll();
             for (final Map.Entry<String, Object> entry : all.entrySet()) {
                 if (entry.getValue().equals(data)) {
                     sameKey = entry.getKey();
@@ -133,8 +133,29 @@ public class FileStorageProvider implements FileStorage {
 
     @Override
     public void writeAll(final Map<String, ?> data, final boolean overwrite) throws StorageException {
-        // ToDo Was ist hier los?
-        // Empty
+        Objects.requireNonNull(data, "Data map must not be null");
+        checkClosed();
+        rwLock.writeLock().lock();
+        try {
+            checkClosed();
+            for (final Map.Entry<String, ?> entry : data.entrySet()) {
+                final String key = entry.getKey();
+                final Object value = entry.getValue();
+
+                if (overwrite) {
+                    final Map<String, Object> all = storage.getAll();
+                    for (final Map.Entry<String, Object> existingEntry : all.entrySet()) {
+                        if (existingEntry.getValue().equals(value)) {
+                            storage.remove(existingEntry.getKey());
+                        }
+                    }
+                }
+
+                storage.setValue(key, value); // Schreibe den neuen Wert
+            }
+        } finally {
+            rwLock.writeLock().unlock();
+        }
     }
 
     @Override
@@ -153,7 +174,7 @@ public class FileStorageProvider implements FileStorage {
     }
 
     @Override
-    public Map<String, ?> readAll() throws StorageException {
+    public Map<String, Object> readAll() throws StorageException {
         checkClosed();
         rwLock.readLock().lock();
         try {
@@ -166,7 +187,7 @@ public class FileStorageProvider implements FileStorage {
 
     private void checkClosed() throws StorageException {
         if (closed.get()) {
-            throw new StorageException("closed");
+            throw new StorageException("Storage is already closed!");
         }
     }
 

@@ -14,7 +14,7 @@ public interface KeyValueStore {
 
     Object get(String key, Object defaultValue);
 
-    Map<String, ?> getAll();
+    Map<String, Object> getAll();
 
     List<String> getKeys();
 

@@ -41,7 +41,7 @@ public abstract class Configuration {
 
     public abstract boolean isLoaded();
 
-    public abstract Map<String, ?> getAll();
+    public abstract Map<String, Object> getAll();
 
     public abstract void reload();
 

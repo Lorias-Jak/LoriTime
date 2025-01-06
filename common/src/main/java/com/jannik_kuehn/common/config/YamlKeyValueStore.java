@@ -66,7 +66,7 @@ public class YamlKeyValueStore implements KeyValueStore {
     }
 
     @Override
-    public Map<String, ?> getAll() {
+    public Map<String, Object> getAll() {
         return data;
     }
 

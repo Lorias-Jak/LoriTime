@@ -110,6 +110,11 @@ public class VelocityServer implements CommonServer {
     }
 
     @Override
+    public String getPluginJarName() {
+        return "LoriTimeVelocity.jar";
+    }
+
+    @Override
     public java.util.logging.Logger getJavaLogger() {
         return null;
     }

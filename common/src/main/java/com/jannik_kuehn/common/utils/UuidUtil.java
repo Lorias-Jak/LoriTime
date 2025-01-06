@@ -1,15 +1,18 @@
 package com.jannik_kuehn.common.utils;
 
+import java.nio.ByteBuffer;
 import java.util.UUID;
 
 /**
  * Utility class for converting UUIDs to byte arrays and vice versa.
  */
 public final class UuidUtil {
+    /**
+     * The length of a UUID in bytes.
+     */
+    private static final int UUID_BYTE_LENGTH = 16;
 
-    // Privater Konstruktor, um die Instanziierung zu verhindern
     private UuidUtil() {
-        throw new UnsupportedOperationException("This is a utility class and cannot be instantiated");
     }
 
     /**
@@ -19,18 +22,10 @@ public final class UuidUtil {
      * @return the byte array
      */
     public static byte[] toBytes(final UUID uuid) {
-        final byte[] result = new byte[16];
-        long lsb = uuid.getLeastSignificantBits();
-        for (int i = 15; i >= 8; i--) {
-            result[i] = (byte) (lsb & 0xffL);
-            lsb >>= 8;
-        }
-        long msb = uuid.getMostSignificantBits();
-        for (int i = 7; i >= 0; i--) {
-            result[i] = (byte) (msb & 0xffL);
-            msb >>= 8;
-        }
-        return result;
+        final ByteBuffer buffer = ByteBuffer.allocate(16);
+        buffer.putLong(uuid.getMostSignificantBits());
+        buffer.putLong(uuid.getLeastSignificantBits());
+        return buffer.array();
     }
 
     /**
@@ -38,18 +33,15 @@ public final class UuidUtil {
      *
      * @param bytes the byte array to convert
      * @return the UUID
+     * @throws IllegalArgumentException if the byte array is not 16 bytes long
      */
     public static UUID fromBytes(final byte[] bytes) {
-        long msb = 0;
-        for (int i = 0; i < 8; i++) {
-            msb <<= 8L;
-            msb |= Byte.toUnsignedLong(bytes[i]);
+        if (bytes.length != UUID_BYTE_LENGTH) {
+            throw new IllegalArgumentException("Invalid byte array length for UUID: " + bytes.length);
         }
-        long lsb = 0;
-        for (int i = 8; i < 16; i++) {
-            lsb <<= 8L;
-            lsb |= Byte.toUnsignedLong(bytes[i]);
-        }
+        final ByteBuffer buffer = ByteBuffer.wrap(bytes);
+        final long msb = buffer.getLong();
+        final long lsb = buffer.getLong();
         return new UUID(msb, lsb);
     }
 }

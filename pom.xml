@@ -150,7 +150,7 @@
       <dependency>
         <groupId>org.mockito</groupId>
         <artifactId>mockito-bom</artifactId>
-        <version>5.14.2</version>
+        <version>5.15.2</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -247,7 +247,7 @@
       <dependency>
         <groupId>org.json</groupId>
         <artifactId>json</artifactId>
-        <version>20241224</version>
+        <version>20250107</version>
         <scope>provided</scope>
       </dependency>
       <dependency>
@@ -265,7 +265,7 @@
       <dependency>
         <groupId>org.apache.maven</groupId>
         <artifactId>maven-artifact</artifactId>
-        <version>4.0.0-beta-3</version>
+        <version>4.0.0-rc-2</version>
         <scope>provided</scope>
         <exclusions>
           <exclusion>
@@ -649,7 +649,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-surefire-plugin</artifactId>
-          <version>3.5.1</version>
+          <version>3.5.2</version>
           <configuration>
             <parallel>all</parallel>
           </configuration>
@@ -687,7 +687,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-surefire-report-plugin</artifactId>
-          <version>3.5.1</version>
+          <version>3.5.2</version>
         </plugin>
         <plugin>
           <groupId>org.codehaus.mojo</groupId>

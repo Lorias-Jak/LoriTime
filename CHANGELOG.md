@@ -11,6 +11,7 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   - new key `backup.enabled` to enable or disable the backup system.
   - new key `backup.maxBackups` to limit the amount of backups. Set to 0 to disable the backup limit.
 ### Changed
+- Updated multiple dependencies
 ### Deprecated
 ### Removed
 ### Fixed

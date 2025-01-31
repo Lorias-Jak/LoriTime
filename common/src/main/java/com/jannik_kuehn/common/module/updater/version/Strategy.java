@@ -22,19 +22,31 @@ public enum Strategy {
      */
     PATCH();
 
+    /**
+     * Returns the strategy from a string.
+     *
+     * @param strategy The string representation of the strategy.
+     * @return The strategy.
+     */
     public static Strategy getFromString(final String strategy) {
         try {
             return Strategy.valueOf(strategy);
-        } catch (IllegalArgumentException e) {
-            throw new UpdateException("The strategy " + strategy + " is not valid.");
+        } catch (final IllegalArgumentException e) {
+            throw new UpdateException("The strategy " + strategy + " is not valid.", e);
         }
     }
 
+    /**
+     * Checks if a strategy exists.
+     *
+     * @param strategy The strategy to check.
+     * @return {@code true} if the strategy exists, otherwise {@code false}.
+     */
     public static boolean doesStrategyExists(final String strategy) {
         try {
             Strategy.valueOf(strategy);
             return true;
-        } catch (IllegalArgumentException e) {
+        } catch (final IllegalArgumentException e) {
             return false;
         }
     }

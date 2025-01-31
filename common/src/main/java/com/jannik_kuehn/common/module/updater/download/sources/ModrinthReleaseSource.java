@@ -12,28 +12,43 @@ import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * This class is responsible for providing the versions of the plugin from Modrinth.
+ */
 public class ModrinthReleaseSource implements ReleaseUpdateSource {
 
+    /**
+     * The API URL of the Modrinth project.
+     */
     private final String apiUrl;
 
+    /**
+     * The name of the jar file.
+     */
     private final String jarFileName;
 
-    public ModrinthReleaseSource(String apiUrl, final String jarFileName) {
+    /**
+     * Creates a new instance of the {@link ModrinthReleaseSource}.
+     *
+     * @param apiUrl      The API URL of the Modrinth project
+     * @param jarFileName The name of the jar file
+     */
+    public ModrinthReleaseSource(final String apiUrl, final String jarFileName) {
         this.apiUrl = apiUrl;
         this.jarFileName = jarFileName;
     }
 
     @Override
-    public Map<Version, String> getReleaseVersions(Version currentVersion) throws IOException {
+    public Map<Version, String> getReleaseVersions(final Version currentVersion) throws IOException {
         final Map<Version, String> releaseVersions = new HashMap<>();
         final JsonArray releaseArray = new Gson().fromJson(new DownloadSource().getFromUrl(URI.create(apiUrl).toURL()), JsonArray.class);
-        for (JsonElement release : releaseArray) {
+        for (final JsonElement release : releaseArray) {
             final JsonObject releaseObject = release.getAsJsonObject();
             final Version version = new Version(releaseObject.get("version_number").getAsString());
             final JsonArray assets = releaseObject.getAsJsonArray("files");
-            for (JsonElement asset : assets) {
-                JsonObject assetObject = asset.getAsJsonObject();
-                String assetName = assetObject.get("filename").getAsString();
+            for (final JsonElement asset : assets) {
+                final JsonObject assetObject = asset.getAsJsonObject();
+                final String assetName = assetObject.get("filename").getAsString();
                 if (assetName.equalsIgnoreCase(jarFileName)) {
                     final String downloadURL = assetObject.get("url").getAsString();
                     releaseVersions.put(version, downloadURL);

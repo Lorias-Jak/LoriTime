@@ -35,7 +35,8 @@ import java.util.Set;
  * The {@link LoriTimePlugin} is the main class of the plugin.
  */
 @SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.UseProperClassLoader",
-        "PMD.ConfusingTernary", "PMD.LiteralsFirstInComparisons", "PMD.AssignmentToNonFinalStatic", "PMD.TooManyMethods"})
+        "PMD.ConfusingTernary", "PMD.LiteralsFirstInComparisons", "PMD.AssignmentToNonFinalStatic", "PMD.TooManyMethods",
+        "PMD.CouplingBetweenObjects"})
 public class LoriTimePlugin {
     /**
      * The {@link LoriTimePlugin} instance.
@@ -101,6 +102,11 @@ public class LoriTimePlugin {
      * The {@link AfkStatusProvider} instance.
      */
     private AfkStatusProvider afkStatusProvider;
+
+    /**
+     * The {@link Updater} instance.
+     */
+    private Updater updater;
 
     /**
      * {@code true} if an error occurred and the plugin should be
@@ -175,15 +181,16 @@ public class LoriTimePlugin {
 
     private void setupUpdater() {
         if (config.getBoolean("updater.checkForUpdates", true)) {
-            List<DevUpdateSource> devSource = List.of();
-            ReleaseUpdateSource modrinthSource = new ModrinthReleaseSource("https://api.modrinth.com/v2/project/loritime/version", server.getPluginJarName());
-            ReleaseUpdateSource gitHubReleaseSource = new GitHubReleaseSource("https://api.github.com/repos/lorias-jak/loritime", server.getPluginJarName());
-            List<ReleaseUpdateSource> releaseSource = List.of(gitHubReleaseSource, modrinthSource);
+            final List<DevUpdateSource> devSource = List.of();
+            final ReleaseUpdateSource modrinthSource = new ModrinthReleaseSource("https://api.modrinth.com/v2/project/loritime/version", server.getPluginJarName());
+            final ReleaseUpdateSource gitHubReleaseSource = new GitHubReleaseSource("https://api.github.com/repos/lorias-jak/loritime", server.getPluginJarName());
+            final List<ReleaseUpdateSource> releaseSource = List.of(gitHubReleaseSource, modrinthSource);
 
-            UpdateSourceHandler updateSourceHandler = new UpdateSourceHandler(loggerFactory.create(UpdateSourceHandler.class),
+            final UpdateSourceHandler updateSourceHandler = new UpdateSourceHandler(loggerFactory.create(UpdateSourceHandler.class),
                     releaseSource, devSource);
-            new Updater(loggerFactory.create(Updater.class), new Version(server.getPluginVersion()), updateSourceHandler,
-                    this, InstantSource.system(), new Downloader(new File(dataFolder.toString() + "/updates"))).search();
+            updater = new Updater(loggerFactory.create(Updater.class), new Version(server.getPluginVersion()), updateSourceHandler,
+                    this, InstantSource.system(), new Downloader(new File(dataFolder.getParentFile().toString() + "/update")));
+            updater.search();
         }
     }
 
@@ -417,5 +424,9 @@ public class LoriTimePlugin {
      */
     public LoriTimePlayerConverter getPlayerConverter() {
         return playerConverter;
+    }
+
+    public Updater getUpdater() {
+        return updater;
     }
 }

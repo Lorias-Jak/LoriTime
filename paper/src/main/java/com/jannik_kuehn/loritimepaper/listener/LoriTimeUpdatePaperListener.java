@@ -27,14 +27,12 @@ public class LoriTimeUpdatePaperListener implements Listener {
 
     /**
      * Sends an update notification to the player when they join the server.
-     * The notification is sent asynchronously to prevent any lag.
      *
      * @param event The {@link PlayerJoinEvent} event.
      */
     @EventHandler
     public void onPlayerJoin(final PlayerJoinEvent event) {
         final CommonSender sender = new PaperPlayer(event.getPlayer());
-        //ToDo
-//        loriTime.getScheduler().runAsyncOnceLater(1L, () -> loriTime.getUpdateCheck().sendUpdateNotification(sender));
+        loriTime.getUpdater().sendPlayerUpdateNotification(sender);
     }
 }

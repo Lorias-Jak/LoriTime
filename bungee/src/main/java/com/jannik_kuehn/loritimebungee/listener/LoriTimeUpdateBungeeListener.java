@@ -35,14 +35,12 @@ public class LoriTimeUpdateBungeeListener implements Listener {
 
     /**
      * Sends an update notification to the player when they join the server.
-     * The notification is sent asynchronously to prevent any lag.
      *
      * @param event The {@link PostLoginEvent} event.
      */
     @EventHandler
     public void onPostLogin(final PostLoginEvent event) {
         final CommonSender sender = new BungeeSender(bungeeAudiences, event.getPlayer());
-        // ToDo
-//        loriTime.getScheduler().runAsyncOnceLater(1L, () -> loriTime.getUpdateCheck().sendUpdateNotification(sender));
+        loriTime.getUpdater().sendPlayerUpdateNotification(sender);
     }
 }

@@ -98,8 +98,15 @@ message:
     resumeAnnounce: '<#50CBAB>[player] <#A4A4A4>ist nicht mehr AFK.'
     afkSelf: '<#A4A4A4>Du bist jetzt AFK.'
     afkResume: '<#A4A4A4>Du bist nicht mehr AFK.'
-  update:
+  updater:
+    startUpdate: '<#A4A4A4>Update Process gestartet. Die Suche nach einer aktuelleren Version wurde gestartet.'
     available: |
       <#A4A4A4>Ein neues Update ist verfügbar.
       Derzeitige Version: <#50CBAB>[currentVersion]<#A4A4A4> | Neue Version: <#50CBAB>[newVersion]
-      <#A4A4A4>Du kannst dir die neuste Version hier Herunterladen: <#50CBAB>[url]
+    disabled: '<#FF3232>Der Update-Check ist deaktiviert. Es darf nicht nach Updates gesucht werden'
+    newerVersionFound: |
+      <#FF3232>Update Abgebrochen...
+      <#A4A4A4>Eine neuere Version ist verfügbar. Neue Version: <#50CBAB>[newVersion]<#A4A4A4>.
+    alreadyDownloaded: '<#FF3232>Das Update wurde bereits heruntergeladen. Bitte starte den Server neu um das Update final durchzuführen.'
+    notFound: '<#FF3232>Es wurde kein Update gefunden.'
+    updateSuccess: '<#1AFA29>Das Update <#50CBAB>[newVersion] <#1AFA29>wurde erfolgreich heruntergeladen. <#A4A4A4>Bitte starte den Server neu um das Update final durchzuführen.'

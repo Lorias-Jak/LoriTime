@@ -4,6 +4,9 @@ import com.jannik_kuehn.common.module.updater.version.Version;
 
 import java.util.Map;
 
+/**
+ * This interface is responsible for providing the developer versions of the plugin.
+ */
 public interface DevUpdateSource {
 
     /**

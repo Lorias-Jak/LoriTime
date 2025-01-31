@@ -1,6 +1,7 @@
 package com.jannik_kuehn.common.api;
 
 import com.jannik_kuehn.common.LoriTimePlugin;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 /**
  * API for the LoriTime plugin.
@@ -25,6 +26,7 @@ public final class LoriTimeAPI {
      * @param plugin The {@link LoriTimePlugin} instance.
      */
     @SuppressWarnings("PMD.AvoidSynchronizedStatement")
+    @SuppressFBWarnings("EI_EXPOSE_STATIC_REP2")
     public static void setPlugin(final LoriTimePlugin plugin) {
         synchronized (LoriTimeAPI.class) {
             if (loriTimePlugin == null) {

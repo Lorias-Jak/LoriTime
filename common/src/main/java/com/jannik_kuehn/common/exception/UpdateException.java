@@ -2,6 +2,9 @@ package com.jannik_kuehn.common.exception;
 
 import java.io.Serial;
 
+/**
+ * This exception is thrown if any problem occurred while updating the plugin.
+ */
 public class UpdateException extends RuntimeException {
 
     @Serial

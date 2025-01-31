@@ -26,14 +26,12 @@ public class LoriTimeUpdateVelocityListener {
 
     /**
      * Sends an update notification to the player when they join the server.
-     * The notification is sent asynchronously to prevent any lag.
      *
      * @param event The {@link PostLoginEvent} event.
      */
     @Subscribe
     public void onPostLogin(final PostLoginEvent event) {
         final CommonSender sender = new VelocitySender(event.getPlayer());
-        //ToDo
-//        loriTime.getScheduler().runAsyncOnceLater(1L, () -> loriTime.getUpdateCheck().sendUpdateNotification(sender));
+        loriTime.getUpdater().sendPlayerUpdateNotification(sender);
     }
 }

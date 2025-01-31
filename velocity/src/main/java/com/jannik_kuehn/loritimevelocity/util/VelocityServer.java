@@ -7,13 +7,14 @@ import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
 import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.slf4j.Logger;
 
 import java.util.Optional;
 import java.util.UUID;
 
 @SuppressWarnings("PMD.CommentRequired")
-public class VelocityServer implements CommonServer {
+public class VelocityServer implements CommonServer, CommonSender {
     private final Logger logger;
 
     private ProxyServer server;
@@ -122,5 +123,40 @@ public class VelocityServer implements CommonServer {
     @Override
     public Logger getSl4jLogger() {
         return logger;
+    }
+
+    @Override
+    public UUID getUniqueId() {
+        return null;
+    }
+
+    @Override
+    public String getName() {
+        return "CONSOLE";
+    }
+
+    @Override
+    public boolean hasPermission(final String permission) {
+        return true;
+    }
+
+    @Override
+    public void sendMessage(final String message) {
+        server.getConsoleCommandSource().sendMessage(LegacyComponentSerializer.legacy('&').deserialize(message));
+    }
+
+    @Override
+    public void sendMessage(final TextComponent message) {
+        server.getConsoleCommandSource().sendMessage(message);
+    }
+
+    @Override
+    public boolean isConsole() {
+        return true;
+    }
+
+    @Override
+    public boolean isOnline() {
+        return true;
     }
 }

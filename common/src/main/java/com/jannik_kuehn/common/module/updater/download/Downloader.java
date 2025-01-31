@@ -10,22 +10,44 @@ import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+/**
+ * Responsible for downloading files from a given URL.
+ */
 public class Downloader {
 
+    /**
+     * The folder where the downloaded files should be stored.
+     */
     private final File targetFolder;
 
+    /**
+     * Indicates if a download is currently in progress.
+     */
     private final AtomicBoolean isDownloading;
 
+    /**
+     * The file that should be downloaded.
+     */
     private File targetFile;
 
+    /**
+     * Creates a new instance of the {@link Downloader}.
+     *
+     * @param targetFolder the folder where the downloaded files should be stored
+     */
     public Downloader(final File targetFolder) {
         this.targetFolder = targetFolder;
         this.isDownloading = new AtomicBoolean(false);
     }
 
+    /**
+     * Downloads a file from the given URL and stores it in the target folder.
+     *
+     * @param downloadUrl the URL where the file should be downloaded from
+     * @param targetFile  the file that should be downloaded
+     */
     public void downloadFile(final URL downloadUrl, final File targetFile) {
         createFolderIfNotExists();
-        this.targetFile = targetFile;
 
         try {
             final boolean runningDownload = isDownloading.compareAndSet(false, true);
@@ -37,18 +59,24 @@ public class Downloader {
             FileUtils.copyURLToFile(downloadUrl, tempFile, 5000, 5000);
 
             try {
-                File detFile = new File(targetFolder.getPath() + "/" + targetFile.getName());
+                final File detFile = new File(targetFolder.getPath() + "/" + targetFile.getName());
+                this.targetFile = detFile;
                 Files.move(tempFile.toPath(), detFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 throw new UpdateException("Could not move downloaded file to target location: " + targetFile.getAbsolutePath(), e);
             }
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new UpdateException("Could not download file from URL: " + downloadUrl, e);
         } finally {
             isDownloading.set(false);
         }
     }
 
+    /**
+     * Checks if the file is already downloaded.
+     *
+     * @return true if the file is already downloaded, otherwise false
+     */
     public boolean fileAlreadyDownloaded() {
         return targetFile.exists();
     }

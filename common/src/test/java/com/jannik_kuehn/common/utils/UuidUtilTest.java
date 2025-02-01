@@ -9,7 +9,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class UuidUtilTest {
 
     @Test
-    @SuppressWarnings("PMD.JUnitTestContainsTooManyAsserts")
+    @SuppressWarnings("PMD.UnitTestContainsTooManyAsserts")
     void testToBytesAndFromBytes() {
         final UUID originalUuid = UUID.randomUUID();
         final byte[] bytes = UuidUtil.toBytes(originalUuid);

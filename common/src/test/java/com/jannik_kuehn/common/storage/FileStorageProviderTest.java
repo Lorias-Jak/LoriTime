@@ -36,7 +36,7 @@ class FileStorageProviderTest {
     }
 
     @Test
-    @SuppressWarnings("PMD.JUnitTestContainsTooManyAsserts")
+    @SuppressWarnings("PMD.UnitTestContainsTooManyAsserts")
     void testReadWithSet() throws StorageException {
         when(mockConfig.getObject("key1")).thenReturn("value1");
         when(mockConfig.getObject("key2")).thenReturn("value2");
@@ -102,7 +102,7 @@ class FileStorageProviderTest {
     }
 
     @Test
-    @SuppressWarnings("PMD.JUnitTestContainsTooManyAsserts")
+    @SuppressWarnings("PMD.UnitTestContainsTooManyAsserts")
     void testWriteAllWithOverwrite() throws StorageException {
         when(mockConfig.getAll()).thenReturn(Map.of("key1", "value1", "key3", "value2"));
 

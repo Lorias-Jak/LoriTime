@@ -52,7 +52,7 @@ message:
         self: '<#A4A4A4>You have played for <#50CBAB>[time] <#A4A4A4>on the server.'
         other: '<#A4A4A4>The player <#50CBAB>[player] <#A4A4A4>has already played for <#50CBAB>[time] <#A4A4A4>on the server.'
     loritimeadmin:
-      usage: '<#A4A4A4>Use <red>/loritimeadmin [set | mod | reset] [player] [time] <#A4A4A4>to edit a players online time.<newline>Other commands: <red>/loritimeadmin [reload | info | delete]'
+      usage: '<#A4A4A4>Use <red>/loritimeadmin [set | mod | reset] [player] [time] <#A4A4A4>to edit a players online time.<newline>Other commands: <red>/loritimeadmin [reload | update | deleteUser]'
       missinguuid: '<#A4A4A4>The player <#50CBAB>[player] <#A4A4A4>is unknown.'
       nottime: '<#A4A4A4>The given time argument <red>[argument] <#FF3232>is not valid.'
       set:

@@ -13,4 +13,5 @@ Documentation
 - [Localization](https://github.com/Lorias-Jak/LoriTime/wiki/Localization)
 - [Placeholder](https://github.com/Lorias-Jak/LoriTime/wiki/Placeholder)
 - [Storage](https://github.com/Lorias-Jak/LoriTime/wiki/Storage)
+- [Updater](https://github.com/Lorias-Jak/LoriTime/wiki/Updater)
 

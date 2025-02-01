@@ -60,6 +60,7 @@ public class LoriTimeAdminCommand implements CommonCommand {
                     case "reset" -> reset(sender, subCommandArgs);
                     case "reload" -> reload(sender, subCommandArgs);
                     case "set" -> set(sender, subCommandArgs);
+                    case "update" -> update(sender);
                     default -> printUtilityMessage(sender, "message.command.loritimeadmin.usage");
                 }
             } catch (final StorageException e) {
@@ -81,6 +82,7 @@ public class LoriTimeAdminCommand implements CommonCommand {
             completions.add("reset");
             completions.add("deleteUser");
             completions.add("reload");
+            completions.add("update");
             return filterCompletion(completions, args[0]);
         }
         if (args.length == 2 && !args[0].equalsIgnoreCase("reload")) {
@@ -111,6 +113,14 @@ public class LoriTimeAdminCommand implements CommonCommand {
     @Override
     public String getCommandName() {
         return "loritimeadmin";
+    }
+
+    private void update(final CommonSender sender) {
+        if (!loriTimePlugin.getUpdater().isUpdateAvailable()) {
+            sender.sendMessage(localization.formatTextComponent(localization.getRawMessage("message.updater.notFound")));
+            return;
+        }
+        loriTimePlugin.getUpdater().update(sender);
     }
 
     private void set(final CommonSender sender, final String... args) throws StorageException {

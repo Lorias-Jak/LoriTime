@@ -10,7 +10,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class VersionTest {
 
     @Test
-    @SuppressWarnings("PMD.JUnitTestContainsTooManyAsserts")
+    @SuppressWarnings("PMD.UnitTestContainsTooManyAsserts")
     void testVersionWithoutQualifierAndBuildNumber() {
         final Version version = new Version("1.2.5");
         assertEquals("1.2.5", version.getVersionString(), "The version string does not match the expected version.");
@@ -26,7 +26,7 @@ class VersionTest {
     }
 
     @Test
-    @SuppressWarnings("PMD.JUnitTestContainsTooManyAsserts")
+    @SuppressWarnings("PMD.UnitTestContainsTooManyAsserts")
     void testVersionWithBuildNumber() {
         final Version version = new Version("1.2.5-DEV-12");
         assertEquals(12, version.getBuildNumber(), "The build number does not match the expected build number.");
@@ -35,7 +35,7 @@ class VersionTest {
     }
 
     @Test
-    @SuppressWarnings("PMD.JUnitTestContainsTooManyAsserts")
+    @SuppressWarnings("PMD.UnitTestContainsTooManyAsserts")
     void testVersionEqualsVersion() {
         final Version versionOne = new Version("1.2.5-DEV-12");
         final Version versionTwo = new Version("1.2.5-DEV-13");
@@ -47,7 +47,7 @@ class VersionTest {
     }
 
     @Test
-    @SuppressWarnings("PMD.JUnitTestContainsTooManyAsserts")
+    @SuppressWarnings("PMD.UnitTestContainsTooManyAsserts")
     void testVersionTest() {
         final Version version = new Version("2.0.1-0");
         assertTrue(version.hasBuildNumber(), "The version should have a build number.");

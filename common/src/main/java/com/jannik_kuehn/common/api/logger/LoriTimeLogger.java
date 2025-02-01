@@ -12,6 +12,14 @@ public interface LoriTimeLogger {
     void debug(String msg);
 
     /**
+     * Logs a debug message with a throwable.
+     *
+     * @param msg    the message to log
+     * @param thrown the throwable to log
+     */
+    void debug(String msg, Throwable thrown);
+
+    /**
      * Logs an info message.
      *
      * @param msg the message to log

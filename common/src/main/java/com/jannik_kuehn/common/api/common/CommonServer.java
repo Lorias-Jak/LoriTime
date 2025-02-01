@@ -15,23 +15,25 @@ public interface CommonServer {
 
     CommonSender[] getOnlinePlayers();
 
-    boolean dispatchCommand(CommonSender consoleSender, String command);
+    String getPluginVersion();
+
+    String getPluginJarName();
 
     String getServerVersion();
-
-    boolean isProxy();
 
     String getServerMode();
 
     void setServerMode(String serverMode);
 
-    void kickPlayer(LoriTimePlayer player, TextComponent message);
-
-    void sendMessageToConsole(TextComponent message);
-
-    String getPluginVersion();
-
     java.util.logging.Logger getJavaLogger();
 
     org.slf4j.Logger getSl4jLogger();
+
+    boolean isProxy();
+
+    boolean dispatchCommand(CommonSender consoleSender, String command);
+
+    void kickPlayer(LoriTimePlayer player, TextComponent message);
+
+    void sendMessageToConsole(TextComponent message);
 }

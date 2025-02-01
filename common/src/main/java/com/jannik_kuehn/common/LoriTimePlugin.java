@@ -14,11 +14,19 @@ import com.jannik_kuehn.common.exception.ConfigurationException;
 import com.jannik_kuehn.common.exception.StorageException;
 import com.jannik_kuehn.common.module.afk.AfkHandling;
 import com.jannik_kuehn.common.module.afk.AfkStatusProvider;
-import com.jannik_kuehn.common.module.updater.UpdateCheck;
+import com.jannik_kuehn.common.module.updater.UpdateSourceHandler;
+import com.jannik_kuehn.common.module.updater.Updater;
+import com.jannik_kuehn.common.module.updater.download.Downloader;
+import com.jannik_kuehn.common.module.updater.download.sources.DevUpdateSource;
+import com.jannik_kuehn.common.module.updater.download.sources.GitHubReleaseSource;
+import com.jannik_kuehn.common.module.updater.download.sources.ModrinthReleaseSource;
+import com.jannik_kuehn.common.module.updater.download.sources.ReleaseUpdateSource;
+import com.jannik_kuehn.common.module.updater.version.Version;
 import com.jannik_kuehn.common.storage.DataStorageManager;
 import com.jannik_kuehn.common.utils.TimeParser;
 
 import java.io.File;
+import java.time.InstantSource;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -27,7 +35,8 @@ import java.util.Set;
  * The {@link LoriTimePlugin} is the main class of the plugin.
  */
 @SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.UseProperClassLoader",
-        "PMD.ConfusingTernary", "PMD.LiteralsFirstInComparisons", "PMD.AssignmentToNonFinalStatic", "PMD.TooManyMethods"})
+        "PMD.ConfusingTernary", "PMD.LiteralsFirstInComparisons", "PMD.AssignmentToNonFinalStatic", "PMD.TooManyMethods",
+        "PMD.CouplingBetweenObjects"})
 public class LoriTimePlugin {
     /**
      * The {@link LoriTimePlugin} instance.
@@ -95,14 +104,14 @@ public class LoriTimePlugin {
     private AfkStatusProvider afkStatusProvider;
 
     /**
+     * The {@link Updater} instance.
+     */
+    private Updater updater;
+
+    /**
      * {@code true} if an error occurred and the plugin should be
      */
     private boolean errorDisable;
-
-    /**
-     * The {@link UpdateCheck} instance.
-     */
-    private UpdateCheck updateCheck;
 
     /**
      * Creates a new {@link LoriTimePlugin} instance.
@@ -143,7 +152,7 @@ public class LoriTimePlugin {
         loadOrCreateConfigs();
         log.debug("Enabling LoriTime main class");
         server.setServerMode(getServerModeFromConfig());
-        updateCheck = new UpdateCheck(this);
+        setupUpdater();
 
         if (server.getServerMode().equalsIgnoreCase("master")) {
             enableAsMaster();
@@ -167,8 +176,22 @@ public class LoriTimePlugin {
             return;
         }
 
-        updateCheck.startCheck();
         dataStorageManager.startCache();
+    }
+
+    private void setupUpdater() {
+        if (config.getBoolean("updater.checkForUpdates", true)) {
+            final List<DevUpdateSource> devSource = List.of();
+            final ReleaseUpdateSource modrinthSource = new ModrinthReleaseSource("https://api.modrinth.com/v2/project/loritime/version", server.getPluginJarName());
+            final ReleaseUpdateSource gitHubReleaseSource = new GitHubReleaseSource("https://api.github.com/repos/lorias-jak/loritime", server.getPluginJarName());
+            final List<ReleaseUpdateSource> releaseSource = List.of(gitHubReleaseSource, modrinthSource);
+
+            final UpdateSourceHandler updateSourceHandler = new UpdateSourceHandler(loggerFactory.create(UpdateSourceHandler.class),
+                    releaseSource, devSource);
+            updater = new Updater(loggerFactory.create(Updater.class), new Version(server.getPluginVersion()), updateSourceHandler,
+                    this, InstantSource.system(), new Downloader(new File(dataFolder.getParentFile().toString() + "/update")));
+            updater.search();
+        }
     }
 
     private String getServerModeFromConfig() {
@@ -212,7 +235,6 @@ public class LoriTimePlugin {
      * Disables the plugin.
      */
     public void disable() {
-        updateCheck.stopCheck();
         dataStorageManager.disableCache();
         dataStorageManager.closeStorages();
     }
@@ -221,13 +243,11 @@ public class LoriTimePlugin {
      * Reloads the plugin.
      */
     public void reload() {
-        updateCheck.stopCheck();
         config.reload();
         localization.reloadTranslation();
         if (afkStatusProvider != null) {
             afkStatusProvider.reloadConfigValues();
         }
-        updateCheck.startCheck();
 
         reloadMasteredFunctions();
     }
@@ -380,15 +400,6 @@ public class LoriTimePlugin {
     }
 
     /**
-     * Getter of the {@link UpdateCheck}.
-     *
-     * @return the {@link UpdateCheck}.
-     */
-    public UpdateCheck getUpdateCheck() {
-        return updateCheck;
-    }
-
-    /**
      * Getter of the {@link FileManager}.
      *
      * @return the {@link FileManager}.
@@ -413,5 +424,9 @@ public class LoriTimePlugin {
      */
     public LoriTimePlayerConverter getPlayerConverter() {
         return playerConverter;
+    }
+
+    public Updater getUpdater() {
+        return updater;
     }
 }

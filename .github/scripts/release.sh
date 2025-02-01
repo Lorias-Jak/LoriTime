@@ -157,17 +157,17 @@ releasePublish() {
   echo 'Release'
 
   echo '    Checking if version tag already exists...'
-  if git rev-parse "v$CURRENT_VERSION" >/dev/null 2>&1; then
-    echo "    Tag 'v$CURRENT_VERSION' already exists. Deleting existing tag..."
-    git tag -d "v$CURRENT_VERSION"
-    git push "$RELEASE_REMOTE_REPOSITORY" --delete "v$CURRENT_VERSION"
+  if git rev-parse "$CURRENT_VERSION" >/dev/null 2>&1; then
+    echo "    Tag '$CURRENT_VERSION' already exists. Deleting existing tag..."
+    git tag -d "$CURRENT_VERSION"
+    git push "$RELEASE_REMOTE_REPOSITORY" --delete "$CURRENT_VERSION"
   fi
 
   echo '    Creating version tag...'
-  git tag "v$CURRENT_VERSION" HEAD 2>&1 > /dev/null | sed 's/^/        /'
+  git tag "$CURRENT_VERSION" HEAD 2>&1 > /dev/null | sed 's/^/        /'
 
   echo '    Pushing version tag...'
-  git push "$RELEASE_REMOTE_REPOSITORY" "v$CURRENT_VERSION" 2>&1 > /dev/null | sed 's/^/        /'
+  git push "$RELEASE_REMOTE_REPOSITORY" "$CURRENT_VERSION" 2>&1 > /dev/null | sed 's/^/        /'
 
   echo '    DONE'
 }

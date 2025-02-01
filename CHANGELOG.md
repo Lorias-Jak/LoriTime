@@ -7,6 +7,9 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## [Unreleased] - ${maven.build.timestamp}
 ### Added
 - Auto updater for the plugin config and language file
+  - `update` sub command for `loritimeadmin` command to update from ingame or the console
+  - a new config section and language section for the updater. Its recommend to regenerate the config file for the updated texts on the command descriptions.
+  - This feature is currently limited to Paper only. On Bungee and Velocity an update folder will be created within the plugin directory, you have to move the files yourself.
 - Backup system for the plugin config and language file. New keys in the config file are automatically added to the backup file. The config will lose its style after the first automated config backup. This is a compromise to have an automated config update system.
   - new key `backup.enabled` to enable or disable the backup system.
   - new key `backup.maxBackups` to limit the amount of backups. Set to 0 to disable the backup limit.
@@ -15,7 +18,7 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Deprecated
 ### Removed
 ### Fixed
-- NullPointerException on LoriTimeBungee when the command `/lt <playerName>` is exectued via console.
+- NullPointerException on LoriTimeBungee when the command `/lt <playerName>` is executed via console.
 - NullPointerException on plugin reload when the afk feature is disabled.
 ### Security
 

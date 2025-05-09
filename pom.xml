@@ -133,6 +133,13 @@
       </dependency>
 
       <dependency>
+        <groupId>commons-io</groupId>
+        <artifactId>commons-io</artifactId>
+        <version>2.18.0</version>
+        <scope>provided</scope>
+      </dependency>
+
+      <dependency>
         <groupId>org.jetbrains</groupId>
         <artifactId>annotations</artifactId>
         <version>26.0.2</version>
@@ -387,8 +394,8 @@
               </filters>
               <relocations>
                 <relocation>
-                  <pattern>org.apache.commons.lang3</pattern>
-                  <shadedPattern>${project.groupId}.dependencies.org.apache.commons.lang3</shadedPattern>
+                  <pattern>org.apache.commons</pattern>
+                  <shadedPattern>${project.groupId}.dependencies.org.apache.commons</shadedPattern>
                 </relocation>
                 <relocation>
                   <pattern>org.apache.maven</pattern>

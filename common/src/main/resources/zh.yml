@@ -52,7 +52,7 @@ message:
         self: '<#A4A4A4>您已经在这个服务器上玩了 <#50CBAB>[time] <#A4A4A4>。'
         other: '<#A4A4A4>玩家 <#50CBAB>[player] <#A4A4A4>已经在这个服务器上玩了 <#50CBAB>[time] <#A4A4A4>。'
     loritimeadmin:
-      usage: '<#A4A4A4>使用 <red>/loritimeadmin [set | mod | reset] [玩家] [时间] <#A4A4A4>来编辑一个玩家的在线时间。<newline>其它命令：<red>/loritimeadmin [reload | info]'
+      usage: '<#A4A4A4>使用 <red>/loritimeadmin [set | mod | reset] [玩家] [时间] <#A4A4A4>来编辑一个玩家的在线时间。<newline>其它命令：<red>/loritimeadmin [reload | update | deleteUser]'
       missinguuid: '<#A4A4A4>玩家 <#50CBAB>[player] <#A4A4A4>是未知的。'
       nottime: '<#A4A4A4>给出的参数 <red>[argument] <#FF3232>不是有效的。'
       set:
@@ -92,8 +92,15 @@ message:
     resumeAnnounce: '<#50CBAB>[player] <#A4A4A4>退出挂机。'
     afkSelf: '<#A4A4A4>您现在正在挂机。'
     afkResume: '<#A4A4A4>您现在退出了挂机。'
-  update:
+  updater:
+    startUpdate: '<#A4A4A4>Started update process. Searching for a newer version than currently found.'
     available: |
       <#A4A4A4>一个该插件的更新可用！
       当前版本！<#50CBAB>[currentVersion]<#A4A4A4> | 最新版本：<#50CBAB>[newVersion]
-      <#A4A4A4>您可以在 <#50CBAB>[url] 处下载并更新该插件！
+    disabled: '<#FF3232>The update check is disabled. Please enable it to check for updates.'
+    newerVersionFound: |
+      <#FF3232>Aborted...
+      <#A4A4A4>A newer version is available. New version <#50CBAB>[newVersion]<#A4A4A4>.
+    alreadyDownloaded: '<#FF3232>The update has already been downloaded. Please restart the server to apply the update.'
+    notFound: '<#FF3232>No update was found.'
+    updateSuccess: '<#1AFA29>Updated successfully to version: <#50CBAB>[newVersion]<#1AFA29>. <#A4A4A4>Restart the server to apply the update.'

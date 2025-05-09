@@ -57,6 +57,10 @@ LoriTime provides a number of different commands that you can use. This page lis
     <td class="tg-9wq8">Reloads the LoriTime plugin and config</td>
   </tr>
   <tr>
+    <td class="tg-9wq8">/loritimeadmin [update]</td>
+    <td class="tg-9wq8">Updates the plugin if an update is available</td>
+  </tr>
+  <tr>
       <td class="tg-9wq8">/ltdebug</td>
       <td class="tg-9wq8">loritimedebug</td>
       <td class="tg-9wq8">Enable or disable the debugger.</td>

@@ -26,10 +26,28 @@ general:
   # The unit is seconds.
   saveInterval: 30
 
-  # LoriTime will automatically check for Updates on Modrinth.
+###########
+# Updater #
+###########
+updater:
+
+  # LoriTime will automatically check for Updates on Modrinth or GitHub.
   # In case you use the multi-setup this will only be checked on the master.
   # If you want to disable this feature, set this to false.
   checkForUpdates: true
+
+  # The Strategy for the update command.
+  # Available options are 'MAJOR', 'MINOR', 'PATCH' in the format MAJOR.MINOR.PATCH (e.g. 1.2.5)
+  updateStrategy: 'MINOR'
+
+  # If the plugin should update itself automatically if a new release version is available.
+  # This will respect the updateStrategy that you have set above.
+  autoUpdate: false
+
+  # If true, the plugin will send a message to the player if a new version is available.
+  # The message will only appear on server join.
+  # It will only be sent once every 24 hours or after a server restart.
+  inGameNotification: true
 
 ###########
 # Backups #

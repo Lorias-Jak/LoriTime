@@ -10,9 +10,9 @@ import com.jannik_kuehn.common.command.LoriTimeInfoCommand;
 import com.jannik_kuehn.common.command.LoriTimeTopCommand;
 import com.jannik_kuehn.common.module.afk.MasteredAfkPlayerHandling;
 import com.jannik_kuehn.loritimevelocity.command.VelocityCommand;
+import com.jannik_kuehn.loritimevelocity.listener.LoriTimeUpdateVelocityListener;
 import com.jannik_kuehn.loritimevelocity.listener.PlayerNameVelocityListener;
 import com.jannik_kuehn.loritimevelocity.listener.TimeAccumulatorVelocityListener;
-import com.jannik_kuehn.loritimevelocity.listener.UpdateNotificationVelocityListener;
 import com.jannik_kuehn.loritimevelocity.schedule.VelocityScheduleAdapter;
 import com.jannik_kuehn.loritimevelocity.util.VelocityMetrics;
 import com.jannik_kuehn.loritimevelocity.util.VelocityServer;
@@ -94,7 +94,7 @@ public class LoriTimeVelocity {
         final EventManager eventManager = proxyServer.getEventManager();
         eventManager.register(this, new PlayerNameVelocityListener(loriTimePlugin));
         eventManager.register(this, new TimeAccumulatorVelocityListener(loriTimePlugin));
-        eventManager.register(this, new UpdateNotificationVelocityListener(loriTimePlugin));
+        eventManager.register(this, new LoriTimeUpdateVelocityListener(loriTimePlugin));
 
         commands.add(new VelocityCommand(this, new LoriTimeAdminCommand(loriTimePlugin, loriTimePlugin.getLocalization(),
                 loriTimePlugin.getParser())));

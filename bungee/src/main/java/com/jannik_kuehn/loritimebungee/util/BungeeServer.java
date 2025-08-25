@@ -6,6 +6,7 @@ import com.jannik_kuehn.common.api.common.CommonServer;
 import net.kyori.adventure.platform.bungeecord.BungeeAudiences;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.serializer.bungeecord.BungeeComponentSerializer;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
@@ -15,7 +16,7 @@ import java.util.UUID;
 import java.util.logging.Logger;
 
 @SuppressWarnings("PMD.CommentRequired")
-public class BungeeServer implements CommonServer {
+public class BungeeServer implements CommonServer, CommonSender {
     private final Logger bungeeLogger;
 
     private final ProxyServer proxyServer;
@@ -101,13 +102,13 @@ public class BungeeServer implements CommonServer {
     }
 
     @Override
-    public void sendMessageToConsole(final TextComponent message) {
-        audiences.sender(proxyServer.getConsole()).sendMessage(message);
+    public String getPluginVersion() {
+        return version;
     }
 
     @Override
-    public String getPluginVersion() {
-        return version;
+    public String getPluginJarName() {
+        return "LoriTimeBungee.jar";
     }
 
     @Override
@@ -118,5 +119,45 @@ public class BungeeServer implements CommonServer {
     @Override
     public org.slf4j.Logger getSl4jLogger() {
         return null;
+    }
+
+    @Override
+    public UUID getUniqueId() {
+        return null;
+    }
+
+    @Override
+    public String getName() {
+        return "CONSOLE";
+    }
+
+    @Override
+    public boolean hasPermission(final String permission) {
+        return true;
+    }
+
+    @Override
+    public void sendMessageToConsole(final TextComponent message) {
+        audiences.sender(proxyServer.getConsole()).sendMessage(message);
+    }
+
+    @Override
+    public void sendMessage(final String message) {
+        audiences.sender(proxyServer.getConsole()).sendMessage(LegacyComponentSerializer.legacy('&').deserialize(message));
+    }
+
+    @Override
+    public void sendMessage(final TextComponent message) {
+        audiences.sender(proxyServer.getConsole()).sendMessage(message);
+    }
+
+    @Override
+    public boolean isConsole() {
+        return true;
+    }
+
+    @Override
+    public boolean isOnline() {
+        return true;
     }
 }

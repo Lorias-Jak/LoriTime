@@ -78,11 +78,11 @@ public class Downloader {
      * @return true if the file is already downloaded, otherwise false
      */
     public boolean fileAlreadyDownloaded() {
-        return targetFile.exists();
+        return targetFile != null && targetFile.exists();
     }
 
     private void createFolderIfNotExists() {
-        if (!targetFolder.exists() && !targetFolder.mkdir()) {
+        if (!targetFolder.exists() && !targetFolder.mkdirs()) {
             throw new UpdateException("Could not create folder for download on path: " + targetFolder.getAbsolutePath());
         }
     }

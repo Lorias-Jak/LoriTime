@@ -21,7 +21,7 @@ public class UpdateSourceHandler {
     /**
      * The qualifier that is used for development versions.
      */
-    public static final String DEV_QUALIFIER = "-DEV";
+    public static final String DEV_QUALIFIER = "DEV-";
 
     /**
      * The {@link LoriTimeLogger} that should be used for logging.
@@ -78,7 +78,7 @@ public class UpdateSourceHandler {
         for (final T updateSource : updateSources) {
             try {
                 for (final Map.Entry<Version, String> entry : consumer.consume(updateSource).entrySet()) {
-                    if (versionComparator.isOtherNewerThanCurrent(latest.getKey(), entry.getKey())) {
+                    if (versionComparator.isOtherNewerThanCurrent(currentLatest.getKey(), entry.getKey())) {
                         currentLatest = Pair.of(entry.getKey(), entry.getValue());
                     }
                 }

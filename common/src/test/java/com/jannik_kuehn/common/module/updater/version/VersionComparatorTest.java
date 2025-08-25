@@ -11,7 +11,6 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * Tests for the {@link VersionComparator} class.
  */
-
 class VersionComparatorTest {
 
     public static final Version VERSION_ONE = new Version("1.2.4");

@@ -22,6 +22,16 @@
       <scope>compile</scope>
     </dependency>
     <dependency>
+      <groupId>commons-io</groupId>
+      <artifactId>commons-io</artifactId>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.maven</groupId>
+      <artifactId>maven-artifact</artifactId>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
       <groupId>com.zaxxer</groupId>
       <artifactId>HikariCP</artifactId>
       <scope>compile</scope>
@@ -66,9 +76,11 @@
                   <include>com.google.code.gson</include>
                   <include>com.google.guava</include>
                   <include>org.apache.commons</include>
+                  <include>org.apache.maven</include>
                   <include>com.zaxxer</include>
                   <include>org.yaml</include>
                   <include>com.mysql</include>
+                  <include>commons-io</include>
                 </includes>
               </artifactSet>
             </configuration>

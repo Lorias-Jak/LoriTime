@@ -5,6 +5,7 @@ import com.jannik_kuehn.common.api.common.CommonSender;
 import com.jannik_kuehn.common.api.common.CommonServer;
 import com.jannik_kuehn.loritimepaper.LoriTimePaper;
 import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.Server;
 import org.bukkit.command.CommandSender;
@@ -15,7 +16,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @SuppressWarnings("PMD.CommentRequired")
-public class PaperServer implements CommonServer {
+public class PaperServer implements CommonServer, CommonSender {
     private final LoriTimePaper loriTimePaper;
 
     private final String version;
@@ -113,6 +114,11 @@ public class PaperServer implements CommonServer {
     }
 
     @Override
+    public String getPluginJarName() {
+        return "LoriTimePaper.jar";
+    }
+
+    @Override
     public java.util.logging.Logger getJavaLogger() {
         return null;
     }
@@ -124,5 +130,40 @@ public class PaperServer implements CommonServer {
 
     private void kickPlayer(final Player player, final TextComponent message) {
         player.kick(message);
+    }
+
+    @Override
+    public UUID getUniqueId() {
+        return null;
+    }
+
+    @Override
+    public String getName() {
+        return "CONSOLE";
+    }
+
+    @Override
+    public boolean hasPermission(final String permission) {
+        return true;
+    }
+
+    @Override
+    public void sendMessage(final String message) {
+        server.getConsoleSender().sendMessage(LegacyComponentSerializer.legacy('&').deserialize(message));
+    }
+
+    @Override
+    public void sendMessage(final TextComponent message) {
+        server.getConsoleSender().sendMessage(message);
+    }
+
+    @Override
+    public boolean isConsole() {
+        return true;
+    }
+
+    @Override
+    public boolean isOnline() {
+        return true;
     }
 }

@@ -1,7 +1,5 @@
 package com.jannik_kuehn.common.api;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-
 import java.util.Objects;
 import java.util.UUID;
 
@@ -97,7 +95,6 @@ public class LoriTimePlayer {
     }
 
     @Override
-    @SuppressFBWarnings("EC_UNRELATED_TYPES")
     public boolean equals(final Object obj) {
         if (this == obj) {
             return true;

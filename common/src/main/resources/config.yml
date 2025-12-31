@@ -19,7 +19,7 @@ general:
   language: 'en'
 
   # You can decide how the player data will be stored.
-  # The two options are 'yml' or 'mysql'.
+  # The options are 'yml', 'mysql' (MySQL/MariaDB), or 'sqlite'.
   storage: 'yml'
 
   # The save interval specifies how often the player's online time is saved.
@@ -71,6 +71,16 @@ mysql:
   database: 'test'
   user: 'user'
   password: 'pw'
+  tablePrefix: 'lori_time'
+  # Choose which SQL driver to use. Options: 'mariadb', 'mysql'
+  dialect: 'mariadb'
+
+#############
+#  SQLite   #
+#############
+sqlite:
+  # File path of the sqlite database. The default is inside the plugin data folder.
+  file: 'loritime.db'
   tablePrefix: 'lori_time'
 
 ##############

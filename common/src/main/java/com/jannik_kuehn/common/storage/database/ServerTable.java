@@ -1,0 +1,61 @@
+package com.jannik_kuehn.common.storage.database;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.Optional;
+
+final class ServerTable {
+
+    private final String tableName;
+
+    ServerTable(final String tableName) {
+        this.tableName = tableName;
+    }
+
+    String createTableSql() {
+        return "CREATE TABLE IF NOT EXISTS `" + tableName + "` ("
+                + "`id` BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,"
+                + "`server` VARCHAR(64) NOT NULL UNIQUE"
+                + ") ENGINE InnoDB";
+    }
+
+    String getTableName() {
+        return tableName;
+    }
+
+    long ensureServer(final Connection connection, final String server) throws SQLException {
+        final Optional<Long> existing = findId(connection, server);
+        if (existing.isPresent()) {
+            return existing.get();
+        }
+
+        try (PreparedStatement insert = connection.prepareStatement(
+                "INSERT INTO `" + tableName + "` (`server`) VALUES (?)",
+                Statement.RETURN_GENERATED_KEYS)) {
+            insert.setString(1, server);
+            insert.executeUpdate();
+            try (ResultSet keys = insert.getGeneratedKeys()) {
+                if (keys.next()) {
+                    return keys.getLong(1);
+                }
+            }
+        }
+        throw new SQLException("Unable to create server entry");
+    }
+
+    private Optional<Long> findId(final Connection connection, final String server) throws SQLException {
+        try (PreparedStatement select = connection.prepareStatement(
+                "SELECT `id` FROM `" + tableName + "` WHERE `server` = ?")) {
+            select.setString(1, server);
+            try (ResultSet result = select.executeQuery()) {
+                if (result.next()) {
+                    return Optional.of(result.getLong("id"));
+                }
+            }
+        }
+        return Optional.empty();
+    }
+}

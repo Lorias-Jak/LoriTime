@@ -8,10 +8,13 @@ import com.jannik_kuehn.common.config.Configuration;
 import com.jannik_kuehn.common.exception.StorageException;
 import com.jannik_kuehn.common.utils.UuidUtil;
 
+import java.io.File;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -27,43 +30,54 @@ public class DatabaseStorage implements NameStorage, TimeStorage {
     private static final String DEFAULT_SERVER_NAME = "default";
     private static final String DEFAULT_WORLD_NAME = "global";
 
-    private final MySQL mySQL;
+    private final SqlConnectionProvider databaseProvider;
     private final LoriTimeLogger log;
     private final ReadWriteLock poolLock;
 
     private final String legacyTable;
+    private final SqlDialect dialect;
     private final PlayerTable playerTable;
     private final ServerTable serverTable;
     private final WorldTable worldTable;
     private final TimeTable timeTable;
     private final StatisticTable statisticTable;
 
-    public DatabaseStorage(final Configuration config, final LoriTimePlugin loriTimePlugin) {
+    public DatabaseStorage(final Configuration config, final LoriTimePlugin loriTimePlugin, final File dataFolder) {
         this.log = loriTimePlugin.getLoggerFactory().create(DatabaseStorage.class);
-        this.mySQL = new MySQL(config, loriTimePlugin);
+        this.databaseProvider = createProvider(config, loriTimePlugin, dataFolder);
         this.poolLock = new ReentrantReadWriteLock();
 
-        this.legacyTable = mySQL.getTablePrefix();
-        final String playerTableName = mySQL.getTablePrefix() + "_player";
-        final String serverTableName = mySQL.getTablePrefix() + "_server";
-        final String worldTableName = mySQL.getTablePrefix() + "_world";
-        final String timeTableName = mySQL.getTablePrefix() + "_time";
-        final String statisticTableName = mySQL.getTablePrefix() + "_statistic";
+        final String tablePrefix = databaseProvider.getTablePrefix();
+        this.legacyTable = tablePrefix;
+        final String playerTableName = tablePrefix + "_player";
+        final String serverTableName = tablePrefix + "_server";
+        final String worldTableName = tablePrefix + "_world";
+        final String timeTableName = tablePrefix + "_time";
+        final String statisticTableName = tablePrefix + "_statistic";
 
-        this.playerTable = new PlayerTable(playerTableName);
-        this.serverTable = new ServerTable(serverTableName);
-        this.worldTable = new WorldTable(worldTableName, serverTable);
-        this.timeTable = new TimeTable(timeTableName, playerTableName, worldTableName);
-        this.statisticTable = new StatisticTable(statisticTableName);
+        this.dialect = databaseProvider.getDialect();
+        this.playerTable = new PlayerTable(playerTableName, dialect);
+        this.serverTable = new ServerTable(serverTableName, dialect);
+        this.worldTable = new WorldTable(worldTableName, serverTable, dialect);
+        this.timeTable = new TimeTable(timeTableName, playerTableName, worldTableName, dialect);
+        this.statisticTable = new StatisticTable(statisticTableName, dialect);
 
-        mySQL.open();
+        databaseProvider.open();
 
-        try (Connection connection = mySQL.getConnection()) {
+        try (Connection connection = databaseProvider.getConnection()) {
             createSchema(connection);
             migrateLegacyData(connection);
         } catch (final SQLException ex) {
             log.error("Error creating table", ex);
         }
+    }
+
+    private SqlConnectionProvider createProvider(final Configuration config, final LoriTimePlugin plugin, final File dataFolder) {
+        final String storageType = config.getString("general.storage", "yml").toLowerCase(Locale.ROOT);
+        if ("sqlite".equals(storageType)) {
+            return new SqliteDatabase(config, plugin, dataFolder);
+        }
+        return new MySQL(config, plugin);
     }
 
     private void createSchema(final Connection connection) throws SQLException {
@@ -129,7 +143,7 @@ public class DatabaseStorage implements NameStorage, TimeStorage {
         poolLock.readLock().lock();
         try {
             checkClosed();
-            try (Connection connection = mySQL.getConnection()) {
+            try (Connection connection = databaseProvider.getConnection()) {
                 return playerTable.findUuidByName(connection, name);
             }
         } catch (final SQLException ex) {
@@ -145,7 +159,7 @@ public class DatabaseStorage implements NameStorage, TimeStorage {
         poolLock.readLock().lock();
         try {
             checkClosed();
-            try (Connection connection = mySQL.getConnection()) {
+            try (Connection connection = databaseProvider.getConnection()) {
                 return playerTable.findNameByUuid(connection, uniqueId);
             }
         } catch (final SQLException ex) {
@@ -161,7 +175,7 @@ public class DatabaseStorage implements NameStorage, TimeStorage {
         poolLock.readLock().lock();
         try {
             checkClosed();
-            try (Connection connection = mySQL.getConnection()) {
+            try (Connection connection = databaseProvider.getConnection()) {
                 return timeTable.sumForPlayer(connection, uniqueId);
             }
         } catch (final SQLException ex) {
@@ -177,7 +191,7 @@ public class DatabaseStorage implements NameStorage, TimeStorage {
         poolLock.readLock().lock();
         try {
             checkClosed();
-            try (Connection connection = mySQL.getConnection()) {
+            try (Connection connection = databaseProvider.getConnection()) {
                 final long worldId = worldTable.ensureWorld(connection, DEFAULT_SERVER_NAME, DEFAULT_WORLD_NAME);
                 final long playerId = playerTable.ensurePlayer(connection, uuid, Optional.empty());
                 timeTable.insertDuration(connection, playerId, worldId, additionalTime);
@@ -197,7 +211,7 @@ public class DatabaseStorage implements NameStorage, TimeStorage {
         poolLock.readLock().lock();
         try {
             checkClosed();
-            try (Connection connection = mySQL.getConnection()) {
+            try (Connection connection = databaseProvider.getConnection()) {
                 final long worldId = worldTable.ensureWorld(connection, DEFAULT_SERVER_NAME, DEFAULT_WORLD_NAME);
                 for (final Map.Entry<UUID, Long> entry : additionalTimes.entrySet()) {
                     final UUID uuid = entry.getKey();
@@ -219,7 +233,7 @@ public class DatabaseStorage implements NameStorage, TimeStorage {
         poolLock.readLock().lock();
         try {
             checkClosed();
-            try (Connection connection = mySQL.getConnection()) {
+            try (Connection connection = databaseProvider.getConnection()) {
                 playerTable.ensurePlayer(connection, uuid, Optional.of(name));
             }
         } catch (final SQLException ex) {
@@ -242,7 +256,7 @@ public class DatabaseStorage implements NameStorage, TimeStorage {
         poolLock.readLock().lock();
         try {
             checkClosed();
-            try (Connection connection = mySQL.getConnection()) {
+            try (Connection connection = databaseProvider.getConnection()) {
                 for (final Map.Entry<UUID, String> entry : entries.entrySet()) {
                     playerTable.ensurePlayer(connection, entry.getKey(), Optional.ofNullable(entry.getValue()));
                 }
@@ -259,7 +273,7 @@ public class DatabaseStorage implements NameStorage, TimeStorage {
         poolLock.readLock().lock();
         try {
             checkClosed();
-            try (Connection connection = mySQL.getConnection()) {
+            try (Connection connection = databaseProvider.getConnection()) {
                 return playerTable.getAllNames(connection);
             }
         } catch (final SQLException ex) {
@@ -274,7 +288,7 @@ public class DatabaseStorage implements NameStorage, TimeStorage {
         poolLock.readLock().lock();
         try {
             checkClosed();
-            try (Connection connection = mySQL.getConnection()) {
+            try (Connection connection = databaseProvider.getConnection()) {
                 return timeTable.getAllTotals(connection);
             }
         } catch (final SQLException ex) {
@@ -301,7 +315,7 @@ public class DatabaseStorage implements NameStorage, TimeStorage {
         poolLock.readLock().lock();
         try {
             checkClosed();
-            try (Connection connection = mySQL.getConnection()) {
+            try (Connection connection = databaseProvider.getConnection()) {
                 playerTable.deleteByUuid(connection, uuid);
             }
         } catch (final SQLException ex) {
@@ -313,13 +327,13 @@ public class DatabaseStorage implements NameStorage, TimeStorage {
 
     @Override
     public void close() throws StorageException {
-        if (!mySQL.isClosed()) {
-            mySQL.close();
+        if (!databaseProvider.isClosed()) {
+            databaseProvider.close();
         }
     }
 
     private void checkClosed() throws StorageException {
-        if (mySQL.isClosed()) {
+        if (databaseProvider.isClosed()) {
             throw new StorageException("closed");
         }
     }

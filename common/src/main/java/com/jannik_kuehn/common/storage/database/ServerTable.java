@@ -10,16 +10,15 @@ import java.util.Optional;
 final class ServerTable {
 
     private final String tableName;
+    private final SqlDialect dialect;
 
-    ServerTable(final String tableName) {
+    ServerTable(final String tableName, final SqlDialect dialect) {
         this.tableName = tableName;
+        this.dialect = dialect;
     }
 
     String createTableSql() {
-        return "CREATE TABLE IF NOT EXISTS `" + tableName + "` ("
-                + "`id` BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,"
-                + "`server` VARCHAR(64) NOT NULL UNIQUE"
-                + ") ENGINE InnoDB";
+        return dialect.createServerTable(tableName);
     }
 
     String getTableName() {

@@ -16,18 +16,15 @@ import java.util.UUID;
 final class PlayerTable {
 
     private final String tableName;
+    private final SqlDialect dialect;
 
-    PlayerTable(final String tableName) {
+    PlayerTable(final String tableName, final SqlDialect dialect) {
         this.tableName = tableName;
+        this.dialect = dialect;
     }
 
     String createTableSql() {
-        return "CREATE TABLE IF NOT EXISTS `" + tableName + "` ("
-                + "`id` BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,"
-                + "`uuid` BINARY(16) NOT NULL UNIQUE,"
-                + "`name` VARCHAR(16) CHARACTER SET ascii UNIQUE,"
-                + "`last_seen` TIMESTAMP NULL"
-                + ") ENGINE InnoDB";
+        return dialect.createPlayerTable(tableName);
     }
 
     String getTableName() {

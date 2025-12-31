@@ -7,23 +7,12 @@ import com.jannik_kuehn.common.config.Configuration;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
-import java.io.Closeable;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Locale;
 
 @SuppressWarnings("PMD.CommentRequired")
-public class MySQL implements Closeable, AutoCloseable {
-
-    private static boolean loadedJDBCDriver = true;
-
-    static {
-        try {
-            Class.forName("com.mysql.cj.jdbc.Driver");
-        } catch (final ClassNotFoundException e) {
-            loadedJDBCDriver = false;
-        }
-    }
+public class MySQL implements SqlConnectionProvider {
 
     private final String mySqlHost;
 
@@ -37,6 +26,12 @@ public class MySQL implements Closeable, AutoCloseable {
 
     private final String tablePrefix;
 
+    private final SqlDialect dialect;
+
+    private final String driverClassName;
+
+    private final String jdbcScheme;
+
     private final LoriTimeLogger log;
 
     private HikariDataSource hikari;
@@ -46,6 +41,7 @@ public class MySQL implements Closeable, AutoCloseable {
      */
     public MySQL(final Configuration config, final LoriTimePlugin loriTimePlugin) {
         this.log = loriTimePlugin.getLoggerFactory().create(MySQL.class);
+        this.dialect = new MySqlDialect();
 
         this.mySqlHost = config.getString("mysql.host", "localhost");
         this.mySqlPort = config.getInt("mysql.port", 3306);
@@ -62,6 +58,10 @@ public class MySQL implements Closeable, AutoCloseable {
         }
         this.tablePrefix = uncheckedTablePrefix;
 
+        final String configuredDialect = config.getString("mysql.dialect", "mariadb").toLowerCase(Locale.ROOT);
+        final boolean useMariaDb = "mariadb".equals(configuredDialect);
+        this.driverClassName = useMariaDb ? "org.mariadb.jdbc.Driver" : "com.mysql.cj.jdbc.Driver";
+        this.jdbcScheme = useMariaDb ? "jdbc:mariadb://" : "jdbc:mysql://";
     }
 
     public boolean isClosed() {
@@ -70,8 +70,10 @@ public class MySQL implements Closeable, AutoCloseable {
 
     @SuppressWarnings("PMD.AvoidCatchingGenericException")
     public void open() {
-        if (!loadedJDBCDriver) {
-            log.error("JDBC Driver was not loaded!");
+        try {
+            Class.forName(driverClassName);
+        } catch (final ClassNotFoundException e) {
+            log.error("JDBC Driver was not loaded: " + driverClassName, e);
             return;
         }
         if (isClosed()) {
@@ -97,7 +99,7 @@ public class MySQL implements Closeable, AutoCloseable {
 
     private HikariConfig getHikariConfig() {
         final HikariConfig databaseConfig = new HikariConfig();
-        databaseConfig.setJdbcUrl("jdbc:mysql://" + mySqlHost + ":" + mySqlPort + "/" + mySqlDatabase);
+        databaseConfig.setJdbcUrl(jdbcScheme + mySqlHost + ":" + mySqlPort + "/" + mySqlDatabase);
         databaseConfig.setUsername(mySqlUser);
         databaseConfig.setPassword(mySqlPassword);
         databaseConfig.setPoolName("LoriTime-Databasepool");
@@ -129,5 +131,10 @@ public class MySQL implements Closeable, AutoCloseable {
 
     public String getTablePrefix() {
         return tablePrefix;
+    }
+
+    @Override
+    public SqlDialect getDialect() {
+        return dialect;
     }
 }

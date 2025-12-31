@@ -11,21 +11,16 @@ final class WorldTable {
 
     private final String tableName;
     private final ServerTable serverTable;
+    private final SqlDialect dialect;
 
-    WorldTable(final String tableName, final ServerTable serverTable) {
+    WorldTable(final String tableName, final ServerTable serverTable, final SqlDialect dialect) {
         this.tableName = tableName;
         this.serverTable = serverTable;
+        this.dialect = dialect;
     }
 
     String createTableSql() {
-        return "CREATE TABLE IF NOT EXISTS `" + tableName + "` ("
-                + "`id` BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,"
-                + "`server_id` BIGINT NOT NULL,"
-                + "`world` VARCHAR(64) NOT NULL,"
-                + "UNIQUE KEY `uk_world` (`server_id`, `world`),"
-                + "CONSTRAINT `fk_world_server` FOREIGN KEY (`server_id`) REFERENCES `"
-                + serverTableName() + "`(`id`) ON DELETE CASCADE"
-                + ") ENGINE InnoDB";
+        return dialect.createWorldTable(tableName, serverTableName());
     }
 
     long ensureWorld(final Connection connection, final String server, final String world) throws SQLException {

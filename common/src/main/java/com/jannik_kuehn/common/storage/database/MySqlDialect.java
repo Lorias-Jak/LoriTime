@@ -53,9 +53,9 @@ final class MySqlDialect implements SqlDialect {
                 + "`statistic_name` VARCHAR(64) NOT NULL,"
                 + "`calculation_time` TIMESTAMP NOT NULL,"
                 + "`result` BIGINT NOT NULL,"
-                + "UNIQUE KEY `uk_statistic` (`statistic_name`, `calculation_time`),"
-                + "INDEX `idx_statistic_name` (`statistic_name`),"
-                + "INDEX `idx_statistic_time` (`calculation_time`)"
+                + "UNIQUE KEY `uk_statistic` (`statistic_name`, `calculation_time`)"
+                + ", INDEX `idx_statistic_name` (`statistic_name`),"
+                + " INDEX `idx_statistic_time` (`calculation_time`)"
                 + ") ENGINE InnoDB";
     }
 

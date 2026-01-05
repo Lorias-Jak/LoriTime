@@ -41,7 +41,7 @@ public class MySQL implements SqlConnectionProvider {
      */
     public MySQL(final Configuration config, final LoriTimePlugin loriTimePlugin) {
         this.log = loriTimePlugin.getLoggerFactory().create(MySQL.class);
-        this.dialect = new MySqlDialect();
+        this.dialect = DatabaseDialect.MYSQL;
 
         this.mySqlHost = config.getString("mysql.host", "localhost");
         this.mySqlPort = config.getInt("mysql.port", 3306);

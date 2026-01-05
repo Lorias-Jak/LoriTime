@@ -25,7 +25,7 @@ final class SqliteDatabase implements SqlConnectionProvider {
 
     SqliteDatabase(final Configuration config, final LoriTimePlugin loriTimePlugin, final File dataFolder) {
         this.log = loriTimePlugin.getLoggerFactory().create(SqliteDatabase.class);
-        this.dialect = new SqliteDialect();
+        this.dialect = DatabaseDialect.SQLITE;
 
         String uncheckedTablePrefix = config.getString("sqlite.tablePrefix", "lori_time");
         if (uncheckedTablePrefix.toLowerCase(Locale.ROOT).contains("select")

@@ -1,10 +1,8 @@
 package com.jannik_kuehn.common.storage.database;
 
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.jannik_kuehn.common.LoriTimePlugin;
 import com.jannik_kuehn.common.api.logger.LoriTimeLogger;
 import com.jannik_kuehn.common.config.Configuration;
-import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
 import java.io.File;
@@ -54,9 +52,15 @@ final class SqliteDatabase implements SqlConnectionProvider {
             return;
         }
 
-        final HikariConfig databaseConfig = getHikariConfig();
         try {
-            hikari = new HikariDataSource(databaseConfig);
+            hikari = HikariDataSourceFactory.create(
+                    "jdbc:sqlite:" + databasePath,
+                    "LoriTime-SqlitePool",
+                    null,
+                    null,
+                    "SELECT 1",
+                    "PRAGMA foreign_keys=ON",
+                    4);
         } catch (final Exception e) {
             log.error("Failed to open SQLite database", e);
             return;
@@ -67,20 +71,6 @@ final class SqliteDatabase implements SqlConnectionProvider {
             return;
         }
         log.error("Could not connect to the SQLite database!");
-    }
-
-    private HikariConfig getHikariConfig() {
-        final HikariConfig databaseConfig = new HikariConfig();
-        databaseConfig.setJdbcUrl("jdbc:sqlite:" + databasePath);
-        databaseConfig.setPoolName("LoriTime-SqlitePool");
-        databaseConfig.setConnectionTestQuery("SELECT 1");
-        databaseConfig.setConnectionInitSql("PRAGMA foreign_keys=ON");
-
-        final ThreadFactoryBuilder builder = new ThreadFactoryBuilder();
-        builder.setNameFormat("HikariThread-%d");
-        databaseConfig.setThreadFactory(builder.build());
-        databaseConfig.setMaximumPoolSize(4);
-        return databaseConfig;
     }
 
     @Override

@@ -1,10 +1,8 @@
 package com.jannik_kuehn.common.storage.database;
 
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.jannik_kuehn.common.LoriTimePlugin;
 import com.jannik_kuehn.common.api.logger.LoriTimeLogger;
 import com.jannik_kuehn.common.config.Configuration;
-import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
 import java.sql.Connection;
@@ -68,7 +66,6 @@ public class MySQL implements SqlConnectionProvider {
         return hikari == null || hikari.isClosed();
     }
 
-    @SuppressWarnings("PMD.AvoidCatchingGenericException")
     public void open() {
         try {
             Class.forName(driverClassName);
@@ -78,10 +75,15 @@ public class MySQL implements SqlConnectionProvider {
         }
         if (isClosed()) {
             log.info("Connecting to (" + mySqlHost + ", " + mySqlPort + " ," + mySqlDatabase + ")...");
-            final HikariConfig databaseConfig = getHikariConfig();
-
             try {
-                hikari = new HikariDataSource(databaseConfig);
+                hikari = HikariDataSourceFactory.create(
+                        jdbcScheme + mySqlHost + ":" + mySqlPort + "/" + mySqlDatabase,
+                        "LoriTime-Databasepool",
+                        mySqlUser,
+                        mySqlPassword,
+                        null,
+                        null,
+                        null);
             } catch (final Exception e) {
                 log.error("Probably wrong login data for MySQL-Server!");
                 return;
@@ -95,19 +97,6 @@ public class MySQL implements SqlConnectionProvider {
             return;
         }
         log.error("The MySQL connection is already open!");
-    }
-
-    private HikariConfig getHikariConfig() {
-        final HikariConfig databaseConfig = new HikariConfig();
-        databaseConfig.setJdbcUrl(jdbcScheme + mySqlHost + ":" + mySqlPort + "/" + mySqlDatabase);
-        databaseConfig.setUsername(mySqlUser);
-        databaseConfig.setPassword(mySqlPassword);
-        databaseConfig.setPoolName("LoriTime-Databasepool");
-
-        final ThreadFactoryBuilder builder = new ThreadFactoryBuilder();
-        builder.setNameFormat("HikariThread-%d");
-        databaseConfig.setThreadFactory(builder.build());
-        return databaseConfig;
     }
 
     public Connection getConnection() throws SQLException {

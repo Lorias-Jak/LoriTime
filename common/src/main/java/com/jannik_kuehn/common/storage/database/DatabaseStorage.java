@@ -64,12 +64,7 @@ public class DatabaseStorage implements NameStorage, TimeStorage {
 
         databaseProvider.open();
 
-        try (Connection connection = databaseProvider.getConnection()) {
-            createSchema(connection);
-            migrateLegacyData(connection);
-        } catch (final SQLException ex) {
-            log.error("Error creating table", ex);
-        }
+        initializeSchemaAndMigrate();
     }
 
     private SqlConnectionProvider createProvider(final Configuration config, final LoriTimePlugin plugin, final File dataFolder) {
@@ -78,6 +73,33 @@ public class DatabaseStorage implements NameStorage, TimeStorage {
             return new SqliteDatabase(config, plugin, dataFolder);
         }
         return new MySQL(config, plugin);
+    }
+
+    private void initializeSchemaAndMigrate() {
+        try (Connection connection = databaseProvider.getConnection()) {
+            final boolean previousAutoCommit = connection.getAutoCommit();
+            try {
+                connection.setAutoCommit(false);
+                createSchema(connection);
+                migrateLegacyData(connection);
+                connection.commit();
+            } catch (final SQLException ex) {
+                try {
+                    connection.rollback();
+                } catch (final SQLException rollbackEx) {
+                    log.error("Rollback after migration failure failed", rollbackEx);
+                }
+                log.error("Error creating schema or migrating legacy data", ex);
+            } finally {
+                try {
+                    connection.setAutoCommit(previousAutoCommit);
+                } catch (final SQLException ex) {
+                    log.error("Failed to restore autoCommit state", ex);
+                }
+            }
+        } catch (final SQLException ex) {
+            log.error("Error obtaining connection for schema initialization", ex);
+        }
     }
 
     private void createSchema(final Connection connection) throws SQLException {

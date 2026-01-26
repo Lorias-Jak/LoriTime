@@ -24,10 +24,9 @@ import com.velocitypowered.api.plugin.PluginContainer;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.proxy.messages.MinecraftChannelIdentifier;
+import jakarta.inject.Inject;
 import org.bstats.velocity.Metrics;
 import org.slf4j.Logger;
-
-import javax.inject.Inject;
 
 import java.nio.file.Path;
 import java.util.ArrayList;

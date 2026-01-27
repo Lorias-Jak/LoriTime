@@ -20,6 +20,7 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Fixed
 - NullPointerException on LoriTimeBungee when the command `/lt <playerName>` is executed via console.
 - NullPointerException on plugin reload when the afk feature is disabled.
+- Load error on Velocity 3.5.0
 ### Security
 
 ## [1.6.0] - 2024-12-26

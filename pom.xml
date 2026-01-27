@@ -128,7 +128,7 @@
       <dependency>
         <groupId>org.apache.commons</groupId>
         <artifactId>commons-lang3</artifactId>
-        <version>3.18.0</version>
+        <version>3.19.0</version>
         <scope>provided</scope>
       </dependency>
 
@@ -149,7 +149,7 @@
       <dependency>
         <groupId>org.junit</groupId>
         <artifactId>junit-bom</artifactId>
-        <version>5.13.4</version>
+        <version>5.14.0</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -165,7 +165,7 @@
       <dependency>
         <groupId>com.github.spotbugs</groupId>
         <artifactId>spotbugs-annotations</artifactId>
-        <version>4.9.3</version>
+        <version>4.9.8</version>
       </dependency>
 
       <!-- Project dependencies -->
@@ -217,7 +217,7 @@
       <dependency>
         <groupId>net.kyori</groupId>
         <artifactId>adventure-text-minimessage</artifactId>
-        <version>4.24.0</version>
+        <version>4.25.0</version>
         <scope>provided</scope>
       </dependency>
       <dependency>
@@ -235,7 +235,7 @@
       <dependency>
         <groupId>com.mysql</groupId>
         <artifactId>mysql-connector-j</artifactId>
-        <version>9.4.0</version>
+        <version>9.5.0</version>
         <scope>provided</scope>
       </dependency>
 
@@ -530,12 +530,12 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-enforcer-plugin</artifactId>
-          <version>3.6.1</version>
+          <version>3.6.2</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-compiler-plugin</artifactId>
-          <version>3.14.0</version>
+          <version>3.14.1</version>
           <configuration>
             <release>${java.api.version}</release>
           </configuration>

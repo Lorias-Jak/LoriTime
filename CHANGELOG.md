@@ -6,6 +6,14 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased] - ${maven.build.timestamp}
 ### Added
+### Changed
+### Deprecated
+### Removed
+### Fixed
+### Security
+
+## [1.7.0] - 2026-02-02
+### Added
 - Auto updater for the plugin config and language file
   - `update` sub command for `loritimeadmin` command to update from ingame or the console
   - a new config section and language section for the updater. Its recommend to regenerate the config file for the updated texts on the command descriptions.

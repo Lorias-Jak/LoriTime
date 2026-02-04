@@ -12,22 +12,56 @@ import java.util.Optional;
  */
 final class WorldTable {
 
+    /**
+     * The table name.
+     */
     private final String tableName;
 
+    /**
+     * The {@link ServerTable} instance.
+     */
     private final ServerTable serverTable;
 
+    /**
+     * The {@link SqlDialect} instance.
+     */
     private final SqlDialect dialect;
 
+    /**
+     * Constructor
+     *
+     * @param tableName the table name
+     * @param serverTable the {@link ServerTable}
+     * @param dialect the {@link SqlDialect}
+     */
+    /* default */
     WorldTable(final String tableName, final ServerTable serverTable, final SqlDialect dialect) {
         this.tableName = tableName;
         this.serverTable = serverTable;
         this.dialect = dialect;
     }
 
+    /**
+     * Creation string of the sql table for the chosen dialect
+     *
+     * @return the DDL statement
+     */
+    /* default */
     String createTableSql() {
         return dialect.createWorldTable(tableName, serverTableName());
     }
 
+    /**
+     * Ensures that a world entry exists in the database for the given server and world.
+     * If the world does not already exist, it creates a new entry.
+     *
+     * @param connection the database connection to use
+     * @param server the name of the server
+     * @param world the name of the world
+     * @return the unique identifier (ID) of the world entry
+     * @throws SQLException if a database access error occurs or the world entry cannot be created
+     */
+    /* default */
     long ensureWorld(final Connection connection, final String server, final String world) throws SQLException {
         final long serverId = serverTable.ensureServer(connection, server);
         final Optional<Long> existing = findId(connection, serverId, world);
@@ -64,10 +98,22 @@ final class WorldTable {
         return Optional.empty();
     }
 
-    String tableName() {
+    /**
+     * Retrieves the name of the database table associated with this instance.
+     *
+     * @return the name of the table as a {@link String}
+     */
+    /* default */
+    String getTableName() {
         return tableName;
     }
 
+    /**
+     * Retrieves the name of the database table associated with the server.
+     *
+     * @return the name of the server-specific table as a {@link String}
+     */
+    /* default */
     String serverTableName() {
         return serverTable.getTableName();
     }

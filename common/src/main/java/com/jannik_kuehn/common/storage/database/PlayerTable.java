@@ -16,25 +16,59 @@ import java.util.UUID;
 /**
  * Table helper for player entries.
  */
+@SuppressWarnings("PMD.TooManyMethods")
 final class PlayerTable {
 
+    /**
+     * The table name.
+     */
     private final String tableName;
 
+    /**
+     * The {@link SqlDialect} instance.
+     */
     private final SqlDialect dialect;
 
+    /**
+     * Constructs a new instance of PlayerTable with the specified table name and SQL dialect.
+     *
+     * @param tableName the name of the table to be managed
+     * @param dialect   the SQL dialect to use for generating SQL statements
+     */
+    /* default */
     PlayerTable(final String tableName, final SqlDialect dialect) {
         this.tableName = tableName;
         this.dialect = dialect;
     }
 
+    /**
+     * Generates the SQL statement to create the table for player entries.
+     *
+     * @return the SQL CREATE TABLE statement for the player table
+     */
+    /* default */
     String createTableSql() {
         return dialect.createPlayerTable(tableName);
     }
 
+    /**
+     * Retrieves the name of the table managed by this instance.
+     *
+     * @return the name of the table as a String
+     */
+    /* default */
     public String getTableName() {
         return tableName;
     }
 
+    /**
+     * Checks if the table managed by this instance contains any data.
+     *
+     * @param connection the database connection to use for executing the query
+     * @return true if the table contains at least one row, false otherwise
+     * @throws SQLException if a database access error occurs
+     */
+    /* default */
     boolean hasAnyData(final Connection connection) throws SQLException {
         try (PreparedStatement statement = connection.prepareStatement(
                 "SELECT 1 FROM `" + tableName + "` LIMIT 1")) {
@@ -44,6 +78,15 @@ final class PlayerTable {
         }
     }
 
+    /**
+     * Finds the ID associated with the given UUID in the database.
+     *
+     * @param connection the database connection to be used for the query
+     * @param uuid       the UUID for which the associated ID should be retrieved
+     * @return an Optional containing the ID if found, or an empty Optional if no matching entry exists
+     * @throws SQLException if an error occurs while accessing the database
+     */
+    /* default */
     Optional<Long> findIdByUuid(final Connection connection, final UUID uuid) throws SQLException {
         try (PreparedStatement select = connection.prepareStatement(
                 "SELECT `id` FROM `" + tableName + "` WHERE `uuid` = ?")) {
@@ -57,6 +100,14 @@ final class PlayerTable {
         return Optional.empty();
     }
 
+    /**
+     * Retrieves the ID associated with the given name from the database.
+     *
+     * @param connection the database connection to use for executing the query
+     * @param name       the name for which the associated ID should be retrieved
+     * @return an Optional containing the
+     */
+    /* default */
     Optional<Long> findIdByName(final Connection connection, final String name) throws SQLException {
         try (PreparedStatement select = connection.prepareStatement(
                 "SELECT `id` FROM `" + tableName + "` WHERE `name` = ?")) {
@@ -70,6 +121,15 @@ final class PlayerTable {
         return Optional.empty();
     }
 
+    /**
+     * Retrieves the UUID associated with the given name from the database.
+     *
+     * @param connection the database connection to use for executing the query
+     * @param name       the name for which the associated UUID should be retrieved
+     * @return an Optional containing the UUID if found, or an empty Optional if no matching entry exists
+     * @throws SQLException if a database access error occurs
+     */
+    /* default */
     Optional<UUID> findUuidByName(final Connection connection, final String name) throws SQLException {
         try (PreparedStatement select = connection.prepareStatement(
                 "SELECT `uuid` FROM `" + tableName + "` WHERE `name` = ?")) {
@@ -83,6 +143,14 @@ final class PlayerTable {
         return Optional.empty();
     }
 
+    /**
+     * Finds the name associated with the given UUID in the database.
+     *
+     * @param connection the database connection to be used for the query
+     * @param uuid       the UUID for which the associated name should be retrieved
+     * @return an Optional containing the name if found, or
+     */
+    /* default */
     Optional<String> findNameByUuid(final Connection connection, final UUID uuid) throws SQLException {
         try (PreparedStatement select = connection.prepareStatement(
                 "SELECT `name` FROM `" + tableName + "` WHERE `uuid` = ?")) {
@@ -96,6 +164,14 @@ final class PlayerTable {
         return Optional.empty();
     }
 
+    /**
+     * Retrieves all non-null names from the database table managed by this instance.
+     *
+     * @param connection the database connection to use for executing the query
+     * @return a Set containing all unique names retrieved from the table
+     * @throws SQLException if a database access error
+     */
+    /* default */
     Set<String> getAllNames(final Connection connection) throws SQLException {
         final Set<String> names = new HashSet<>();
         try (PreparedStatement select = connection.prepareStatement(
@@ -109,6 +185,18 @@ final class PlayerTable {
         return names;
     }
 
+    /**
+     * Ensures that a player with the specified UUID exists in the database. If the player exists,
+     * their name and last seen timestamp are updated as needed. If the player does not exist, they
+     * are inserted into the database with the provided UUID and, if present, the given name.
+     *
+     * @param connection the database connection to use for the operation
+     * @param uuid       the unique identifier of the player
+     * @param name       an Optional containing the name of the player, if available
+     * @return the unique ID of the player in the database
+     * @throws SQLException if a database access error occurs during the operation
+     */
+    /* default */
     long ensurePlayer(final Connection connection, final UUID uuid, final Optional<String> name) throws SQLException {
         final Optional<Long> existingId = findIdByUuid(connection, uuid);
         if (existingId.isPresent()) {
@@ -143,6 +231,7 @@ final class PlayerTable {
         throw new SQLException("Unable to insert player");
     }
 
+    /* default */
     void deleteByUuid(final Connection connection, final UUID uuid) throws SQLException {
         try (PreparedStatement delete = connection.prepareStatement(
                 "DELETE FROM `" + tableName + "` WHERE `uuid` = ?")) {

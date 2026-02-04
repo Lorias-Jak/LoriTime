@@ -28,8 +28,10 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 /**
  * Database-backed storage implementation for player names and time tracking.
  */
-@SuppressWarnings({"PMD.CommentRequired", "PMD.TooManyMethods"})
+@SuppressWarnings({"PMD.CommentRequired", "PMD.TooManyMethods", "PMD.CouplingBetweenObjects"})
 public class DatabaseStorage implements NameStorage, TimeStorage {
+
+    private static final String SQLITE_STORAGE_TYPE = "sqlite";
 
     private static final String DEFAULT_SERVER_NAME = "default";
 
@@ -95,7 +97,7 @@ public class DatabaseStorage implements NameStorage, TimeStorage {
      */
     private SqlConnectionProvider createProvider(final Configuration config, final LoriTimePlugin plugin, final File dataFolder) {
         final String storageType = config.getString("general.storage", "yml").toLowerCase(Locale.ROOT);
-        if ("sqlite".equals(storageType)) {
+        if (SQLITE_STORAGE_TYPE.equals(storageType)) {
             return new SqliteDatabase(config, plugin, dataFolder);
         }
         return new MySQL(config, plugin);

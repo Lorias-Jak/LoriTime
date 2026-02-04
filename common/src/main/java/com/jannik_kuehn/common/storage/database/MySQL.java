@@ -14,33 +14,66 @@ import java.util.Locale;
  */
 public class MySQL implements SqlConnectionProvider {
 
+    /**
+     * Represents the hostname.
+     */
     private final String mySqlHost;
 
+    /**
+     * Represents the port.
+     */
     private final Integer mySqlPort;
 
+    /**
+     * Represents the name.
+     */
     private final String mySqlDatabase;
 
+    /**
+     * Represents the username.
+     */
     private final String mySqlUser;
 
+    /**
+     * Represents the password.
+     */
     private final String mySqlPassword;
 
+    /**
+     * The table prefix.
+     */
     private final String tablePrefix;
 
+    /**
+     * The SQL dialect.
+     */
     private final SqlDialect dialect;
 
+    /**
+     * The JDBC driver.
+     */
     private final String driverClassName;
 
+    /**
+     * The JDBC scheme.
+     */
     private final String jdbcScheme;
 
+    /**
+     * The {@link LoriTimeLogger} instance.
+     */
     private final LoriTimeLogger log;
 
+    /**
+     * The HikariCP connection pool.
+     */
     private HikariDataSource hikari;
 
     /**
      * Creates a MySQL/MariaDB provider from configuration.
      *
-     * @param config          the configuration to read connection settings from
-     * @param loriTimePlugin  the plugin instance for logging
+     * @param config         the configuration to read connection settings from
+     * @param loriTimePlugin the plugin instance for logging
      */
     public MySQL(final Configuration config, final LoriTimePlugin loriTimePlugin) {
         this.log = loriTimePlugin.getLoggerFactory().create(MySQL.class);
@@ -74,8 +107,9 @@ public class MySQL implements SqlConnectionProvider {
      * and determines if it is either uninitialized or closed.
      *
      * @return true if the Hikari connection pool is not initialized
-     *         or has been closed; false otherwise
+     * or has been closed; false otherwise
      */
+    @Override
     public boolean isClosed() {
         return hikari == null || hikari.isClosed();
     }
@@ -92,8 +126,9 @@ public class MySQL implements SqlConnectionProvider {
      * Logs appropriate information about the connection status:
      * - Logs an info message if the connection is successfully established.
      * - Logs an error if the connection could not be established or if it is
-     *   already open.
+     * already open.
      */
+    @Override
     public void open() {
         try {
             Class.forName(driverClassName);
@@ -103,19 +138,14 @@ public class MySQL implements SqlConnectionProvider {
         }
         if (isClosed()) {
             log.info("Connecting to (" + mySqlHost + ", " + mySqlPort + " ," + mySqlDatabase + ")...");
-            try {
-                hikari = HikariDataSourceFactory.create(
-                        jdbcScheme + mySqlHost + ":" + mySqlPort + "/" + mySqlDatabase,
-                        "LoriTime-Databasepool",
-                        mySqlUser,
-                        mySqlPassword,
-                        null,
-                        null,
-                        null);
-            } catch (final Exception e) {
-                log.error("Probably wrong login data for MySQL-Server!");
-                return;
-            }
+            hikari = HikariDataSourceFactory.create(
+                    jdbcScheme + mySqlHost + ":" + mySqlPort + "/" + mySqlDatabase,
+                    "LoriTime-Databasepool",
+                    mySqlUser,
+                    mySqlPassword,
+                    null,
+                    null,
+                    null);
 
             if (!hikari.isClosed()) {
                 log.info("Successfully connected to the MySQL-Server!");
@@ -127,12 +157,7 @@ public class MySQL implements SqlConnectionProvider {
         log.error("The MySQL connection is already open!");
     }
 
-    /**
-     * Returns a new hikari connection
-     *
-     * @return a {@link Connection}
-     * @throws SQLException in case hikari is not initialized
-     */
+    @Override
     public Connection getConnection() throws SQLException {
         if (hikari == null) {
             throw new SQLException("HikariDataSource is not initialized.");
@@ -152,12 +177,7 @@ public class MySQL implements SqlConnectionProvider {
         log.error("Could not disconnect from the MySQL-Server!");
     }
 
-
-    /**
-     * Returns the table prefix.
-     *
-     * @return the table prefix
-     */
+    @Override
     public String getTablePrefix() {
         return tablePrefix;
     }

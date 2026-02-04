@@ -3,6 +3,7 @@ package com.jannik_kuehn.common.storage.database;
 /**
  * Built-in SQL dialects supported by the storage layer.
  */
+@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 enum DatabaseDialect implements SqlDialect {
     /**
      * An enumeration constant representing the MySQL SQL dialect implementation.
@@ -11,7 +12,7 @@ enum DatabaseDialect implements SqlDialect {
      * <p>
      * Responsibilities include:
      * - Defining SQL schema creation statements such as player tables, server tables,
-     *   world tables, time tracking tables, and statistic tables.
+     * world tables, time tracking tables, and statistic tables.
      * - Generating SQL expressions for computing time durations in seconds.
      */
     MYSQL {
@@ -140,5 +141,5 @@ enum DatabaseDialect implements SqlDialect {
         public String durationSecondsExpression(final String joinColumn, final String leaveColumn) {
             return "strftime('%s', " + leaveColumn + ") - strftime('%s', " + joinColumn + ")";
         }
-    };
+    }
 }

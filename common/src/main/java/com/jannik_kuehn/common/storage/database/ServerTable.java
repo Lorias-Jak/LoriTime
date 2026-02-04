@@ -12,23 +12,58 @@ import java.util.Optional;
  */
 final class ServerTable {
 
+    /**
+     * The table name.
+     */
     private final String tableName;
 
+    /**
+     * The {@link SqlDialect} instance.
+     */
     private final SqlDialect dialect;
 
+    /**
+     * Constructs a ServerTable instance with the specified table name and SQL dialect.
+     *
+     * @param tableName the name of the database table
+     * @param dialect   the SQL dialect to use for database operations
+     */
+    /* default */
     ServerTable(final String tableName, final SqlDialect dialect) {
         this.tableName = tableName;
         this.dialect = dialect;
     }
 
+    /**
+     * Generates the SQL statement to create the table for server entries.
+     *
+     * @return the SQL CREATE TABLE statement for the server table
+     */
+    /* default */
     String createTableSql() {
         return dialect.createServerTable(tableName);
     }
 
+    /**
+     * Retrieves the name of the database table.
+     *
+     * @return the name of the table
+     */
+    /* default */
     String getTableName() {
         return tableName;
     }
 
+    /**
+     * Ensures a server entry exists in the database and returns its ID.
+     * If the server entry does not already exist, it is created.
+     *
+     * @param connection the database connection to use for the operation
+     * @param server     the name of the server to ensure exists in the database
+     * @return the ID of the server entry
+     * @throws SQLException if a database access error occurs or the server entry cannot be created
+     */
+    /* default */
     long ensureServer(final Connection connection, final String server) throws SQLException {
         final Optional<Long> existing = findId(connection, server);
         if (existing.isPresent()) {

@@ -15,15 +15,16 @@ final class HikariDataSourceFactory {
     /**
      * Creates a HikariCP data source with optional credentials and tuning settings.
      *
-     * @param jdbcUrl              the JDBC URL to connect to
-     * @param poolName             the pool name for diagnostics
-     * @param username             optional username
-     * @param password             optional password
-     * @param connectionTestQuery  optional connection test query
-     * @param connectionInitSql    optional initialization SQL
-     * @param maximumPoolSize      optional maximum pool size
+     * @param jdbcUrl             the JDBC URL to connect to
+     * @param poolName            the pool name for diagnostics
+     * @param username            optional username
+     * @param password            optional password
+     * @param connectionTestQuery optional connection test query
+     * @param connectionInitSql   optional initialization SQL
+     * @param maximumPoolSize     optional maximum pool size
      * @return the configured data source
      */
+    /* default */
     static HikariDataSource create(final String jdbcUrl,
                                    final String poolName,
                                    final String username,

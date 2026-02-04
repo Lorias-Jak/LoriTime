@@ -15,7 +15,7 @@ interface SqlConnectionProvider extends Closeable {
     void open();
 
     /**
-     * Obtains a database connection.
+     * Gets a database connection.
      *
      * @return an open connection
      * @throws SQLException if a connection cannot be obtained

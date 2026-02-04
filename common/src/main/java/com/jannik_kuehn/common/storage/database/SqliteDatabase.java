@@ -10,6 +10,9 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Locale;
 
+/**
+ * SQLite connection provider backed by HikariCP.
+ */
 final class SqliteDatabase implements SqlConnectionProvider {
 
     private static final String DEFAULT_FILENAME = "loritime.db";
@@ -21,6 +24,13 @@ final class SqliteDatabase implements SqlConnectionProvider {
 
     private HikariDataSource hikari;
 
+    /**
+     * Creates a SQLite provider from configuration.
+     *
+     * @param config         the configuration to read connection settings from
+     * @param loriTimePlugin the plugin instance for logging
+     * @param dataFolder     the plugin data folder for the default DB path
+     */
     SqliteDatabase(final Configuration config, final LoriTimePlugin loriTimePlugin, final File dataFolder) {
         this.log = loriTimePlugin.getLoggerFactory().create(SqliteDatabase.class);
         this.dialect = DatabaseDialect.SQLITE;
@@ -40,6 +50,7 @@ final class SqliteDatabase implements SqlConnectionProvider {
     }
 
     @Override
+    /** {@inheritDoc} */
     public void open() {
         if (hikari != null && !hikari.isClosed()) {
             log.error("The SQLite connection is already open!");
@@ -74,6 +85,7 @@ final class SqliteDatabase implements SqlConnectionProvider {
     }
 
     @Override
+    /** {@inheritDoc} */
     public Connection getConnection() throws SQLException {
         if (hikari == null) {
             throw new SQLException("HikariDataSource is not initialized.");
@@ -82,11 +94,13 @@ final class SqliteDatabase implements SqlConnectionProvider {
     }
 
     @Override
+    /** {@inheritDoc} */
     public boolean isClosed() {
         return hikari == null || hikari.isClosed();
     }
 
     @Override
+    /** {@inheritDoc} */
     public void close() {
         if (hikari != null) {
             log.info("Closing SQLite connection ...");
@@ -99,11 +113,13 @@ final class SqliteDatabase implements SqlConnectionProvider {
     }
 
     @Override
+    /** {@inheritDoc} */
     public String getTablePrefix() {
         return tablePrefix;
     }
 
     @Override
+    /** {@inheritDoc} */
     public SqlDialect getDialect() {
         return dialect;
     }

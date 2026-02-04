@@ -1,5 +1,8 @@
 package com.jannik_kuehn.common.storage.database;
 
+/**
+ * Table helper for statistic entries.
+ */
 final class StatisticTable {
 
     private final String tableName;

@@ -9,6 +9,9 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Locale;
 
+/**
+ * MySQL/MariaDB connection provider backed by HikariCP.
+ */
 @SuppressWarnings("PMD.CommentRequired")
 public class MySQL implements SqlConnectionProvider {
 
@@ -35,7 +38,10 @@ public class MySQL implements SqlConnectionProvider {
     private HikariDataSource hikari;
 
     /**
-     * @param config The {@link Configuration} for the connection
+     * Creates a MySQL/MariaDB provider from configuration.
+     *
+     * @param config          the configuration to read connection settings from
+     * @param loriTimePlugin  the plugin instance for logging
      */
     public MySQL(final Configuration config, final LoriTimePlugin loriTimePlugin) {
         this.log = loriTimePlugin.getLoggerFactory().create(MySQL.class);
@@ -62,10 +68,16 @@ public class MySQL implements SqlConnectionProvider {
         this.jdbcScheme = useMariaDb ? "jdbc:mariadb://" : "jdbc:mysql://";
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public boolean isClosed() {
         return hikari == null || hikari.isClosed();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public void open() {
         try {
             Class.forName(driverClassName);
@@ -99,6 +111,9 @@ public class MySQL implements SqlConnectionProvider {
         log.error("The MySQL connection is already open!");
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public Connection getConnection() throws SQLException {
         if (hikari == null) {
             throw new SQLException("HikariDataSource is not initialized.");
@@ -107,6 +122,7 @@ public class MySQL implements SqlConnectionProvider {
     }
 
     @Override
+    /** {@inheritDoc} */
     public void close() {
         if (hikari != null) {
             log.info("Closing connection to (" + mySqlHost + ", " + mySqlPort + " ," + mySqlDatabase + ")...");
@@ -118,11 +134,15 @@ public class MySQL implements SqlConnectionProvider {
         log.error("Could not disconnect from the MySQL-Server!");
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public String getTablePrefix() {
         return tablePrefix;
     }
 
     @Override
+    /** {@inheritDoc} */
     public SqlDialect getDialect() {
         return dialect;
     }

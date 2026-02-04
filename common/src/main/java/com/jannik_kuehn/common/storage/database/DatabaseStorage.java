@@ -24,6 +24,9 @@ import java.util.UUID;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+/**
+ * Database-backed storage implementation for player names and time tracking.
+ */
 @SuppressWarnings({"PMD.CommentRequired", "PMD.TooManyMethods"})
 public class DatabaseStorage implements NameStorage, TimeStorage {
 
@@ -42,6 +45,13 @@ public class DatabaseStorage implements NameStorage, TimeStorage {
     private final TimeTable timeTable;
     private final StatisticTable statisticTable;
 
+    /**
+     * Creates a database storage instance and initializes the schema.
+     *
+     * @param config         the configuration to read database settings from
+     * @param loriTimePlugin the plugin instance for logging and context
+     * @param dataFolder     the plugin data folder (used for SQLite paths)
+     */
     public DatabaseStorage(final Configuration config, final LoriTimePlugin loriTimePlugin, final File dataFolder) {
         this.log = loriTimePlugin.getLoggerFactory().create(DatabaseStorage.class);
         this.databaseProvider = createProvider(config, loriTimePlugin, dataFolder);
@@ -67,6 +77,14 @@ public class DatabaseStorage implements NameStorage, TimeStorage {
         initializeSchemaAndMigrate();
     }
 
+    /**
+     * Creates a connection provider based on the configured storage type.
+     *
+     * @param config     the configuration to read storage settings from
+     * @param plugin     the plugin instance for logging
+     * @param dataFolder the plugin data folder
+     * @return a provider for the selected database backend
+     */
     private SqlConnectionProvider createProvider(final Configuration config, final LoriTimePlugin plugin, final File dataFolder) {
         final String storageType = config.getString("general.storage", "yml").toLowerCase(Locale.ROOT);
         if ("sqlite".equals(storageType)) {
@@ -75,6 +93,9 @@ public class DatabaseStorage implements NameStorage, TimeStorage {
         return new MySQL(config, plugin);
     }
 
+    /**
+     * Initializes the schema and migrates legacy data in a single transaction.
+     */
     private void initializeSchemaAndMigrate() {
         try (Connection connection = databaseProvider.getConnection()) {
             final boolean previousAutoCommit = connection.getAutoCommit();
@@ -102,6 +123,12 @@ public class DatabaseStorage implements NameStorage, TimeStorage {
         }
     }
 
+    /**
+     * Creates all required schema tables.
+     *
+     * @param connection an open connection
+     * @throws SQLException if schema creation fails
+     */
     private void createSchema(final Connection connection) throws SQLException {
         try (PreparedStatement statement = connection.prepareStatement(playerTable.createTableSql())) {
             statement.execute();
@@ -120,6 +147,12 @@ public class DatabaseStorage implements NameStorage, TimeStorage {
         }
     }
 
+    /**
+     * Migrates data from the legacy table into the new schema.
+     *
+     * @param connection an open connection
+     * @throws SQLException if migration fails
+     */
     private void migrateLegacyData(final Connection connection) throws SQLException {
         if (!tableExists(connection, legacyTable)) {
             return;
@@ -149,6 +182,14 @@ public class DatabaseStorage implements NameStorage, TimeStorage {
         log.info("Legacy migration completed.");
     }
 
+    /**
+     * Checks whether a table exists in the current database schema.
+     *
+     * @param connection an open connection
+     * @param tableName  the table name to check
+     * @return {@code true} if the table exists
+     * @throws SQLException if the lookup fails
+     */
     private boolean tableExists(final Connection connection, final String tableName) throws SQLException {
         final String query = "SELECT 1 FROM information_schema.tables WHERE table_schema = DATABASE() AND table_name = ?";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
@@ -160,6 +201,7 @@ public class DatabaseStorage implements NameStorage, TimeStorage {
     }
 
     @Override
+    /** {@inheritDoc} */
     public Optional<UUID> getUuid(final String name) throws StorageException {
         Objects.requireNonNull(name);
         poolLock.readLock().lock();
@@ -176,6 +218,7 @@ public class DatabaseStorage implements NameStorage, TimeStorage {
     }
 
     @Override
+    /** {@inheritDoc} */
     public Optional<String> getName(final UUID uniqueId) throws StorageException {
         Objects.requireNonNull(uniqueId);
         poolLock.readLock().lock();
@@ -192,6 +235,7 @@ public class DatabaseStorage implements NameStorage, TimeStorage {
     }
 
     @Override
+    /** {@inheritDoc} */
     public OptionalLong getTime(final UUID uniqueId) throws StorageException {
         Objects.requireNonNull(uniqueId);
         poolLock.readLock().lock();
@@ -208,6 +252,7 @@ public class DatabaseStorage implements NameStorage, TimeStorage {
     }
 
     @Override
+    /** {@inheritDoc} */
     public void addTime(final UUID uuid, final long additionalTime) throws StorageException {
         Objects.requireNonNull(uuid);
         poolLock.readLock().lock();
@@ -226,6 +271,7 @@ public class DatabaseStorage implements NameStorage, TimeStorage {
     }
 
     @Override
+    /** {@inheritDoc} */
     public void addTimes(final Map<UUID, Long> additionalTimes) throws StorageException {
         if (additionalTimes == null || additionalTimes.isEmpty()) {
             return;
@@ -249,6 +295,7 @@ public class DatabaseStorage implements NameStorage, TimeStorage {
     }
 
     @Override
+    /** {@inheritDoc} */
     public void setEntry(final UUID uuid, final String name) throws StorageException {
         Objects.requireNonNull(uuid);
         Objects.requireNonNull(name);
@@ -266,11 +313,13 @@ public class DatabaseStorage implements NameStorage, TimeStorage {
     }
 
     @Override
+    /** {@inheritDoc} */
     public void setEntry(final UUID uniqueId, final String name, final boolean override) throws StorageException {
         setEntry(uniqueId, name);
     }
 
     @Override
+    /** {@inheritDoc} */
     public void setEntries(final Map<UUID, String> entries) throws StorageException {
         if (entries == null || entries.isEmpty()) {
             return;
@@ -291,6 +340,7 @@ public class DatabaseStorage implements NameStorage, TimeStorage {
     }
 
     @Override
+    /** {@inheritDoc} */
     public Set<String> getNameEntries() throws StorageException {
         poolLock.readLock().lock();
         try {
@@ -306,6 +356,7 @@ public class DatabaseStorage implements NameStorage, TimeStorage {
     }
 
     @Override
+    /** {@inheritDoc} */
     public Map<String, ?> getAllTimeEntries() throws StorageException {
         poolLock.readLock().lock();
         try {
@@ -321,15 +372,23 @@ public class DatabaseStorage implements NameStorage, TimeStorage {
     }
 
     @Override
+    /** {@inheritDoc} */
     public void removeUser(final UUID uniqueId) throws StorageException, SQLException {
         deleteUser(uniqueId);
     }
 
     @Override
+    /** {@inheritDoc} */
     public void removeTimeHolder(final UUID uniqueId) throws StorageException, SQLException {
         deleteUser(uniqueId);
     }
 
+    /**
+     * Deletes a player entry by UUID.
+     *
+     * @param uuid the player UUID
+     * @throws StorageException if the deletion fails
+     */
     private void deleteUser(final UUID uuid) throws StorageException {
         if (uuid == null) {
             return;
@@ -348,12 +407,18 @@ public class DatabaseStorage implements NameStorage, TimeStorage {
     }
 
     @Override
+    /** {@inheritDoc} */
     public void close() throws StorageException {
         if (!databaseProvider.isClosed()) {
             databaseProvider.close();
         }
     }
 
+    /**
+     * Throws an exception if the storage is already closed.
+     *
+     * @throws StorageException if the storage is closed
+     */
     private void checkClosed() throws StorageException {
         if (databaseProvider.isClosed()) {
             throw new StorageException("closed");

@@ -14,6 +14,9 @@ import java.util.Map;
 import java.util.OptionalLong;
 import java.util.UUID;
 
+/**
+ * Table helper for time entries.
+ */
 final class TimeTable {
 
     private final String tableName;

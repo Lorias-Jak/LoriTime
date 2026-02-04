@@ -4,9 +4,18 @@ package com.jannik_kuehn.common.storage.database;
  * Built-in SQL dialects supported by the storage layer.
  */
 enum DatabaseDialect implements SqlDialect {
+    /**
+     * An enumeration constant representing the MySQL SQL dialect implementation.
+     * Provides methods for generating MySQL-specific SQL statements, including table creation
+     * and query expressions for database operations.
+     * <p>
+     * Responsibilities include:
+     * - Defining SQL schema creation statements such as player tables, server tables,
+     *   world tables, time tracking tables, and statistic tables.
+     * - Generating SQL expressions for computing time durations in seconds.
+     */
     MYSQL {
         @Override
-        /** {@inheritDoc} */
         public String createPlayerTable(final String tableName) {
             return "CREATE TABLE IF NOT EXISTS `" + tableName + "` ("
                     + "`id` BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,"
@@ -17,7 +26,6 @@ enum DatabaseDialect implements SqlDialect {
         }
 
         @Override
-        /** {@inheritDoc} */
         public String createServerTable(final String tableName) {
             return "CREATE TABLE IF NOT EXISTS `" + tableName + "` ("
                     + "`id` BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,"
@@ -26,7 +34,6 @@ enum DatabaseDialect implements SqlDialect {
         }
 
         @Override
-        /** {@inheritDoc} */
         public String createWorldTable(final String tableName, final String serverTableName) {
             return "CREATE TABLE IF NOT EXISTS `" + tableName + "` ("
                     + "`id` BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,"
@@ -38,7 +45,6 @@ enum DatabaseDialect implements SqlDialect {
         }
 
         @Override
-        /** {@inheritDoc} */
         public String createTimeTable(final String tableName, final String playerTableName, final String worldTableName) {
             return "CREATE TABLE IF NOT EXISTS `" + tableName + "` ("
                     + "`id` BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,"
@@ -54,7 +60,6 @@ enum DatabaseDialect implements SqlDialect {
         }
 
         @Override
-        /** {@inheritDoc} */
         public String createStatisticTable(final String tableName) {
             return "CREATE TABLE IF NOT EXISTS `" + tableName + "` ("
                     + "`id` BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,"
@@ -68,14 +73,17 @@ enum DatabaseDialect implements SqlDialect {
         }
 
         @Override
-        /** {@inheritDoc} */
         public String durationSecondsExpression(final String joinColumn, final String leaveColumn) {
             return "TIMESTAMPDIFF(SECOND, " + joinColumn + ", " + leaveColumn + ")";
         }
     },
+    /**
+     * Represents the SQLite dialect for interacting with SQLite databases.
+     * Provides SQL statement generation for creating and managing tables and
+     * for performing specific database operations.
+     */
     SQLITE {
         @Override
-        /** {@inheritDoc} */
         public String createPlayerTable(final String tableName) {
             return "CREATE TABLE IF NOT EXISTS `" + tableName + "` ("
                     + "`id` INTEGER PRIMARY KEY AUTOINCREMENT,"
@@ -86,7 +94,6 @@ enum DatabaseDialect implements SqlDialect {
         }
 
         @Override
-        /** {@inheritDoc} */
         public String createServerTable(final String tableName) {
             return "CREATE TABLE IF NOT EXISTS `" + tableName + "` ("
                     + "`id` INTEGER PRIMARY KEY AUTOINCREMENT,"
@@ -95,7 +102,6 @@ enum DatabaseDialect implements SqlDialect {
         }
 
         @Override
-        /** {@inheritDoc} */
         public String createWorldTable(final String tableName, final String serverTableName) {
             return "CREATE TABLE IF NOT EXISTS `" + tableName + "` ("
                     + "`id` INTEGER PRIMARY KEY AUTOINCREMENT,"
@@ -107,7 +113,6 @@ enum DatabaseDialect implements SqlDialect {
         }
 
         @Override
-        /** {@inheritDoc} */
         public String createTimeTable(final String tableName, final String playerTableName, final String worldTableName) {
             return "CREATE TABLE IF NOT EXISTS `" + tableName + "` ("
                     + "`id` INTEGER PRIMARY KEY AUTOINCREMENT,"
@@ -121,7 +126,6 @@ enum DatabaseDialect implements SqlDialect {
         }
 
         @Override
-        /** {@inheritDoc} */
         public String createStatisticTable(final String tableName) {
             return "CREATE TABLE IF NOT EXISTS `" + tableName + "` ("
                     + "`id` INTEGER PRIMARY KEY AUTOINCREMENT,"
@@ -133,7 +137,6 @@ enum DatabaseDialect implements SqlDialect {
         }
 
         @Override
-        /** {@inheritDoc} */
         public String durationSecondsExpression(final String joinColumn, final String leaveColumn) {
             return "strftime('%s', " + leaveColumn + ") - strftime('%s', " + joinColumn + ")";
         }

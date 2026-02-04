@@ -19,6 +19,7 @@ import java.util.UUID;
 final class PlayerTable {
 
     private final String tableName;
+
     private final SqlDialect dialect;
 
     PlayerTable(final String tableName, final SqlDialect dialect) {
@@ -30,7 +31,7 @@ final class PlayerTable {
         return dialect.createPlayerTable(tableName);
     }
 
-    String getTableName() {
+    public String getTableName() {
         return tableName;
     }
 

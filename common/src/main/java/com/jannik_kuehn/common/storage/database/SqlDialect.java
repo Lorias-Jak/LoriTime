@@ -31,7 +31,7 @@ interface SqlDialect {
     String createWorldTable(String tableName, String serverTableName);
 
     /**
-     * Returns the CREATE TABLE DDL for the time table.
+     * Returns the CREATE TABLE DDL for the timetable.
      *
      * @param tableName       the table name
      * @param playerTableName the player table name

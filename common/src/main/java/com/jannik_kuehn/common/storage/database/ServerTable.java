@@ -13,6 +13,7 @@ import java.util.Optional;
 final class ServerTable {
 
     private final String tableName;
+
     private final SqlDialect dialect;
 
     ServerTable(final String tableName, final SqlDialect dialect) {

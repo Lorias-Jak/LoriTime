@@ -15,25 +15,44 @@ import java.util.Locale;
  */
 final class SqliteDatabase implements SqlConnectionProvider {
 
+    /**
+     * Default database filename.
+     */
     private static final String DEFAULT_FILENAME = "loritime.db";
 
+    /**
+     * The {@link SqlDialect} instance.
+     */
     private final SqlDialect dialect;
 
+    /**
+     * The table prefix
+     */
     private final String tablePrefix;
 
+    /**
+     * The {@link LoriTimeLogger} instance.
+     */
     private final LoriTimeLogger log;
 
+    /**
+     * The SQLite database path.
+     */
     private final String databasePath;
 
+    /**
+     * The {@link HikariDataSource} instance.
+     */
     private HikariDataSource hikari;
 
     /**
-     * Creates a SQLite provider from configuration.
+     * Creates an SQLite provider from configuration.
      *
      * @param config         the configuration to read connection settings from
      * @param loriTimePlugin the plugin instance for logging
      * @param dataFolder     the plugin data folder for the default DB path
      */
+    /* default */
     SqliteDatabase(final Configuration config, final LoriTimePlugin loriTimePlugin, final File dataFolder) {
         this.log = loriTimePlugin.getLoggerFactory().create(SqliteDatabase.class);
         this.dialect = DatabaseDialect.SQLITE;
@@ -63,20 +82,14 @@ final class SqliteDatabase implements SqlConnectionProvider {
             log.error("SQLite JDBC Driver was not loaded!", e);
             return;
         }
-
-        try {
-            hikari = HikariDataSourceFactory.create(
-                    "jdbc:sqlite:" + databasePath,
-                    "LoriTime-SqlitePool",
-                    null,
-                    null,
-                    "SELECT 1",
-                    "PRAGMA foreign_keys=ON",
-                    4);
-        } catch (final Exception e) {
-            log.error("Failed to open SQLite database", e);
-            return;
-        }
+        hikari = HikariDataSourceFactory.create(
+                "jdbc:sqlite:" + databasePath,
+                "LoriTime-SqlitePool",
+                null,
+                null,
+                "SELECT 1",
+                "PRAGMA foreign_keys=ON",
+                4);
 
         if (!hikari.isClosed()) {
             log.info("Connected to SQLite database at " + databasePath);

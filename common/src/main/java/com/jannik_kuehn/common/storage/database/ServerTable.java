@@ -7,6 +7,9 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Optional;
 
+/**
+ * Table helper for server entries.
+ */
 final class ServerTable {
 
     private final String tableName;

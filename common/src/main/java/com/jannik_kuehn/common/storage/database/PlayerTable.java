@@ -13,6 +13,9 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
+/**
+ * Table helper for player entries.
+ */
 final class PlayerTable {
 
     private final String tableName;

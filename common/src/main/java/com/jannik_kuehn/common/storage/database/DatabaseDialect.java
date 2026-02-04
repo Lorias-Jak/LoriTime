@@ -1,8 +1,12 @@
 package com.jannik_kuehn.common.storage.database;
 
+/**
+ * Built-in SQL dialects supported by the storage layer.
+ */
 enum DatabaseDialect implements SqlDialect {
     MYSQL {
         @Override
+        /** {@inheritDoc} */
         public String createPlayerTable(final String tableName) {
             return "CREATE TABLE IF NOT EXISTS `" + tableName + "` ("
                     + "`id` BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,"
@@ -13,6 +17,7 @@ enum DatabaseDialect implements SqlDialect {
         }
 
         @Override
+        /** {@inheritDoc} */
         public String createServerTable(final String tableName) {
             return "CREATE TABLE IF NOT EXISTS `" + tableName + "` ("
                     + "`id` BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,"
@@ -21,6 +26,7 @@ enum DatabaseDialect implements SqlDialect {
         }
 
         @Override
+        /** {@inheritDoc} */
         public String createWorldTable(final String tableName, final String serverTableName) {
             return "CREATE TABLE IF NOT EXISTS `" + tableName + "` ("
                     + "`id` BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,"
@@ -32,6 +38,7 @@ enum DatabaseDialect implements SqlDialect {
         }
 
         @Override
+        /** {@inheritDoc} */
         public String createTimeTable(final String tableName, final String playerTableName, final String worldTableName) {
             return "CREATE TABLE IF NOT EXISTS `" + tableName + "` ("
                     + "`id` BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,"
@@ -47,6 +54,7 @@ enum DatabaseDialect implements SqlDialect {
         }
 
         @Override
+        /** {@inheritDoc} */
         public String createStatisticTable(final String tableName) {
             return "CREATE TABLE IF NOT EXISTS `" + tableName + "` ("
                     + "`id` BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,"
@@ -60,12 +68,14 @@ enum DatabaseDialect implements SqlDialect {
         }
 
         @Override
+        /** {@inheritDoc} */
         public String durationSecondsExpression(final String joinColumn, final String leaveColumn) {
             return "TIMESTAMPDIFF(SECOND, " + joinColumn + ", " + leaveColumn + ")";
         }
     },
     SQLITE {
         @Override
+        /** {@inheritDoc} */
         public String createPlayerTable(final String tableName) {
             return "CREATE TABLE IF NOT EXISTS `" + tableName + "` ("
                     + "`id` INTEGER PRIMARY KEY AUTOINCREMENT,"
@@ -76,6 +86,7 @@ enum DatabaseDialect implements SqlDialect {
         }
 
         @Override
+        /** {@inheritDoc} */
         public String createServerTable(final String tableName) {
             return "CREATE TABLE IF NOT EXISTS `" + tableName + "` ("
                     + "`id` INTEGER PRIMARY KEY AUTOINCREMENT,"
@@ -84,6 +95,7 @@ enum DatabaseDialect implements SqlDialect {
         }
 
         @Override
+        /** {@inheritDoc} */
         public String createWorldTable(final String tableName, final String serverTableName) {
             return "CREATE TABLE IF NOT EXISTS `" + tableName + "` ("
                     + "`id` INTEGER PRIMARY KEY AUTOINCREMENT,"
@@ -95,6 +107,7 @@ enum DatabaseDialect implements SqlDialect {
         }
 
         @Override
+        /** {@inheritDoc} */
         public String createTimeTable(final String tableName, final String playerTableName, final String worldTableName) {
             return "CREATE TABLE IF NOT EXISTS `" + tableName + "` ("
                     + "`id` INTEGER PRIMARY KEY AUTOINCREMENT,"
@@ -108,6 +121,7 @@ enum DatabaseDialect implements SqlDialect {
         }
 
         @Override
+        /** {@inheritDoc} */
         public String createStatisticTable(final String tableName) {
             return "CREATE TABLE IF NOT EXISTS `" + tableName + "` ("
                     + "`id` INTEGER PRIMARY KEY AUTOINCREMENT,"
@@ -119,6 +133,7 @@ enum DatabaseDialect implements SqlDialect {
         }
 
         @Override
+        /** {@inheritDoc} */
         public String durationSecondsExpression(final String joinColumn, final String leaveColumn) {
             return "strftime('%s', " + leaveColumn + ") - strftime('%s', " + joinColumn + ")";
         }

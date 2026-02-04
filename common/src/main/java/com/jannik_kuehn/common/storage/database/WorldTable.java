@@ -7,6 +7,9 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Optional;
 
+/**
+ * Table helper for world entries.
+ */
 final class WorldTable {
 
     private final String tableName;

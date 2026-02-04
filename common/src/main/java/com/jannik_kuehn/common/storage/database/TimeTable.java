@@ -6,7 +6,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.HashMap;
@@ -20,8 +19,11 @@ import java.util.UUID;
 final class TimeTable {
 
     private final String tableName;
+
     private final String playerTableName;
+
     private final String worldTableName;
+
     private final SqlDialect dialect;
 
     TimeTable(final String tableName, final String playerTableName, final String worldTableName, final SqlDialect dialect) {

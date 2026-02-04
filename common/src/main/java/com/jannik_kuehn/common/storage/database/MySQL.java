@@ -12,7 +12,6 @@ import java.util.Locale;
 /**
  * MySQL/MariaDB connection provider backed by HikariCP.
  */
-@SuppressWarnings("PMD.CommentRequired")
 public class MySQL implements SqlConnectionProvider {
 
     private final String mySqlHost;
@@ -69,14 +68,31 @@ public class MySQL implements SqlConnectionProvider {
     }
 
     /**
-     * {@inheritDoc}
+     * Checks if the current MySQL connection pool is closed.
+     * <p>
+     * This method evaluates the state of the Hikari connection pool
+     * and determines if it is either uninitialized or closed.
+     *
+     * @return true if the Hikari connection pool is not initialized
+     *         or has been closed; false otherwise
      */
     public boolean isClosed() {
         return hikari == null || hikari.isClosed();
     }
 
     /**
-     * {@inheritDoc}
+     * Opens a connection to the MySQL database if it is not already open.
+     * <p>
+     * The method attempts to load the JDBC driver specified by `driverClassName`.
+     * If the driver cannot be loaded, an error is logged and the method returns.
+     * <p>
+     * If the connection is closed, it initiates a connection to the database
+     * by creating a Hikari connection pool using `HikariDataSourceFactory`.
+     * <p>
+     * Logs appropriate information about the connection status:
+     * - Logs an info message if the connection is successfully established.
+     * - Logs an error if the connection could not be established or if it is
+     *   already open.
      */
     public void open() {
         try {
@@ -112,7 +128,10 @@ public class MySQL implements SqlConnectionProvider {
     }
 
     /**
-     * {@inheritDoc}
+     * Returns a new hikari connection
+     *
+     * @return a {@link Connection}
+     * @throws SQLException in case hikari is not initialized
      */
     public Connection getConnection() throws SQLException {
         if (hikari == null) {
@@ -122,7 +141,6 @@ public class MySQL implements SqlConnectionProvider {
     }
 
     @Override
-    /** {@inheritDoc} */
     public void close() {
         if (hikari != null) {
             log.info("Closing connection to (" + mySqlHost + ", " + mySqlPort + " ," + mySqlDatabase + ")...");
@@ -134,15 +152,17 @@ public class MySQL implements SqlConnectionProvider {
         log.error("Could not disconnect from the MySQL-Server!");
     }
 
+
     /**
-     * {@inheritDoc}
+     * Returns the table prefix.
+     *
+     * @return the table prefix
      */
     public String getTablePrefix() {
         return tablePrefix;
     }
 
     @Override
-    /** {@inheritDoc} */
     public SqlDialect getDialect() {
         return dialect;
     }

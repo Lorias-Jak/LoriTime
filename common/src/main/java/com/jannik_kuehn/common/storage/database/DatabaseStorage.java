@@ -9,6 +9,7 @@ import com.jannik_kuehn.common.exception.StorageException;
 import com.jannik_kuehn.common.utils.UuidUtil;
 
 import java.io.File;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -31,18 +32,25 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 public class DatabaseStorage implements NameStorage, TimeStorage {
 
     private static final String DEFAULT_SERVER_NAME = "default";
+
     private static final String DEFAULT_WORLD_NAME = "global";
 
     private final SqlConnectionProvider databaseProvider;
+
     private final LoriTimeLogger log;
+
     private final ReadWriteLock poolLock;
 
     private final String legacyTable;
-    private final SqlDialect dialect;
+
     private final PlayerTable playerTable;
+
     private final ServerTable serverTable;
+
     private final WorldTable worldTable;
+
     private final TimeTable timeTable;
+
     private final StatisticTable statisticTable;
 
     /**
@@ -65,7 +73,7 @@ public class DatabaseStorage implements NameStorage, TimeStorage {
         final String timeTableName = tablePrefix + "_time";
         final String statisticTableName = tablePrefix + "_statistic";
 
-        this.dialect = databaseProvider.getDialect();
+        final SqlDialect dialect = databaseProvider.getDialect();
         this.playerTable = new PlayerTable(playerTableName, dialect);
         this.serverTable = new ServerTable(serverTableName, dialect);
         this.worldTable = new WorldTable(worldTableName, serverTable, dialect);
@@ -201,7 +209,6 @@ public class DatabaseStorage implements NameStorage, TimeStorage {
     }
 
     @Override
-    /** {@inheritDoc} */
     public Optional<UUID> getUuid(final String name) throws StorageException {
         Objects.requireNonNull(name);
         poolLock.readLock().lock();
@@ -218,7 +225,6 @@ public class DatabaseStorage implements NameStorage, TimeStorage {
     }
 
     @Override
-    /** {@inheritDoc} */
     public Optional<String> getName(final UUID uniqueId) throws StorageException {
         Objects.requireNonNull(uniqueId);
         poolLock.readLock().lock();
@@ -235,7 +241,6 @@ public class DatabaseStorage implements NameStorage, TimeStorage {
     }
 
     @Override
-    /** {@inheritDoc} */
     public OptionalLong getTime(final UUID uniqueId) throws StorageException {
         Objects.requireNonNull(uniqueId);
         poolLock.readLock().lock();
@@ -252,7 +257,6 @@ public class DatabaseStorage implements NameStorage, TimeStorage {
     }
 
     @Override
-    /** {@inheritDoc} */
     public void addTime(final UUID uuid, final long additionalTime) throws StorageException {
         Objects.requireNonNull(uuid);
         poolLock.readLock().lock();
@@ -271,7 +275,6 @@ public class DatabaseStorage implements NameStorage, TimeStorage {
     }
 
     @Override
-    /** {@inheritDoc} */
     public void addTimes(final Map<UUID, Long> additionalTimes) throws StorageException {
         if (additionalTimes == null || additionalTimes.isEmpty()) {
             return;
@@ -295,7 +298,6 @@ public class DatabaseStorage implements NameStorage, TimeStorage {
     }
 
     @Override
-    /** {@inheritDoc} */
     public void setEntry(final UUID uuid, final String name) throws StorageException {
         Objects.requireNonNull(uuid);
         Objects.requireNonNull(name);
@@ -313,13 +315,11 @@ public class DatabaseStorage implements NameStorage, TimeStorage {
     }
 
     @Override
-    /** {@inheritDoc} */
     public void setEntry(final UUID uniqueId, final String name, final boolean override) throws StorageException {
         setEntry(uniqueId, name);
     }
 
     @Override
-    /** {@inheritDoc} */
     public void setEntries(final Map<UUID, String> entries) throws StorageException {
         if (entries == null || entries.isEmpty()) {
             return;
@@ -340,7 +340,6 @@ public class DatabaseStorage implements NameStorage, TimeStorage {
     }
 
     @Override
-    /** {@inheritDoc} */
     public Set<String> getNameEntries() throws StorageException {
         poolLock.readLock().lock();
         try {
@@ -356,7 +355,6 @@ public class DatabaseStorage implements NameStorage, TimeStorage {
     }
 
     @Override
-    /** {@inheritDoc} */
     public Map<String, ?> getAllTimeEntries() throws StorageException {
         poolLock.readLock().lock();
         try {
@@ -372,13 +370,11 @@ public class DatabaseStorage implements NameStorage, TimeStorage {
     }
 
     @Override
-    /** {@inheritDoc} */
     public void removeUser(final UUID uniqueId) throws StorageException, SQLException {
         deleteUser(uniqueId);
     }
 
     @Override
-    /** {@inheritDoc} */
     public void removeTimeHolder(final UUID uniqueId) throws StorageException, SQLException {
         deleteUser(uniqueId);
     }
@@ -407,10 +403,13 @@ public class DatabaseStorage implements NameStorage, TimeStorage {
     }
 
     @Override
-    /** {@inheritDoc} */
     public void close() throws StorageException {
         if (!databaseProvider.isClosed()) {
-            databaseProvider.close();
+            try {
+                databaseProvider.close();
+            } catch (final IOException e) {
+                throw new StorageException("The database could not be closed properly.", e);
+            }
         }
     }
 

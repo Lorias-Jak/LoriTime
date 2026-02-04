@@ -18,8 +18,11 @@ final class SqliteDatabase implements SqlConnectionProvider {
     private static final String DEFAULT_FILENAME = "loritime.db";
 
     private final SqlDialect dialect;
+
     private final String tablePrefix;
+
     private final LoriTimeLogger log;
+
     private final String databasePath;
 
     private HikariDataSource hikari;
@@ -45,12 +48,10 @@ final class SqliteDatabase implements SqlConnectionProvider {
         }
         this.tablePrefix = uncheckedTablePrefix;
 
-        final String configuredPath = config.getString("sqlite.file", new File(dataFolder, DEFAULT_FILENAME).getAbsolutePath());
-        this.databasePath = configuredPath;
+        this.databasePath = config.getString("sqlite.file", new File(dataFolder, DEFAULT_FILENAME).getAbsolutePath());
     }
 
     @Override
-    /** {@inheritDoc} */
     public void open() {
         if (hikari != null && !hikari.isClosed()) {
             log.error("The SQLite connection is already open!");
@@ -85,7 +86,6 @@ final class SqliteDatabase implements SqlConnectionProvider {
     }
 
     @Override
-    /** {@inheritDoc} */
     public Connection getConnection() throws SQLException {
         if (hikari == null) {
             throw new SQLException("HikariDataSource is not initialized.");
@@ -94,13 +94,11 @@ final class SqliteDatabase implements SqlConnectionProvider {
     }
 
     @Override
-    /** {@inheritDoc} */
     public boolean isClosed() {
         return hikari == null || hikari.isClosed();
     }
 
     @Override
-    /** {@inheritDoc} */
     public void close() {
         if (hikari != null) {
             log.info("Closing SQLite connection ...");
@@ -113,13 +111,11 @@ final class SqliteDatabase implements SqlConnectionProvider {
     }
 
     @Override
-    /** {@inheritDoc} */
     public String getTablePrefix() {
         return tablePrefix;
     }
 
     @Override
-    /** {@inheritDoc} */
     public SqlDialect getDialect() {
         return dialect;
     }

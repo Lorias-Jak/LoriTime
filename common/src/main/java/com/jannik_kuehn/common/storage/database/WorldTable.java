@@ -13,7 +13,9 @@ import java.util.Optional;
 final class WorldTable {
 
     private final String tableName;
+
     private final ServerTable serverTable;
+
     private final SqlDialect dialect;
 
     WorldTable(final String tableName, final ServerTable serverTable, final SqlDialect dialect) {

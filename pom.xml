@@ -337,7 +337,7 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>flatten-maven-plugin</artifactId>
-        <version>1.7.2</version>
+        <version>1.7.3</version>
         <configuration>
           <updatePomFile>true</updatePomFile>
           <flattenMode>resolveCiFriendliesOnly</flattenMode>
@@ -543,7 +543,7 @@
         <plugin>
           <groupId>org.codehaus.mojo</groupId>
           <artifactId>flatten-maven-plugin</artifactId>
-          <version>1.7.2</version>
+          <version>1.7.3</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>

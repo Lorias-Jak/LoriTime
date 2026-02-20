@@ -1,4 +1,6 @@
-package com.jannik_kuehn.common.storage.database;
+package com.jannik_kuehn.common.storage.database.table;
+
+import com.jannik_kuehn.common.storage.database.SqlDialect;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -10,7 +12,7 @@ import java.util.Optional;
 /**
  * Table helper for server entries.
  */
-final class ServerTable {
+public final class ServerTable {
 
     /**
      * The table name.
@@ -29,7 +31,7 @@ final class ServerTable {
      * @param dialect   the SQL dialect to use for database operations
      */
     /* default */
-    ServerTable(final String tableName, final SqlDialect dialect) {
+    public ServerTable(final String tableName, final SqlDialect dialect) {
         this.tableName = tableName;
         this.dialect = dialect;
     }
@@ -40,7 +42,7 @@ final class ServerTable {
      * @return the SQL CREATE TABLE statement for the server table
      */
     /* default */
-    String createTableSql() {
+    public String createTableSql() {
         return dialect.createServerTable(tableName);
     }
 
@@ -50,7 +52,7 @@ final class ServerTable {
      * @return the name of the table
      */
     /* default */
-    String getTableName() {
+    public String getTableName() {
         return tableName;
     }
 
@@ -64,7 +66,7 @@ final class ServerTable {
      * @throws SQLException if a database access error occurs or the server entry cannot be created
      */
     /* default */
-    long ensureServer(final Connection connection, final String server) throws SQLException {
+    public long ensureServer(final Connection connection, final String server) throws SQLException {
         final Optional<Long> existing = findId(connection, server);
         if (existing.isPresent()) {
             return existing.get();

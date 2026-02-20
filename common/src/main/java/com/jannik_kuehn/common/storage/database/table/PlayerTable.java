@@ -1,5 +1,6 @@
-package com.jannik_kuehn.common.storage.database;
+package com.jannik_kuehn.common.storage.database.table;
 
+import com.jannik_kuehn.common.storage.database.SqlDialect;
 import com.jannik_kuehn.common.utils.UuidUtil;
 
 import java.sql.Connection;
@@ -17,7 +18,7 @@ import java.util.UUID;
  * Table helper for player entries.
  */
 @SuppressWarnings("PMD.TooManyMethods")
-final class PlayerTable {
+public final class PlayerTable {
 
     /**
      * The table name.
@@ -36,7 +37,7 @@ final class PlayerTable {
      * @param dialect   the SQL dialect to use for generating SQL statements
      */
     /* default */
-    PlayerTable(final String tableName, final SqlDialect dialect) {
+    public PlayerTable(final String tableName, final SqlDialect dialect) {
         this.tableName = tableName;
         this.dialect = dialect;
     }
@@ -47,7 +48,7 @@ final class PlayerTable {
      * @return the SQL CREATE TABLE statement for the player table
      */
     /* default */
-    String createTableSql() {
+    public String createTableSql() {
         return dialect.createPlayerTable(tableName);
     }
 
@@ -69,7 +70,7 @@ final class PlayerTable {
      * @throws SQLException if a database access error occurs
      */
     /* default */
-    boolean hasAnyData(final Connection connection) throws SQLException {
+    public boolean hasAnyData(final Connection connection) throws SQLException {
         try (PreparedStatement statement = connection.prepareStatement(
                 "SELECT 1 FROM `" + tableName + "` LIMIT 1")) {
             try (ResultSet result = statement.executeQuery()) {
@@ -130,7 +131,7 @@ final class PlayerTable {
      * @throws SQLException if a database access error occurs
      */
     /* default */
-    Optional<UUID> findUuidByName(final Connection connection, final String name) throws SQLException {
+    public Optional<UUID> findUuidByName(final Connection connection, final String name) throws SQLException {
         try (PreparedStatement select = connection.prepareStatement(
                 "SELECT `uuid` FROM `" + tableName + "` WHERE `name` = ?")) {
             select.setString(1, name);
@@ -151,7 +152,7 @@ final class PlayerTable {
      * @return an Optional containing the name if found, or
      */
     /* default */
-    Optional<String> findNameByUuid(final Connection connection, final UUID uuid) throws SQLException {
+    public Optional<String> findNameByUuid(final Connection connection, final UUID uuid) throws SQLException {
         try (PreparedStatement select = connection.prepareStatement(
                 "SELECT `name` FROM `" + tableName + "` WHERE `uuid` = ?")) {
             select.setBytes(1, UuidUtil.toBytes(uuid));
@@ -172,7 +173,7 @@ final class PlayerTable {
      * @throws SQLException if a database access error
      */
     /* default */
-    Set<String> getAllNames(final Connection connection) throws SQLException {
+    public Set<String> getAllNames(final Connection connection) throws SQLException {
         final Set<String> names = new HashSet<>();
         try (PreparedStatement select = connection.prepareStatement(
                 "SELECT `name` FROM `" + tableName + "` WHERE `name` IS NOT NULL")) {
@@ -197,7 +198,7 @@ final class PlayerTable {
      * @throws SQLException if a database access error occurs during the operation
      */
     /* default */
-    long ensurePlayer(final Connection connection, final UUID uuid, final Optional<String> name) throws SQLException {
+    public long ensurePlayer(final Connection connection, final UUID uuid, final Optional<String> name) throws SQLException {
         final Optional<Long> existingId = findIdByUuid(connection, uuid);
         if (existingId.isPresent()) {
             if (name.isPresent()) {
@@ -232,7 +233,7 @@ final class PlayerTable {
     }
 
     /* default */
-    void deleteByUuid(final Connection connection, final UUID uuid) throws SQLException {
+    public void deleteByUuid(final Connection connection, final UUID uuid) throws SQLException {
         try (PreparedStatement delete = connection.prepareStatement(
                 "DELETE FROM `" + tableName + "` WHERE `uuid` = ?")) {
             delete.setBytes(1, UuidUtil.toBytes(uuid));

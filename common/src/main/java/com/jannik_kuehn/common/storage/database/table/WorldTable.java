@@ -1,4 +1,6 @@
-package com.jannik_kuehn.common.storage.database;
+package com.jannik_kuehn.common.storage.database.table;
+
+import com.jannik_kuehn.common.storage.database.SqlDialect;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -10,7 +12,7 @@ import java.util.Optional;
 /**
  * Table helper for world entries.
  */
-final class WorldTable {
+public final class WorldTable {
 
     /**
      * The table name.
@@ -35,7 +37,7 @@ final class WorldTable {
      * @param dialect the {@link SqlDialect}
      */
     /* default */
-    WorldTable(final String tableName, final ServerTable serverTable, final SqlDialect dialect) {
+    public WorldTable(final String tableName, final ServerTable serverTable, final SqlDialect dialect) {
         this.tableName = tableName;
         this.serverTable = serverTable;
         this.dialect = dialect;
@@ -47,7 +49,7 @@ final class WorldTable {
      * @return the DDL statement
      */
     /* default */
-    String createTableSql() {
+    public String createTableSql() {
         return dialect.createWorldTable(tableName, serverTableName());
     }
 
@@ -62,7 +64,7 @@ final class WorldTable {
      * @throws SQLException if a database access error occurs or the world entry cannot be created
      */
     /* default */
-    long ensureWorld(final Connection connection, final String server, final String world) throws SQLException {
+    public long ensureWorld(final Connection connection, final String server, final String world) throws SQLException {
         final long serverId = serverTable.ensureServer(connection, server);
         final Optional<Long> existing = findId(connection, serverId, world);
         if (existing.isPresent()) {
@@ -104,7 +106,7 @@ final class WorldTable {
      * @return the name of the table as a {@link String}
      */
     /* default */
-    String getTableName() {
+    public String getTableName() {
         return tableName;
     }
 

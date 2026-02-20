@@ -6,6 +6,11 @@ import com.jannik_kuehn.common.api.storage.NameStorage;
 import com.jannik_kuehn.common.api.storage.TimeStorage;
 import com.jannik_kuehn.common.config.Configuration;
 import com.jannik_kuehn.common.exception.StorageException;
+import com.jannik_kuehn.common.storage.database.table.PlayerTable;
+import com.jannik_kuehn.common.storage.database.table.ServerTable;
+import com.jannik_kuehn.common.storage.database.table.StatisticTable;
+import com.jannik_kuehn.common.storage.database.table.TimeTable;
+import com.jannik_kuehn.common.storage.database.table.WorldTable;
 import com.jannik_kuehn.common.utils.UuidUtil;
 
 import java.io.File;
@@ -201,12 +206,8 @@ public class DatabaseStorage implements NameStorage, TimeStorage {
      * @throws SQLException if the lookup fails
      */
     private boolean tableExists(final Connection connection, final String tableName) throws SQLException {
-        final String query = "SELECT 1 FROM information_schema.tables WHERE table_schema = DATABASE() AND table_name = ?";
-        try (PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setString(1, tableName);
-            try (ResultSet result = statement.executeQuery()) {
-                return result.next();
-            }
+        try (ResultSet tables = connection.getMetaData().getTables(null, null, tableName, new String[]{"TABLE"})) {
+            return tables.next();
         }
     }
 

@@ -9,6 +9,7 @@ Choose what suits you more, there are no restrictions by your choice<br>
 |------|-------------|
 | yml | A file-based Storage |
 | mysql | A database hosted on a MySQL or MariaDB server |
+| sqlite | A file-based SQLite database |
 
 ## Setting up the database
 <p>To change the storage type, open your `config.yml` and enter all database properties.</p>
@@ -26,6 +27,23 @@ mysql:
   user: 'user'
   password: '123ABC!'
   tablePrefix: 'loritime'
+  dialect: 'mariadb' # options: mariadb, mysql
+
+###########
+# SQLite  #
+###########
+sqlite:
+  file: 'loritime.db'
+  tablePrefix: 'loritime'
 ```
 
 </details>
+
+## Proxy-only usage with database storage
+If LoriTime runs only on a proxy (multi-setup master on Velocity/Bungee) and no world-specific source is available,
+LoriTime stores accumulated time in a synthetic scope:
+
+- server: `default`
+- world: `global`
+
+This keeps proxy-only deployments compatible with the normalized database schema, because no paper/spigot world data is required.

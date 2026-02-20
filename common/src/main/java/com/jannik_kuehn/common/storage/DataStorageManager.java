@@ -127,7 +127,7 @@ public class DataStorageManager {
         final String storageMethod = loriTime.getConfig().getString("general.storage", "file");
         switch (storageMethod.toLowerCase(Locale.ROOT)) {
             case "yml" -> loadFileStorage();
-            case "sql", "mysql" -> loadDatabaseStorage();
+            case "sql", "mysql", "mariadb", "sqlite" -> loadDatabaseStorage();
             default -> log.error("illegal storage method " + storageMethod);
         }
     }
@@ -206,7 +206,7 @@ public class DataStorageManager {
 
     @SuppressWarnings("PMD.CloseResource")
     private void loadDatabaseStorage() {
-        final DatabaseStorage databaseStorage = new DatabaseStorage(loriTime.getConfig(), loriTime);
+        final DatabaseStorage databaseStorage = new DatabaseStorage(loriTime.getConfig(), loriTime, dataFolder);
         this.nameStorage = databaseStorage;
         this.timeStorage = new AccumulatingTimeStorage(loriTime.getLoggerFactory().create(AccumulatingTimeStorage.class), databaseStorage);
     }

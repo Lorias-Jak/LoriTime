@@ -1,5 +1,6 @@
-package com.jannik_kuehn.common.storage.database;
+package com.jannik_kuehn.common.storage.database.table;
 
+import com.jannik_kuehn.common.storage.database.SqlDialect;
 import com.jannik_kuehn.common.utils.UuidUtil;
 
 import java.sql.Connection;
@@ -16,7 +17,7 @@ import java.util.UUID;
 /**
  * Table helper for time entries.
  */
-final class TimeTable {
+public final class TimeTable {
 
     /**
      * The table name.
@@ -47,7 +48,7 @@ final class TimeTable {
      * @param dialect the {@link SqlDialect} instance
      */
     /* default */
-    TimeTable(final String tableName, final String playerTableName, final String worldTableName, final SqlDialect dialect) {
+    public TimeTable(final String tableName, final String playerTableName, final String worldTableName, final SqlDialect dialect) {
         this.tableName = tableName;
         this.playerTableName = playerTableName;
         this.worldTableName = worldTableName;
@@ -62,7 +63,7 @@ final class TimeTable {
      * @return the SQL statement for creating the time table
      */
     /* default */
-    String createTableSql() {
+    public String createTableSql() {
         return dialect.createTimeTable(tableName, playerTableName, worldTableName);
     }
 
@@ -79,7 +80,7 @@ final class TimeTable {
      * @throws SQLException if an SQL error occurs while attempting to insert the data
      */
     /* default */
-    void insertDuration(final Connection connection, final long playerId, final long worldId, final long durationSeconds)
+    public void insertDuration(final Connection connection, final long playerId, final long worldId, final long durationSeconds)
             throws SQLException {
         final Instant leave = Instant.now();
         final Instant join = leave.minusSeconds(durationSeconds);
@@ -105,7 +106,7 @@ final class TimeTable {
      * @throws SQLException if an SQL error occurs during the query execution
      */
     /* default */
-    OptionalLong sumForPlayer(final Connection connection, final UUID uuid) throws SQLException {
+    public OptionalLong sumForPlayer(final Connection connection, final UUID uuid) throws SQLException {
         final String durationExpression = dialect.durationSecondsExpression("t.join_time", "t.leave_time");
         final String sql = "SELECT SUM(" + durationExpression + ") AS total "
                 + "FROM `" + tableName + "` t "
@@ -136,7 +137,7 @@ final class TimeTable {
      * @throws SQLException if an SQL error occurs during the query execution
      */
     /* default */
-    Map<String, Long> getAllTotals(final Connection connection) throws SQLException {
+    public Map<String, Long> getAllTotals(final Connection connection) throws SQLException {
         final Map<String, Long> totals = new HashMap<>();
         final String durationExpression = dialect.durationSecondsExpression("t.join_time", "t.leave_time");
         final String sql = "SELECT p.uuid AS uuid, SUM(" + durationExpression + ") AS total "

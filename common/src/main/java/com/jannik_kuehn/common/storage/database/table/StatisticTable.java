@@ -1,9 +1,11 @@
-package com.jannik_kuehn.common.storage.database;
+package com.jannik_kuehn.common.storage.database.table;
+
+import com.jannik_kuehn.common.storage.database.SqlDialect;
 
 /**
  * Table helper for statistic entries.
  */
-final class StatisticTable {
+public final class StatisticTable {
 
     /**
      * The table name.
@@ -22,7 +24,7 @@ final class StatisticTable {
      * @param dialect   the {@link SqlDialect} instance
      */
     /* default */
-    StatisticTable(final String tableName, final SqlDialect dialect) {
+    public StatisticTable(final String tableName, final SqlDialect dialect) {
         this.tableName = tableName;
         this.dialect = dialect;
     }
@@ -33,7 +35,7 @@ final class StatisticTable {
      * @return the SQL CREATE TABLE statement for the statistic table
      */
     /* default */
-    String createTableSql() {
+    public String createTableSql() {
         return dialect.createStatisticTable(tableName);
     }
 }

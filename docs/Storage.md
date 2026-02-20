@@ -38,3 +38,12 @@ sqlite:
 ```
 
 </details>
+
+## Proxy-only usage with database storage
+If LoriTime runs only on a proxy (multi-setup master on Velocity/Bungee) and no world-specific source is available,
+LoriTime stores accumulated time in a synthetic scope:
+
+- server: `default`
+- world: `global`
+
+This keeps proxy-only deployments compatible with the normalized database schema, because no paper/spigot world data is required.

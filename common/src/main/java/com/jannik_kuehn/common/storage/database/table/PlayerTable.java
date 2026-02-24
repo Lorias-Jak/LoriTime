@@ -232,7 +232,13 @@ public final class PlayerTable {
         throw new SQLException("Unable to insert player");
     }
 
-    /* default */
+    /**
+     * Deletes a record from the database table based on the specified UUID.
+     *
+     * @param connection the database connection to use for executing the delete operation
+     * @param uuid       the UUID of the record to be deleted
+     * @throws SQLException if a database access error occurs during the operation
+     */
     public void deleteByUuid(final Connection connection, final UUID uuid) throws SQLException {
         try (PreparedStatement delete = connection.prepareStatement(
                 "DELETE FROM `" + tableName + "` WHERE `uuid` = ?")) {

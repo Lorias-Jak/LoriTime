@@ -3,7 +3,7 @@ package com.jannik_kuehn.common.storage.database;
 /**
  * Provides SQL fragments for a specific database dialect.
  */
-interface SqlDialect {
+public interface SqlDialect {
 
     /**
      * Returns the CREATE TABLE DDL for the player table.

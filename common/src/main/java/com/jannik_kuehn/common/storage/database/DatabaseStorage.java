@@ -33,7 +33,12 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 /**
  * Database-backed storage implementation for player names and time tracking.
  */
-@SuppressWarnings({"PMD.CommentRequired", "PMD.TooManyMethods", "PMD.CouplingBetweenObjects"})
+@SuppressWarnings({
+        "PMD.CommentRequired",
+        "PMD.TooManyMethods",
+        "PMD.CouplingBetweenObjects",
+        "PMD.CyclomaticComplexity"
+})
 public class DatabaseStorage implements NameStorage, TimeStorage {
 
     private static final String SQLITE_STORAGE_TYPE = "sqlite";
@@ -51,6 +56,8 @@ public class DatabaseStorage implements NameStorage, TimeStorage {
     private final LoriTimeLogger log;
 
     private final ReadWriteLock poolLock;
+
+    private final Object initializationLock;
 
     private final String legacyTable;
 
@@ -92,13 +99,14 @@ public class DatabaseStorage implements NameStorage, TimeStorage {
         this.log = loriTimePlugin.getLoggerFactory().create(DatabaseStorage.class);
         this.databaseProvider = createProvider(config, loriTimePlugin, dataFolder, log);
         this.poolLock = new ReentrantReadWriteLock();
+        this.initializationLock = new Object();
         this.initialized = false;
 
         final String tablePrefix = initializeTables(databaseProvider.getTablePrefix(), databaseProvider.getDialect());
         this.legacyTable = tablePrefix;
 
         if (autoInitialize) {
-            initialize();
+            initializeInternal();
         }
     }
 
@@ -115,13 +123,14 @@ public class DatabaseStorage implements NameStorage, TimeStorage {
         this.databaseProvider = Objects.requireNonNull(databaseProvider);
         this.log = Objects.requireNonNull(log);
         this.poolLock = new ReentrantReadWriteLock();
+        this.initializationLock = new Object();
         this.initialized = false;
 
         final String tablePrefix = initializeTables(databaseProvider.getTablePrefix(), databaseProvider.getDialect());
         this.legacyTable = tablePrefix;
 
         if (autoInitialize) {
-            initialize();
+            initializeInternal();
         }
     }
 
@@ -143,22 +152,28 @@ public class DatabaseStorage implements NameStorage, TimeStorage {
     /**
      * Opens the provider and initializes schema/migration.
      */
-    public synchronized void initialize() throws StorageException {
-        if (initialized) {
-            return;
-        }
-        databaseProvider.open();
-        if (databaseProvider.isClosed()) {
-            throw new StorageException("Failed to initialize database storage: provider could not be opened.");
-        }
-        initialized = initializeSchemaAndMigrate();
-        if (!initialized) {
-            try {
-                databaseProvider.close();
-            } catch (final IOException ex) {
-                log.error("Failed to close database provider after initialization failure", ex);
+    public void initialize() throws StorageException {
+        initializeInternal();
+    }
+
+    private void initializeInternal() throws StorageException {
+        synchronized (initializationLock) {
+            if (initialized) {
+                return;
             }
-            throw new StorageException("Failed to initialize database storage: schema creation or migration failed.");
+            databaseProvider.open();
+            if (databaseProvider.isClosed()) {
+                throw new StorageException("Failed to initialize database storage: provider could not be opened.");
+            }
+            initialized = initializeSchemaAndMigrate();
+            if (!initialized) {
+                try {
+                    databaseProvider.close();
+                } catch (final IOException ex) {
+                    log.error("Failed to close database provider after initialization failure", ex);
+                }
+                throw new StorageException("Failed to initialize database storage: schema creation or migration failed.");
+            }
         }
     }
 

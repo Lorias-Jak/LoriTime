@@ -8,9 +8,11 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.time.Clock;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.OptionalLong;
 import java.util.UUID;
 
@@ -40,6 +42,11 @@ public final class TimeTable {
     private final SqlDialect dialect;
 
     /**
+     * Time source used for duration inserts.
+     */
+    private final Clock clock;
+
+    /**
      * Default constructor.
      *
      * @param tableName the table name
@@ -49,10 +56,29 @@ public final class TimeTable {
      */
     /* default */
     public TimeTable(final String tableName, final String playerTableName, final String worldTableName, final SqlDialect dialect) {
+        this(tableName, playerTableName, worldTableName, dialect, Clock.systemUTC());
+    }
+
+    /**
+     * Default constructor with custom time source.
+     *
+     * @param tableName the table name
+     * @param playerTableName the player table name
+     * @param worldTableName the world table name
+     * @param dialect the {@link SqlDialect} instance
+     * @param clock time source used to create join/leave timestamps
+     */
+    /* default */
+    public TimeTable(final String tableName,
+                     final String playerTableName,
+                     final String worldTableName,
+                     final SqlDialect dialect,
+                     final Clock clock) {
         this.tableName = tableName;
         this.playerTableName = playerTableName;
         this.worldTableName = worldTableName;
         this.dialect = dialect;
+        this.clock = Objects.requireNonNull(clock);
     }
 
     /**
@@ -82,7 +108,7 @@ public final class TimeTable {
     /* default */
     public void insertDuration(final Connection connection, final long playerId, final long worldId, final long durationSeconds)
             throws SQLException {
-        final Instant leave = Instant.now();
+        final Instant leave = Instant.now(clock);
         final Instant join = leave.minusSeconds(durationSeconds);
         try (PreparedStatement insert = connection.prepareStatement(
                 "INSERT INTO `" + tableName + "` (`player_id`, `world_id`, `join_time`, `leave_time`) "

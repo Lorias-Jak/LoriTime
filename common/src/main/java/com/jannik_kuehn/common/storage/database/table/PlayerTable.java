@@ -36,7 +36,6 @@ public final class PlayerTable {
      * @param tableName the name of the table to be managed
      * @param dialect   the SQL dialect to use for generating SQL statements
      */
-    /* default */
     public PlayerTable(final String tableName, final SqlDialect dialect) {
         this.tableName = tableName;
         this.dialect = dialect;

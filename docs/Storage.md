@@ -8,11 +8,12 @@ Choose what suits you more, there are no restrictions by your choice<br>
 | Type | Description | 
 |------|-------------|
 | yml | A file-based Storage |
-| mysql | A database hosted on a MySQL or MariaDB server |
+| mysql | A database hosted on a MySQL server |
+| mariadb | A database hosted on a MariaDB server |
 | sqlite | A file-based SQLite database |
 
 ## Setting up the database
-<p>To change the storage type, open your `config.yml` and enter all database properties.</p>
+<p>To change the storage type, open your `config.yml`, set <code>general.storage</code> to <code>mysql</code>, <code>mariadb</code> or <code>sqlite</code>, and enter all database properties.</p>
 <details>
 <summary>Database properties (config.yml)</summary>
 
@@ -27,7 +28,6 @@ mysql:
   user: 'user'
   password: '123ABC!'
   tablePrefix: 'loritime'
-  dialect: 'mariadb' # options: mariadb, mysql
 
 ###########
 # SQLite  #

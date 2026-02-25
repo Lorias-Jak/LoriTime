@@ -38,6 +38,10 @@ public class DatabaseStorage implements NameStorage, TimeStorage {
 
     private static final String SQLITE_STORAGE_TYPE = "sqlite";
 
+    private static final String MYSQL_STORAGE_TYPE = "mysql";
+
+    private static final String MARIADB_STORAGE_TYPE = "mariadb";
+
     private static final String DEFAULT_SERVER_NAME = "default";
 
     private static final String DEFAULT_WORLD_NAME = "global";
@@ -102,10 +106,24 @@ public class DatabaseStorage implements NameStorage, TimeStorage {
      */
     private SqlConnectionProvider createProvider(final Configuration config, final LoriTimePlugin plugin, final File dataFolder) {
         final String storageType = config.getString("general.storage", "yml").toLowerCase(Locale.ROOT);
-        if (SQLITE_STORAGE_TYPE.equals(storageType)) {
-            return new SqliteDatabase(config, plugin, dataFolder);
-        }
-        return new MySQL(config, plugin);
+        return switch (storageType) {
+            case SQLITE_STORAGE_TYPE -> new SqliteDatabase(config, plugin, dataFolder);
+            case MARIADB_STORAGE_TYPE -> new MySQL(config, plugin, MySQL.Engine.MARIADB);
+            case MYSQL_STORAGE_TYPE -> new MySQL(config, plugin, MySQL.Engine.MYSQL);
+            case "sql" -> {
+                final String legacyDialect = config.getString("mysql.dialect", "mariadb").toLowerCase(Locale.ROOT);
+                final MySQL.Engine legacyEngine = MYSQL_STORAGE_TYPE.equals(legacyDialect)
+                        ? MySQL.Engine.MYSQL
+                        : MySQL.Engine.MARIADB;
+                log.warn("The storage type 'sql' is deprecated. Please use 'mysql', 'mariadb' or 'sqlite' in general.storage.");
+                yield new MySQL(config, plugin, legacyEngine);
+            }
+            default -> {
+                log.warn("Unknown SQL storage type '" + storageType
+                        + "'. Falling back to SQLite. Supported: mysql, mariadb, sqlite.");
+                yield new SqliteDatabase(config, plugin, dataFolder);
+            }
+        };
     }
 
     /**

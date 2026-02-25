@@ -15,6 +15,14 @@ import java.util.Locale;
 public class MySQL implements SqlConnectionProvider {
 
     /**
+     * Selects which JDBC variant should be used.
+     */
+    public enum Engine {
+        MYSQL,
+        MARIADB
+    }
+
+    /**
      * Represents the hostname.
      */
     private final String mySqlHost;
@@ -60,6 +68,11 @@ public class MySQL implements SqlConnectionProvider {
     private final String jdbcScheme;
 
     /**
+     * The selected engine.
+     */
+    private final Engine engine;
+
+    /**
      * The {@link LoriTimeLogger} instance.
      */
     private final LoriTimeLogger log;
@@ -75,9 +88,10 @@ public class MySQL implements SqlConnectionProvider {
      * @param config         the configuration to read connection settings from
      * @param loriTimePlugin the plugin instance for logging
      */
-    public MySQL(final Configuration config, final LoriTimePlugin loriTimePlugin) {
+    public MySQL(final Configuration config, final LoriTimePlugin loriTimePlugin, final Engine engine) {
         this.log = loriTimePlugin.getLoggerFactory().create(MySQL.class);
         this.dialect = DatabaseDialect.MYSQL;
+        this.engine = engine;
 
         this.mySqlHost = config.getString("mysql.host", "localhost");
         this.mySqlPort = config.getInt("mysql.port", 3306);
@@ -94,8 +108,7 @@ public class MySQL implements SqlConnectionProvider {
         }
         this.tablePrefix = uncheckedTablePrefix;
 
-        final String configuredDialect = config.getString("mysql.dialect", "mariadb").toLowerCase(Locale.ROOT);
-        final boolean useMariaDb = "mariadb".equals(configuredDialect);
+        final boolean useMariaDb = engine == Engine.MARIADB;
         this.driverClassName = useMariaDb ? "org.mariadb.jdbc.Driver" : "com.mysql.cj.jdbc.Driver";
         this.jdbcScheme = useMariaDb ? "jdbc:mariadb://" : "jdbc:mysql://";
     }
@@ -148,13 +161,13 @@ public class MySQL implements SqlConnectionProvider {
                     null);
 
             if (!hikari.isClosed()) {
-                log.info("Successfully connected to the MySQL-Server!");
+                log.info("Successfully connected to the " + engine + " server!");
                 return;
             }
-            log.error("Could not connect to the MySQL-Server!");
+            log.error("Could not connect to the " + engine + " server!");
             return;
         }
-        log.error("The MySQL connection is already open!");
+        log.error("The " + engine + " connection is already open!");
     }
 
     @Override
@@ -171,10 +184,10 @@ public class MySQL implements SqlConnectionProvider {
             log.info("Closing connection to (" + mySqlHost + ", " + mySqlPort + " ," + mySqlDatabase + ")...");
             hikari.close();
             hikari = null;
-            log.info("Successfully closed the connection to the MySQL-Server!");
+            log.info("Successfully closed the connection to the " + engine + " server!");
             return;
         }
-        log.error("Could not disconnect from the MySQL-Server!");
+        log.error("Could not disconnect from the " + engine + " server!");
     }
 
     @Override

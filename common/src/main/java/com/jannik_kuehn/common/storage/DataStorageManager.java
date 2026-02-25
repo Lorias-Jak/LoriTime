@@ -128,7 +128,11 @@ public class DataStorageManager {
         switch (storageMethod.toLowerCase(Locale.ROOT)) {
             case "yml" -> loadFileStorage();
             case "sql", "mysql", "mariadb", "sqlite" -> loadDatabaseStorage();
-            default -> log.error("illegal storage method " + storageMethod);
+            default -> {
+                log.warn("Illegal storage method '" + storageMethod
+                        + "'. Falling back to SQLite database storage.");
+                loadDatabaseStorage();
+            }
         }
     }
 

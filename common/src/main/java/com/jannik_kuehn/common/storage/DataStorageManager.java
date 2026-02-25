@@ -124,9 +124,9 @@ public class DataStorageManager {
         switch (storageMethod.toLowerCase(Locale.ROOT)) {
             case "sql", "mysql", "mariadb", "sqlite", "yml" -> loadDatabaseStorage();
             default -> {
-                log.warn("Illegal storage method '" + storageMethod
-                        + "'. Falling back to SQLite database storage.");
-                loadDatabaseStorage();
+                log.error("Illegal storage method '" + storageMethod
+                        + "'. Supported values: mysql, mariadb, sqlite (legacy: yml, sql).");
+                throw new StorageException("Unsupported storage method: " + storageMethod);
             }
         }
     }

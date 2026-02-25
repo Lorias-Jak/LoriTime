@@ -124,7 +124,8 @@ public class StorageMigrationService {
 
         prepareSqliteFile(migrationId);
 
-        try (DatabaseStorage sqliteStorage = new DatabaseStorage(config, loriTime, dataFolder)) {
+        try (DatabaseStorage sqliteStorage = new DatabaseStorage(config, loriTime, dataFolder, false)) {
+            sqliteStorage.initialize();
             sqliteStorage.setEntries(names);
             sqliteStorage.addTimes(times);
             config.setValue("general.storage", "sqlite");

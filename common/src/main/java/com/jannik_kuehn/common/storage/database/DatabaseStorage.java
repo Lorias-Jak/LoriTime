@@ -110,6 +110,10 @@ public class DatabaseStorage implements NameStorage, TimeStorage {
             case SQLITE_STORAGE_TYPE -> new SqliteDatabase(config, plugin, dataFolder);
             case MARIADB_STORAGE_TYPE -> new MySQL(config, plugin, MySQL.Engine.MARIADB);
             case MYSQL_STORAGE_TYPE -> new MySQL(config, plugin, MySQL.Engine.MYSQL);
+            case "yml" -> {
+                log.warn("Legacy storage type 'yml' is no longer supported directly. Using SQLite provider for migration/fallback.");
+                yield new SqliteDatabase(config, plugin, dataFolder);
+            }
             case "sql" -> {
                 final String legacyDialect = config.getString("mysql.dialect", "mariadb").toLowerCase(Locale.ROOT);
                 final MySQL.Engine legacyEngine = MYSQL_STORAGE_TYPE.equals(legacyDialect)

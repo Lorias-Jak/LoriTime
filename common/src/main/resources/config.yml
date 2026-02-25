@@ -19,8 +19,12 @@ general:
   language: 'en'
 
   # You can decide how the player data will be stored.
-  # The options are 'yml', 'mysql', 'mariadb', or 'sqlite'.
-  storage: 'yml'
+  # The options are 'mysql', 'mariadb', or 'sqlite'.
+  # If you still use 'yml', LoriTime will migrate your data to sqlite on startup.
+  storage: 'sqlite'
+
+  # Internal config migration version. Do not change manually.
+  configVersion: 2
 
   # The save interval specifies how often the player's online time is saved.
   # The unit is seconds.

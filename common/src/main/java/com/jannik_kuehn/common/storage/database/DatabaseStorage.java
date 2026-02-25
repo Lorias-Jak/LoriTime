@@ -27,7 +27,9 @@ import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
@@ -57,19 +59,19 @@ public class DatabaseStorage implements NameStorage, TimeStorage {
 
     private final ReadWriteLock poolLock;
 
-    private final Object initializationLock;
+    private final Lock initializationLock;
 
     private final String legacyTable;
 
-    private final PlayerTable playerTable;
+    private PlayerTable playerTable;
 
-    private final ServerTable serverTable;
+    private ServerTable serverTable;
 
-    private final WorldTable worldTable;
+    private WorldTable worldTable;
 
-    private final TimeTable timeTable;
+    private TimeTable timeTable;
 
-    private final StatisticTable statisticTable;
+    private StatisticTable statisticTable;
 
     private boolean initialized;
 
@@ -99,81 +101,13 @@ public class DatabaseStorage implements NameStorage, TimeStorage {
         this.log = loriTimePlugin.getLoggerFactory().create(DatabaseStorage.class);
         this.databaseProvider = createProvider(config, loriTimePlugin, dataFolder, log);
         this.poolLock = new ReentrantReadWriteLock();
-        this.initializationLock = new Object();
+        this.initializationLock = new ReentrantLock();
         this.initialized = false;
 
-        final String tablePrefix = initializeTables(databaseProvider.getTablePrefix(), databaseProvider.getDialect());
-        this.legacyTable = tablePrefix;
+        this.legacyTable = initializeTables(databaseProvider.getTablePrefix(), databaseProvider.getDialect());
 
         if (autoInitialize) {
             initializeInternal();
-        }
-    }
-
-    /**
-     * Constructor intended for injection-based usage.
-     *
-     * @param databaseProvider connection provider implementation
-     * @param log logger to be used by this storage
-     * @param autoInitialize if {@code true}, opens the provider and initializes schema immediately
-     */
-    public DatabaseStorage(final SqlConnectionProvider databaseProvider,
-                           final LoriTimeLogger log,
-                           final boolean autoInitialize) throws StorageException {
-        this.databaseProvider = Objects.requireNonNull(databaseProvider);
-        this.log = Objects.requireNonNull(log);
-        this.poolLock = new ReentrantReadWriteLock();
-        this.initializationLock = new Object();
-        this.initialized = false;
-
-        final String tablePrefix = initializeTables(databaseProvider.getTablePrefix(), databaseProvider.getDialect());
-        this.legacyTable = tablePrefix;
-
-        if (autoInitialize) {
-            initializeInternal();
-        }
-    }
-
-    private String initializeTables(final String tablePrefix, final SqlDialect dialect) {
-        final String playerTableName = tablePrefix + "_player";
-        final String serverTableName = tablePrefix + "_server";
-        final String worldTableName = tablePrefix + "_world";
-        final String timeTableName = tablePrefix + "_time";
-        final String statisticTableName = tablePrefix + "_statistic";
-
-        this.playerTable = new PlayerTable(playerTableName, dialect);
-        this.serverTable = new ServerTable(serverTableName, dialect);
-        this.worldTable = new WorldTable(worldTableName, serverTable, dialect);
-        this.timeTable = new TimeTable(timeTableName, playerTableName, worldTableName, dialect);
-        this.statisticTable = new StatisticTable(statisticTableName, dialect);
-        return tablePrefix;
-    }
-
-    /**
-     * Opens the provider and initializes schema/migration.
-     */
-    public void initialize() throws StorageException {
-        initializeInternal();
-    }
-
-    private void initializeInternal() throws StorageException {
-        synchronized (initializationLock) {
-            if (initialized) {
-                return;
-            }
-            databaseProvider.open();
-            if (databaseProvider.isClosed()) {
-                throw new StorageException("Failed to initialize database storage: provider could not be opened.");
-            }
-            initialized = initializeSchemaAndMigrate();
-            if (!initialized) {
-                try {
-                    databaseProvider.close();
-                } catch (final IOException ex) {
-                    log.error("Failed to close database provider after initialization failure", ex);
-                }
-                throw new StorageException("Failed to initialize database storage: schema creation or migration failed.");
-            }
         }
     }
 
@@ -212,6 +146,52 @@ public class DatabaseStorage implements NameStorage, TimeStorage {
                 yield new SqliteDatabase(config, plugin, dataFolder);
             }
         };
+    }
+
+    private String initializeTables(final String tablePrefix, final SqlDialect dialect) {
+        final String playerTableName = tablePrefix + "_player";
+        final String serverTableName = tablePrefix + "_server";
+        final String worldTableName = tablePrefix + "_world";
+        final String timeTableName = tablePrefix + "_time";
+        final String statisticTableName = tablePrefix + "_statistic";
+
+        this.playerTable = new PlayerTable(playerTableName, dialect);
+        this.serverTable = new ServerTable(serverTableName, dialect);
+        this.worldTable = new WorldTable(worldTableName, serverTable, dialect);
+        this.timeTable = new TimeTable(timeTableName, playerTableName, worldTableName, dialect);
+        this.statisticTable = new StatisticTable(statisticTableName, dialect);
+        return tablePrefix;
+    }
+
+    /**
+     * Opens the provider and initializes schema/migration.
+     */
+    public void initialize() throws StorageException {
+        initializeInternal();
+    }
+
+    private void initializeInternal() throws StorageException {
+        initializationLock.lock();
+        try {
+            if (initialized) {
+                return;
+            }
+            databaseProvider.open();
+            if (databaseProvider.isClosed()) {
+                throw new StorageException("Failed to initialize database storage: provider could not be opened.");
+            }
+            initialized = initializeSchemaAndMigrate();
+            if (!initialized) {
+                try {
+                    databaseProvider.close();
+                } catch (final IOException ex) {
+                    log.error("Failed to close database provider after initialization failure", ex);
+                }
+                throw new StorageException("Failed to initialize database storage: schema creation or migration failed.");
+            }
+        } finally {
+            initializationLock.unlock();
+        }
     }
 
     /**

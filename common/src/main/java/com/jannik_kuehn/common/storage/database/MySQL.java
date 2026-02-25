@@ -15,14 +15,6 @@ import java.util.Locale;
 public class MySQL implements SqlConnectionProvider {
 
     /**
-     * Selects which JDBC variant should be used.
-     */
-    public enum Engine {
-        MYSQL,
-        MARIADB
-    }
-
-    /**
      * Represents the hostname.
      */
     private final String mySqlHost;
@@ -142,6 +134,7 @@ public class MySQL implements SqlConnectionProvider {
      * already open.
      */
     @Override
+    @SuppressWarnings("PMD.AvoidDuplicateLiterals")
     public void open() {
         try {
             Class.forName(driverClassName);
@@ -198,5 +191,13 @@ public class MySQL implements SqlConnectionProvider {
     @Override
     public SqlDialect getDialect() {
         return dialect;
+    }
+
+    /**
+     * Selects which JDBC variant should be used.
+     */
+    public enum Engine {
+        MYSQL,
+        MARIADB
     }
 }

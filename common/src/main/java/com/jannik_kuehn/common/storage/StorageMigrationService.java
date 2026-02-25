@@ -24,16 +24,39 @@ import java.util.UUID;
  */
 public class StorageMigrationService {
 
+    /**
+     * The string of the yml storage type
+     */
+    public static final String YML = "yml";
+
+    /**
+     * The current config version.
+     */
     private static final int CURRENT_CONFIG_VERSION = 2;
 
+    /**
+     * The {@link LoriTimePlugin} instance.
+     */
     private final LoriTimePlugin loriTime;
 
+    /**
+     * The {@link LoriTimeLogger} instance.
+     */
     private final LoriTimeLogger log;
 
+    /**
+     * The data folder of the plugin.
+     */
     private final File dataFolder;
 
+    /**
+     * The {@link FileManager} instance.
+     */
     private final FileManager fileManager;
 
+    /**
+     * The {@link Configuration} instance.
+     */
     private final Configuration config;
 
     /**
@@ -62,7 +85,7 @@ public class StorageMigrationService {
         }
 
         final String configuredStorage = config.getString("general.storage", "sqlite").toLowerCase(Locale.ROOT);
-        if ("yml".equals(configuredStorage)) {
+        if (YML.equals(configuredStorage)) {
             migrateYmlToSqlite();
         }
 
@@ -101,9 +124,7 @@ public class StorageMigrationService {
 
         prepareSqliteFile(migrationId);
 
-        DatabaseStorage sqliteStorage = null;
-        try {
-            sqliteStorage = new DatabaseStorage(config, loriTime, dataFolder);
+        try (DatabaseStorage sqliteStorage = new DatabaseStorage(config, loriTime, dataFolder)) {
             sqliteStorage.setEntries(names);
             sqliteStorage.addTimes(times);
             config.setValue("general.storage", "sqlite");
@@ -111,12 +132,6 @@ public class StorageMigrationService {
             archiveLegacyFile(timeFile, "time", migrationId);
             log.info("Successfully migrated yml storage to SQLite. Imported " + names.size()
                     + " names and " + times.size() + " time entries.");
-        } catch (final StorageException e) {
-            throw e;
-        } finally {
-            if (sqliteStorage != null) {
-                sqliteStorage.close();
-            }
         }
     }
 
@@ -168,6 +183,7 @@ public class StorageMigrationService {
         }
     }
 
+    @SuppressWarnings("PMD.AvoidLiteralsInIfCondition")
     private void prepareSqliteFile(final String migrationId) throws StorageException {
         final File sqliteFile = resolveSqliteFile();
         if (!sqliteFile.exists()) {

@@ -183,7 +183,7 @@ public class DataStorageManager {
     }
 
     @SuppressWarnings("PMD.CloseResource")
-    private void loadDatabaseStorage() {
+    private void loadDatabaseStorage() throws StorageException {
         final DatabaseStorage databaseStorage = new DatabaseStorage(loriTime.getConfig(), loriTime, dataFolder, false);
         databaseStorage.initialize();
         this.nameStorage = databaseStorage;

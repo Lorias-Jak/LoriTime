@@ -73,7 +73,7 @@ public class DatabaseStorage implements NameStorage, TimeStorage {
      * @param loriTimePlugin the plugin instance for logging and context
      * @param dataFolder     the plugin data folder (used for SQLite paths)
      */
-    public DatabaseStorage(final Configuration config, final LoriTimePlugin loriTimePlugin, final File dataFolder) {
+    public DatabaseStorage(final Configuration config, final LoriTimePlugin loriTimePlugin, final File dataFolder) throws StorageException {
         this(config, loriTimePlugin, dataFolder, true);
     }
 
@@ -88,7 +88,7 @@ public class DatabaseStorage implements NameStorage, TimeStorage {
     public DatabaseStorage(final Configuration config,
                            final LoriTimePlugin loriTimePlugin,
                            final File dataFolder,
-                           final boolean autoInitialize) {
+                           final boolean autoInitialize) throws StorageException {
         this.log = loriTimePlugin.getLoggerFactory().create(DatabaseStorage.class);
         this.databaseProvider = createProvider(config, loriTimePlugin, dataFolder, log);
         this.poolLock = new ReentrantReadWriteLock();
@@ -111,7 +111,7 @@ public class DatabaseStorage implements NameStorage, TimeStorage {
      */
     public DatabaseStorage(final SqlConnectionProvider databaseProvider,
                            final LoriTimeLogger log,
-                           final boolean autoInitialize) {
+                           final boolean autoInitialize) throws StorageException {
         this.databaseProvider = Objects.requireNonNull(databaseProvider);
         this.log = Objects.requireNonNull(log);
         this.poolLock = new ReentrantReadWriteLock();
@@ -143,16 +143,23 @@ public class DatabaseStorage implements NameStorage, TimeStorage {
     /**
      * Opens the provider and initializes schema/migration.
      */
-    public synchronized void initialize() {
+    public synchronized void initialize() throws StorageException {
         if (initialized) {
             return;
         }
         databaseProvider.open();
         if (databaseProvider.isClosed()) {
-            log.error("Database provider is closed after open attempt. Initialization aborted.");
-            return;
+            throw new StorageException("Failed to initialize database storage: provider could not be opened.");
         }
         initialized = initializeSchemaAndMigrate();
+        if (!initialized) {
+            try {
+                databaseProvider.close();
+            } catch (final IOException ex) {
+                log.error("Failed to close database provider after initialization failure", ex);
+            }
+            throw new StorageException("Failed to initialize database storage: schema creation or migration failed.");
+        }
     }
 
     /**

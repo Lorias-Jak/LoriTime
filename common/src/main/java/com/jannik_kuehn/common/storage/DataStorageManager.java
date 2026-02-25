@@ -5,12 +5,8 @@ import com.jannik_kuehn.common.api.logger.LoriTimeLogger;
 import com.jannik_kuehn.common.api.scheduler.PluginTask;
 import com.jannik_kuehn.common.api.storage.AccumulatingTimeStorage;
 import com.jannik_kuehn.common.api.storage.NameStorage;
-import com.jannik_kuehn.common.config.Configuration;
-import com.jannik_kuehn.common.exception.ConfigurationException;
 import com.jannik_kuehn.common.exception.StorageException;
 import com.jannik_kuehn.common.storage.database.DatabaseStorage;
-import com.jannik_kuehn.common.storage.file.FileNameStorage;
-import com.jannik_kuehn.common.storage.file.FileTimeStorage;
 
 import java.io.File;
 import java.util.Locale;
@@ -126,9 +122,12 @@ public class DataStorageManager {
         }
         final String storageMethod = loriTime.getConfig().getString("general.storage", "file");
         switch (storageMethod.toLowerCase(Locale.ROOT)) {
-            case "yml" -> loadFileStorage();
-            case "sql", "mysql", "mariadb", "sqlite" -> loadDatabaseStorage();
-            default -> log.error("illegal storage method " + storageMethod);
+            case "sql", "mysql", "mariadb", "sqlite", "yml" -> loadDatabaseStorage();
+            default -> {
+                log.error("Illegal storage method '" + storageMethod
+                        + "'. Supported values: mysql, mariadb, sqlite (legacy: yml, sql).");
+                throw new StorageException("Unsupported storage method: " + storageMethod);
+            }
         }
     }
 
@@ -180,27 +179,6 @@ public class DataStorageManager {
             timeStorage.flushOnlineTimeCache();
         } catch (final StorageException ex) {
             log.error("could not flush online time cache", ex);
-        }
-    }
-
-    private void loadFileStorage() {
-        final File directory = new File(dataFolder.toString() + "/data/");
-        if (!directory.exists()) {
-            final boolean created = directory.mkdir();
-            if (!created) {
-                log.error("Exception while creating the data directory. Could not create data directory for saving player data!");
-            }
-        }
-        try {
-            final File nameFile = loriTime.getFileManager().getOrCreateFile(dataFolder + "/data/", "names.yml", false);
-            final File timeFile = loriTime.getFileManager().getOrCreateFile(dataFolder + "/data/", "time.yml", false);
-            final Configuration nameConfiguration = loriTime.getFileManager().getConfiguration(nameFile);
-            final Configuration timeConfiguration = loriTime.getFileManager().getConfiguration(timeFile);
-            this.nameStorage = new FileNameStorage(new FileStorageProvider(nameConfiguration));
-            this.timeStorage = new AccumulatingTimeStorage(loriTime.getLoggerFactory().create(AccumulatingTimeStorage.class),
-                    new FileTimeStorage(new FileStorageProvider(timeConfiguration)));
-        } catch (final ConfigurationException e) {
-            log.error("An exception occurred while loading the file storages", e);
         }
     }
 

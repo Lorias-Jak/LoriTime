@@ -23,6 +23,7 @@ import com.jannik_kuehn.common.module.updater.download.sources.ModrinthReleaseSo
 import com.jannik_kuehn.common.module.updater.download.sources.ReleaseUpdateSource;
 import com.jannik_kuehn.common.module.updater.version.Version;
 import com.jannik_kuehn.common.storage.DataStorageManager;
+import com.jannik_kuehn.common.storage.StorageMigrationService;
 import com.jannik_kuehn.common.utils.TimeParser;
 
 import java.io.File;
@@ -163,6 +164,8 @@ public class LoriTimePlugin {
 
     private void enableAsMaster() {
         try {
+            final StorageMigrationService storageMigrationService = new StorageMigrationService(this, dataFolder);
+            storageMigrationService.migrateIfNecessary();
             dataStorageManager.loadStorages();
         } catch (final StorageException e) {
             log.error("An error occurred while enabling the storage", e);

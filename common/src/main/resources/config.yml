@@ -75,7 +75,7 @@ mysql:
   database: 'test'
   user: 'user'
   password: 'pw'
-  tablePrefix: 'lori_time'
+  tablePrefix: 'loritime'
 
 #############
 #  SQLite   #

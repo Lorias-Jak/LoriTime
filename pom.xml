@@ -48,13 +48,13 @@
       <id>s01.oss.sonatype.org-snapshot</id>
       <url>https://s01.oss.sonatype.org/content/repositories/snapshots/</url>
     </repository>
+    <repository>
+      <id>mvn.velyn.me-github</id>
+      <url>https://mvn.velyn.me/github</url>
+    </repository>
   </repositories>
 
   <dependencies>
-    <dependency>
-      <groupId>org.jetbrains</groupId>
-      <artifactId>annotations</artifactId>
-    </dependency>
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter-engine</artifactId>
@@ -196,6 +196,19 @@
         <scope>provided</scope>
       </dependency>
 
+      <!-- Spellbook integration -->
+      <dependency>
+        <groupId>com.github.roleplay-cauldron</groupId>
+        <artifactId>spellbook-core</artifactId>
+        <version>0.0.5-alpha</version>
+      </dependency>
+      <dependency>
+        <groupId>com.github.roleplay-cauldron</groupId>
+        <artifactId>spellbook-database</artifactId>
+        <version>0.0.5-alpha</version>
+      </dependency>
+
+      <!-- Module specific imports -->
       <dependency>
         <groupId>org.bstats</groupId>
         <artifactId>bstats-bukkit</artifactId>
@@ -242,13 +255,11 @@
         <artifactId>mariadb-java-client</artifactId>
         <version>3.4.1</version>
       </dependency>
-
       <dependency>
         <groupId>org.xerial</groupId>
         <artifactId>sqlite-jdbc</artifactId>
-        <version>3.46.0.0</version>
+        <version>3.51.2.0</version>
       </dependency>
-
       <dependency>
         <groupId>com.zaxxer</groupId>
         <artifactId>HikariCP</artifactId>
@@ -401,6 +412,24 @@
                     <include>com/mysql/cj/**</include>
                   </includes>
                 </filter>
+                <filter>
+                  <artifact>org.mariadb.jdbc</artifact>
+                  <includes>
+                    <include>org/mariadb/jdbc/**</include>
+                  </includes>
+                </filter>
+                <filter>
+                  <artifact>org.sqlite</artifact>
+                  <includes>
+                    <include>org/sqlite/**</include>
+                  </includes>
+                </filter>
+                <filter>
+                  <artifact>com.github.roleplaycauldron</artifact>
+                  <includes>
+                    <include>com/github/roleplaycauldron/**</include>
+                  </includes>
+                </filter>
               </filters>
               <relocations>
                 <relocation>
@@ -412,6 +441,16 @@
                   <shadedPattern>${project.groupId}.dependencies.org.apache.maven</shadedPattern>
                 </relocation>
                 <relocation>
+                  <pattern>com.github.roleplaycauldron.spellbook.core</pattern>
+                  <shadedPattern>${project.groupId}.dependencies.com.github.roleplaycauldron.spellbook.core
+                  </shadedPattern>
+                </relocation>
+                <relocation>
+                  <pattern>com.github.roleplaycauldron.spellbook.database</pattern>
+                  <shadedPattern>${project.groupId}.dependencies.com.github.roleplaycauldron.spellbook.database
+                  </shadedPattern>
+                </relocation>
+                <relocation>
                   <pattern>com.zaxxer.hikari</pattern>
                   <shadedPattern>${project.groupId}.dependencies.com.zaxxer.hikari</shadedPattern>
                 </relocation>
@@ -421,7 +460,7 @@
                 </relocation>
                 <relocation>
                   <pattern>org.sqlite</pattern>
-                  <shadedPattern>${project.groupId}.dependencies.org.sqlite</shadedPattern>
+                  <shadedPattern>${project.groupId}.dependencies.org.xerial.sqlite</shadedPattern>
                 </relocation>
                 <relocation>
                   <pattern>org.bstats</pattern>

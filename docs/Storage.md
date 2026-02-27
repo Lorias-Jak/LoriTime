@@ -2,7 +2,7 @@ Currently LoriTime stores data in a database.<br>
 You can choose between SQLite (file-based) and MySQL/MariaDB (server-based).<br>
 
 ## Types
-> ⚠️ Only MariaDB is tested, not mysql. In case you have any problems, pls report them<br>
+> ⚠️ Only MariaDB and SQLite are tested, not mysql. In case you have any problems, pls report them<br>
 
 | Type | Description | 
 |------|-------------|
@@ -41,10 +41,10 @@ sqlite:
 </details>
 
 ## Proxy-only usage with database storage
-If LoriTime runs only on a proxy (multi-setup master on Velocity/Bungee) and no world-specific source is available,
+If LoriTime runs only on a proxy (multi-setup master on Velocity / Bungee) and no world-specific source is available,
 LoriTime stores accumulated time in a synthetic scope:
 
 - server: `default`
 - world: `global`
 
-This keeps proxy-only deployments compatible with the normalized database schema, because no paper/spigot world data is required.
+This keeps proxy-only deployments compatible with the normalized database schema, because no paper world data is required.

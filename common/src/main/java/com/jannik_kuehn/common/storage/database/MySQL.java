@@ -30,16 +30,6 @@ public class MySQL implements SqlConnectionProvider {
     private final String mySqlDatabase;
 
     /**
-     * Represents the username.
-     */
-    private final String mySqlUser;
-
-    /**
-     * Represents the password.
-     */
-    private final String mySqlPassword;
-
-    /**
      * The table prefix.
      */
     private final String tablePrefix;
@@ -70,6 +60,11 @@ public class MySQL implements SqlConnectionProvider {
     private final LoriTimeLogger log;
 
     /**
+     * The configuration.
+     */
+    private final Configuration config;
+
+    /**
      * The HikariCP connection pool.
      */
     private HikariDataSource hikari;
@@ -83,20 +78,19 @@ public class MySQL implements SqlConnectionProvider {
     public MySQL(final Configuration config, final LoriTimePlugin loriTimePlugin, final Engine engine) {
         this.log = loriTimePlugin.getLoggerFactory().create(MySQL.class);
         this.dialect = DatabaseDialect.MYSQL;
+        this.config = config;
         this.engine = engine;
 
         this.mySqlHost = config.getString("mysql.host", "localhost");
         this.mySqlPort = config.getInt("mysql.port", 3306);
         this.mySqlDatabase = config.getString("mysql.database");
-        this.mySqlUser = config.getString("mysql.user");
-        this.mySqlPassword = config.getString("mysql.password");
         String uncheckedTablePrefix = config.getString("mysql.tablePrefix", "lori_time");
         if (uncheckedTablePrefix.toLowerCase(Locale.ROOT).contains("select")
                 || uncheckedTablePrefix.toLowerCase(Locale.ROOT).contains("insert")
                 || uncheckedTablePrefix.toLowerCase(Locale.ROOT).contains("drop")
                 || uncheckedTablePrefix.toLowerCase(Locale.ROOT).contains("create")) {
             log.error("Unsafe database table name detected! Going back to default.");
-            uncheckedTablePrefix = "lori_time";
+            uncheckedTablePrefix = "loritime";
         }
         this.tablePrefix = uncheckedTablePrefix;
 
@@ -145,13 +139,9 @@ public class MySQL implements SqlConnectionProvider {
         if (isClosed()) {
             log.info("Connecting to (" + mySqlHost + ", " + mySqlPort + " ," + mySqlDatabase + ")...");
             hikari = HikariDataSourceFactory.create(
+                    config,
                     jdbcScheme + mySqlHost + ":" + mySqlPort + "/" + mySqlDatabase,
-                    "LoriTime-Databasepool",
-                    mySqlUser,
-                    mySqlPassword,
-                    null,
-                    null,
-                    null);
+                    "LoriTime-Databasepool");
 
             if (!hikari.isClosed()) {
                 log.info("Successfully connected to the " + engine + " server!");

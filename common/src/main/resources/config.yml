@@ -18,12 +18,8 @@ general:
   # To see all available options see: https://github.com/Lorias-Jak/LoriTime/tree/main/src/main/resources/localization
   language: 'en'
 
-  # You can decide how the player data will be stored.
-  # The options are 'mysql', 'mariadb', or 'sqlite'.
-  # If you still use 'yml', LoriTime will migrate your data to sqlite on startup.
-  storage: 'sqlite'
-
   # Internal config migration version. Do not change manually.
+  # ToDo Leftover, Remove!
   configVersion: 2
 
   # The save interval specifies how often the player's online time is saved.
@@ -66,24 +62,69 @@ backup:
   # Set this to 0 to disable the deletion of old backups.
   maxBackups: 5
 
-###########
-#  Mysql  #
-###########
-mysql:
-  host: 'localhost'
-  port: 3306
-  database: 'test'
-  user: 'user'
-  password: 'pw'
+##################
+#  Data Storage  #
+##################
+# The desired storage-method for the plugin data.
+# Possible options:
+#
+# |    Flat-file / local database - no extra configuration needed
+# | => SQLite
+#
+# |    Remote databases - requires connection information. You can configure them below in the data section.
+# | => MySQL
+# | => MariaDB
+#
+# A SQLite database is the default storage option.
+storage-method: 'sqlite'
+
+# the following options are only relevant for the remote database storage-methods.
+data:
+  # The prefix for the tables in the database.
+  # The plugin will automatically create tables with this prefix, if they don't exist yet.
+  # In migration scenarios, the plugin will not automatically rename the table-prefix.
   tablePrefix: 'loritime'
 
-#############
-#  SQLite   #
-#############
-sqlite:
-  # File path of the sqlite database. The default is inside the plugin data folder.
-  file: 'loritime.db'
-  tablePrefix: 'lori_time'
+  # The default address and port for the database.
+  host: 'localhost'
+  port: 3306
+
+  # The name of the database to store LoriTime data in
+  # The database has to be created manually bevore the first plugin startup. Rename this value to your database name.
+  database: 'minecraft'
+
+  # The credentials for the database.
+  user: 'user'
+  password: 'pw'
+
+  # These settings apply to the MySQL connection pool.
+  # The default values will be suitable for the majority of users.
+  # DO NOT change these settings unless you know what you're doing!
+  poolSettings:
+
+    # Sets the maximum number of connections to the MySQL database.
+    # - The value will determine the maximum number of actual connections to the database.
+    # - More information about determining the size of connection pools can be found here:
+    #   https://github.com/brettwooldridge/HikariCP/wiki/About-Pool-Sizing
+    maximumPoolSize: 10
+
+    # Sets the minimum number of idle connections that the pool will try to maintain.
+    # For maximum performance and responsiveness to spike demands, it is recommended to not set
+    # this value and instead allow the pool to act as a fixed size connection pool.
+    # (set this value to the same as 'maximum-pool-size')
+    minimumIdle: 10
+
+    # Sets the maximum amount of time that a connection may remain idle in the pool.
+    # The minimum value should be 30 seconds less than any db or infrastructure imposed connection time limit.
+    maximumLifetime: 1800000 # 30 Minutes
+
+    # Controls how often the pool will 'ping' a connection to prevent it from going into timeout.
+    # The value should be less than maximum-lifetime and greater than 30000 (30 seconds).
+    # Setting the value to zero will disable the keepalive functionality.
+    keepAliveTime: 0
+
+    # Controls the maximum number of ms that the plugin will wait for a connection from the pool before timing out.
+    connectionTimeout: 5000 # 5 seconds
 
 ##############
 # MultiSetup #

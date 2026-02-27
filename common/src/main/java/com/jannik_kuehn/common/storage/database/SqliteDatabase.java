@@ -36,6 +36,11 @@ final class SqliteDatabase implements SqlConnectionProvider {
     private final LoriTimeLogger log;
 
     /**
+     * The configuration.
+     */
+    private final Configuration config;
+
+    /**
      * The SQLite database path.
      */
     private final String databasePath;
@@ -55,6 +60,7 @@ final class SqliteDatabase implements SqlConnectionProvider {
     /* default */
     SqliteDatabase(final Configuration config, final LoriTimePlugin loriTimePlugin, final File dataFolder) {
         this.log = loriTimePlugin.getLoggerFactory().create(SqliteDatabase.class);
+        this.config = config;
         this.dialect = DatabaseDialect.SQLITE;
 
         String uncheckedTablePrefix = config.getString("sqlite.tablePrefix", "lori_time");
@@ -63,7 +69,7 @@ final class SqliteDatabase implements SqlConnectionProvider {
                 || uncheckedTablePrefix.toLowerCase(Locale.ROOT).contains("drop")
                 || uncheckedTablePrefix.toLowerCase(Locale.ROOT).contains("create")) {
             log.error("Unsafe database table name detected! Going back to default.");
-            uncheckedTablePrefix = "lori_time";
+            uncheckedTablePrefix = "loritime";
         }
         this.tablePrefix = uncheckedTablePrefix;
 
@@ -83,13 +89,9 @@ final class SqliteDatabase implements SqlConnectionProvider {
             return;
         }
         hikari = HikariDataSourceFactory.create(
+                config,
                 "jdbc:sqlite:" + databasePath,
-                "LoriTime-SqlitePool",
-                null,
-                null,
-                "SELECT 1",
-                "PRAGMA foreign_keys=ON",
-                4);
+                "LoriTime-SqlitePool");
 
         if (!hikari.isClosed()) {
             log.info("Connected to SQLite database at " + databasePath);

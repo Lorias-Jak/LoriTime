@@ -3,15 +3,15 @@ package com.jannik_kuehn.common.storage.database;
 import com.jannik_kuehn.common.LoriTimePlugin;
 import com.jannik_kuehn.common.api.logger.LoriTimeLogger;
 import com.jannik_kuehn.common.config.Configuration;
-import com.zaxxer.hikari.HikariDataSource;
 
 import java.io.File;
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Locale;
 
 /**
- * SQLite connection provider backed by HikariCP.
+ * SQLite connection provider backed by direct JDBC connections.
  */
 final class SqliteDatabase implements SqlConnectionProvider {
 
@@ -36,19 +36,14 @@ final class SqliteDatabase implements SqlConnectionProvider {
     private final LoriTimeLogger log;
 
     /**
-     * The configuration.
-     */
-    private final Configuration config;
-
-    /**
      * The SQLite database path.
      */
     private final String databasePath;
 
     /**
-     * The {@link HikariDataSource} instance.
+     * Tracks whether the provider is currently open.
      */
-    private HikariDataSource hikari;
+    private boolean open;
 
     /**
      * Creates an SQLite provider from configuration.
@@ -60,7 +55,6 @@ final class SqliteDatabase implements SqlConnectionProvider {
     /* default */
     SqliteDatabase(final Configuration config, final LoriTimePlugin loriTimePlugin, final File dataFolder) {
         this.log = loriTimePlugin.getLoggerFactory().create(SqliteDatabase.class);
-        this.config = config;
         this.dialect = DatabaseDialect.SQLITE;
 
         String uncheckedTablePrefix = config.getString("sqlite.tablePrefix", "lori_time");
@@ -78,7 +72,7 @@ final class SqliteDatabase implements SqlConnectionProvider {
 
     @Override
     public void open() {
-        if (hikari != null && !hikari.isClosed()) {
+        if (open) {
             log.error("The SQLite connection is already open!");
             return;
         }
@@ -88,37 +82,33 @@ final class SqliteDatabase implements SqlConnectionProvider {
             log.error("SQLite JDBC Driver was not loaded!", e);
             return;
         }
-        hikari = HikariDataSourceFactory.create(
-                config,
-                "jdbc:sqlite:" + databasePath,
-                "LoriTime-SqlitePool");
-
-        if (!hikari.isClosed()) {
+        try (Connection connection = DriverManager.getConnection("jdbc:sqlite:" + databasePath)) {
+            open = true;
             log.info("Connected to SQLite database at " + databasePath);
             return;
+        } catch (final SQLException ex) {
+            log.error("Could not connect to the SQLite database!", ex);
         }
-        log.error("Could not connect to the SQLite database!");
     }
 
     @Override
     public Connection getConnection() throws SQLException {
-        if (hikari == null) {
-            throw new SQLException("HikariDataSource is not initialized.");
+        if (!open) {
+            throw new SQLException("SQLite database provider is not initialized.");
         }
-        return hikari.getConnection();
+        return DriverManager.getConnection("jdbc:sqlite:" + databasePath);
     }
 
     @Override
     public boolean isClosed() {
-        return hikari == null || hikari.isClosed();
+        return !open;
     }
 
     @Override
     public void close() {
-        if (hikari != null) {
+        if (open) {
             log.info("Closing SQLite connection ...");
-            hikari.close();
-            hikari = null;
+            open = false;
             log.info("Successfully closed the connection to SQLite!");
             return;
         }

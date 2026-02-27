@@ -3,6 +3,8 @@ package com.jannik_kuehn.common.storage.database;
 import com.jannik_kuehn.common.LoriTimePlugin;
 import com.jannik_kuehn.common.api.logger.LoriTimeLogger;
 import com.jannik_kuehn.common.api.storage.NameStorage;
+import com.jannik_kuehn.common.api.storage.ReasonAwareTimeStorage;
+import com.jannik_kuehn.common.api.storage.TimeEntryReason;
 import com.jannik_kuehn.common.api.storage.TimeStorage;
 import com.jannik_kuehn.common.config.Configuration;
 import com.jannik_kuehn.common.exception.StorageException;
@@ -41,7 +43,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
         "PMD.CouplingBetweenObjects",
         "PMD.CyclomaticComplexity"
 })
-public class DatabaseStorage implements NameStorage, TimeStorage {
+public class DatabaseStorage implements NameStorage, TimeStorage, ReasonAwareTimeStorage {
 
     private static final String SQLITE_STORAGE_TYPE = "sqlite";
 
@@ -245,7 +247,17 @@ public class DatabaseStorage implements NameStorage, TimeStorage {
         try (PreparedStatement statement = connection.prepareStatement(timeTable.createTableSql())) {
             statement.execute();
         }
+        ensureTimeReasonColumn(connection);
         try (PreparedStatement statement = connection.prepareStatement(statisticTable.createTableSql())) {
+            statement.execute();
+        }
+    }
+
+    private void ensureTimeReasonColumn(final Connection connection) throws SQLException {
+        if (columnExists(connection, timeTable.getTableName(), "reason")) {
+            return;
+        }
+        try (PreparedStatement statement = connection.prepareStatement(dialect().addTimeReasonColumn(timeTable.getTableName()))) {
             statement.execute();
         }
     }
@@ -274,7 +286,7 @@ public class DatabaseStorage implements NameStorage, TimeStorage {
                     final Optional<String> name = Optional.ofNullable(result.getString("name"));
                     final long timeSeconds = result.getLong("time");
                     final long playerId = playerTable.ensurePlayer(connection, uuid, name);
-                    timeTable.insertDuration(connection, playerId, worldId, timeSeconds);
+                    timeTable.insertDuration(connection, playerId, worldId, timeSeconds, TimeEntryReason.LEGACY_IMPORT);
                 }
             }
         }
@@ -297,6 +309,16 @@ public class DatabaseStorage implements NameStorage, TimeStorage {
         try (ResultSet tables = connection.getMetaData().getTables(null, null, tableName, new String[]{"TABLE"})) {
             return tables.next();
         }
+    }
+
+    private boolean columnExists(final Connection connection, final String tableName, final String columnName) throws SQLException {
+        try (ResultSet columns = connection.getMetaData().getColumns(null, null, tableName, columnName)) {
+            return columns.next();
+        }
+    }
+
+    private SqlDialect dialect() {
+        return databaseProvider.getDialect();
     }
 
     @Override
@@ -349,14 +371,20 @@ public class DatabaseStorage implements NameStorage, TimeStorage {
 
     @Override
     public void addTime(final UUID uuid, final long additionalTime) throws StorageException {
+        addTime(uuid, additionalTime, TimeEntryReason.MANUAL_ADJUSTMENT);
+    }
+
+    @Override
+    public void addTime(final UUID uuid, final long additionalTime, final TimeEntryReason reason) throws StorageException {
         Objects.requireNonNull(uuid);
+        Objects.requireNonNull(reason);
         poolLock.readLock().lock();
         try {
             checkClosed();
             try (Connection connection = databaseProvider.getConnection()) {
                 final long worldId = worldTable.ensureWorld(connection, DEFAULT_SERVER_NAME, DEFAULT_WORLD_NAME);
                 final long playerId = playerTable.ensurePlayer(connection, uuid, Optional.empty());
-                timeTable.insertDuration(connection, playerId, worldId, additionalTime);
+                timeTable.insertDuration(connection, playerId, worldId, additionalTime, reason);
             }
         } catch (final SQLException ex) {
             throw new StorageException(ex);
@@ -367,9 +395,15 @@ public class DatabaseStorage implements NameStorage, TimeStorage {
 
     @Override
     public void addTimes(final Map<UUID, Long> additionalTimes) throws StorageException {
+        addTimes(additionalTimes, TimeEntryReason.MANUAL_ADJUSTMENT);
+    }
+
+    @Override
+    public void addTimes(final Map<UUID, Long> additionalTimes, final TimeEntryReason reason) throws StorageException {
         if (additionalTimes == null || additionalTimes.isEmpty()) {
             return;
         }
+        Objects.requireNonNull(reason);
         poolLock.readLock().lock();
         try {
             checkClosed();
@@ -378,7 +412,7 @@ public class DatabaseStorage implements NameStorage, TimeStorage {
                 for (final Map.Entry<UUID, Long> entry : additionalTimes.entrySet()) {
                     final UUID uuid = entry.getKey();
                     final long playerId = playerTable.ensurePlayer(connection, uuid, Optional.empty());
-                    timeTable.insertDuration(connection, playerId, worldId, entry.getValue());
+                    timeTable.insertDuration(connection, playerId, worldId, entry.getValue(), reason);
                 }
             }
         } catch (final SQLException ex) {

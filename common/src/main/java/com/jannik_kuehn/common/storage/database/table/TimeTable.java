@@ -1,6 +1,7 @@
 package com.jannik_kuehn.common.storage.database.table;
 
 import com.jannik_kuehn.common.storage.database.SqlDialect;
+import com.jannik_kuehn.common.api.storage.TimeEntryReason;
 import com.jannik_kuehn.common.utils.UuidUtil;
 
 import java.sql.Connection;
@@ -10,6 +11,7 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -108,17 +110,88 @@ public final class TimeTable {
     /* default */
     public void insertDuration(final Connection connection, final long playerId, final long worldId, final long durationSeconds)
             throws SQLException {
+        insertDuration(connection, playerId, worldId, durationSeconds, TimeEntryReason.UNSPECIFIED);
+    }
+
+    /**
+     * Inserts or updates a player's session duration with the given reason.
+     *
+     * <p>Reasons {@link TimeEntryReason#PLAYER_LEAVE}, {@link TimeEntryReason#AUTO_FLUSH} and
+     * {@link TimeEntryReason#SHUTDOWN_FLUSH} update the latest entry by setting the leave timestamp
+     * to the current moment and replacing the reason. Other reasons create a fresh entry.</p>
+     *
+     * @param connection the database connection
+     * @param playerId player id
+     * @param worldId world id
+     * @param durationSeconds duration in seconds
+     * @param reason reason for writing the entry
+     * @throws SQLException if persistence fails
+     */
+    /* default */
+    public void insertDuration(final Connection connection,
+                               final long playerId,
+                               final long worldId,
+                               final long durationSeconds,
+                               final TimeEntryReason reason) throws SQLException {
+        Objects.requireNonNull(reason);
+        if (shouldUpdateLatest(reason) && updateLatestDuration(connection, playerId, worldId, reason)) {
+            return;
+        }
+        insertNewDuration(connection, playerId, worldId, durationSeconds, reason);
+    }
+
+    private boolean shouldUpdateLatest(final TimeEntryReason reason) {
+        return EnumSet.of(TimeEntryReason.PLAYER_LEAVE, TimeEntryReason.AUTO_FLUSH, TimeEntryReason.SHUTDOWN_FLUSH).contains(reason);
+    }
+
+    private void insertNewDuration(final Connection connection,
+                                   final long playerId,
+                                   final long worldId,
+                                   final long durationSeconds,
+                                   final TimeEntryReason reason) throws SQLException {
         final Instant leave = Instant.now(clock);
         final Instant join = leave.minusSeconds(durationSeconds);
         try (PreparedStatement insert = connection.prepareStatement(
-                "INSERT INTO `" + tableName + "` (`player_id`, `world_id`, `join_time`, `leave_time`) "
-                        + "VALUES (?, ?, ?, ?)")) {
+                "INSERT INTO `" + tableName + "` (`player_id`, `world_id`, `join_time`, `leave_time`, `reason`) "
+                        + "VALUES (?, ?, ?, ?, ?)")) {
             insert.setLong(1, playerId);
             insert.setLong(2, worldId);
             insert.setTimestamp(3, Timestamp.from(join));
             insert.setTimestamp(4, Timestamp.from(leave));
+            insert.setString(5, reason.name());
             insert.executeUpdate();
         }
+    }
+
+    private boolean updateLatestDuration(final Connection connection,
+                                         final long playerId,
+                                         final long worldId,
+                                         final TimeEntryReason reason) throws SQLException {
+        final Long entryId = findLatestEntryId(connection, playerId, worldId);
+        if (entryId == null) {
+            return false;
+        }
+        try (PreparedStatement update = connection.prepareStatement(
+                "UPDATE `" + tableName + "` SET `leave_time` = ?, `reason` = ? WHERE `id` = ?")) {
+            update.setTimestamp(1, Timestamp.from(Instant.now(clock)));
+            update.setString(2, reason.name());
+            update.setLong(3, entryId);
+            return update.executeUpdate() > 0;
+        }
+    }
+
+    private Long findLatestEntryId(final Connection connection, final long playerId, final long worldId) throws SQLException {
+        try (PreparedStatement select = connection.prepareStatement(
+                "SELECT `id` FROM `" + tableName + "` WHERE `player_id` = ? AND `world_id` = ? ORDER BY `leave_time` DESC, `id` DESC LIMIT 1")) {
+            select.setLong(1, playerId);
+            select.setLong(2, worldId);
+            try (ResultSet result = select.executeQuery()) {
+                if (result.next()) {
+                    return result.getLong("id");
+                }
+            }
+        }
+        return null;
     }
 
     /**

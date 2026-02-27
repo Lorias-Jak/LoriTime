@@ -8,7 +8,6 @@ import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.Locale;
 
 /**
  * SQLite connection provider backed by direct JDBC connections.
@@ -56,18 +55,7 @@ final class SqliteDatabase implements SqlConnectionProvider {
     SqliteDatabase(final Configuration config, final LoriTimePlugin loriTimePlugin, final File dataFolder) {
         this.log = loriTimePlugin.getLoggerFactory().create(SqliteDatabase.class);
         this.dialect = DatabaseDialect.SQLITE;
-
-        String uncheckedTablePrefix = config.getString("sqlite.tablePrefix", "lori_time");
-        final String lower = uncheckedTablePrefix.toLowerCase(Locale.ROOT);
-        if (lower.contains("select")
-                || lower.contains("insert")
-                || lower.contains("drop")
-                || lower.contains("create")) {
-            log.error("Unsafe database table name detected! Going back to default.");
-            uncheckedTablePrefix = "loritime";
-        }
-
-        this.tablePrefix = uncheckedTablePrefix;
+        this.tablePrefix = "loritime";
         this.databasePath = new File(dataFolder, DEFAULT_FILENAME).getAbsolutePath();
     }
 

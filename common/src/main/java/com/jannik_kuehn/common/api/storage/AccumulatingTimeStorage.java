@@ -77,6 +77,8 @@ public class AccumulatingTimeStorage implements TimeStorage, TimeAccumulator {
         if (null != from) {
             final long previousOnlineTime = (when - from) / 1000;
             addTimeWithReason(uuid, previousOnlineTime, TimeEntryReason.CONTEXT_SWITCH);
+        } else {
+            addTimeWithReason(uuid, 0, TimeEntryReason.PLAYER_JOIN);
         }
     }
 
@@ -128,19 +130,21 @@ public class AccumulatingTimeStorage implements TimeStorage, TimeAccumulator {
         }
     }
 
+    @SuppressWarnings("PMD.CloseResource")
     private void addTimeWithReason(final UUID uuid, final long additionalTime, final TimeEntryReason reason) throws StorageException {
-        if (storage instanceof ReasonAwareTimeStorage reasonAware) {
+        if (storage instanceof final ReasonAwareTimeStorage reasonAware) {
             reasonAware.addTime(uuid, additionalTime, reason);
             return;
         }
         storage.addTime(uuid, additionalTime);
     }
 
+    @SuppressWarnings("PMD.CloseResource")
     private void addTimesWithReason(final Map<UUID, Long> additionalTimes, final TimeEntryReason reason) throws StorageException {
         if (additionalTimes.isEmpty()) {
             return;
         }
-        if (storage instanceof ReasonAwareTimeStorage reasonAware) {
+        if (storage instanceof final ReasonAwareTimeStorage reasonAware) {
             reasonAware.addTimes(additionalTimes, reason);
             return;
         }

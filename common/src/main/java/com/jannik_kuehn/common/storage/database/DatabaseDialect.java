@@ -150,8 +150,8 @@ enum DatabaseDialect implements SqlDialect {
         }
 
         @Override
-        public String durationSecondsExpression(final String joinColumn, final String leaveColumn) {
-            return "strftime('%s', " + leaveColumn + ") - strftime('%s', " + joinColumn + ")";
+        public String durationSecondsExpression(final String join, final String leave) {
+            return "CAST((" + leave + " - " + join + ") / 1000 AS INTEGER)";
         }
     }
 }

@@ -247,17 +247,7 @@ public class DatabaseStorage implements NameStorage, TimeStorage, ReasonAwareTim
         try (PreparedStatement statement = connection.prepareStatement(timeTable.createTableSql())) {
             statement.execute();
         }
-        ensureTimeReasonColumn(connection);
         try (PreparedStatement statement = connection.prepareStatement(statisticTable.createTableSql())) {
-            statement.execute();
-        }
-    }
-
-    private void ensureTimeReasonColumn(final Connection connection) throws SQLException {
-        if (columnExists(connection, timeTable.getTableName(), "reason")) {
-            return;
-        }
-        try (PreparedStatement statement = connection.prepareStatement(dialect().addTimeReasonColumn(timeTable.getTableName()))) {
             statement.execute();
         }
     }
@@ -309,16 +299,6 @@ public class DatabaseStorage implements NameStorage, TimeStorage, ReasonAwareTim
         try (ResultSet tables = connection.getMetaData().getTables(null, null, tableName, new String[]{"TABLE"})) {
             return tables.next();
         }
-    }
-
-    private boolean columnExists(final Connection connection, final String tableName, final String columnName) throws SQLException {
-        try (ResultSet columns = connection.getMetaData().getColumns(null, null, tableName, columnName)) {
-            return columns.next();
-        }
-    }
-
-    private SqlDialect dialect() {
-        return databaseProvider.getDialect();
     }
 
     @Override

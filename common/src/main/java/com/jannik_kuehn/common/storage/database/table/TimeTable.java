@@ -1,7 +1,7 @@
 package com.jannik_kuehn.common.storage.database.table;
 
-import com.jannik_kuehn.common.storage.database.SqlDialect;
 import com.jannik_kuehn.common.api.storage.TimeEntryReason;
+import com.jannik_kuehn.common.storage.database.SqlDialect;
 import com.jannik_kuehn.common.utils.UuidUtil;
 
 import java.sql.Connection;
@@ -22,7 +22,6 @@ import java.util.UUID;
  * Table helper for time entries.
  */
 public final class TimeTable {
-
     /**
      * The table name.
      */
@@ -51,10 +50,10 @@ public final class TimeTable {
     /**
      * Default constructor.
      *
-     * @param tableName the table name
+     * @param tableName       the table name
      * @param playerTableName the player table name
-     * @param worldTableName the world table name
-     * @param dialect the {@link SqlDialect} instance
+     * @param worldTableName  the world table name
+     * @param dialect         the {@link SqlDialect} instance
      */
     /* default */
     public TimeTable(final String tableName, final String playerTableName, final String worldTableName, final SqlDialect dialect) {
@@ -62,13 +61,13 @@ public final class TimeTable {
     }
 
     /**
-     * Default constructor with custom time source.
+     * Default constructor with a custom time source.
      *
-     * @param tableName the table name
+     * @param tableName       the table name
      * @param playerTableName the player table name
-     * @param worldTableName the world table name
-     * @param dialect the {@link SqlDialect} instance
-     * @param clock time source used to create join/leave timestamps
+     * @param worldTableName  the world table name
+     * @param dialect         the {@link SqlDialect} instance
+     * @param clock           time source used to create join/leave timestamps
      */
     /* default */
     public TimeTable(final String tableName,
@@ -84,33 +83,15 @@ public final class TimeTable {
     }
 
     /**
-     * Generates the SQL statement for creating the time table.
-     * This method utilizes the associated SQL dialect to construct
+     * Generates the SQL statement for creating the timetable.
+     * This method uses the associated SQL dialect to construct
      * the CREATE TABLE statement.
      *
-     * @return the SQL statement for creating the time table
+     * @return the SQL statement for creating the timetable
      */
     /* default */
     public String createTableSql() {
         return dialect.createTimeTable(tableName, playerTableName, worldTableName);
-    }
-
-    /**
-     * Inserts a player's session duration into the database.
-     *
-     * This method calculates the player's join and leave timestamps based on the provided duration
-     * in seconds and inserts these values, along with the player ID and world ID, into the appropriate table.
-     *
-     * @param connection the database connection to use for the operation
-     * @param playerId the unique identifier of the player
-     * @param worldId the unique identifier of the world
-     * @param durationSeconds the duration of the player's session in seconds
-     * @throws SQLException if an SQL error occurs while attempting to insert the data
-     */
-    /* default */
-    public void insertDuration(final Connection connection, final long playerId, final long worldId, final long durationSeconds)
-            throws SQLException {
-        insertDuration(connection, playerId, worldId, durationSeconds, TimeEntryReason.UNSPECIFIED);
     }
 
     /**
@@ -120,11 +101,11 @@ public final class TimeTable {
      * {@link TimeEntryReason#SHUTDOWN_FLUSH} update the latest entry by setting the leave timestamp
      * to the current moment and replacing the reason. Other reasons create a fresh entry.</p>
      *
-     * @param connection the database connection
-     * @param playerId player id
-     * @param worldId world id
+     * @param connection      the database connection
+     * @param playerId        player id
+     * @param worldId         world id
      * @param durationSeconds duration in seconds
-     * @param reason reason for writing the entry
+     * @param reason          reason for writing the entry
      * @throws SQLException if persistence fails
      */
     /* default */
@@ -199,9 +180,9 @@ public final class TimeTable {
      * duration in the database for the specified player UUID.
      *
      * @param connection the database connection to use for the query
-     * @param uuid the unique identifier of the player whose total duration is to be calculated
+     * @param uuid       the unique identifier of the player whose total duration is to be calculated
      * @return an {@code OptionalLong} containing the total session duration in seconds if present,
-     *         or an empty {@code OptionalLong} if no data exists for the specified player
+     * or an empty {@code OptionalLong} if no data exists for the specified player
      * @throws SQLException if an SQL error occurs during the query execution
      */
     /* default */
@@ -232,7 +213,7 @@ public final class TimeTable {
      *
      * @param connection the database connection to use for executing the query
      * @return a map where the keys are player UUIDs (as strings), and the values are
-     *         the total session durations in seconds
+     * the total session durations in seconds
      * @throws SQLException if an SQL error occurs during the query execution
      */
     /* default */

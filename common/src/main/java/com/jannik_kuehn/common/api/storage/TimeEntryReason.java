@@ -26,6 +26,11 @@ public enum TimeEntryReason {
     CONTEXT_SWITCH,
 
     /**
+     * When a player joins the Server
+     */
+    PLAYER_JOIN,
+
+    /**
      * Player left and current session was persisted.
      */
     PLAYER_LEAVE,

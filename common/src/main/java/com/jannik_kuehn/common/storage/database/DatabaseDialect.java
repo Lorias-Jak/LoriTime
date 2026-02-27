@@ -53,11 +53,17 @@ enum DatabaseDialect implements SqlDialect {
                     + "`world_id` BIGINT NOT NULL,"
                     + "`join_time` DATETIME(3) NOT NULL,"
                     + "`leave_time` DATETIME(3) NOT NULL,"
+                    + "`reason` VARCHAR(32) NOT NULL DEFAULT 'UNSPECIFIED',"
                     + "INDEX `idx_time_player` (`player_id`),"
                     + "INDEX `idx_time_world` (`world_id`),"
                     + "CONSTRAINT `fk_time_player` FOREIGN KEY (`player_id`) REFERENCES `" + playerTableName + "`(`id`) ON DELETE CASCADE,"
                     + "CONSTRAINT `fk_time_world` FOREIGN KEY (`world_id`) REFERENCES `" + worldTableName + "`(`id`) ON DELETE CASCADE"
                     + ") ENGINE InnoDB";
+        }
+
+        @Override
+        public String addTimeReasonColumn(final String tableName) {
+            return "ALTER TABLE `" + tableName + "` ADD COLUMN `reason` VARCHAR(32) NOT NULL DEFAULT 'UNSPECIFIED'";
         }
 
         @Override
@@ -121,9 +127,15 @@ enum DatabaseDialect implements SqlDialect {
                     + "`world_id` INTEGER NOT NULL,"
                     + "`join_time` DATETIME(3) NOT NULL,"
                     + "`leave_time` DATETIME(3) NOT NULL,"
+                    + "`reason` TEXT NOT NULL DEFAULT 'UNSPECIFIED',"
                     + "FOREIGN KEY (`player_id`) REFERENCES `" + playerTableName + "`(`id`) ON DELETE CASCADE,"
                     + "FOREIGN KEY (`world_id`) REFERENCES `" + worldTableName + "`(`id`) ON DELETE CASCADE"
                     + ")";
+        }
+
+        @Override
+        public String addTimeReasonColumn(final String tableName) {
+            return "ALTER TABLE `" + tableName + "` ADD COLUMN `reason` TEXT NOT NULL DEFAULT 'UNSPECIFIED'";
         }
 
         @Override

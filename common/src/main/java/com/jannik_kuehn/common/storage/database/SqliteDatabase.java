@@ -43,7 +43,7 @@ final class SqliteDatabase implements SqlConnectionProvider {
     /**
      * Tracks whether the provider is currently open.
      */
-    private boolean open;
+    private boolean isOpen;
 
     /**
      * Creates an SQLite provider from configuration.
@@ -58,34 +58,43 @@ final class SqliteDatabase implements SqlConnectionProvider {
         this.dialect = DatabaseDialect.SQLITE;
 
         String uncheckedTablePrefix = config.getString("sqlite.tablePrefix", "lori_time");
-        if (uncheckedTablePrefix.toLowerCase(Locale.ROOT).contains("select")
-                || uncheckedTablePrefix.toLowerCase(Locale.ROOT).contains("insert")
-                || uncheckedTablePrefix.toLowerCase(Locale.ROOT).contains("drop")
-                || uncheckedTablePrefix.toLowerCase(Locale.ROOT).contains("create")) {
+        final String lower = uncheckedTablePrefix.toLowerCase(Locale.ROOT);
+        if (lower.contains("select")
+                || lower.contains("insert")
+                || lower.contains("drop")
+                || lower.contains("create")) {
             log.error("Unsafe database table name detected! Going back to default.");
             uncheckedTablePrefix = "loritime";
         }
-        this.tablePrefix = uncheckedTablePrefix;
 
-        this.databasePath = config.getString("sqlite.file", new File(dataFolder, DEFAULT_FILENAME).getAbsolutePath());
+        this.tablePrefix = uncheckedTablePrefix;
+        this.databasePath = new File(dataFolder, DEFAULT_FILENAME).getAbsolutePath();
     }
 
     @Override
     public void open() {
-        if (open) {
+        if (isOpen) {
             log.error("The SQLite connection is already open!");
             return;
         }
+
         try {
             Class.forName("org.sqlite.JDBC");
         } catch (final ClassNotFoundException e) {
             log.error("SQLite JDBC Driver was not loaded!", e);
             return;
         }
-        try (Connection connection = DriverManager.getConnection("jdbc:sqlite:" + databasePath)) {
-            open = true;
-            log.info("Connected to SQLite database at " + databasePath);
+
+        final File databaseFile = new File(databasePath);
+        final File parent = databaseFile.getParentFile();
+        if (parent != null && !parent.exists() && !parent.mkdirs()) {
+            log.error("Could not create SQLite database directory: " + parent.getAbsolutePath());
             return;
+        }
+
+        try (Connection ignored = DriverManager.getConnection("jdbc:sqlite:" + databasePath)) {
+            this.isOpen = true;
+            log.info("Connected to SQLite database at " + databasePath);
         } catch (final SQLException ex) {
             log.error("Could not connect to the SQLite database!", ex);
         }
@@ -93,7 +102,7 @@ final class SqliteDatabase implements SqlConnectionProvider {
 
     @Override
     public Connection getConnection() throws SQLException {
-        if (!open) {
+        if (!isOpen) {
             throw new SQLException("SQLite database provider is not initialized.");
         }
         return DriverManager.getConnection("jdbc:sqlite:" + databasePath);
@@ -101,18 +110,16 @@ final class SqliteDatabase implements SqlConnectionProvider {
 
     @Override
     public boolean isClosed() {
-        return !open;
+        return !isOpen;
     }
 
     @Override
     public void close() {
-        if (open) {
-            log.info("Closing SQLite connection ...");
-            open = false;
-            log.info("Successfully closed the connection to SQLite!");
+        if (!isOpen) {
+            log.error("Could not disconnect from the SQLite database, as it already was closed.");
             return;
         }
-        log.error("Could not disconnect from the SQLite database!");
+        this.isOpen = false;
     }
 
     @Override

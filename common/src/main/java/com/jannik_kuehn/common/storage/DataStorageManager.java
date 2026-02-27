@@ -120,9 +120,9 @@ public class DataStorageManager {
             log.info("External storage detected, skipping LoriTime's default storage loading.");
             return;
         }
-        final String storageMethod = loriTime.getConfig().getString("general.storage", "file");
+        final String storageMethod = loriTime.getConfig().getString("storage-method", "sqlite");
         switch (storageMethod.toLowerCase(Locale.ROOT)) {
-            case "sql", "mysql", "mariadb", "sqlite", "yml" -> loadDatabaseStorage();
+            case "mysql", "mariadb", "sqlite" -> loadDatabaseStorage();
             default -> {
                 log.error("Illegal storage method '" + storageMethod
                         + "'. Supported values: mysql, mariadb, sqlite (legacy: yml, sql).");

@@ -90,7 +90,7 @@
             </goals>
             <configuration>
               <shadedClassifierName>shaded</shadedClassifierName>
-              <minimizeJar>true</minimizeJar>
+              <minimizeJar>false</minimizeJar>
               <artifactSet>
                 <includes>
                   <include>com.google.code.gson</include>

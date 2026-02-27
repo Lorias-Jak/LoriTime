@@ -460,7 +460,7 @@
                 </relocation>
                 <relocation>
                   <pattern>org.sqlite</pattern>
-                  <shadedPattern>${project.groupId}.dependencies.org.xerial.sqlite</shadedPattern>
+                  <shadedPattern>${project.groupId}.dependencies.org.sqlite</shadedPattern>
                 </relocation>
                 <relocation>
                   <pattern>org.bstats</pattern>

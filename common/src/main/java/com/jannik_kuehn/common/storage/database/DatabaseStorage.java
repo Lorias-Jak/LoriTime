@@ -123,7 +123,7 @@ public class DatabaseStorage implements NameStorage, TimeStorage {
                                                         final LoriTimePlugin plugin,
                                                         final File dataFolder,
                                                         final LoriTimeLogger log) {
-        final String storageType = config.getString("general.storage", "yml").toLowerCase(Locale.ROOT);
+        final String storageType = config.getString("storage-method", "sqlite").toLowerCase(Locale.ROOT);
         return switch (storageType) {
             case SQLITE_STORAGE_TYPE -> new SqliteDatabase(config, plugin, dataFolder);
             case MARIADB_STORAGE_TYPE -> new MySQL(config, plugin, MySQL.Engine.MARIADB);

@@ -81,10 +81,10 @@ public class MySQL implements SqlConnectionProvider {
         this.config = config;
         this.engine = engine;
 
-        this.mySqlHost = config.getString("mysql.host", "localhost");
-        this.mySqlPort = config.getInt("mysql.port", 3306);
-        this.mySqlDatabase = config.getString("mysql.database");
-        String uncheckedTablePrefix = config.getString("mysql.tablePrefix", "lori_time");
+        this.mySqlHost = config.getString("data.host", "localhost");
+        this.mySqlPort = config.getInt("data.port", 3306);
+        this.mySqlDatabase = config.getString("data.database");
+        String uncheckedTablePrefix = config.getString("data.tablePrefix", "loritime");
         if (uncheckedTablePrefix.toLowerCase(Locale.ROOT).contains("select")
                 || uncheckedTablePrefix.toLowerCase(Locale.ROOT).contains("insert")
                 || uncheckedTablePrefix.toLowerCase(Locale.ROOT).contains("drop")

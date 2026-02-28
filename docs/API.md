@@ -3,12 +3,12 @@
 The LoriTime API offers various methods for querying and managing the online times of players.
 
 ## Compatibility
-| Plattform | Version         | Supported |
-|-----------|-----------------|-----------|
-| paper     | 1.7.0 - current | ✅         |
-| Folia     | 1.7.0 - current | ✅         |
-| velocity  | 1.7.0 - current | ✅         |
-| bungee    | 1.7.0 - current | ✅         |
+| Plattform | LoriTime-Version | Supported |
+|-----------|------------------|-----------|
+| paper     | 2.0.0 - current  | ✅         |
+| Folia     | 2.0.0 - current  | ✅         |
+| velocity  | 2.0.0 - current  | ✅         |
+| bungee    | 2.0.0 - current  | ✅         |
 
 ## API Introduction
 

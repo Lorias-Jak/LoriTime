@@ -3,86 +3,302 @@ package com.jannik_kuehn.common.storage.database;
 import com.jannik_kuehn.common.LoriTimePlugin;
 import com.jannik_kuehn.common.api.logger.LoriTimeLogger;
 import com.jannik_kuehn.common.api.storage.NameStorage;
+import com.jannik_kuehn.common.api.storage.ReasonAwareTimeStorage;
+import com.jannik_kuehn.common.api.storage.TimeEntryReason;
 import com.jannik_kuehn.common.api.storage.TimeStorage;
 import com.jannik_kuehn.common.config.Configuration;
 import com.jannik_kuehn.common.exception.StorageException;
+import com.jannik_kuehn.common.storage.database.table.PlayerTable;
+import com.jannik_kuehn.common.storage.database.table.ServerTable;
+import com.jannik_kuehn.common.storage.database.table.StatisticTable;
+import com.jannik_kuehn.common.storage.database.table.TimeTable;
+import com.jannik_kuehn.common.storage.database.table.WorldTable;
 import com.jannik_kuehn.common.utils.UuidUtil;
 
+import java.io.File;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.sql.Types;
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-@SuppressWarnings({"PMD.CommentRequired", "PMD.TooManyMethods"})
-public class DatabaseStorage implements NameStorage, TimeStorage {
+/**
+ * Database-backed storage implementation for player names and time tracking.
+ */
+@SuppressWarnings({
+        "PMD.CommentRequired",
+        "PMD.TooManyMethods",
+        "PMD.CouplingBetweenObjects",
+        "PMD.CyclomaticComplexity"
+})
+public class DatabaseStorage implements NameStorage, TimeStorage, ReasonAwareTimeStorage {
 
-    private final MySQL mySQL;
+    private static final String SQLITE_STORAGE_TYPE = "sqlite";
+
+    private static final String MYSQL_STORAGE_TYPE = "mysql";
+
+    private static final String MARIADB_STORAGE_TYPE = "mariadb";
+
+    private static final String DEFAULT_SERVER_NAME = "default";
+
+    private static final String DEFAULT_WORLD_NAME = "global";
+
+    private final SqlConnectionProvider databaseProvider;
+
+    private final LoriTimeLogger log;
 
     private final ReadWriteLock poolLock;
 
-    public DatabaseStorage(final Configuration config, final LoriTimePlugin loriTimePlugin) {
-        this.mySQL = new MySQL(config, loriTimePlugin);
-        mySQL.open();
-        this.poolLock = new ReentrantReadWriteLock();
-        final LoriTimeLogger log = loriTimePlugin.getLoggerFactory().create(DatabaseStorage.class);
+    private final Lock initializationLock;
 
-        try (
-                Connection connection = mySQL.getConnection();
-                Statement statement = connection.createStatement()
-        ) {
-            statement.execute(createTable());
-        } catch (final SQLException ex) {
-            log.error("Error creating table", ex);
+    private final String legacyTable;
+
+    private PlayerTable playerTable;
+
+    private ServerTable serverTable;
+
+    private WorldTable worldTable;
+
+    private TimeTable timeTable;
+
+    private StatisticTable statisticTable;
+
+    private boolean initialized;
+
+    /**
+     * Creates a database storage instance and initializes the schema.
+     *
+     * @param config         the configuration to read database settings from
+     * @param loriTimePlugin the plugin instance for logging and context
+     * @param dataFolder     the plugin data folder (used for SQLite paths)
+     */
+    public DatabaseStorage(final Configuration config, final LoriTimePlugin loriTimePlugin, final File dataFolder) throws StorageException {
+        this(config, loriTimePlugin, dataFolder, true);
+    }
+
+    /**
+     * Creates a database storage instance.
+     *
+     * @param config         the configuration to read database settings from
+     * @param loriTimePlugin the plugin instance for logging and context
+     * @param dataFolder     the plugin data folder (used for SQLite paths)
+     * @param autoInitialize if {@code true}, opens the provider and initializes schema immediately
+     */
+    public DatabaseStorage(final Configuration config,
+                           final LoriTimePlugin loriTimePlugin,
+                           final File dataFolder,
+                           final boolean autoInitialize) throws StorageException {
+        this.log = loriTimePlugin.getLoggerFactory().create(DatabaseStorage.class);
+        this.databaseProvider = createProvider(config, loriTimePlugin, dataFolder, log);
+        this.poolLock = new ReentrantReadWriteLock();
+        this.initializationLock = new ReentrantLock();
+        this.initialized = false;
+
+        this.legacyTable = initializeTables(databaseProvider.getTablePrefix(), databaseProvider.getDialect());
+
+        if (autoInitialize) {
+            initializeInternal();
         }
     }
 
-    private String createTable() {
-        return "CREATE TABLE IF NOT EXISTS `" + mySQL.getTablePrefix() + "` ("
-                + "`id`   INT NOT NULL AUTO_INCREMENT PRIMARY KEY,"
-                + "`uuid` BINARY(16) NOT NULL UNIQUE,"
-                + "`name` CHAR(16) CHARACTER SET ascii UNIQUE,"
-                + "`time` BIGINT UNSIGNED NOT NULL DEFAULT 0"
-                + ") ENGINE InnoDB";
+    /**
+     * Creates a connection provider based on the configured storage type.
+     *
+     * @param config     the configuration to read storage settings from
+     * @param plugin     the plugin instance for logging
+     * @param dataFolder the plugin data folder
+     * @return a provider for the selected database backend
+     */
+    private static SqlConnectionProvider createProvider(final Configuration config,
+                                                        final LoriTimePlugin plugin,
+                                                        final File dataFolder,
+                                                        final LoriTimeLogger log) {
+        final String storageType = config.getString("storage-method", "sqlite").toLowerCase(Locale.ROOT);
+        return switch (storageType) {
+            case SQLITE_STORAGE_TYPE -> new SqliteDatabase(config, plugin, dataFolder);
+            case MARIADB_STORAGE_TYPE -> new MySQL(config, plugin, MySQL.Engine.MARIADB);
+            case MYSQL_STORAGE_TYPE -> new MySQL(config, plugin, MySQL.Engine.MYSQL);
+            case "yml" -> {
+                log.warn("Legacy storage type 'yml' is no longer supported directly. Using SQLite provider for migration/fallback.");
+                yield new SqliteDatabase(config, plugin, dataFolder);
+            }
+            case "sql" -> {
+                final String legacyDialect = config.getString("mysql.dialect", "mariadb").toLowerCase(Locale.ROOT);
+                final MySQL.Engine legacyEngine = MYSQL_STORAGE_TYPE.equals(legacyDialect)
+                        ? MySQL.Engine.MYSQL
+                        : MySQL.Engine.MARIADB;
+                log.warn("The storage type 'sql' is deprecated. Please use 'mysql', 'mariadb' or 'sqlite' in general.storage.");
+                yield new MySQL(config, plugin, legacyEngine);
+            }
+            default -> {
+                log.warn("Unknown SQL storage type '" + storageType
+                        + "'. Falling back to SQLite. Supported: mysql, mariadb, sqlite.");
+                yield new SqliteDatabase(config, plugin, dataFolder);
+            }
+        };
     }
 
-    private String getByUuid() {
-        return "SELECT `name`, `time` FROM `" + mySQL.getTablePrefix() + "` WHERE `uuid` = ?";
+    private String initializeTables(final String tablePrefix, final SqlDialect dialect) {
+        final String playerTableName = tablePrefix + "_player";
+        final String serverTableName = tablePrefix + "_server";
+        final String worldTableName = tablePrefix + "_world";
+        final String timeTableName = tablePrefix + "_time";
+        final String statisticTableName = tablePrefix + "_statistic";
+
+        this.playerTable = new PlayerTable(playerTableName, dialect);
+        this.serverTable = new ServerTable(serverTableName, dialect);
+        this.worldTable = new WorldTable(worldTableName, serverTable, dialect);
+        this.timeTable = new TimeTable(timeTableName, playerTableName, worldTableName, dialect);
+        this.statisticTable = new StatisticTable(statisticTableName, dialect);
+        return tablePrefix;
     }
 
-    private String getAllEntriesSet() {
-        return "SELECT `uuid` AS uuid, `time` FROM `" + mySQL.getTablePrefix() + "`";
+    /**
+     * Opens the provider and initializes schema/migration.
+     */
+    public void initialize() throws StorageException {
+        initializeInternal();
     }
 
-    private String getAllNameEntries() {
-        return "SELECT `name` FROM `" + mySQL.getTablePrefix() + "`";
+    private void initializeInternal() throws StorageException {
+        initializationLock.lock();
+        try {
+            if (initialized) {
+                return;
+            }
+            databaseProvider.open();
+            if (databaseProvider.isClosed()) {
+                throw new StorageException("Failed to initialize database storage: provider could not be opened.");
+            }
+            initialized = initializeSchemaAndMigrate();
+            if (!initialized) {
+                try {
+                    databaseProvider.close();
+                } catch (final IOException ex) {
+                    log.error("Failed to close database provider after initialization failure", ex);
+                }
+                throw new StorageException("Failed to initialize database storage: schema creation or migration failed.");
+            }
+        } finally {
+            initializationLock.unlock();
+        }
     }
 
-    private String getByName() {
-        return "SELECT `uuid` AS uuid FROM `" + mySQL.getTablePrefix() + "` WHERE `name` = ?";
+    /**
+     * Initializes the schema and migrates legacy data in a single transaction.
+     */
+    private boolean initializeSchemaAndMigrate() {
+        try (Connection connection = databaseProvider.getConnection()) {
+            final boolean previousAutoCommit = connection.getAutoCommit();
+            try {
+                connection.setAutoCommit(false);
+                createSchema(connection);
+                migrateLegacyData(connection);
+                connection.commit();
+                return true;
+            } catch (final SQLException ex) {
+                try {
+                    connection.rollback();
+                } catch (final SQLException rollbackEx) {
+                    log.error("Rollback after migration failure failed", rollbackEx);
+                }
+                log.error("Error creating schema or migrating legacy data", ex);
+            } finally {
+                try {
+                    connection.setAutoCommit(previousAutoCommit);
+                } catch (final SQLException ex) {
+                    log.error("Failed to restore autoCommit state", ex);
+                }
+            }
+        } catch (final SQLException ex) {
+            log.error("Error obtaining connection for schema initialization", ex);
+        }
+        return false;
     }
 
-    private String unsetTakenName() {
-        return "UPDATE `" + mySQL.getTablePrefix() + "` SET name = NULL WHERE `uuid` = ?";
+    /**
+     * Creates all required schema tables.
+     *
+     * @param connection an open connection
+     * @throws SQLException if schema creation fails
+     */
+    private void createSchema(final Connection connection) throws SQLException {
+        try (PreparedStatement statement = connection.prepareStatement(playerTable.createTableSql())) {
+            statement.execute();
+        }
+        try (PreparedStatement statement = connection.prepareStatement(serverTable.createTableSql())) {
+            statement.execute();
+        }
+        try (PreparedStatement statement = connection.prepareStatement(worldTable.createTableSql())) {
+            statement.execute();
+        }
+        try (PreparedStatement statement = connection.prepareStatement(timeTable.createTableSql())) {
+            statement.execute();
+        }
+        try (PreparedStatement statement = connection.prepareStatement(statisticTable.createTableSql())) {
+            statement.execute();
+        }
     }
 
-    private String insertOrUpdateEntry() {
-        return "INSERT INTO `" + mySQL.getTablePrefix() + "` (`uuid`, `name`, `time`) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE `name` = ?, `time` = `time` + ?";
+    /**
+     * Migrates data from the legacy table into the new schema.
+     *
+     * @param connection an open connection
+     * @throws SQLException if migration fails
+     */
+    private void migrateLegacyData(final Connection connection) throws SQLException {
+        if (!tableExists(connection, legacyTable)) {
+            return;
+        }
+        if (tableExists(connection, playerTable.getTableName()) && playerTable.hasAnyData(connection)) {
+            return;
+        }
+        log.info("Migrating legacy LoriTime table to the new schema ...");
+        final long worldId = worldTable.ensureWorld(connection, DEFAULT_SERVER_NAME, DEFAULT_WORLD_NAME);
+
+        try (PreparedStatement selectLegacy = connection.prepareStatement(
+                "SELECT `uuid`, `name`, `time` FROM `" + legacyTable + "`")) {
+            try (ResultSet result = selectLegacy.executeQuery()) {
+                while (result.next()) {
+                    final UUID uuid = UuidUtil.fromBytes(result.getBytes("uuid"));
+                    final Optional<String> name = Optional.ofNullable(result.getString("name"));
+                    final long timeSeconds = result.getLong("time");
+                    final long playerId = playerTable.ensurePlayer(connection, uuid, name);
+                    timeTable.insertDuration(connection, playerId, worldId, timeSeconds, TimeEntryReason.LEGACY_IMPORT);
+                }
+            }
+        }
+
+        try (Statement dropLegacy = connection.createStatement()) {
+            dropLegacy.execute("DROP TABLE IF EXISTS `" + legacyTable + "`");
+        }
+        log.info("Legacy migration completed.");
     }
 
-    private String deleteByUuid() {
-        return "DELETE FROM `" + mySQL.getTablePrefix() + "` WHERE `uuid` = ?";
+    /**
+     * Checks whether a table exists in the current database schema.
+     *
+     * @param connection an open connection
+     * @param tableName  the table name to check
+     * @return {@code true} if the table exists
+     * @throws SQLException if the lookup fails
+     */
+    private boolean tableExists(final Connection connection, final String tableName) throws SQLException {
+        try (ResultSet tables = connection.getMetaData().getTables(null, null, tableName, new String[]{"TABLE"})) {
+            return tables.next();
+        }
     }
 
     @Override
@@ -91,26 +307,13 @@ public class DatabaseStorage implements NameStorage, TimeStorage {
         poolLock.readLock().lock();
         try {
             checkClosed();
-            try (Connection connection = mySQL.getConnection()) {
-                return getUuid(connection, name);
+            try (Connection connection = databaseProvider.getConnection()) {
+                return playerTable.findUuidByName(connection, name);
             }
         } catch (final SQLException ex) {
             throw new StorageException(ex);
         } finally {
             poolLock.readLock().unlock();
-        }
-    }
-
-    private Optional<UUID> getUuid(final Connection connection, final String name) throws SQLException {
-        try (PreparedStatement getByNameStatement = connection.prepareStatement(getByName())) {
-            getByNameStatement.setString(1, name);
-            try (ResultSet result = getByNameStatement.executeQuery()) {
-                if (result.next()) {
-                    return Optional.of(UuidUtil.fromBytes(result.getBytes("uuid")));
-                } else {
-                    return Optional.empty();
-                }
-            }
         }
     }
 
@@ -120,26 +323,13 @@ public class DatabaseStorage implements NameStorage, TimeStorage {
         poolLock.readLock().lock();
         try {
             checkClosed();
-            try (Connection connection = mySQL.getConnection()) {
-                return getName(connection, uniqueId);
+            try (Connection connection = databaseProvider.getConnection()) {
+                return playerTable.findNameByUuid(connection, uniqueId);
             }
         } catch (final SQLException ex) {
             throw new StorageException(ex);
         } finally {
             poolLock.readLock().unlock();
-        }
-    }
-
-    private Optional<String> getName(final Connection connection, final UUID uuid) throws SQLException {
-        try (PreparedStatement getByUuidStatement = connection.prepareStatement(getByUuid())) {
-            getByUuidStatement.setBytes(1, UuidUtil.toBytes(uuid));
-            try (ResultSet result = getByUuidStatement.executeQuery()) {
-                if (result.next()) {
-                    return Optional.of(result.getString("name"));
-                } else {
-                    return Optional.empty();
-                }
-            }
         }
     }
 
@@ -149,94 +339,67 @@ public class DatabaseStorage implements NameStorage, TimeStorage {
         poolLock.readLock().lock();
         try {
             checkClosed();
-            try (Connection connection = mySQL.getConnection()) {
-                return getOnlineTime(connection, uniqueId);
+            try (Connection connection = databaseProvider.getConnection()) {
+                return timeTable.sumForPlayer(connection, uniqueId);
             }
         } catch (final SQLException ex) {
             throw new StorageException(ex);
         } finally {
             poolLock.readLock().unlock();
-        }
-    }
-
-    private OptionalLong getOnlineTime(final Connection connection, final UUID uuid) throws SQLException {
-        try (PreparedStatement getByUuidStatement = connection.prepareStatement(getByUuid())) {
-            getByUuidStatement.setBytes(1, UuidUtil.toBytes(uuid));
-            try (ResultSet result = getByUuidStatement.executeQuery()) {
-                if (result.next()) {
-                    return OptionalLong.of(result.getLong("time"));
-                } else {
-                    return OptionalLong.empty();
-                }
-            }
         }
     }
 
     @Override
     public void addTime(final UUID uuid, final long additionalTime) throws StorageException {
+        addTime(uuid, additionalTime, TimeEntryReason.MANUAL_ADJUSTMENT);
+    }
+
+    @Override
+    public void addTime(final UUID uuid, final long additionalTime, final TimeEntryReason reason) throws StorageException {
         Objects.requireNonNull(uuid);
+        Objects.requireNonNull(reason);
         poolLock.readLock().lock();
         try {
             checkClosed();
-            try (Connection connection = mySQL.getConnection()) {
-                addOnlineTime(connection, uuid, additionalTime);
+            try (Connection connection = databaseProvider.getConnection()) {
+                final long worldId = worldTable.ensureWorld(connection, DEFAULT_SERVER_NAME, DEFAULT_WORLD_NAME);
+                final long playerId = playerTable.ensurePlayer(connection, uuid, Optional.empty());
+                timeTable.insertDuration(connection, playerId, worldId, additionalTime, reason);
             }
         } catch (final SQLException ex) {
             throw new StorageException(ex);
         } finally {
             poolLock.readLock().unlock();
-        }
-    }
-
-    private void addOnlineTime(final Connection connection, final UUID uuid, final long additionalOnlineTime) throws SQLException {
-        try (PreparedStatement insertOrUpdateEntryStatement = connection.prepareStatement(insertOrUpdateEntry())) {
-            final Optional<String> name = getName(connection, uuid);
-            insertOrUpdateEntryParams(insertOrUpdateEntryStatement, uuid, name, additionalOnlineTime);
-            insertOrUpdateEntryStatement.executeUpdate();
         }
     }
 
     @Override
     public void addTimes(final Map<UUID, Long> additionalTimes) throws StorageException {
-        if (additionalTimes == null) {
+        addTimes(additionalTimes, TimeEntryReason.MANUAL_ADJUSTMENT);
+    }
+
+    @Override
+    public void addTimes(final Map<UUID, Long> additionalTimes, final TimeEntryReason reason) throws StorageException {
+        if (additionalTimes == null || additionalTimes.isEmpty()) {
             return;
         }
+        Objects.requireNonNull(reason);
         poolLock.readLock().lock();
         try {
-            try (Connection connection = mySQL.getConnection()) {
-                addOnlineTimes(connection, additionalTimes);
+            checkClosed();
+            try (Connection connection = databaseProvider.getConnection()) {
+                final long worldId = worldTable.ensureWorld(connection, DEFAULT_SERVER_NAME, DEFAULT_WORLD_NAME);
+                for (final Map.Entry<UUID, Long> entry : additionalTimes.entrySet()) {
+                    final UUID uuid = entry.getKey();
+                    final long playerId = playerTable.ensurePlayer(connection, uuid, Optional.empty());
+                    timeTable.insertDuration(connection, playerId, worldId, entry.getValue(), reason);
+                }
             }
         } catch (final SQLException ex) {
             throw new StorageException(ex);
         } finally {
             poolLock.readLock().unlock();
         }
-    }
-
-    private void addOnlineTimes(final Connection connection, final Map<UUID, Long> additionalOnlineTimes) throws SQLException {
-        try (PreparedStatement insertOrUpdateEntryStatement = connection.prepareStatement(insertOrUpdateEntry())) {
-            for (final Map.Entry<UUID, Long> entry : additionalOnlineTimes.entrySet()) {
-                final UUID uuid = entry.getKey();
-                final Optional<String> name = getName(connection, uuid);
-                final long additionalOnlineTime = entry.getValue();
-                insertOrUpdateEntryParams(insertOrUpdateEntryStatement, uuid, name, additionalOnlineTime);
-                insertOrUpdateEntryStatement.addBatch();
-            }
-            insertOrUpdateEntryStatement.executeBatch();
-        }
-    }
-
-    private void insertOrUpdateEntryParams(final PreparedStatement insertOrUpdateEntryStatement, final UUID uuid, final Optional<String> name, final long additionalOnlineTime) throws SQLException {
-        insertOrUpdateEntryStatement.setBytes(1, UuidUtil.toBytes(uuid));
-        if (name.isPresent()) {
-            insertOrUpdateEntryStatement.setString(2, name.get());
-            insertOrUpdateEntryStatement.setString(4, name.get());
-        } else {
-            insertOrUpdateEntryStatement.setNull(2, Types.CHAR);
-            insertOrUpdateEntryStatement.setNull(4, Types.CHAR);
-        }
-        insertOrUpdateEntryStatement.setLong(3, Math.max(0, additionalOnlineTime));
-        insertOrUpdateEntryStatement.setLong(5, additionalOnlineTime);
     }
 
     @Override
@@ -246,8 +409,8 @@ public class DatabaseStorage implements NameStorage, TimeStorage {
         poolLock.readLock().lock();
         try {
             checkClosed();
-            try (Connection connection = mySQL.getConnection()) {
-                setEntry(connection, uuid, name);
+            try (Connection connection = databaseProvider.getConnection()) {
+                playerTable.ensurePlayer(connection, uuid, Optional.of(name));
             }
         } catch (final SQLException ex) {
             throw new StorageException(ex);
@@ -261,33 +424,18 @@ public class DatabaseStorage implements NameStorage, TimeStorage {
         setEntry(uniqueId, name);
     }
 
-    private void setEntry(final Connection connection, final UUID uuid, final String name) throws SQLException {
-        final Optional<UUID> oldNameHolder = getUuid(connection, name);
-        if (oldNameHolder.filter(oldUuid -> !oldUuid.equals(uuid)).isPresent()) { // name not unique ? update on duplicate uuid
-            try (PreparedStatement unsetTakenNameStatement = connection.prepareStatement(unsetTakenName())) {
-                unsetTakenNameStatement.setBytes(1, UuidUtil.toBytes(oldNameHolder.get()));
-                unsetTakenNameStatement.executeUpdate();
-            }
-        }
-        try (PreparedStatement insertOrUpdateEntryStatement = connection.prepareStatement(insertOrUpdateEntry())) {
-            insertOrUpdateEntryStatement.setBytes(1, UuidUtil.toBytes(uuid));
-            insertOrUpdateEntryStatement.setString(2, name);
-            insertOrUpdateEntryStatement.setString(4, name);
-            insertOrUpdateEntryStatement.setLong(3, 0);
-            insertOrUpdateEntryStatement.setLong(5, 0);
-            insertOrUpdateEntryStatement.executeUpdate();
-        }
-    }
-
     @Override
     public void setEntries(final Map<UUID, String> entries) throws StorageException {
-        if (entries == null) {
+        if (entries == null || entries.isEmpty()) {
             return;
         }
         poolLock.readLock().lock();
         try {
-            try (Connection connection = mySQL.getConnection()) {
-                setEntries(connection, entries);
+            checkClosed();
+            try (Connection connection = databaseProvider.getConnection()) {
+                for (final Map.Entry<UUID, String> entry : entries.entrySet()) {
+                    playerTable.ensurePlayer(connection, entry.getKey(), Optional.ofNullable(entry.getValue()));
+                }
             }
         } catch (final SQLException ex) {
             throw new StorageException(ex);
@@ -301,8 +449,23 @@ public class DatabaseStorage implements NameStorage, TimeStorage {
         poolLock.readLock().lock();
         try {
             checkClosed();
-            try (Connection connection = mySQL.getConnection()) {
-                return getNameEntries(connection);
+            try (Connection connection = databaseProvider.getConnection()) {
+                return playerTable.getAllNames(connection);
+            }
+        } catch (final SQLException ex) {
+            throw new StorageException(ex);
+        } finally {
+            poolLock.readLock().unlock();
+        }
+    }
+
+    @Override
+    public Map<String, ?> getAllTimeEntries() throws StorageException {
+        poolLock.readLock().lock();
+        try {
+            checkClosed();
+            try (Connection connection = databaseProvider.getConnection()) {
+                return timeTable.getAllTotals(connection);
             }
         } catch (final SQLException ex) {
             throw new StorageException(ex);
@@ -316,102 +479,55 @@ public class DatabaseStorage implements NameStorage, TimeStorage {
         deleteUser(uniqueId);
     }
 
-    private void deleteUser(final UUID uuid) throws SQLException, StorageException {
-        if (uuid == null) {
-            return;
-        }
-        poolLock.readLock().lock();
-        try {
-            try (Connection connection = mySQL.getConnection()) {
-                try (PreparedStatement getByUuidStatement = connection.prepareStatement(deleteByUuid())) {
-                    getByUuidStatement.setBytes(1, UuidUtil.toBytes(uuid));
-                    getByUuidStatement.executeUpdate();
-                }
-            }
-        } catch (final SQLException ex) {
-            throw new StorageException(ex);
-        } finally {
-            poolLock.readLock().unlock();
-        }
-
-    }
-
-    private Set<String> getNameEntries(final Connection connection) throws SQLException {
-        try (PreparedStatement getByUuidStatement = connection.prepareStatement(getAllNameEntries())) {
-            try (ResultSet result = getByUuidStatement.executeQuery()) {
-                final Set<String> nameSet = new HashSet<>();
-                while (result.next()) {
-                    nameSet.add(result.getString("name"));
-                }
-                return nameSet;
-            }
-        }
-    }
-
-    @Override
-    public Map<String, ?> getAllTimeEntries() throws StorageException {
-        poolLock.readLock().lock();
-        try {
-            checkClosed();
-            try (Connection connection = mySQL.getConnection()) {
-                return getAllTimeEntries(connection);
-            }
-        } catch (final SQLException ex) {
-            throw new StorageException(ex);
-        } finally {
-            poolLock.readLock().unlock();
-        }
-    }
-
     @Override
     public void removeTimeHolder(final UUID uniqueId) throws StorageException, SQLException {
         deleteUser(uniqueId);
     }
 
-    private Map<String, ?> getAllTimeEntries(final Connection connection) throws SQLException {
-        try (PreparedStatement getByUuidStatement = connection.prepareStatement(getAllEntriesSet())) {
-            try (ResultSet result = getByUuidStatement.executeQuery()) {
-                final Map<String, Long> test = new HashMap<>();
-                while (result.next()) {
-                    test.put(UuidUtil.fromBytes(result.getBytes("uuid")).toString(), result.getLong("time"));
-                }
-                return test;
+    /**
+     * Deletes a player entry by UUID.
+     *
+     * @param uuid the player UUID
+     * @throws StorageException if the deletion fails
+     */
+    private void deleteUser(final UUID uuid) throws StorageException {
+        if (uuid == null) {
+            return;
+        }
+        poolLock.readLock().lock();
+        try {
+            checkClosed();
+            try (Connection connection = databaseProvider.getConnection()) {
+                playerTable.deleteByUuid(connection, uuid);
             }
+        } catch (final SQLException ex) {
+            throw new StorageException(ex);
+        } finally {
+            poolLock.readLock().unlock();
         }
     }
 
     @Override
     public void close() throws StorageException {
-        if (!mySQL.isClosed()) {
-            mySQL.close();
-        }
-    }
-
-    private void setEntries(final Connection connection, final Map<UUID, String> entries) throws SQLException {
-        try (PreparedStatement unsetTakenNameStatement = connection.prepareStatement(unsetTakenName());
-             PreparedStatement insertOrUpdateEntryStatement = connection.prepareStatement(insertOrUpdateEntry())) {
-            for (final Map.Entry<UUID, String> entry : entries.entrySet()) {
-                final UUID uuid = entry.getKey();
-                final String name = entry.getValue();
-                final Optional<UUID> oldNameHolder = getUuid(connection, name);
-                if (oldNameHolder.filter(oldUuid -> !oldUuid.equals(uuid)).isPresent()) { // name not unique ? update on duplicate uuid
-                    unsetTakenNameStatement.setBytes(1, UuidUtil.toBytes(oldNameHolder.get()));
-                    unsetTakenNameStatement.addBatch();
-                }
-                insertOrUpdateEntryStatement.setBytes(1, UuidUtil.toBytes(uuid));
-                insertOrUpdateEntryStatement.setString(2, name);
-                insertOrUpdateEntryStatement.setString(4, name);
-                insertOrUpdateEntryStatement.setLong(3, 0);
-                insertOrUpdateEntryStatement.setLong(5, 0);
-                insertOrUpdateEntryStatement.addBatch();
+        if (!databaseProvider.isClosed()) {
+            try {
+                databaseProvider.close();
+            } catch (final IOException e) {
+                throw new StorageException("The database could not be closed properly.", e);
             }
-            unsetTakenNameStatement.executeBatch();
-            insertOrUpdateEntryStatement.executeBatch();
         }
     }
 
+    /**
+     * Throws an exception if the storage is already closed.
+     *
+     * @throws StorageException if the storage is closed
+     */
     private void checkClosed() throws StorageException {
-        if (mySQL.isClosed()) {
+        if (!initialized) {
+            throw new StorageException("database storage is not initialized");
+        }
+        if (databaseProvider.isClosed()) {
             throw new StorageException("closed");
         }
     }

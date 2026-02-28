@@ -4,9 +4,9 @@ This will walk you through installing HuskHomes on your Spigot, Fabric or Sponge
 * To see all requirements pls checkout the [compatibility](https://github.com/Lorias-Jak/LoriTime/wiki/Compatibility) page.
 * Download the jar file for your server from the [latest release](https://github.com/Lorias-Jak/LoriTime/releases/latest).
 
-## When to use on MultiSetup?
+## When to use MultiSetup?
 The MultiSetup is a realization for networks within a single-proxy and subserver system. 
-LoriTime is communicating with between the proxy and subservers to send data between them.
+LoriTime is communicating between the proxy and subservers to send data between them.
 Not every data is available on the proxy for every feature.
 <br>
 <br>

@@ -6,9 +6,15 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased] - ${maven.build.timestamp}
 ### Added
+- New storage types:
+  - `mysql`
+  - `mariadb`
+  - `sqlite`
 ### Changed
+- The way the plugin stores its internal data in the storages for more flexibility.
 ### Deprecated
 ### Removed
+- The storage type `yml`
 ### Fixed
 ### Security
 

@@ -7,6 +7,7 @@ import java.util.Map;
 /**
  * This interface is responsible for providing the developer versions of the plugin.
  */
+@FunctionalInterface
 public interface DevUpdateSource {
 
     /**

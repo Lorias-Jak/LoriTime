@@ -21,7 +21,7 @@ import net.md_5.bungee.api.plugin.Plugin;
 import net.md_5.bungee.api.plugin.PluginManager;
 import org.bstats.bungeecord.Metrics;
 
-@SuppressWarnings({"PMD.CommentRequired", "PMD.AvoidCatchingGenericException", "PMD.AtLeastOneConstructor"})
+@SuppressWarnings({"PMD.CommentRequired", "PMD.AtLeastOneConstructor"})
 public class LoriTimeBungee extends Plugin {
 
     private LoriTimePlugin loriTimePlugin;

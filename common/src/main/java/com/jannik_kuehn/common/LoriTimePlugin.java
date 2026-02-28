@@ -35,9 +35,8 @@ import java.util.Set;
 /**
  * The {@link LoriTimePlugin} is the main class of the plugin.
  */
-@SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.UseProperClassLoader",
-        "PMD.ConfusingTernary", "PMD.LiteralsFirstInComparisons", "PMD.AssignmentToNonFinalStatic", "PMD.TooManyMethods",
-        "PMD.CouplingBetweenObjects"})
+@SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.ConfusingTernary", "PMD.LiteralsFirstInComparisons",
+        "PMD.AssignmentToNonFinalStatic", "PMD.CouplingBetweenObjects"})
 public class LoriTimePlugin {
     /**
      * The {@link LoriTimePlugin} instance.

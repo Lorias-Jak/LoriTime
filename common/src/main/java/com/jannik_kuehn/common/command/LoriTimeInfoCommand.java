@@ -10,7 +10,7 @@ import net.kyori.adventure.text.minimessage.MiniMessage;
 import java.util.ArrayList;
 import java.util.List;
 
-@SuppressWarnings({"PMD.CommentRequired", "PMD.TooManyMethods"})
+@SuppressWarnings({"PMD.CommentRequired"})
 public class LoriTimeInfoCommand implements CommonCommand {
 
     private final LoriTimePlugin plugin;

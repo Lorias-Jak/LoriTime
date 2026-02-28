@@ -17,9 +17,8 @@ import java.util.OptionalLong;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-@SuppressWarnings({"PMD.CommentRequired", "PMD.TooManyMethods", "PMD.AvoidLiteralsInIfCondition", "PMD.CognitiveComplexity",
-        "PMD.CyclomaticComplexity", "PMD.NPathComplexity", "PMD.AvoidThrowingRawExceptionTypes", "PMD.CloseResource",
-        "PMD.AvoidDuplicateLiterals", "PMD.ConfusingTernary"})
+@SuppressWarnings({"PMD.CommentRequired", "PMD.AvoidLiteralsInIfCondition", "PMD.CognitiveComplexity",
+        "PMD.AvoidThrowingRawExceptionTypes", "PMD.ConfusingTernary"})
 public class LoriTimeCommand implements CommonCommand {
 
     private final LoriTimePlugin loriTimePlugin;
@@ -35,6 +34,7 @@ public class LoriTimeCommand implements CommonCommand {
     }
 
     @Override
+    @SuppressWarnings("PMD.AvoidDeeplyNestedIfStmts")
     public void execute(final CommonSender sender, final String... args) {
         if (!sender.hasPermission("loritime.see")) {
             printUtilityMessage(sender, "message.nopermission");

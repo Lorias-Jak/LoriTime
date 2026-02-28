@@ -31,36 +31,6 @@ import static org.mockito.Mockito.*;
  */
 class UpdaterTest {
 
-    /**
-     * An {@link InstantSource} that can be advanced.
-     */
-    private static class MutableInstantSource implements InstantSource {
-        private Instant now;
-
-        /**
-         * Constructor.
-         *
-         * @param start the start instant
-         */
-        public MutableInstantSource(final Instant start) {
-            this.now = start;
-        }
-
-        /**
-         * Returns the current instant.
-         *
-         * @return the current instant
-         */
-        @Override
-        public Instant instant() {
-            return now;
-        }
-
-        private void advanceSeconds(final long seconds) {
-            now = now.plusSeconds(seconds);
-        }
-    }
-
     private LoriTimePlugin mockPlugin(final Configuration config, final CommonServer server, final PluginScheduler scheduler, final Localization loc) {
         final LoriTimePlugin plugin = mock(LoriTimePlugin.class);
         when(plugin.getConfig()).thenReturn(config);
@@ -75,13 +45,16 @@ class UpdaterTest {
         final PluginTask task = mock(PluginTask.class);
 
         final Answer<PluginTask> runNow1 = inv -> {
-            ((Runnable) inv.getArgument(0)).run(); return task;
+            ((Runnable) inv.getArgument(0)).run();
+            return task;
         };
         final Answer<PluginTask> runNow2 = inv -> {
-            ((Runnable) inv.getArgument(1)).run(); return task;
+            ((Runnable) inv.getArgument(1)).run();
+            return task;
         };
         final Answer<PluginTask> runNow3 = inv -> {
-            ((Runnable) inv.getArgument(2)).run(); return task;
+            ((Runnable) inv.getArgument(2)).run();
+            return task;
         };
 
         when(scheduler.runAsyncOnce(any())).thenAnswer(runNow1);
@@ -177,7 +150,8 @@ class UpdaterTest {
         when(player.isConsole()).thenReturn(false);
         when(player.isOnline()).thenReturn(true);
         doAnswer(inv -> {
-            msgCount.incrementAndGet(); return null;
+            msgCount.incrementAndGet();
+            return null;
         }).when(player).sendMessage(any(TextComponent.class));
 
         updater.sendPlayerUpdateNotification(player);
@@ -192,5 +166,35 @@ class UpdaterTest {
         when(console.isConsole()).thenReturn(true);
         updater.sendPlayerUpdateNotification(console);
         assertEquals(2, msgCount.get(), "Expected 2 messages for console");
+    }
+
+    /**
+     * An {@link InstantSource} that can be advanced.
+     */
+    private static final class MutableInstantSource implements InstantSource {
+        private Instant now;
+
+        /**
+         * Constructor.
+         *
+         * @param start the start instant
+         */
+        private MutableInstantSource(final Instant start) {
+            this.now = start;
+        }
+
+        /**
+         * Returns the current instant.
+         *
+         * @return the current instant
+         */
+        @Override
+        public Instant instant() {
+            return now;
+        }
+
+        private void advanceSeconds(final long seconds) {
+            now = now.plusSeconds(seconds);
+        }
     }
 }

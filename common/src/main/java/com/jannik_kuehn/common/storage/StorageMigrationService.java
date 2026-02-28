@@ -100,7 +100,6 @@ public class StorageMigrationService {
         return 0;
     }
 
-    @SuppressWarnings("PMD.CloseResource")
     private void migrateYmlToSqlite() throws StorageException {
         final String migrationId = String.valueOf(Instant.now().toEpochMilli());
         log.warn("Storage 'yml' is deprecated and will be migrated to SQLite now.");

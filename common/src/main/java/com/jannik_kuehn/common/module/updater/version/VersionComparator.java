@@ -68,7 +68,7 @@ public class VersionComparator {
      * @param otherVersion   the other {@link Version}.
      * @return 0 if equal, less than 0 if other is newer, more than 0 if current is newer.
      */
-    @SuppressWarnings({"PMD.NPathComplexity", "PMD.CyclomaticComplexity"})
+    @SuppressWarnings({"PMD.CyclomaticComplexity"})
     public int compareVersions(final Version currentVersion, final Version otherVersion) {
         if (currentVersion == null && otherVersion == null) {
             return 0;
@@ -129,9 +129,8 @@ public class VersionComparator {
                     }
                     return compareQualifier(qualifierNumber, buildNumber);
                 }
-            default:
-                return 1;
         }
+        return 1;
     }
 
     private int compareQualifier(final int qualifierNumber, final int buildNumber) {

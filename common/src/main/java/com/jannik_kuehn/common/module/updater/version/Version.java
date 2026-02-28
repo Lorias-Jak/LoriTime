@@ -35,6 +35,7 @@ public class Version {
      *
      * @param versionString the version string in form of `major.minor.patch-qualifier-buildNumber`
      */
+    @SuppressWarnings("PMD.AvoidDeeplyNestedIfStmts")
     public Version(final String versionString) {
         this.artifactVersion = new DefaultArtifactVersion(versionString);
         String tempQualifier = null;

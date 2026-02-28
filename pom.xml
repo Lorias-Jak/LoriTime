@@ -128,7 +128,7 @@
       <dependency>
         <groupId>org.apache.commons</groupId>
         <artifactId>commons-lang3</artifactId>
-        <version>3.19.0</version>
+        <version>3.20.0</version>
         <scope>provided</scope>
       </dependency>
 
@@ -230,13 +230,7 @@
       <dependency>
         <groupId>net.kyori</groupId>
         <artifactId>adventure-text-minimessage</artifactId>
-        <version>4.25.0</version>
-        <scope>provided</scope>
-      </dependency>
-      <dependency>
-        <groupId>net.kyori</groupId>
-        <artifactId>adventure-platform-bukkit</artifactId>
-        <version>4.4.1</version>
+        <version>4.26.1</version>
         <scope>provided</scope>
       </dependency>
       <dependency>
@@ -615,12 +609,12 @@
             <dependency>
               <groupId>net.sourceforge.pmd</groupId>
               <artifactId>pmd-core</artifactId>
-              <version>7.17.0</version>
+              <version>7.22.0</version>
             </dependency>
             <dependency>
               <groupId>net.sourceforge.pmd</groupId>
               <artifactId>pmd-java</artifactId>
-              <version>7.17.0</version>
+              <version>7.22.0</version>
             </dependency>
             <dependency>
               <groupId>com.jannik_kuehn</groupId>
@@ -639,7 +633,7 @@
         <plugin>
           <groupId>com.github.spotbugs</groupId>
           <artifactId>spotbugs-maven-plugin</artifactId>
-          <version>4.9.8.1</version>
+          <version>4.9.8.2</version>
           <dependencies>
             <dependency>
               <groupId>com.jannik_kuehn</groupId>
@@ -692,7 +686,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-source-plugin</artifactId>
-          <version>3.3.1</version>
+          <version>3.4.0</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>

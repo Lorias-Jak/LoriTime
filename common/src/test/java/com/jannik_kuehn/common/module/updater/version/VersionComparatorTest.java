@@ -13,19 +13,19 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 class VersionComparatorTest {
 
-    public static final Version VERSION_ONE = new Version("1.2.4");
+    private static final Version VERSION_ONE = new Version("1.2.4");
 
-    public static final Version VERSION_TWO = new Version("2.2.5-DEV-1");
+    private static final Version VERSION_TWO = new Version("2.2.5-DEV-1");
 
-    public static final Version VERSION_TWO_WITHOUT_QUALIFIER = new Version("2.2.5");
+    private static final Version VERSION_TWO_WITHOUT_QUALIFIER = new Version("2.2.5");
 
-    public static final Version VERSION_THREE = new Version("2.2.5-DEV-12");
+    private static final Version VERSION_THREE = new Version("2.2.5-DEV-12");
 
-    public static final Version VERSION_FOUR = new Version("2.3.6-DEV-UNOFFICIAL");
+    private static final Version VERSION_FOUR = new Version("2.3.6-DEV-UNOFFICIAL");
 
-    public static final Version VERSION_FIVE = new Version("2.3.7-DEV-UNOFFICIAL");
+    private static final Version VERSION_FIVE = new Version("2.3.7-DEV-UNOFFICIAL");
 
-    public static final Version VERSION_SIX = new Version("2.4.5-DEV-UNOFFICIAL");
+    private static final Version VERSION_SIX = new Version("2.4.5-DEV-UNOFFICIAL");
 
     private static Stream<Arguments> combinations() {
         return Stream.of(

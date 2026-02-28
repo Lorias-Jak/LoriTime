@@ -18,7 +18,7 @@ class FileStorageProviderTest {
     private FileStorageProvider storageProvider;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         mockConfig = mock(Configuration.class);
         storageProvider = new FileStorageProvider(mockConfig);
     }

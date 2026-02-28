@@ -8,6 +8,7 @@ import java.util.Map;
 /**
  * This interface is responsible for providing the versions of the plugin.
  */
+@FunctionalInterface
 public interface ReleaseUpdateSource {
 
     /**

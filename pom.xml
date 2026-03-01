@@ -453,10 +453,6 @@
                   <shadedPattern>${project.groupId}.dependencies.org.mariadb.jdbc</shadedPattern>
                 </relocation>
                 <relocation>
-                  <pattern>org.sqlite</pattern>
-                  <shadedPattern>${project.groupId}.dependencies.org.sqlite</shadedPattern>
-                </relocation>
-                <relocation>
                   <pattern>org.bstats</pattern>
                   <shadedPattern>${project.groupId}.dependencies.org.bstats</shadedPattern>
                 </relocation>

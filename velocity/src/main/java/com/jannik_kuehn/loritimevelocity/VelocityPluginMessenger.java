@@ -1,7 +1,7 @@
 package com.jannik_kuehn.loritimevelocity;
 
+import com.github.roleplaycauldron.spellbook.core.logger.WrappedLogger;
 import com.jannik_kuehn.common.api.common.CommonSender;
-import com.jannik_kuehn.common.api.logger.LoriTimeLogger;
 import com.jannik_kuehn.common.module.messaging.PluginMessaging;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.connection.PluginMessageEvent;
@@ -23,9 +23,9 @@ public class VelocityPluginMessenger extends PluginMessaging {
     private final LoriTimeVelocity loriTimeVelocity;
 
     /**
-     * The {@link LoriTimeLogger} instance.
+     * The {@link WrappedLogger} instance.
      */
-    private final LoriTimeLogger log;
+    private final WrappedLogger log;
 
     /**
      * Creates a new {@link VelocityPluginMessenger} instance.

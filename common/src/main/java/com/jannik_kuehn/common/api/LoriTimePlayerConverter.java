@@ -1,9 +1,9 @@
 package com.jannik_kuehn.common.api;
 
+import com.github.roleplaycauldron.spellbook.core.logger.LoggerFactory;
+import com.github.roleplaycauldron.spellbook.core.logger.WrappedLogger;
 import com.jannik_kuehn.common.LoriTimePlugin;
 import com.jannik_kuehn.common.api.common.CommonSender;
-import com.jannik_kuehn.common.api.logger.LoggerFactory;
-import com.jannik_kuehn.common.api.logger.LoriTimeLogger;
 import com.jannik_kuehn.common.exception.StorageException;
 
 import java.util.List;
@@ -23,9 +23,9 @@ public class LoriTimePlayerConverter {
     private final Map<UUID, LoriTimePlayer> playerCache;
 
     /**
-     * The {@link LoriTimeLogger} instance.
+     * The {@link WrappedLogger} instance.
      */
-    private final LoriTimeLogger log;
+    private final WrappedLogger log;
 
     /**
      * The {@link LoriTimePlugin} instance.

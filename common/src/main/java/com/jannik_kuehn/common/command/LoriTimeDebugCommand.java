@@ -1,9 +1,9 @@
 package com.jannik_kuehn.common.command;
 
+import com.github.roleplaycauldron.spellbook.core.logger.WrappedLogger;
 import com.jannik_kuehn.common.LoriTimePlugin;
 import com.jannik_kuehn.common.api.common.CommonCommand;
 import com.jannik_kuehn.common.api.common.CommonSender;
-import com.jannik_kuehn.common.api.logger.LoriTimeLogger;
 import com.jannik_kuehn.common.api.scheduler.PluginTask;
 import com.jannik_kuehn.common.config.localization.Localization;
 
@@ -17,7 +17,7 @@ public class LoriTimeDebugCommand implements CommonCommand {
 
     private final Localization localization;
 
-    private final LoriTimeLogger log;
+    private final WrappedLogger log;
 
     private boolean isDebugging;
 

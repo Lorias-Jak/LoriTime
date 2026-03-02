@@ -1,8 +1,8 @@
 package com.jannik_kuehn.common.module.updater;
 
+import com.github.roleplaycauldron.spellbook.core.logger.WrappedLogger;
 import com.jannik_kuehn.common.LoriTimePlugin;
 import com.jannik_kuehn.common.api.common.CommonSender;
-import com.jannik_kuehn.common.api.logger.LoriTimeLogger;
 import com.jannik_kuehn.common.config.Configuration;
 import com.jannik_kuehn.common.exception.UpdateException;
 import com.jannik_kuehn.common.module.updater.download.Downloader;
@@ -38,9 +38,9 @@ public class Updater {
     private static final TemporalAmount ANNOUNCE_PLAYER_DELAY = Duration.ofHours(24);
 
     /**
-     * The {@link LoriTimeLogger} that should be used for logging.
+     * The {@link WrappedLogger} that should be used for logging.
      */
-    private final LoriTimeLogger log;
+    private final WrappedLogger log;
 
     /**
      * The {@link LoriTimePlugin} that should be updated.
@@ -80,14 +80,14 @@ public class Updater {
     /**
      * Creates a new instance of the {@link Updater}.
      *
-     * @param log                 the {@link LoriTimeLogger} that should be used for logging
+     * @param log                 the {@link WrappedLogger} that should be used for logging
      * @param currentVersion      the current {@link Version} of the plugin
      * @param updateSourceHandler the {@link UpdateSourceHandler} that should be used for searching for updates
      * @param loriTime            the {@link LoriTimePlugin} that should be updated
      * @param instantSource       the {@link InstantSource} that should be used for getting the current time
      * @param downloader          the {@link Downloader} that should be used for downloading the update
      */
-    public Updater(final LoriTimeLogger log, final Version currentVersion, final UpdateSourceHandler updateSourceHandler, final LoriTimePlugin loriTime,
+    public Updater(final WrappedLogger log, final Version currentVersion, final UpdateSourceHandler updateSourceHandler, final LoriTimePlugin loriTime,
                    final InstantSource instantSource, final Downloader downloader) {
         this.log = log;
         this.updateSourceHandler = updateSourceHandler;

@@ -1,6 +1,6 @@
 package com.jannik_kuehn.common.module.updater;
 
-import com.jannik_kuehn.common.api.logger.LoriTimeLogger;
+import com.github.roleplaycauldron.spellbook.core.logger.WrappedLogger;
 import com.jannik_kuehn.common.module.updater.download.sources.DevUpdateSource;
 import com.jannik_kuehn.common.module.updater.download.sources.ReleaseUpdateSource;
 import com.jannik_kuehn.common.module.updater.version.Strategy;
@@ -24,9 +24,9 @@ public class UpdateSourceHandler {
     public static final String DEV_QUALIFIER = "DEV-";
 
     /**
-     * The {@link LoriTimeLogger} that should be used for logging.
+     * The {@link WrappedLogger} that should be used for logging.
      */
-    private final LoriTimeLogger log;
+    private final WrappedLogger log;
 
     /**
      * The {@link ReleaseUpdateSource}s that should be used for searching for release updates.
@@ -41,11 +41,11 @@ public class UpdateSourceHandler {
     /**
      * Creates a new {@link UpdateSourceHandler}.
      *
-     * @param log                      the {@link LoriTimeLogger} that should be used for logging
+     * @param log                      the {@link WrappedLogger} that should be used for logging
      * @param releaseUpdateSources     the {@link ReleaseUpdateSource}s that should be used for searching for release updates
      * @param developmentUpdateSources the {@link DevUpdateSource}s that should be used for searching for development updates
      */
-    public UpdateSourceHandler(final LoriTimeLogger log, final List<ReleaseUpdateSource> releaseUpdateSources,
+    public UpdateSourceHandler(final WrappedLogger log, final List<ReleaseUpdateSource> releaseUpdateSources,
                                final List<DevUpdateSource> developmentUpdateSources) {
         this.log = log;
         this.releaseUpdateSources = releaseUpdateSources;

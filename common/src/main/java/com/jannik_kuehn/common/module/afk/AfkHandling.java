@@ -1,9 +1,9 @@
 package com.jannik_kuehn.common.module.afk;
 
+import com.github.roleplaycauldron.spellbook.core.logger.WrappedLogger;
 import com.jannik_kuehn.common.LoriTimePlugin;
 import com.jannik_kuehn.common.api.LoriTimePlayer;
 import com.jannik_kuehn.common.api.common.CommonSender;
-import com.jannik_kuehn.common.api.logger.LoriTimeLogger;
 import com.jannik_kuehn.common.utils.TimeUtil;
 
 import java.util.Optional;
@@ -14,7 +14,7 @@ public abstract class AfkHandling {
 
     protected final LoriTimePlugin loriTimePlugin;
 
-    private final LoriTimeLogger log;
+    private final WrappedLogger log;
 
     protected boolean afkEnabled;
 

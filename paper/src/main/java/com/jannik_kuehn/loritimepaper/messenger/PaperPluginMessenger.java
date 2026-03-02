@@ -1,6 +1,6 @@
 package com.jannik_kuehn.loritimepaper.messenger;
 
-import com.jannik_kuehn.common.api.logger.LoriTimeLogger;
+import com.github.roleplaycauldron.spellbook.core.logger.WrappedLogger;
 import com.jannik_kuehn.common.module.messaging.PluginMessaging;
 import com.jannik_kuehn.loritimepaper.LoriTimePaper;
 import org.bukkit.entity.Player;
@@ -18,9 +18,9 @@ public class PaperPluginMessenger extends PluginMessaging {
     private final LoriTimePaper paperPlugin;
 
     /**
-     * The {@link LoriTimeLogger} instance.
+     * The {@link WrappedLogger} instance.
      */
-    private final LoriTimeLogger log;
+    private final WrappedLogger log;
 
     /**
      * Creates a new instance of the {@link PaperPluginMessenger}.

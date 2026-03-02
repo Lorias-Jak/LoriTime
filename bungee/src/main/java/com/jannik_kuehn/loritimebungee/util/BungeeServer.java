@@ -13,11 +13,9 @@ import net.md_5.bungee.api.connection.ProxiedPlayer;
 
 import java.util.Optional;
 import java.util.UUID;
-import java.util.logging.Logger;
 
 @SuppressWarnings("PMD.CommentRequired")
 public class BungeeServer implements CommonServer, CommonSender {
-    private final Logger bungeeLogger;
 
     private final ProxyServer proxyServer;
 
@@ -27,8 +25,7 @@ public class BungeeServer implements CommonServer, CommonSender {
 
     private String serverMode;
 
-    public BungeeServer(final Logger bungeeLogger, final ProxyServer proxyServer, final String version, final BungeeAudiences audiences) {
-        this.bungeeLogger = bungeeLogger;
+    public BungeeServer(final ProxyServer proxyServer, final String version, final BungeeAudiences audiences) {
         this.proxyServer = proxyServer;
         this.version = version;
         this.audiences = audiences;
@@ -109,16 +106,6 @@ public class BungeeServer implements CommonServer, CommonSender {
     @Override
     public String getPluginJarName() {
         return "LoriTimeBungee.jar";
-    }
-
-    @Override
-    public Logger getJavaLogger() {
-        return bungeeLogger;
-    }
-
-    @Override
-    public org.slf4j.Logger getSl4jLogger() {
-        return null;
     }
 
     @Override

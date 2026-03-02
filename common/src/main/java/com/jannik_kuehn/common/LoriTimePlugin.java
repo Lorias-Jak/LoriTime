@@ -1,9 +1,9 @@
 package com.jannik_kuehn.common;
 
+import com.github.roleplaycauldron.spellbook.core.logger.LoggerFactory;
+import com.github.roleplaycauldron.spellbook.core.logger.WrappedLogger;
 import com.jannik_kuehn.common.api.LoriTimePlayerConverter;
 import com.jannik_kuehn.common.api.common.CommonServer;
-import com.jannik_kuehn.common.api.logger.LoggerFactory;
-import com.jannik_kuehn.common.api.logger.LoriTimeLogger;
 import com.jannik_kuehn.common.api.scheduler.PluginScheduler;
 import com.jannik_kuehn.common.api.storage.AccumulatingTimeStorage;
 import com.jannik_kuehn.common.api.storage.NameStorage;
@@ -48,9 +48,9 @@ public class LoriTimePlugin {
     private final LoggerFactory loggerFactory;
 
     /**
-     * The {@link LoriTimeLogger} instance.
+     * The {@link WrappedLogger} instance.
      */
-    private final LoriTimeLogger log;
+    private final WrappedLogger log;
 
     /**
      * The {@link CommonServer} instance.
@@ -120,14 +120,14 @@ public class LoriTimePlugin {
      * @param server      the {@link CommonServer} instance.
      * @param loggerTopic the logger topic.
      */
-    public LoriTimePlugin(final File dataFolder, final PluginScheduler scheduler, final CommonServer server, final String loggerTopic) {
+    public LoriTimePlugin(final LoggerFactory loggerFactory, final File dataFolder, final PluginScheduler scheduler, final CommonServer server, final String loggerTopic) {
         instance = this;
         this.dataFolder = dataFolder;
         this.scheduler = scheduler;
         this.server = server;
         this.errorDisable = false;
 
-        this.loggerFactory = new LoggerFactory(this);
+        this.loggerFactory = loggerFactory;
         this.log = loggerFactory.create(LoriTimePlugin.class, loggerTopic);
 
         this.fileManager = new FileManager(loggerFactory, dataFolder);
@@ -329,27 +329,27 @@ public class LoriTimePlugin {
     }
 
     /**
-     * Getter of the {@link LoriTimeLogger}.
+     * Getter of the {@link PluginScheduler}.
      *
-     * @return the {@link LoriTimeLogger}.
+     * @return the {@link PluginScheduler}.
      */
     public PluginScheduler getScheduler() {
         return scheduler;
     }
 
     /**
-     * Getter of the {@link LoriTimeLogger}.
+     * Getter of the {@link CommonServer}.
      *
-     * @return the {@link LoriTimeLogger}.
+     * @return the {@link CommonServer}.
      */
     public CommonServer getServer() {
         return server;
     }
 
     /**
-     * Getter of the {@link LoriTimeLogger}.
+     * Getter of the {@link Configuration}.
      *
-     * @return the {@link LoriTimeLogger}.
+     * @return the {@link Configuration}.
      */
     public Configuration getConfig() {
         return config;

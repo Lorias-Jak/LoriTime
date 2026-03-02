@@ -1,7 +1,7 @@
 package com.jannik_kuehn.common.storage.database;
 
+import com.github.roleplaycauldron.spellbook.core.logger.WrappedLogger;
 import com.jannik_kuehn.common.LoriTimePlugin;
-import com.jannik_kuehn.common.api.logger.LoriTimeLogger;
 import com.jannik_kuehn.common.config.Configuration;
 import com.zaxxer.hikari.HikariDataSource;
 
@@ -55,9 +55,9 @@ public class MySQL implements SqlConnectionProvider {
     private final Engine engine;
 
     /**
-     * The {@link LoriTimeLogger} instance.
+     * The {@link WrappedLogger} instance.
      */
-    private final LoriTimeLogger log;
+    private final WrappedLogger log;
 
     /**
      * The configuration.

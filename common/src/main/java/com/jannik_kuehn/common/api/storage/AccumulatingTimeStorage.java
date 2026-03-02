@@ -1,6 +1,6 @@
 package com.jannik_kuehn.common.api.storage;
 
-import com.jannik_kuehn.common.api.logger.LoriTimeLogger;
+import com.github.roleplaycauldron.spellbook.core.logger.WrappedLogger;
 import com.jannik_kuehn.common.exception.StorageException;
 
 import java.sql.SQLException;
@@ -16,13 +16,13 @@ import java.util.concurrent.ConcurrentMap;
 @SuppressWarnings("PMD.CommentRequired")
 public class AccumulatingTimeStorage implements TimeStorage, TimeAccumulator {
 
-    private final LoriTimeLogger log;
+    private final WrappedLogger log;
 
     private final TimeStorage storage;
 
     private final ConcurrentMap<UUID, Long> onlineSince = new ConcurrentHashMap<>();
 
-    public AccumulatingTimeStorage(final LoriTimeLogger log, final TimeStorage timeStorage) {
+    public AccumulatingTimeStorage(final WrappedLogger log, final TimeStorage timeStorage) {
         this.log = log;
         this.storage = Objects.requireNonNull(timeStorage);
     }

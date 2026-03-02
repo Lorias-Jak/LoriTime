@@ -1,7 +1,7 @@
 package com.jannik_kuehn.common.config;
 
-import com.jannik_kuehn.common.api.logger.LoggerFactory;
-import com.jannik_kuehn.common.api.logger.LoriTimeLogger;
+import com.github.roleplaycauldron.spellbook.core.logger.LoggerFactory;
+import com.github.roleplaycauldron.spellbook.core.logger.WrappedLogger;
 import com.jannik_kuehn.common.config.backup.FileBackupManager;
 import com.jannik_kuehn.common.exception.ConfigurationException;
 import org.yaml.snakeyaml.DumperOptions;
@@ -26,9 +26,9 @@ import java.util.Set;
 public class FileManager {
 
     /**
-     * The {@link LoriTimeLogger} instance.
+     * The {@link WrappedLogger} instance.
      */
-    private final LoriTimeLogger log;
+    private final WrappedLogger log;
 
     /**
      * The data folder of the plugin.

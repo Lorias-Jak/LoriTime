@@ -1,7 +1,7 @@
 package com.jannik_kuehn.loritimebungee;
 
+import com.github.roleplaycauldron.spellbook.core.logger.WrappedLogger;
 import com.jannik_kuehn.common.api.common.CommonSender;
-import com.jannik_kuehn.common.api.logger.LoriTimeLogger;
 import com.jannik_kuehn.common.module.messaging.PluginMessaging;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.connection.Server;
@@ -23,9 +23,9 @@ public class BungeePluginMessenger extends PluginMessaging implements Listener {
     private final LoriTimeBungee loriTimeBungee;
 
     /**
-     * The {@link LoriTimeLogger} instance.
+     * The {@link WrappedLogger} instance.
      */
-    private final LoriTimeLogger log;
+    private final WrappedLogger log;
 
     /**
      * The default constructor.

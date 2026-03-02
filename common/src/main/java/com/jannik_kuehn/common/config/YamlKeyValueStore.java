@@ -1,7 +1,7 @@
 package com.jannik_kuehn.common.config;
 
+import com.github.roleplaycauldron.spellbook.core.logger.WrappedLogger;
 import com.jannik_kuehn.common.LoriTimePlugin;
-import com.jannik_kuehn.common.api.logger.LoriTimeLogger;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
@@ -23,7 +23,7 @@ import java.util.Set;
 public class YamlKeyValueStore implements KeyValueStore {
     private final String filePath;
 
-    private final LoriTimeLogger log;
+    private final WrappedLogger log;
 
     private final Map<String, Object> data;
 

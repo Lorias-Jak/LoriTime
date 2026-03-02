@@ -1,7 +1,7 @@
 package com.jannik_kuehn.loritimepaper.afk;
 
+import com.github.roleplaycauldron.spellbook.core.logger.WrappedLogger;
 import com.jannik_kuehn.common.api.LoriTimePlayer;
-import com.jannik_kuehn.common.api.logger.LoriTimeLogger;
 import com.jannik_kuehn.common.module.afk.AfkHandling;
 import com.jannik_kuehn.loritimepaper.LoriTimePaper;
 
@@ -15,9 +15,9 @@ public class PaperSlavedAfkHandling extends AfkHandling {
     private final LoriTimePaper loriTimePaper;
 
     /**
-     * The {@link LoriTimeLogger} instance.
+     * The {@link WrappedLogger} instance.
      */
-    private final LoriTimeLogger log;
+    private final WrappedLogger log;
 
     /**
      * Creates a new instance of the {@link PaperSlavedAfkHandling}.

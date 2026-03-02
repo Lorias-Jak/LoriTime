@@ -1,8 +1,9 @@
 package com.jannik_kuehn.loritimevelocity;
 
+import com.github.roleplaycauldron.spellbook.core.logger.LoggerFactory;
+import com.github.roleplaycauldron.spellbook.core.logger.WrappedLogger;
 import com.jannik_kuehn.common.LoriTimePlugin;
 import com.jannik_kuehn.common.api.LoriTimeAPI;
-import com.jannik_kuehn.common.api.logger.LoriTimeLogger;
 import com.jannik_kuehn.common.command.LoriTimeAdminCommand;
 import com.jannik_kuehn.common.command.LoriTimeCommand;
 import com.jannik_kuehn.common.command.LoriTimeDebugCommand;
@@ -42,16 +43,16 @@ public class LoriTimeVelocity {
 
     private final Metrics.Factory metricsFactory;
 
-    private final Logger pluginLogger;
+    private final LoggerFactory loggerFactory;
 
     private LoriTimePlugin loriTimePlugin;
 
-    private LoriTimeLogger log;
+    private WrappedLogger log;
 
     @Inject
     public LoriTimeVelocity(final ProxyServer server, final Logger logger, @DataDirectory final Path dataDirectory, final Metrics.Factory metricsFactory) {
         this.proxyServer = server;
-        this.pluginLogger = logger;
+        this.loggerFactory = new LoggerFactory(logger);
         this.dataDirectory = dataDirectory;
         this.metricsFactory = metricsFactory;
         this.commands = new ArrayList<>();
@@ -60,10 +61,10 @@ public class LoriTimeVelocity {
     @Subscribe
     @SuppressWarnings({"PMD.UseUnderscoresInNumericLiterals", "PMD.AvoidLiteralsInIfCondition"})
     public void onInitialize(final ProxyInitializeEvent event) {
-        final VelocityServer velocityServer = new VelocityServer(pluginLogger);
-        this.loriTimePlugin = new LoriTimePlugin(dataDirectory.toFile(), new VelocityScheduleAdapter(this,
+        final VelocityServer velocityServer = new VelocityServer();
+        this.loriTimePlugin = new LoriTimePlugin(loggerFactory, dataDirectory.toFile(), new VelocityScheduleAdapter(this,
                 proxyServer.getScheduler()), velocityServer, null);
-        this.log = loriTimePlugin.getLoggerFactory().create(LoriTimeVelocity.class);
+        this.log = loggerFactory.create(LoriTimeVelocity.class);
 
         final PluginContainer container = proxyServer.getPluginManager().ensurePluginContainer(this);
         if (container.getDescription().getVersion().isEmpty()) {

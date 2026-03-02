@@ -1,9 +1,9 @@
 package com.jannik_kuehn.common.module.updater;
 
+import com.github.roleplaycauldron.spellbook.core.logger.WrappedLogger;
 import com.jannik_kuehn.common.LoriTimePlugin;
 import com.jannik_kuehn.common.api.common.CommonSender;
 import com.jannik_kuehn.common.api.common.CommonServer;
-import com.jannik_kuehn.common.api.logger.LoriTimeLogger;
 import com.jannik_kuehn.common.api.scheduler.PluginScheduler;
 import com.jannik_kuehn.common.api.scheduler.PluginTask;
 import com.jannik_kuehn.common.config.Configuration;
@@ -89,7 +89,7 @@ class UpdaterTest {
 
     @Test
     void search_withAutoUpdate_triggersDownloader_and_clearsLatestAfterExecute() throws Exception {
-        final LoriTimeLogger logger = mock(LoriTimeLogger.class);
+        final WrappedLogger logger = mock(WrappedLogger.class);
         final MutableInstantSource clock = new MutableInstantSource(Instant.parse("2024-01-01T00:00:00Z"));
 
         final CommonServer server = mock(CommonServer.class, withSettings().extraInterfaces(CommonSender.class));
@@ -121,7 +121,7 @@ class UpdaterTest {
     @Test
     @SuppressWarnings("PMD.UnitTestContainsTooManyAsserts")
     void sendPlayerUpdateNotification_throttles_per_player_and_respects_console() throws Exception {
-        final LoriTimeLogger logger = mock(LoriTimeLogger.class);
+        final WrappedLogger logger = mock(WrappedLogger.class);
         final MutableInstantSource clock = new MutableInstantSource(Instant.parse("2024-01-01T00:00:00Z"));
 
         final CommonServer server = mock(CommonServer.class, withSettings().extraInterfaces(CommonSender.class));

@@ -435,16 +435,6 @@
                   <shadedPattern>${project.groupId}.dependencies.org.apache.maven</shadedPattern>
                 </relocation>
                 <relocation>
-                  <pattern>com.github.roleplaycauldron.spellbook.core</pattern>
-                  <shadedPattern>${project.groupId}.dependencies.com.github.roleplaycauldron.spellbook.core
-                  </shadedPattern>
-                </relocation>
-                <relocation>
-                  <pattern>com.github.roleplaycauldron.spellbook.database</pattern>
-                  <shadedPattern>${project.groupId}.dependencies.com.github.roleplaycauldron.spellbook.database
-                  </shadedPattern>
-                </relocation>
-                <relocation>
                   <pattern>com.zaxxer.hikari</pattern>
                   <shadedPattern>${project.groupId}.dependencies.com.zaxxer.hikari</shadedPattern>
                 </relocation>

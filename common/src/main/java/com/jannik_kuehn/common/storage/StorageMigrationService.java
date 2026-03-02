@@ -1,7 +1,7 @@
 package com.jannik_kuehn.common.storage;
 
+import com.github.roleplaycauldron.spellbook.core.logger.WrappedLogger;
 import com.jannik_kuehn.common.LoriTimePlugin;
-import com.jannik_kuehn.common.api.logger.LoriTimeLogger;
 import com.jannik_kuehn.common.config.Configuration;
 import com.jannik_kuehn.common.config.FileManager;
 import com.jannik_kuehn.common.exception.ConfigurationException;
@@ -40,9 +40,9 @@ public class StorageMigrationService {
     private final LoriTimePlugin loriTime;
 
     /**
-     * The {@link LoriTimeLogger} instance.
+     * The {@link WrappedLogger} instance.
      */
-    private final LoriTimeLogger log;
+    private final WrappedLogger log;
 
     /**
      * The data folder of the plugin.

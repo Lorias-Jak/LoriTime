@@ -1,8 +1,9 @@
 package com.jannik_kuehn.loritimebungee;
 
+import com.github.roleplaycauldron.spellbook.core.logger.LoggerFactory;
+import com.github.roleplaycauldron.spellbook.core.logger.WrappedLogger;
 import com.jannik_kuehn.common.LoriTimePlugin;
 import com.jannik_kuehn.common.api.LoriTimeAPI;
-import com.jannik_kuehn.common.api.logger.LoriTimeLogger;
 import com.jannik_kuehn.common.command.LoriTimeAdminCommand;
 import com.jannik_kuehn.common.command.LoriTimeCommand;
 import com.jannik_kuehn.common.command.LoriTimeDebugCommand;
@@ -33,11 +34,12 @@ public class LoriTimeBungee extends Plugin {
     public void onEnable() {
         audiences = BungeeAudiences.create(this);
         final BungeeScheduleAdapter scheduleAdapter = new BungeeScheduleAdapter(this, getProxy().getScheduler());
-        final BungeeServer bungeeServer = new BungeeServer(getLogger(), getProxy(), getDescription().getVersion(), audiences);
+        final BungeeServer bungeeServer = new BungeeServer(getProxy(), getDescription().getVersion(), audiences);
         final String loggerTopic = "LoriTimeBungee";
-        this.loriTimePlugin = new LoriTimePlugin(this.getDataFolder(), scheduleAdapter, bungeeServer, loggerTopic);
 
-        final LoriTimeLogger log = loriTimePlugin.getLoggerFactory().create(LoriTimeBungee.class, loggerTopic);
+        final LoggerFactory loggerFactory = new LoggerFactory(getLogger());
+        this.loriTimePlugin = new LoriTimePlugin(loggerFactory, this.getDataFolder(), scheduleAdapter, bungeeServer, loggerTopic);
+        final WrappedLogger log = loggerFactory.create(LoriTimeBungee.class, loggerTopic);
 
         loriTimePlugin.enable();
         LoriTimeAPI.setPlugin(loriTimePlugin);

@@ -1,8 +1,8 @@
 package com.jannik_kuehn.loritimepaper.command;
 
+import com.github.roleplaycauldron.spellbook.core.logger.WrappedLogger;
 import com.jannik_kuehn.common.api.common.CommonCommand;
 import com.jannik_kuehn.common.api.common.CommonSender;
-import com.jannik_kuehn.common.api.logger.LoriTimeLogger;
 import com.jannik_kuehn.loritimepaper.LoriTimePaper;
 import com.jannik_kuehn.loritimepaper.util.PaperPlayer;
 import com.jannik_kuehn.loritimepaper.util.PaperSender;
@@ -28,7 +28,7 @@ public class PaperCommand implements CommandExecutor, TabExecutor {
 
     private final CommonCommand command;
 
-    private final LoriTimeLogger log;
+    private final WrappedLogger log;
 
     public PaperCommand(final LoriTimePaper paperPlugin, final CommonCommand command) {
         this.paperPlugin = paperPlugin;

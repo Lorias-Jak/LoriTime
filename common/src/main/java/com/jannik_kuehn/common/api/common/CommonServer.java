@@ -25,10 +25,6 @@ public interface CommonServer {
 
     void setServerMode(String serverMode);
 
-    java.util.logging.Logger getJavaLogger();
-
-    org.slf4j.Logger getSl4jLogger();
-
     boolean isProxy();
 
     boolean dispatchCommand(CommonSender consoleSender, String command);

@@ -10,7 +10,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.Server;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.slf4j.Logger;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -116,16 +115,6 @@ public class PaperServer implements CommonServer, CommonSender {
     @Override
     public String getPluginJarName() {
         return "LoriTimePaper.jar";
-    }
-
-    @Override
-    public java.util.logging.Logger getJavaLogger() {
-        return null;
-    }
-
-    @Override
-    public Logger getSl4jLogger() {
-        return loriTimePaper.getSLF4JLogger();
     }
 
     private void kickPlayer(final Player player, final TextComponent message) {

@@ -1,7 +1,7 @@
 package com.jannik_kuehn.common.storage.database;
 
+import com.github.roleplaycauldron.spellbook.core.logger.WrappedLogger;
 import com.jannik_kuehn.common.LoriTimePlugin;
-import com.jannik_kuehn.common.api.logger.LoriTimeLogger;
 import com.jannik_kuehn.common.api.storage.NameStorage;
 import com.jannik_kuehn.common.api.storage.ReasonAwareTimeStorage;
 import com.jannik_kuehn.common.api.storage.TimeEntryReason;
@@ -57,7 +57,7 @@ public class DatabaseStorage implements NameStorage, TimeStorage, ReasonAwareTim
 
     private final SqlConnectionProvider databaseProvider;
 
-    private final LoriTimeLogger log;
+    private final WrappedLogger log;
 
     private final ReadWriteLock poolLock;
 
@@ -124,7 +124,7 @@ public class DatabaseStorage implements NameStorage, TimeStorage, ReasonAwareTim
     private static SqlConnectionProvider createProvider(final Configuration config,
                                                         final LoriTimePlugin plugin,
                                                         final File dataFolder,
-                                                        final LoriTimeLogger log) {
+                                                        final WrappedLogger log) {
         final String storageType = config.getString("storage-method", "sqlite").toLowerCase(Locale.ROOT);
         return switch (storageType) {
             case SQLITE_STORAGE_TYPE -> new SqliteDatabase(config, plugin, dataFolder);

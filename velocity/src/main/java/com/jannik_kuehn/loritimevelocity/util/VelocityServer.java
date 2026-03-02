@@ -8,14 +8,12 @@ import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
-import org.slf4j.Logger;
 
 import java.util.Optional;
 import java.util.UUID;
 
 @SuppressWarnings("PMD.CommentRequired")
 public class VelocityServer implements CommonServer, CommonSender {
-    private final Logger logger;
 
     private ProxyServer server;
 
@@ -23,8 +21,8 @@ public class VelocityServer implements CommonServer, CommonSender {
 
     private String serverMode;
 
-    public VelocityServer(final Logger logger) {
-        this.logger = logger;
+    public VelocityServer() {
+        // Empty
     }
 
     public void enable(final ProxyServer server, final String version) {
@@ -113,16 +111,6 @@ public class VelocityServer implements CommonServer, CommonSender {
     @Override
     public String getPluginJarName() {
         return "LoriTimeVelocity.jar";
-    }
-
-    @Override
-    public java.util.logging.Logger getJavaLogger() {
-        return null;
-    }
-
-    @Override
-    public Logger getSl4jLogger() {
-        return logger;
     }
 
     @Override

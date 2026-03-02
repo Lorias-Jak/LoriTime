@@ -1,8 +1,9 @@
 package com.jannik_kuehn.loritimepaper;
 
+import com.github.roleplaycauldron.spellbook.core.logger.LoggerFactory;
+import com.github.roleplaycauldron.spellbook.core.logger.WrappedLogger;
 import com.jannik_kuehn.common.LoriTimePlugin;
 import com.jannik_kuehn.common.api.LoriTimeAPI;
-import com.jannik_kuehn.common.api.logger.LoriTimeLogger;
 import com.jannik_kuehn.common.api.storage.TimeStorage;
 import com.jannik_kuehn.common.command.LoriTimeAdminCommand;
 import com.jannik_kuehn.common.command.LoriTimeAfkCommand;
@@ -43,8 +44,9 @@ public class LoriTimePaper extends JavaPlugin {
                 getServer().getAsyncScheduler(),
                 getServer().getGlobalRegionScheduler());
         final PaperServer paperServer = new PaperServer(this, getDescription().getVersion());
-        this.loriTimePlugin = new LoriTimePlugin(this.getDataFolder(), scheduleAdapter, paperServer, null);
-        final LoriTimeLogger log = loriTimePlugin.getLoggerFactory().create(LoriTimePaper.class);
+        final LoggerFactory loggerFactory = new LoggerFactory(getSLF4JLogger());
+        this.loriTimePlugin = new LoriTimePlugin(loggerFactory, this.getDataFolder(), scheduleAdapter, paperServer, null);
+        final WrappedLogger log = loggerFactory.create(LoriTimePaper.class);
 
         loriTimePlugin.enable();
         LoriTimeAPI.setPlugin(loriTimePlugin);

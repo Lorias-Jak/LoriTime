@@ -1,8 +1,8 @@
 package com.jannik_kuehn.loritimepaper.placeholder;
 
+import com.github.roleplaycauldron.spellbook.core.logger.WrappedLogger;
 import com.jannik_kuehn.common.LoriTimePlugin;
 import com.jannik_kuehn.common.api.LoriTimePlayer;
-import com.jannik_kuehn.common.api.logger.LoriTimeLogger;
 import com.jannik_kuehn.common.api.storage.TimeStorage;
 import com.jannik_kuehn.common.exception.StorageException;
 import com.jannik_kuehn.common.utils.TimeUtil;
@@ -24,7 +24,7 @@ public class LoriTimePlaceholder extends PlaceholderExpansion {
 
     private final TimeStorage timeStorage;
 
-    private final LoriTimeLogger log;
+    private final WrappedLogger log;
 
     private final Map<UUID, Long> offlinePlayerTime;
 

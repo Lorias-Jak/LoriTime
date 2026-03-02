@@ -1,6 +1,6 @@
 package com.jannik_kuehn.common.config.backup;
 
-import com.jannik_kuehn.common.api.logger.LoriTimeLogger;
+import com.github.roleplaycauldron.spellbook.core.logger.WrappedLogger;
 import com.jannik_kuehn.common.exception.ConfigurationException;
 
 import java.io.File;
@@ -26,9 +26,9 @@ public class FileBackupManager {
     private final boolean backupsEnabled;
 
     /**
-     * The {@link LoriTimeLogger} instance.
+     * The {@link WrappedLogger} instance.
      */
-    private final LoriTimeLogger log;
+    private final WrappedLogger log;
 
     /**
      * The maximum number of backups.
@@ -48,12 +48,12 @@ public class FileBackupManager {
     /**
      * Creates a new {@link FileBackupManager} instance.
      *
-     * @param log             the {@link LoriTimeLogger} instance.
+     * @param log             the {@link WrappedLogger} instance.
      * @param pluginDirectory the plugin directory.
      * @param backupsEnabled  {@code true} if backups are enabled, otherwise {@code false}.
      * @param maxBackups      the maximum number of backups. If set to 0 or lower, no backups will be deleted.
      */
-    public FileBackupManager(final LoriTimeLogger log, final File pluginDirectory, final boolean backupsEnabled, final int maxBackups) {
+    public FileBackupManager(final WrappedLogger log, final File pluginDirectory, final boolean backupsEnabled, final int maxBackups) {
         this.log = log;
         this.backupsEnabled = backupsEnabled;
         this.maxBackups = maxBackups;

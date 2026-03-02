@@ -1,6 +1,6 @@
 package com.jannik_kuehn.common.module.updater;
 
-import com.jannik_kuehn.common.api.logger.LoriTimeLogger;
+import com.github.roleplaycauldron.spellbook.core.logger.WrappedLogger;
 import com.jannik_kuehn.common.module.updater.download.sources.DevUpdateSource;
 import com.jannik_kuehn.common.module.updater.download.sources.ReleaseUpdateSource;
 import com.jannik_kuehn.common.module.updater.version.Strategy;
@@ -22,8 +22,8 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 class UpdateSourceHandlerTest {
 
-    private static LoriTimeLogger mockedLogger() {
-        return Mockito.mock(LoriTimeLogger.class);
+    private static WrappedLogger mockedLogger() {
+        return Mockito.mock(WrappedLogger.class);
     }
 
     @Test
@@ -34,7 +34,7 @@ class UpdateSourceHandlerTest {
                 new Version("1.2.4"), "https://example.com/1.2.4",
                 new Version("1.3.0"), "https://example.com/1.3.0"
         );
-        final LoriTimeLogger logger = Mockito.mock(LoriTimeLogger.class);
+        final WrappedLogger logger = Mockito.mock(WrappedLogger.class);
         final UpdateSourceHandler handler = new UpdateSourceHandler(logger, List.of(release), List.of());
 
         final Pair<Version, String> latest = handler.searchUpdate(Strategy.MINOR, "", current);

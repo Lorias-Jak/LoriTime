@@ -1,8 +1,9 @@
 package com.jannik_kuehn.common.config;
 
+import com.github.roleplaycauldron.spellbook.core.file.FileBackupService;
+import com.github.roleplaycauldron.spellbook.core.file.FileException;
 import com.github.roleplaycauldron.spellbook.core.logger.LoggerFactory;
 import com.github.roleplaycauldron.spellbook.core.logger.WrappedLogger;
-import com.jannik_kuehn.common.config.backup.FileBackupManager;
 import com.jannik_kuehn.common.exception.ConfigurationException;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
@@ -36,9 +37,14 @@ public class FileManager {
     private final File dataFolder;
 
     /**
-     * The {@link FileBackupManager} instance.
+     * The {@link FileBackupService} instance.
      */
-    private final FileBackupManager fileBackupManager;
+    private final FileBackupService backupService;
+
+    /**
+     * If backups are enabled.
+     */
+    private final boolean backupsEnabled;
 
     /**
      * Creates a new {@link FileManager} object.
@@ -53,9 +59,9 @@ public class FileManager {
 
         final Configuration temp = tempLoadConfiguration();
 
-        final boolean backupsEnabled = temp.getBoolean("backup.enabled", true);
+        this.backupsEnabled = temp.getBoolean("backup.enabled", true);
         final int maxBackups = temp.getInt("backup.maxBackups", 5);
-        this.fileBackupManager = new FileBackupManager(loggerFactory.create(FileBackupManager.class), dataFolder, backupsEnabled, maxBackups);
+        this.backupService = new FileBackupService(loggerFactory.create(FileBackupService.class), dataFolder, "backups", maxBackups);
     }
 
     private Configuration tempLoadConfiguration() {
@@ -138,8 +144,8 @@ public class FileManager {
             createFromResources(file.toPath(), fileName);
         } else if (doesFileNotExist(file)) {
             createFile(file);
-        } else if (needCopy && checkFileForUpdate(file, fileName)) {
-            fileBackupManager.addFileToBackup(file);
+        } else if (backupsEnabled && needCopy && checkFileForUpdate(file, fileName)) {
+            backupService.addFileToBackup(file);
             updateConfigFromResource(file, fileName);
         }
         return file;
@@ -251,16 +257,20 @@ public class FileManager {
      * Starts the backup process.
      */
     public void startBackup() {
-        fileBackupManager.startBackup();
+        if (backupsEnabled) {
+            backupService.startBackup();
+        }
     }
 
     /**
      * Adds a file in form of an actual file or path to the backup list.
      *
      * @param file the {@link File} to add to the backup list
-     * @throws ConfigurationException if the file could not be added to the backup list
+     * @throws FileException if the file could not be added to the backup lis
      */
-    public void addToBackup(final File file) throws ConfigurationException {
-        fileBackupManager.addFileToBackup(file);
+    public void addToBackup(final File file) {
+        if (backupsEnabled) {
+            backupService.addFileToBackup(file);
+        }
     }
 }

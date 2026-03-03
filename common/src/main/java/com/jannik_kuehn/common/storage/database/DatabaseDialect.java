@@ -62,11 +62,6 @@ enum DatabaseDialect implements SqlDialect {
         }
 
         @Override
-        public String addTimeReasonColumn(final String tableName) {
-            return "ALTER TABLE `" + tableName + "` ADD COLUMN `reason` VARCHAR(32) NOT NULL DEFAULT 'UNSPECIFIED'";
-        }
-
-        @Override
         public String createStatisticTable(final String tableName) {
             return "CREATE TABLE IF NOT EXISTS `" + tableName + "` ("
                     + "`id` BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,"
@@ -80,10 +75,20 @@ enum DatabaseDialect implements SqlDialect {
         }
 
         @Override
+        public String createVersionTable(final String tableName) {
+            return "CREATE TABLE IF NOT EXISTS `" + tableName + "` ("
+                    + "`version_no` INT NOT NULL,"
+                    + " `applied_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,"
+                    + " INDEX `idx_version_no` (`version_no`)"
+                    + ") ENGINE=InnoDB;";
+        }
+
+        @Override
         public String durationSecondsExpression(final String joinColumn, final String leaveColumn) {
             return "TIMESTAMPDIFF(SECOND, " + joinColumn + ", " + leaveColumn + ")";
         }
     },
+    
     /**
      * Represents the SQLite dialect for interacting with SQLite databases.
      * Provides SQL statement generation for creating and managing tables and
@@ -134,11 +139,6 @@ enum DatabaseDialect implements SqlDialect {
         }
 
         @Override
-        public String addTimeReasonColumn(final String tableName) {
-            return "ALTER TABLE `" + tableName + "` ADD COLUMN `reason` TEXT NOT NULL DEFAULT 'UNSPECIFIED'";
-        }
-
-        @Override
         public String createStatisticTable(final String tableName) {
             return "CREATE TABLE IF NOT EXISTS `" + tableName + "` ("
                     + "`id` INTEGER PRIMARY KEY AUTOINCREMENT,"
@@ -146,6 +146,14 @@ enum DatabaseDialect implements SqlDialect {
                     + "`calculation_time` DATETIME NOT NULL,"
                     + "`result` INTEGER NOT NULL,"
                     + "UNIQUE (`statistic_name`, `calculation_time`)"
+                    + ")";
+        }
+
+        @Override
+        public String createVersionTable(final String tableName) {
+            return "CREATE TABLE IF NOT EXISTS `your_version_table_name` ("
+                    + " `version_no` INTEGER NOT NULL,"
+                    + " `applied_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP"
                     + ")";
         }
 

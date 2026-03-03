@@ -41,21 +41,20 @@ public interface SqlDialect {
     String createTimeTable(String tableName, String playerTableName, String worldTableName);
 
     /**
-     * Returns a dialect specific ALTER TABLE statement that adds the reason column
-     * to the time table.
-     *
-     * @param tableName time table name
-     * @return SQL statement
-     */
-    String addTimeReasonColumn(String tableName);
-
-    /**
      * Returns the CREATE TABLE DDL for the statistic table.
      *
      * @param tableName the table name
      * @return the DDL statement
      */
     String createStatisticTable(String tableName);
+
+    /**
+     * Returns the CREATE TABLE DDL for the version table.
+     *
+     * @param tableName the table name
+     * @return the DDL statement
+     */
+    String createVersionTable(String tableName);
 
     /**
      * Returns the SQL expression to compute duration in seconds.

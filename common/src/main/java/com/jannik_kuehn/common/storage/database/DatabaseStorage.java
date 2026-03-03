@@ -12,6 +12,7 @@ import com.jannik_kuehn.common.storage.database.table.PlayerTable;
 import com.jannik_kuehn.common.storage.database.table.ServerTable;
 import com.jannik_kuehn.common.storage.database.table.StatisticTable;
 import com.jannik_kuehn.common.storage.database.table.TimeTable;
+import com.jannik_kuehn.common.storage.database.table.VersionTable;
 import com.jannik_kuehn.common.storage.database.table.WorldTable;
 import com.jannik_kuehn.common.utils.UuidUtil;
 
@@ -72,6 +73,8 @@ public class DatabaseStorage implements NameStorage, TimeStorage, ReasonAwareTim
     private WorldTable worldTable;
 
     private TimeTable timeTable;
+
+    private VersionTable versionTable;
 
     private StatisticTable statisticTable;
 
@@ -156,12 +159,14 @@ public class DatabaseStorage implements NameStorage, TimeStorage, ReasonAwareTim
         final String worldTableName = tablePrefix + "_world";
         final String timeTableName = tablePrefix + "_time";
         final String statisticTableName = tablePrefix + "_statistic";
+        final String versionTableName = tablePrefix + "_version";
 
         this.playerTable = new PlayerTable(playerTableName, dialect);
         this.serverTable = new ServerTable(serverTableName, dialect);
         this.worldTable = new WorldTable(worldTableName, serverTable, dialect);
         this.timeTable = new TimeTable(timeTableName, playerTableName, worldTableName, dialect);
         this.statisticTable = new StatisticTable(statisticTableName, dialect);
+        this.versionTable = new VersionTable(versionTableName, dialect);
         return tablePrefix;
     }
 
@@ -235,19 +240,16 @@ public class DatabaseStorage implements NameStorage, TimeStorage, ReasonAwareTim
      * @throws SQLException if schema creation fails
      */
     private void createSchema(final Connection connection) throws SQLException {
-        try (PreparedStatement statement = connection.prepareStatement(playerTable.createTableSql())) {
-            statement.execute();
-        }
-        try (PreparedStatement statement = connection.prepareStatement(serverTable.createTableSql())) {
-            statement.execute();
-        }
-        try (PreparedStatement statement = connection.prepareStatement(worldTable.createTableSql())) {
-            statement.execute();
-        }
-        try (PreparedStatement statement = connection.prepareStatement(timeTable.createTableSql())) {
-            statement.execute();
-        }
-        try (PreparedStatement statement = connection.prepareStatement(statisticTable.createTableSql())) {
+        createTable(connection, playerTable.createTableSql());
+        createTable(connection, serverTable.createTableSql());
+        createTable(connection, worldTable.createTableSql());
+        createTable(connection, timeTable.createTableSql());
+        createTable(connection, statisticTable.createTableSql());
+        createTable(connection, versionTable.createTableSql());
+    }
+
+    private void createTable(final Connection connection, final String sql) throws SQLException {
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.execute();
         }
     }

@@ -1,5 +1,6 @@
 package com.jannik_kuehn.common.storage;
 
+import com.github.roleplaycauldron.spellbook.core.logger.LoggerFactory;
 import com.github.roleplaycauldron.spellbook.core.logger.WrappedLogger;
 import com.jannik_kuehn.common.LoriTimePlugin;
 import com.jannik_kuehn.common.api.scheduler.PluginTask;
@@ -7,6 +8,11 @@ import com.jannik_kuehn.common.api.storage.AccumulatingTimeStorage;
 import com.jannik_kuehn.common.api.storage.NameStorage;
 import com.jannik_kuehn.common.exception.StorageException;
 import com.jannik_kuehn.common.storage.database.DatabaseStorage;
+import com.jannik_kuehn.common.storage.database.DatabaseTimeAndNameStorage;
+import com.jannik_kuehn.common.storage.database.table.PlayerTable;
+import com.jannik_kuehn.common.storage.database.table.ServerTable;
+import com.jannik_kuehn.common.storage.database.table.TimeTable;
+import com.jannik_kuehn.common.storage.database.table.WorldTable;
 
 import java.io.File;
 import java.util.Locale;
@@ -23,6 +29,11 @@ public class DataStorageManager {
      * The {@link LoriTimePlugin} instance.
      */
     private final LoriTimePlugin loriTime;
+
+    /**
+     * The {@link LoggerFactory} instance.
+     */
+    private final LoggerFactory loggerFactory;
 
     /**
      * The {@link WrappedLogger} instance.
@@ -62,7 +73,8 @@ public class DataStorageManager {
      */
     public DataStorageManager(final LoriTimePlugin loriTime, final File dataFolder) {
         this.loriTime = loriTime;
-        this.log = loriTime.getLoggerFactory().create(DataStorageManager.class);
+        this.loggerFactory = loriTime.getLoggerFactory();
+        this.log = loggerFactory.create(DataStorageManager.class);
         this.dataFolder = dataFolder;
         this.externalStorage = false;
     }
@@ -184,10 +196,17 @@ public class DataStorageManager {
 
     @SuppressWarnings("PMD.CloseResource")
     private void loadDatabaseStorage() throws StorageException {
-        final DatabaseStorage databaseStorage = new DatabaseStorage(loriTime.getConfig(), loriTime, dataFolder, false);
-        databaseStorage.initialize();
-        this.nameStorage = databaseStorage;
-        this.timeStorage = new AccumulatingTimeStorage(loriTime.getLoggerFactory().create(AccumulatingTimeStorage.class), databaseStorage);
+        final DatabaseStorage dbStorage = new DatabaseStorage(loggerFactory, loriTime.getConfig(), dataFolder);
+        dbStorage.initialize();
+
+        final PlayerTable playerTable = new PlayerTable(dbStorage.getTablePrefix());
+        final ServerTable serverTable = new ServerTable(dbStorage.getTablePrefix());
+        final WorldTable worldTable = new WorldTable(dbStorage.getTablePrefix(), serverTable);
+        final TimeTable timeTable = new TimeTable(dbStorage.getTablePrefix(), playerTable, dbStorage.getDialect());
+
+        final DatabaseTimeAndNameStorage nameAndTimeStorage = new DatabaseTimeAndNameStorage(dbStorage.getProvider(), playerTable, serverTable, worldTable, timeTable);
+        this.nameStorage = nameAndTimeStorage;
+        this.timeStorage = new AccumulatingTimeStorage(loriTime.getLoggerFactory().create(AccumulatingTimeStorage.class), nameAndTimeStorage);
     }
 
     /**

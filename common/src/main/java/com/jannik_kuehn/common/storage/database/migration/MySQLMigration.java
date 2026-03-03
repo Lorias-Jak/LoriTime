@@ -1,0 +1,191 @@
+package com.jannik_kuehn.common.storage.database.migration;
+
+import com.github.roleplaycauldron.spellbook.database.updater.DatabaseVersion;
+import com.github.roleplaycauldron.spellbook.database.updater.builder.VersionListBuilder;
+
+import java.util.List;
+
+/**
+ * This class provides a utility for generating MySQL database schema migrations
+ * for a graph-based data model. It constructs and returns a list of database
+ * version migration scripts tailored to the specified table prefix.
+ */
+@SuppressWarnings("PMD.AvoidDuplicateLiterals")
+public final class MySQLMigration {
+
+    private MySQLMigration() {
+    }
+
+    /**
+     * Builds a list of database versions with associated schema definitions and migration scripts
+     * based on the provided table prefix. The generated queries include the creation of tables,
+     * indexes, and foreign key constraints for graph, node, edge, and version data storage.
+     *
+     * @param tablePrefix a prefix to be used for the table names in the generated SQL queries,
+     *                    allowing for data namespace isolation.
+     * @return a list of {@code DatabaseVersion} objects that represent the database schemas
+     * and migration scripts to be applied.
+     */
+    public static List<DatabaseVersion> build(final String tablePrefix) {
+        final VersionListBuilder builder = new VersionListBuilder();
+        addMigrationOne(builder, tablePrefix);
+        addMigrationTwo(builder, tablePrefix);
+
+        return builder.finish();
+    }
+
+    private static void addMigrationOne(final VersionListBuilder builder, final String tablePrefix) {
+        builder.version(1)
+                .addUnconditionalQuery(
+                        "CREATE TABLE IF NOT EXISTS `" + tablePrefix + "` ("
+                                + "`id`   INT NOT NULL AUTO_INCREMENT PRIMARY KEY,"
+                                + "`uuid` BINARY(16) NOT NULL UNIQUE,"
+                                + "`name` CHAR(16) CHARACTER SET ascii UNIQUE,"
+                                + "`time` BIGINT UNSIGNED NOT NULL DEFAULT 0"
+                                + ") ENGINE InnoDB")
+                .finishVersion();
+    }
+
+    private static void addMigrationTwo(final VersionListBuilder builder, final String tablePrefix) {
+        builder.version(2)
+                .addFirstStartupQuery(
+                        "CREATE TABLE IF NOT EXISTS `" + tablePrefix + "_player` ("
+                                + "`id` BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,"
+                                + "`uuid` BINARY(16) NOT NULL UNIQUE,"
+                                + "`name` VARCHAR(16) CHARACTER SET ascii UNIQUE,"
+                                + "`last_seen` TIMESTAMP NULL"
+                                + ") ENGINE InnoDB"
+                )
+                .addFirstStartupQuery(
+                        "CREATE TABLE IF NOT EXISTS `" + tablePrefix + "_server` ("
+                                + "`id` BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,"
+                                + "`server` VARCHAR(64) NOT NULL UNIQUE"
+                                + ") ENGINE InnoDB"
+                )
+                .addFirstStartupQuery(
+                        "CREATE TABLE IF NOT EXISTS `" + tablePrefix + "_world` ("
+                                + "`id` BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,"
+                                + "`server_id` BIGINT NOT NULL,"
+                                + "`world` VARCHAR(64) NOT NULL,"
+                                + "UNIQUE KEY `uk_world` (`server_id`, `world`),"
+                                + "CONSTRAINT `fk_world_server` FOREIGN KEY (`server_id`) "
+                                + "REFERENCES `" + tablePrefix + "_server`(`id`) ON DELETE CASCADE"
+                                + ") ENGINE InnoDB"
+                )
+                .addFirstStartupQuery(
+                        "CREATE TABLE IF NOT EXISTS `" + tablePrefix + "_time` ("
+                                + "`id` BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,"
+                                + "`player_id` BIGINT NOT NULL,"
+                                + "`world_id` BIGINT NOT NULL,"
+                                + "`join_time` DATETIME(3) NOT NULL,"
+                                + "`leave_time` DATETIME(3) NOT NULL,"
+                                + "`reason` VARCHAR(32) NOT NULL DEFAULT 'UNSPECIFIED',"
+                                + "INDEX `idx_time_player` (`player_id`),"
+                                + "INDEX `idx_time_world` (`world_id`),"
+                                + "CONSTRAINT `fk_time_player` FOREIGN KEY (`player_id`) "
+                                + "REFERENCES `" + tablePrefix + "_player`(`id`) ON DELETE CASCADE,"
+                                + "CONSTRAINT `fk_time_world` FOREIGN KEY (`world_id`) "
+                                + "REFERENCES `" + tablePrefix + "_world`(`id`) ON DELETE CASCADE"
+                                + ") ENGINE InnoDB"
+                )
+                .addUnconditionalQuery(
+                        "CREATE TABLE IF NOT EXISTS `" + tablePrefix + "_version` ("
+                                + "`version_no` INT NOT NULL,"
+                                + "`applied_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,"
+                                + "INDEX `idx_version_no` (`version_no`)"
+                                + ") ENGINE=InnoDB"
+                )
+                .addUnconditionalQuery(
+                        "CREATE TABLE IF NOT EXISTS `" + tablePrefix + "_player` ("
+                                + "`id` BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,"
+                                + "`uuid` BINARY(16) NOT NULL UNIQUE,"
+                                + "`name` VARCHAR(16) CHARACTER SET ascii UNIQUE,"
+                                + "`last_seen` TIMESTAMP NULL"
+                                + ") ENGINE InnoDB"
+                )
+                .addUnconditionalQuery(
+                        "CREATE TABLE IF NOT EXISTS `" + tablePrefix + "_server` ("
+                                + "`id` BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,"
+                                + "`server` VARCHAR(64) NOT NULL UNIQUE"
+                                + ") ENGINE InnoDB"
+                )
+                .addUnconditionalQuery(
+                        "CREATE TABLE IF NOT EXISTS `" + tablePrefix + "_world` ("
+                                + "`id` BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,"
+                                + "`server_id` BIGINT NOT NULL,"
+                                + "`world` VARCHAR(64) NOT NULL,"
+                                + "UNIQUE KEY `uk_world` (`server_id`, `world`),"
+                                + "CONSTRAINT `fk_world_server` FOREIGN KEY (`server_id`) "
+                                + "REFERENCES `" + tablePrefix + "_server`(`id`) ON DELETE CASCADE"
+                                + ") ENGINE InnoDB"
+                )
+                .addUnconditionalQuery(
+                        "CREATE TABLE IF NOT EXISTS `" + tablePrefix + "_time` ("
+                                + "`id` BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,"
+                                + "`player_id` BIGINT NOT NULL,"
+                                + "`world_id` BIGINT NOT NULL,"
+                                + "`join_time` DATETIME(3) NOT NULL,"
+                                + "`leave_time` DATETIME(3) NOT NULL,"
+                                + "`reason` VARCHAR(32) NOT NULL DEFAULT 'UNSPECIFIED',"
+                                + "INDEX `idx_time_player` (`player_id`),"
+                                + "INDEX `idx_time_world` (`world_id`),"
+                                + "CONSTRAINT `fk_time_player` FOREIGN KEY (`player_id`) "
+                                + "REFERENCES `" + tablePrefix + "_player`(`id`) ON DELETE CASCADE,"
+                                + "CONSTRAINT `fk_time_world` FOREIGN KEY (`world_id`) "
+                                + "REFERENCES `" + tablePrefix + "_world`(`id`) ON DELETE CASCADE"
+                                + ") ENGINE InnoDB"
+                )
+                .addUnconditionalQuery(
+                        "CREATE TABLE IF NOT EXISTS `" + tablePrefix + "_version` ("
+                                + "`version_no` INT NOT NULL,"
+                                + "`applied_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,"
+                                + "INDEX `idx_version_no` (`version_no`)"
+                                + ") ENGINE=InnoDB"
+                )
+                .addUnconditionalQuery(
+                        "INSERT IGNORE INTO `" + tablePrefix + "_server` (`server`) "
+                                + "VALUES ('default')"
+                )
+                .addUnconditionalQuery(
+                        "INSERT IGNORE INTO `" + tablePrefix + "_world` (`server_id`, `world`) "
+                                + "SELECT s.`id`, 'world' "
+                                + "FROM `" + tablePrefix + "_server` s "
+                                + "WHERE s.`server` = 'default'"
+                )
+                .addUnconditionalQuery(
+                        "INSERT INTO `" + tablePrefix + "_player` (`uuid`, `name`, `last_seen`) "
+                                + "SELECT old.`uuid`, old.`name`, NOW(3) "
+                                + "FROM `" + tablePrefix + "` old "
+                                + "ON DUPLICATE KEY UPDATE "
+                                + "`name` = VALUES(`name`), "
+                                + "`last_seen` = VALUES(`last_seen`)"
+                )
+                .addUnconditionalQuery(
+                        "INSERT INTO `" + tablePrefix + "_time` "
+                                + "(`player_id`, `world_id`, `join_time`, `leave_time`, `reason`) "
+                                + "SELECT "
+                                + "p.`id`, "
+                                + "w.`id`, "
+                                + "DATE_SUB(NOW(3), INTERVAL old.`time` SECOND), "
+                                + "NOW(3), "
+                                + "'MIGRATED' "
+                                + "FROM `" + tablePrefix + "` old "
+                                + "JOIN `" + tablePrefix + "_player` p ON p.`uuid` = old.`uuid` "
+                                + "JOIN `" + tablePrefix + "_server` s ON s.`server` = 'default' "
+                                + "JOIN `" + tablePrefix + "_world` w "
+                                + "  ON w.`server_id` = s.`id` AND w.`world` = 'world' "
+                                + "WHERE old.`time` > 0 "
+                                + "AND NOT EXISTS ("
+                                + "    SELECT 1 "
+                                + "    FROM `" + tablePrefix + "_time` t "
+                                + "    WHERE t.`player_id` = p.`id` "
+                                + "      AND t.`world_id` = w.`id` "
+                                + "      AND t.`reason` = 'MIGRATED'"
+                                + ")"
+                )
+                .addUnconditionalQuery(
+                        "DROP TABLE `" + tablePrefix + "`"
+                )
+                .finishVersion();
+    }
+}

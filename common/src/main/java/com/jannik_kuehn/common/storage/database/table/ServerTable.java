@@ -1,7 +1,5 @@
 package com.jannik_kuehn.common.storage.database.table;
 
-import com.jannik_kuehn.common.storage.database.SqlDialect;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -12,7 +10,7 @@ import java.util.Optional;
 /**
  * Table helper for server entries.
  */
-public final class ServerTable {
+public class ServerTable {
 
     /**
      * The table name.
@@ -20,40 +18,13 @@ public final class ServerTable {
     private final String tableName;
 
     /**
-     * The {@link SqlDialect} instance.
-     */
-    private final SqlDialect dialect;
-
-    /**
      * Constructs a ServerTable instance with the specified table name and SQL dialect.
      *
      * @param tableName the name of the database table
-     * @param dialect   the SQL dialect to use for database operations
      */
     /* default */
-    public ServerTable(final String tableName, final SqlDialect dialect) {
+    public ServerTable(final String tableName) {
         this.tableName = tableName;
-        this.dialect = dialect;
-    }
-
-    /**
-     * Generates the SQL statement to create the table for server entries.
-     *
-     * @return the SQL CREATE TABLE statement for the server table
-     */
-    /* default */
-    public String createTableSql() {
-        return dialect.createServerTable(tableName);
-    }
-
-    /**
-     * Retrieves the name of the database table.
-     *
-     * @return the name of the table
-     */
-    /* default */
-    public String getTableName() {
-        return tableName;
     }
 
     /**
@@ -65,7 +36,6 @@ public final class ServerTable {
      * @return the ID of the server entry
      * @throws SQLException if a database access error occurs or the server entry cannot be created
      */
-    /* default */
     public long ensureServer(final Connection connection, final String server) throws SQLException {
         final Optional<Long> existing = findId(connection, server);
         if (existing.isPresent()) {

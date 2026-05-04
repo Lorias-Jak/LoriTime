@@ -211,6 +211,11 @@ public class PlayerTable {
         }
     }
 
+    @Override
+    public String toString() {
+        return tableName;
+    }
+
     private void releaseTakenName(final Connection connection, final String name, final UUID owner) throws SQLException {
         final Optional<Long> oldHolder = findIdByName(connection, name);
         if (oldHolder.isEmpty()) {

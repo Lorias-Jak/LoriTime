@@ -132,7 +132,7 @@ public class DataStorageManager {
             log.info("External storage detected, skipping LoriTime's default storage loading.");
             return;
         }
-        final String storageMethod = loriTime.getConfig().getString("storage-method", "sqlite");
+        final String storageMethod = loriTime.getConfig().getString("storageMethod", "sqlite");
         switch (storageMethod.toLowerCase(Locale.ROOT)) {
             case "mysql", "mariadb", "sqlite" -> loadDatabaseStorage();
             default -> {
@@ -197,12 +197,12 @@ public class DataStorageManager {
     @SuppressWarnings("PMD.CloseResource")
     private void loadDatabaseStorage() throws StorageException {
         final DatabaseStorage dbStorage = new DatabaseStorage(loggerFactory, loriTime.getConfig(), dataFolder);
-        dbStorage.initialize();
+        dbStorage.initializeRuntime();
 
-        final PlayerTable playerTable = new PlayerTable(dbStorage.getTablePrefix());
-        final ServerTable serverTable = new ServerTable(dbStorage.getTablePrefix());
-        final WorldTable worldTable = new WorldTable(dbStorage.getTablePrefix(), serverTable);
-        final TimeTable timeTable = new TimeTable(dbStorage.getTablePrefix(), playerTable, dbStorage.getDialect());
+        final PlayerTable playerTable = new PlayerTable(dbStorage.getTablePrefix() + "_player");
+        final ServerTable serverTable = new ServerTable(dbStorage.getTablePrefix() + "_server");
+        final WorldTable worldTable = new WorldTable(dbStorage.getTablePrefix() + "_world", serverTable);
+        final TimeTable timeTable = new TimeTable(dbStorage.getTablePrefix() + "_time", playerTable, dbStorage.getDialect());
 
         final DatabaseTimeAndNameStorage nameAndTimeStorage = new DatabaseTimeAndNameStorage(dbStorage.getProvider(), playerTable, serverTable, worldTable, timeTable);
         this.nameStorage = nameAndTimeStorage;

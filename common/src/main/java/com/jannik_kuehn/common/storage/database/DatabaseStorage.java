@@ -2,6 +2,7 @@ package com.jannik_kuehn.common.storage.database;
 
 import com.github.roleplaycauldron.spellbook.core.logger.LoggerFactory;
 import com.github.roleplaycauldron.spellbook.core.logger.WrappedLogger;
+import com.github.roleplaycauldron.spellbook.database.updater.DatabaseUpdateException;
 import com.github.roleplaycauldron.spellbook.database.updater.DatabaseUpdater;
 import com.github.roleplaycauldron.spellbook.database.updater.DatabaseVersion;
 import com.github.roleplaycauldron.spellbook.database.updater.DefaultVersionRepository;
@@ -74,36 +75,73 @@ public class DatabaseStorage {
     }
 
     /**
-     * Initializes the storage system by opening the database connection and performing necessary
-     * setup operations such as creating tables and applying database updates. If the connection
-     * provider is already open, a log message will indicate that the database is already connected.
+     * Initializes the storage system for runtime use after migrations have been handled.
      *
      * @throws StorageException if an error occurs during the initialization process
      */
-    public void initialize() throws StorageException {
+    public void initializeRuntime() throws StorageException {
+        openProvider();
+    }
+
+    /**
+     * Opens the configured connection provider if necessary.
+     *
+     * @throws StorageException if the provider cannot be initialized
+     */
+    public void openProvider() throws StorageException {
+        if (provider != null && !provider.isClosed()) {
+            log.error("Database is already connected!");
+            return;
+        }
+
+        dialect = DatabaseDialect.getEngineByName(getConfiguredEngine());
+        provider = initializeProvider();
+        provider.open();
+    }
+
+    /**
+     * Applies database updates for an already versioned database.
+     *
+     * @throws StorageException if database updates fail
+     */
+    public void applyUpdates() throws StorageException {
+        try {
+            createUpdater().checkAndApplyUpdates();
+        } catch (final DatabaseUpdateException ex) {
+            throw new StorageException("Database update failed", ex);
+        }
+    }
+
+    /**
+     * Applies first-startup database creation for a fresh database.
+     *
+     * @throws StorageException if database initialization fails
+     */
+    public void applyFirstStartup() throws StorageException {
+        try {
+            createUpdater().firstStartup();
+        } catch (final DatabaseUpdateException ex) {
+            throw new StorageException("Database first startup failed", ex);
+        }
+    }
+
+    private String getConfiguredEngine() {
         final String engineString = config.getString("storageMethod");
         if (engineString == null || engineString.isBlank()) {
             throw new IllegalArgumentException("Database engine configuration is missing");
         }
-        if (provider == null || provider.isClosed()) {
-            dialect = DatabaseDialect.getEngineByName(engineString);
-            provider = initializeProvider();
-            provider.open();
+        return engineString;
+    }
 
-            final DatabaseUpdater updater = DatabaseUpdater.builder()
-                    .logger(loggerFactory.create(DatabaseUpdater.class))
-                    .connectionProvider(provider)
-                    .versionRepository(new DefaultVersionRepository(getDatabaseMigrationVersionList(dialect)))
-                    .versionTable(tablePrefix + "_version",
-                            "SELECT MAX(version_no) AS latest_version FROM `" + tablePrefix + "_version`;",
-                            "INSERT INTO `" + tablePrefix + "_version` (`version_no`) VALUES (?);")
-                    .build();
-
-            updater.firstStartup();
-            return;
-        }
-
-        log.error("Database is already connected!");
+    private DatabaseUpdater createUpdater() {
+        return DatabaseUpdater.builder()
+                .logger(loggerFactory.create(DatabaseUpdater.class))
+                .connectionProvider(provider)
+                .versionRepository(new DefaultVersionRepository(getDatabaseMigrationVersionList(dialect)))
+                .versionTable(tablePrefix + "_version",
+                        "SELECT MAX(version_no) AS latest_version FROM `" + tablePrefix + "_version`;",
+                        "INSERT INTO `" + tablePrefix + "_version` (`version_no`) VALUES (?);")
+                .build();
     }
 
     private LoriTimeConnectionProvider initializeProvider() throws StorageException {

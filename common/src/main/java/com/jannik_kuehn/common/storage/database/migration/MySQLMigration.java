@@ -95,6 +95,16 @@ public final class MySQLMigration {
                                 + "INDEX `idx_version_no` (`version_no`)"
                                 + ") ENGINE=InnoDB"
                 )
+                .addFirstStartupQuery(
+                        "INSERT IGNORE INTO `" + tablePrefix + "_server` (`server`) "
+                                + "VALUES ('default')"
+                )
+                .addFirstStartupQuery(
+                        "INSERT IGNORE INTO `" + tablePrefix + "_world` (`server_id`, `world`) "
+                                + "SELECT s.`id`, 'global' "
+                                + "FROM `" + tablePrefix + "_server` s "
+                                + "WHERE s.`server` = 'default'"
+                )
                 .addUnconditionalQuery(
                         "CREATE TABLE IF NOT EXISTS `" + tablePrefix + "_version` ("
                                 + "`version_no` INT NOT NULL,"
@@ -155,7 +165,7 @@ public final class MySQLMigration {
                 )
                 .addUnconditionalQuery(
                         "INSERT IGNORE INTO `" + tablePrefix + "_world` (`server_id`, `world`) "
-                                + "SELECT s.`id`, 'world' "
+                                + "SELECT s.`id`, 'global' "
                                 + "FROM `" + tablePrefix + "_server` s "
                                 + "WHERE s.`server` = 'default'"
                 )
@@ -175,19 +185,19 @@ public final class MySQLMigration {
                                 + "w.`id`, "
                                 + "DATE_SUB(NOW(3), INTERVAL old.`time` SECOND), "
                                 + "NOW(3), "
-                                + "'MIGRATED' "
+                                + "'LEGACY_IMPORT' "
                                 + "FROM `" + tablePrefix + "` old "
                                 + "JOIN `" + tablePrefix + "_player` p ON p.`uuid` = old.`uuid` "
                                 + "JOIN `" + tablePrefix + "_server` s ON s.`server` = 'default' "
                                 + "JOIN `" + tablePrefix + "_world` w "
-                                + "  ON w.`server_id` = s.`id` AND w.`world` = 'world' "
+                                + "  ON w.`server_id` = s.`id` AND w.`world` = 'global' "
                                 + "WHERE old.`time` > 0 "
                                 + "AND NOT EXISTS ("
                                 + "    SELECT 1 "
                                 + "    FROM `" + tablePrefix + "_time` t "
                                 + "    WHERE t.`player_id` = p.`id` "
                                 + "      AND t.`world_id` = w.`id` "
-                                + "      AND t.`reason` = 'MIGRATED'"
+                                + "      AND t.`reason` = 'LEGACY_IMPORT'"
                                 + ")"
                 )
                 .addUnconditionalQuery(

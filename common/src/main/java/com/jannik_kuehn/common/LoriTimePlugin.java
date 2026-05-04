@@ -23,6 +23,7 @@ import com.jannik_kuehn.common.module.updater.download.sources.ModrinthReleaseSo
 import com.jannik_kuehn.common.module.updater.download.sources.ReleaseUpdateSource;
 import com.jannik_kuehn.common.module.updater.version.Version;
 import com.jannik_kuehn.common.storage.DataStorageManager;
+import com.jannik_kuehn.common.storage.StorageMigrationService;
 import com.jannik_kuehn.common.utils.TimeParser;
 
 import java.io.File;
@@ -162,8 +163,8 @@ public class LoriTimePlugin {
 
     private void enableAsMaster() {
         try {
-//            final StorageMigrationService storageMigrationService = new StorageMigrationService(this, dataFolder);
-//            storageMigrationService.migrateIfNecessary();
+            final StorageMigrationService storageMigrationService = new StorageMigrationService(this, dataFolder);
+            storageMigrationService.migrateIfNecessary();
             dataStorageManager.loadStorages();
         } catch (final StorageException e) {
             log.error("An error occurred while enabling the storage", e);
@@ -272,6 +273,7 @@ public class LoriTimePlugin {
         try {
             this.config = fileManager.getConfiguration(fileManager.getOrCreateFile(dataFolder.toString(), "config.yml", true));
             localizationFile = fileManager.getConfiguration(fileManager.getOrCreateFile(dataFolder.toString(), config.getString("general.language", "en") + ".yml", true));
+            new StorageMigrationService(this, dataFolder).addLegacyFilesToStartupBackup();
             fileManager.startBackup();
         } catch (final ConfigurationException e) {
             log.error("An error occurred while loading the config file.", e);

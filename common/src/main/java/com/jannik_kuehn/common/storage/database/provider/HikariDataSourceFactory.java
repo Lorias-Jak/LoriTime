@@ -18,8 +18,14 @@ import com.zaxxer.hikari.HikariDataSource;
  */
 public final class HikariDataSourceFactory {
 
+    /**
+     * Prefix for database connection configuration keys.
+     */
     private static final String DATA_SECTION = "data.";
 
+    /**
+     * Prefix for Hikari connection pool configuration keys.
+     */
     private static final String POOL_SECTION = DATA_SECTION + "poolSettings.";
 
     private HikariDataSourceFactory() {

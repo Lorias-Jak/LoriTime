@@ -160,7 +160,7 @@ public class StorageMigrationService {
         for (final Map.Entry<String, Object> entry : names.getAll().entrySet()) {
             final Optional<UUID> uuid = parseUuid(entry.getValue());
             if (uuid.isPresent()) {
-                storage.setEntry(uuid.get(), entry.getKey());
+                storage.setPlayerName(uuid.get(), entry.getKey());
             }
         }
     }

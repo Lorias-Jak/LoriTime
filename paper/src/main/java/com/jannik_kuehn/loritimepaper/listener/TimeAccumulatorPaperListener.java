@@ -42,10 +42,13 @@ public class TimeAccumulatorPaperListener implements Listener {
     @EventHandler
     public void playerJoin(final PlayerJoinEvent event) {
         final UUID uuid = event.getPlayer().getUniqueId();
+        final String name = event.getPlayer().getName();
+        final String server = event.getPlayer().getServer().getName();
+        final String world = event.getPlayer().getWorld().getName();
         final long now = System.currentTimeMillis();
         loriTimePlugin.getScheduler().runAsyncOnce(() -> {
             try {
-                loriTimePlugin.getTimeStorage().startAccumulating(uuid, now);
+                loriTimePlugin.getAccumulator().startAccumulating(uuid, name, server, world, now);
             } catch (final StorageException e) {
                 log.warn("could not start accumulating online time for player " + uuid, e);
             }
@@ -60,10 +63,12 @@ public class TimeAccumulatorPaperListener implements Listener {
     @EventHandler
     public void playerQuit(final PlayerQuitEvent event) {
         final UUID uuid = event.getPlayer().getUniqueId();
+        final String server = event.getPlayer().getServer().getName();
+        final String world = event.getPlayer().getWorld().getName();
         final long now = System.currentTimeMillis();
         loriTimePlugin.getScheduler().runAsyncOnce(() -> {
             try {
-                loriTimePlugin.getTimeStorage().stopAccumulatingAndSaveOnlineTime(uuid, now);
+                loriTimePlugin.getAccumulator().stopAccumulatingAndSaveOnlineTime(uuid, server, world, now);
                 loriTimePlugin.getPlayerConverter().removePlayerFromCache(uuid);
             } catch (final StorageException e) {
                 log.warn("error while stopping accumulation of online time for player " + uuid, e);

@@ -45,7 +45,7 @@ public class PlayerNameBungeeListener implements Listener {
         final String name = event.getPlayer().getName();
         loriTimePlugin.getScheduler().runAsyncOnce(() -> {
             try {
-                loriTimePlugin.getNameStorage().setEntry(uuid, name, true);
+                loriTimePlugin.getStorage().setPlayerName(uuid, name);
             } catch (final StorageException ex) {
                 log.warn("could not save player name and uuid " + name, ex);
             }

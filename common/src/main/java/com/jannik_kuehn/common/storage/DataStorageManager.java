@@ -5,7 +5,8 @@ import com.github.roleplaycauldron.spellbook.core.logger.WrappedLogger;
 import com.jannik_kuehn.common.LoriTimePlugin;
 import com.jannik_kuehn.common.api.scheduler.PluginTask;
 import com.jannik_kuehn.common.api.storage.AccumulatingTimeStorage;
-import com.jannik_kuehn.common.api.storage.NameStorage;
+import com.jannik_kuehn.common.api.storage.StorageMode;
+import com.jannik_kuehn.common.api.storage.UnifiedStorage;
 import com.jannik_kuehn.common.exception.StorageException;
 import com.jannik_kuehn.common.storage.database.DatabaseStorage;
 import com.jannik_kuehn.common.storage.database.DatabaseTimeAndNameStorage;
@@ -19,9 +20,9 @@ import java.util.Locale;
 
 /**
  * The {@link DataStorageManager} is responsible for holding the
- * {@link NameStorage} and {@link AccumulatingTimeStorage}.
+ * {@link UnifiedStorage} and {@link AccumulatingTimeStorage}.
  * It also manages the loading and reloading of the storages.
- * You're able to inject custom storages by calling {@link #injectCustomStorage(NameStorage, AccumulatingTimeStorage)}.
+ * You're able to inject custom storages by calling {@link #injectCustomStorage(UnifiedStorage, AccumulatingTimeStorage)}.
  * The {@link DataStorageManager} also handles the cache flushing for the time storage.
  */
 public class DataStorageManager {
@@ -46,14 +47,19 @@ public class DataStorageManager {
     private final File dataFolder;
 
     /**
-     * The {@link NameStorage}.
+     * The {@link UnifiedStorage}.
      */
-    private NameStorage nameStorage;
+    private UnifiedStorage storage;
 
     /**
      * The {@link AccumulatingTimeStorage}.
      */
-    private AccumulatingTimeStorage timeStorage;
+    private AccumulatingTimeStorage accumulator;
+
+    /**
+     * The configured storage responsibility mode.
+     */
+    private StorageMode storageMode;
 
     /**
      * {@code true} if an external storage is injected, otherwise {@code false}.
@@ -80,23 +86,23 @@ public class DataStorageManager {
     }
 
     /**
-     * Injects a custom {@link NameStorage} and {@link AccumulatingTimeStorage} to the plugin.
-     * If the {@link NameStorage} or {@link AccumulatingTimeStorage} is {@code null}, the injection will fail.
+     * Injects a custom {@link UnifiedStorage} and {@link AccumulatingTimeStorage} to the plugin.
+     * If the {@link UnifiedStorage} or {@link AccumulatingTimeStorage} is {@code null}, the injection will fail.
      * The {@link DataStorageManager} will use the injected storages instead of the default ones.
      * The default storages will not be able to load or save data anymore.
      * On plugin reload, the injected storages will not be reloaded on {@link #reloadStorages()}.
      * Note that the {@link DataStorageManager} will not close the injected storages when the plugin is disabled.
      *
-     * @param nameStorage the {@link NameStorage}.
-     * @param timeStorage the {@link AccumulatingTimeStorage}.
+     * @param storage     the {@link UnifiedStorage}.
+     * @param accumulator the {@link AccumulatingTimeStorage}.
      */
-    public void injectCustomStorage(final NameStorage nameStorage, final AccumulatingTimeStorage timeStorage) {
-        if (nameStorage == null || timeStorage == null) {
-            log.error("Custom storage injection failed: nameStorage and timeStorage must not be null!");
+    public void injectCustomStorage(final UnifiedStorage storage, final AccumulatingTimeStorage accumulator) {
+        if (storage == null || accumulator == null) {
+            log.error("Custom storage injection failed: storage and accumulator must not be null!");
             return;
         }
-        this.nameStorage = nameStorage;
-        this.timeStorage = timeStorage;
+        this.storage = storage;
+        this.accumulator = accumulator;
         externalStorage = true;
     }
 
@@ -122,14 +128,19 @@ public class DataStorageManager {
 
     /**
      * Loads the default plugin storages.
-     * It will not load the storages if an external {@link NameStorage}
+     * It will not load the storages if an external {@link UnifiedStorage}
      * or {@link AccumulatingTimeStorage} is injected.
      *
      * @throws StorageException if an exception occurred while loading the storages.
      */
     public void loadStorages() throws StorageException {
-        if (nameStorage != null || timeStorage != null) {
+        if (storage != null || accumulator != null) {
             log.info("External storage detected, skipping LoriTime's default storage loading.");
+            return;
+        }
+        storageMode = StorageMode.parse(loriTime.getServer().getServerMode());
+        if (storageMode == StorageMode.SLAVE) {
+            log.info("Slave mode detected, skipping canonical storage loading.");
             return;
         }
         final String storageMethod = loriTime.getConfig().getString("storageMethod", "sqlite");
@@ -144,7 +155,7 @@ public class DataStorageManager {
     }
 
     /**
-     * Reloads the {@link NameStorage} and {@link AccumulatingTimeStorage} if no external storage is injected.
+     * Reloads the {@link UnifiedStorage} and {@link AccumulatingTimeStorage} if no external storage is injected.
      */
     public void reloadStorages() {
         if (externalStorage) {
@@ -160,27 +171,26 @@ public class DataStorageManager {
     }
 
     /**
-     * Closes the {@link NameStorage} and {@link AccumulatingTimeStorage}.
+     * Closes the {@link UnifiedStorage} and {@link AccumulatingTimeStorage}.
      * External storages will be closed too.
      * If you want to load the custom storages again, you have to inject them again.
      */
     public void closeStorages() {
-        if (nameStorage != null) {
+        if (accumulator != null) {
             try {
-                nameStorage.close();
+                accumulator.close();
             } catch (final StorageException e) {
-                log.error("An exception occurred while closing the nameStorage", e);
+                log.error("An exception occurred while closing the accumulator", e);
+            }
+        } else if (storage != null) {
+            try {
+                storage.close();
+            } catch (final StorageException e) {
+                log.error("An exception occurred while closing the storage", e);
             }
         }
-        if (timeStorage != null) {
-            try {
-                timeStorage.close();
-            } catch (final StorageException e) {
-                log.error("An exception occurred while closing the timeStorage", e);
-            }
-        }
-        nameStorage = null;
-        timeStorage = null;
+        storage = null;
+        accumulator = null;
     }
 
     /**
@@ -188,7 +198,9 @@ public class DataStorageManager {
      */
     public void flushOnlineTimeCache() {
         try {
-            timeStorage.flushOnlineTimeCache();
+            if (accumulator != null) {
+                accumulator.flushOnlineTimeCache();
+            }
         } catch (final StorageException ex) {
             log.error("could not flush online time cache", ex);
         }
@@ -205,17 +217,17 @@ public class DataStorageManager {
         final TimeTable timeTable = new TimeTable(dbStorage.getTablePrefix() + "_time", playerTable, dbStorage.getDialect());
 
         final DatabaseTimeAndNameStorage nameAndTimeStorage = new DatabaseTimeAndNameStorage(dbStorage.getProvider(), playerTable, serverTable, worldTable, timeTable);
-        this.nameStorage = nameAndTimeStorage;
-        this.timeStorage = new AccumulatingTimeStorage(loriTime.getLoggerFactory().create(AccumulatingTimeStorage.class), nameAndTimeStorage);
+        this.storage = nameAndTimeStorage;
+        this.accumulator = new AccumulatingTimeStorage(loriTime.getLoggerFactory().create(AccumulatingTimeStorage.class), nameAndTimeStorage);
     }
 
     /**
-     * Getter of the {@link NameStorage}.
+     * Getter of the {@link UnifiedStorage}.
      *
-     * @return the {@link NameStorage}.
+     * @return the {@link UnifiedStorage}.
      */
-    public NameStorage getNameStorage() {
-        return nameStorage;
+    public UnifiedStorage getStorage() {
+        return storage;
     }
 
     /**
@@ -223,7 +235,16 @@ public class DataStorageManager {
      *
      * @return the {@link AccumulatingTimeStorage}.
      */
-    public AccumulatingTimeStorage getTimeStorage() {
-        return timeStorage;
+    public AccumulatingTimeStorage getAccumulator() {
+        return accumulator;
+    }
+
+    /**
+     * Getter of the storage mode.
+     *
+     * @return the storage mode
+     */
+    public StorageMode getStorageMode() {
+        return storageMode;
     }
 }

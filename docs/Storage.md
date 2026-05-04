@@ -1,50 +1,58 @@
-Currently LoriTime stores data in a database.<br>
-You can choose between SQLite (file-based) and MySQL/MariaDB (server-based).<br>
+LoriTime stores data in a database. You can choose between SQLite for a local file database and MySQL/MariaDB for a remote database.
 
-## Types
-> ⚠️ Only MariaDB and SQLite are tested, not mysql. In case you have any problems, pls report them<br>
+## Storage Types
 
-| Type | Description | 
+| Type | Description |
 |------|-------------|
-| mysql | A database hosted on a MySQL server |
-| mariadb | A database hosted on a MariaDB server |
-| sqlite | A file-based SQLite database |
+| `sqlite` | File-based SQLite database |
+| `mysql` | Database hosted on a MySQL server |
+| `mariadb` | Database hosted on a MariaDB server |
 
-> ℹ️ Legacy `yml` storage is no longer a regular storage mode. If detected on startup,
-> LoriTime automatically migrates `data/names.yml` and `data/time.yml` to SQLite.
+Only MariaDB and SQLite are tested regularly. Legacy `yml` storage is no longer a regular storage mode. If LoriTime detects `data/names.yml` or `data/time.yml` on startup, it migrates them to SQLite.
 
-## Setting up the database
-<p>To change the storage type, open your `config.yml`, set <code>general.storage</code> to <code>mysql</code>, <code>mariadb</code> or <code>sqlite</code>, and enter all database properties.</p>
-<details>
-<summary>Database properties (config.yml)</summary>
+## Database Configuration
+
+Set `storageMethod` in `config.yml`:
 
 ```yml
-###########
-#  Mysql  #
-###########
-mysql:
+storageMethod: 'sqlite'
+
+data:
+  tablePrefix: 'loritime'
   host: 'localhost'
   port: 3306
-  database: 'test'
+  database: 'minecraft'
   user: 'user'
-  password: '123ABC!'
-  tablePrefix: 'loritime'
-
-###########
-# SQLite  #
-###########
-sqlite:
-  file: 'loritime.db'
-  tablePrefix: 'loritime'
+  password: 'pw'
 ```
 
-</details>
+The `data` section is only used for remote database storage methods, except `tablePrefix`, which is shared by all SQL backends.
 
-## Proxy-only usage with database storage
-If LoriTime runs only on a proxy (multi-setup master on Velocity / Bungee) and no world-specific source is available,
-LoriTime stores accumulated time in a synthetic scope:
+## Storage Modes
+
+LoriTime has three storage responsibility modes:
+
+| Mode | Responsibility |
+|------|----------------|
+| `standalone` | The instance reads and writes its own canonical storage. |
+| `master` | The instance owns canonical storage for a multi-setup and answers slave read requests. |
+| `slave` | The instance sends session writes to a master and keeps a local read cache for local consumers. |
+
+If `multiSetup.enabled` is `false`, LoriTime runs as `standalone`. If `multiSetup.enabled` is `true`, `multiSetup.mode` must be one of `standalone`, `master`, or `slave`.
+
+Modes describe storage responsibility only. Platform modules decide what features they can provide in that mode.
+
+## Platform Behavior
+
+Paper and Folia-compatible servers can provide player name, server, and world context for session rows. They are also the only supported target for PlaceholderAPI placeholders.
+
+Velocity and Bungee can run as `standalone` or `master`, but they cannot provide PlaceholderAPI placeholders because PlaceholderAPI is not a proxy plugin. When a proxy writes session rows without world context, LoriTime stores them in the fallback scope:
 
 - server: `default`
 - world: `global`
 
-This keeps proxy-only deployments compatible with the normalized database schema, because no paper world data is required.
+In a multi-setup, the slave servers are the instances that need placeholders. The master owns canonical storage; it does not need PlaceholderAPI for slave placeholder values.
+
+## Placeholder TODO
+
+Paper/Folia slave placeholder support is intentionally deferred in the unified storage refactor. The placeholder integration still needs to be updated to read from the slave read cache and to return deterministic values on cache misses while requesting a refresh from the master.

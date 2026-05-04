@@ -1,9 +1,8 @@
 package com.jannik_kuehn.common.storage.database;
 
-import com.jannik_kuehn.common.api.storage.NameStorage;
-import com.jannik_kuehn.common.api.storage.ReasonAwareTimeStorage;
+import com.jannik_kuehn.common.api.storage.PlayerSessionChunk;
 import com.jannik_kuehn.common.api.storage.TimeEntryReason;
-import com.jannik_kuehn.common.api.storage.TimeStorage;
+import com.jannik_kuehn.common.api.storage.UnifiedStorage;
 import com.jannik_kuehn.common.exception.StorageException;
 import com.jannik_kuehn.common.storage.database.provider.LoriTimeConnectionProvider;
 import com.jannik_kuehn.common.storage.database.table.PlayerTable;
@@ -14,6 +13,7 @@ import com.jannik_kuehn.common.storage.database.table.WorldTable;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.time.Instant;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -24,7 +24,7 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 @SuppressWarnings({"PMD.CommentRequired", "PMD.UnusedPrivateField", "PMD.TooManyMethods"})
-public class DatabaseTimeAndNameStorage implements NameStorage, TimeStorage, ReasonAwareTimeStorage {
+public class DatabaseTimeAndNameStorage implements UnifiedStorage {
 
     private static final String DEFAULT_SERVER_NAME = "default";
 
@@ -103,11 +103,6 @@ public class DatabaseTimeAndNameStorage implements NameStorage, TimeStorage, Rea
     }
 
     @Override
-    public void addTime(final UUID uuid, final long additionalTime) throws StorageException {
-        addTime(uuid, additionalTime, TimeEntryReason.MANUAL_ADJUSTMENT);
-    }
-
-    @Override
     public void addTime(final UUID uuid, final long additionalTime, final TimeEntryReason reason) throws StorageException {
         Objects.requireNonNull(uuid);
         Objects.requireNonNull(reason);
@@ -124,11 +119,6 @@ public class DatabaseTimeAndNameStorage implements NameStorage, TimeStorage, Rea
         } finally {
             poolLock.readLock().unlock();
         }
-    }
-
-    @Override
-    public void addTimes(final Map<UUID, Long> additionalTimes) throws StorageException {
-        addTimes(additionalTimes, TimeEntryReason.MANUAL_ADJUSTMENT);
     }
 
     @Override
@@ -156,7 +146,7 @@ public class DatabaseTimeAndNameStorage implements NameStorage, TimeStorage, Rea
     }
 
     @Override
-    public void setEntry(final UUID uuid, final String name) throws StorageException {
+    public void setPlayerName(final UUID uuid, final String name) throws StorageException {
         Objects.requireNonNull(uuid);
         Objects.requireNonNull(name);
         poolLock.readLock().lock();
@@ -173,12 +163,7 @@ public class DatabaseTimeAndNameStorage implements NameStorage, TimeStorage, Rea
     }
 
     @Override
-    public void setEntry(final UUID uniqueId, final String name, final boolean override) throws StorageException {
-        setEntry(uniqueId, name);
-    }
-
-    @Override
-    public void setEntries(final Map<UUID, String> entries) throws StorageException {
+    public void setPlayerNames(final Map<UUID, String> entries) throws StorageException {
         if (entries == null || entries.isEmpty()) {
             return;
         }
@@ -228,13 +213,29 @@ public class DatabaseTimeAndNameStorage implements NameStorage, TimeStorage, Rea
     }
 
     @Override
-    public void removeUser(final UUID uniqueId) throws StorageException, SQLException {
+    public void removePlayer(final UUID uniqueId) throws StorageException, SQLException {
         deleteUser(uniqueId);
     }
 
     @Override
-    public void removeTimeHolder(final UUID uniqueId) throws StorageException, SQLException {
-        deleteUser(uniqueId);
+    public void persistSession(final PlayerSessionChunk session) throws StorageException {
+        Objects.requireNonNull(session);
+        poolLock.readLock().lock();
+        try {
+            checkClosed();
+            try (Connection connection = provider.getConnection()) {
+                final long worldId = worldTable.ensureWorld(connection, session.server(), session.world());
+                final long playerId = playerTable.ensurePlayer(connection, session.uuid(), session.name());
+                timeTable.insertSession(connection, playerId, worldId,
+                        Instant.ofEpochMilli(session.startedAt()),
+                        Instant.ofEpochMilli(session.stoppedAt()),
+                        session.reason());
+            }
+        } catch (final SQLException ex) {
+            throw new StorageException(ex);
+        } finally {
+            poolLock.readLock().unlock();
+        }
     }
 
     /**

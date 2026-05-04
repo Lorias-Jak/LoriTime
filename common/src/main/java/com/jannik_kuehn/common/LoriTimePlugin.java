@@ -6,7 +6,9 @@ import com.jannik_kuehn.common.api.LoriTimePlayerConverter;
 import com.jannik_kuehn.common.api.common.CommonServer;
 import com.jannik_kuehn.common.api.scheduler.PluginScheduler;
 import com.jannik_kuehn.common.api.storage.AccumulatingTimeStorage;
-import com.jannik_kuehn.common.api.storage.NameStorage;
+import com.jannik_kuehn.common.api.storage.StorageMode;
+import com.jannik_kuehn.common.api.storage.TimeAccumulator;
+import com.jannik_kuehn.common.api.storage.UnifiedStorage;
 import com.jannik_kuehn.common.config.Configuration;
 import com.jannik_kuehn.common.config.FileManager;
 import com.jannik_kuehn.common.config.localization.Localization;
@@ -35,7 +37,7 @@ import java.util.Set;
 /**
  * The {@link LoriTimePlugin} is the main class of the plugin.
  */
-@SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.ConfusingTernary", "PMD.LiteralsFirstInComparisons",
+@SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.ConfusingTernary",
         "PMD.AssignmentToNonFinalStatic", "PMD.CouplingBetweenObjects"})
 public class LoriTimePlugin {
     /**
@@ -154,14 +156,14 @@ public class LoriTimePlugin {
         server.setServerMode(getServerModeFromConfig());
         setupUpdater();
 
-        if (server.getServerMode().equalsIgnoreCase("master")) {
-            enableAsMaster();
+        if (!StorageMode.SLAVE.configValue().equalsIgnoreCase(server.getServerMode())) {
+            enableCanonicalStorage();
         }
 
         log.debug("Enabled main class of the plugin, enabling the rest of the plugin..");
     }
 
-    private void enableAsMaster() {
+    private void enableCanonicalStorage() {
         try {
             final StorageMigrationService storageMigrationService = new StorageMigrationService(this, dataFolder);
             storageMigrationService.migrateIfNecessary();
@@ -199,7 +201,7 @@ public class LoriTimePlugin {
     private String getServerModeFromConfig() {
         final String serverMode;
         if (!isMultiSetupEnabled()) {
-            serverMode = "master";
+            serverMode = StorageMode.STANDALONE.configValue();
         } else {
             serverMode = config.getString("multiSetup.mode", "master");
         }
@@ -376,21 +378,30 @@ public class LoriTimePlugin {
     }
 
     /**
-     * Getter of the {@link NameStorage}.
+     * Getter of the {@link UnifiedStorage}.
      *
-     * @return the {@link NameStorage}.
+     * @return the {@link UnifiedStorage}.
      */
-    public NameStorage getNameStorage() {
-        return dataStorageManager.getNameStorage();
+    public UnifiedStorage getStorage() {
+        return dataStorageManager.getStorage();
     }
 
     /**
-     * Getter of the {@link AccumulatingTimeStorage}.
+     * Getter of the {@link TimeAccumulator}.
      *
-     * @return the {@link AccumulatingTimeStorage}.
+     * @return the {@link TimeAccumulator}.
      */
-    public AccumulatingTimeStorage getTimeStorage() {
-        return dataStorageManager.getTimeStorage();
+    public TimeAccumulator getAccumulator() {
+        return dataStorageManager.getAccumulator();
+    }
+
+    /**
+     * Getter of the accumulated unified storage.
+     *
+     * @return the accumulated unified storage
+     */
+    public AccumulatingTimeStorage getAccumulatingStorage() {
+        return dataStorageManager.getAccumulator();
     }
 
     /**

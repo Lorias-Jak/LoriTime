@@ -41,10 +41,13 @@ public class TimeAccumulatorVelocityListener {
     @Subscribe
     public void onPostLogin(final PostLoginEvent event) {
         final UUID uuid = event.getPlayer().getUniqueId();
+        final String name = event.getPlayer().getUsername();
+        final String server = "default";
+        final String world = "global";
         final long now = System.currentTimeMillis();
         loriTimePlugin.getScheduler().runAsyncOnce(() -> {
             try {
-                loriTimePlugin.getTimeStorage().startAccumulating(uuid, now);
+                loriTimePlugin.getAccumulator().startAccumulating(uuid, name, server, world, now);
             } catch (final StorageException ex) {
                 log.warn("could not start accumulating online time for player " + uuid, ex);
             }
@@ -59,10 +62,12 @@ public class TimeAccumulatorVelocityListener {
     @Subscribe
     public void onDisconnect(final DisconnectEvent event) {
         final UUID uuid = event.getPlayer().getUniqueId();
+        final String server = "default";
+        final String world = "global";
         final long now = System.currentTimeMillis();
         loriTimePlugin.getScheduler().runAsyncOnce(() -> {
             try {
-                loriTimePlugin.getTimeStorage().stopAccumulatingAndSaveOnlineTime(uuid, now);
+                loriTimePlugin.getAccumulator().stopAccumulatingAndSaveOnlineTime(uuid, server, world, now);
                 loriTimePlugin.getPlayerConverter().removePlayerFromCache(uuid);
             } catch (final StorageException ex) {
                 log.warn("error while stopping accumulation of online time for player " + uuid, ex);

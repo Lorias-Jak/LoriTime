@@ -99,6 +99,38 @@ public final class TimeTable {
     }
 
     /**
+     * Inserts a session with explicit join and leave timestamps.
+     *
+     * @param connection the database connection
+     * @param playerId   player id
+     * @param worldId    world id
+     * @param join       join timestamp
+     * @param leave      leave timestamp
+     * @param reason     persistence reason
+     * @throws SQLException if persistence fails
+     */
+    public void insertSession(final Connection connection,
+                              final long playerId,
+                              final long worldId,
+                              final Instant join,
+                              final Instant leave,
+                              final TimeEntryReason reason) throws SQLException {
+        Objects.requireNonNull(join);
+        Objects.requireNonNull(leave);
+        Objects.requireNonNull(reason);
+        try (PreparedStatement insert = connection.prepareStatement(
+                "INSERT INTO `" + tableName + "` (`player_id`, `world_id`, `join_time`, `leave_time`, `reason`) "
+                        + "VALUES (?, ?, ?, ?, ?)")) {
+            insert.setLong(1, playerId);
+            insert.setLong(2, worldId);
+            insert.setTimestamp(3, Timestamp.from(join));
+            insert.setTimestamp(4, Timestamp.from(leave));
+            insert.setString(5, reason.name());
+            insert.executeUpdate();
+        }
+    }
+
+    /**
      * Calculates the total session duration for a player by summing up the recorded
      * duration in the database for the specified player UUID.
      *

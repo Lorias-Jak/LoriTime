@@ -4,6 +4,7 @@ import com.github.roleplaycauldron.spellbook.core.logger.LoggerFactory;
 import com.github.roleplaycauldron.spellbook.core.logger.WrappedLogger;
 import com.jannik_kuehn.common.LoriTimePlugin;
 import com.jannik_kuehn.common.api.LoriTimeAPI;
+import com.jannik_kuehn.common.api.storage.StorageMode;
 import com.jannik_kuehn.common.command.LoriTimeAdminCommand;
 import com.jannik_kuehn.common.command.LoriTimeCommand;
 import com.jannik_kuehn.common.command.LoriTimeDebugCommand;
@@ -44,12 +45,13 @@ public class LoriTimeBungee extends Plugin {
         loriTimePlugin.enable();
         LoriTimeAPI.setPlugin(loriTimePlugin);
 
-        if ("master".equalsIgnoreCase(bungeeServer.getServerMode())) {
+        if (StorageMode.STANDALONE.configValue().equalsIgnoreCase(bungeeServer.getServerMode())
+                || StorageMode.MASTER.configValue().equalsIgnoreCase(bungeeServer.getServerMode())) {
             enableAsMaster();
         } else if ("slave".equalsIgnoreCase(bungeeServer.getServerMode())) {
             enableAsSlave();
         } else {
-            log.error("Server mode is not set correctly! Please set the server mode to 'master' or 'slave' in the config.yml. Disabling the plugin...");
+            log.error("Server mode is not set correctly! Please set the server mode to 'standalone', 'master' or 'slave' in the config.yml. Disabling the plugin...");
             loriTimePlugin.disable();
         }
         enableRemainingFeatures();
@@ -76,10 +78,10 @@ public class LoriTimeBungee extends Plugin {
     }
 
     private void enableRemainingFeatures() {
+        getProxy().registerChannel("loritime:storage");
+        getProxy().getPluginManager().registerListener(this, new BungeePluginMessenger(this));
         if (loriTimePlugin.isAfkEnabled()) {
             getProxy().registerChannel("loritime:afk");
-            getProxy().registerChannel("loritime:storage");
-            getProxy().getPluginManager().registerListener(this, new BungeePluginMessenger(this));
             loriTimePlugin.enableAfkFeature(new MasteredAfkPlayerHandling(loriTimePlugin));
         }
     }

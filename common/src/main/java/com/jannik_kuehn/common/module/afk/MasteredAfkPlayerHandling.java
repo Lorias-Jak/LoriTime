@@ -28,8 +28,8 @@ public class MasteredAfkPlayerHandling extends AfkHandling {
             try {
                 log.debug("Removing online time for player " + loriTimePlayer.getUniqueId()
                         + ". Time to remove: " + timeToRemove);
-                loriTimePlugin.getTimeStorage().flushOnlineTimeCache();
-                loriTimePlugin.getTimeStorage().addTime(loriTimePlayer.getUniqueId(), -timeToRemove);
+                loriTimePlugin.getAccumulator().flushOnlineTimeCache();
+                loriTimePlugin.getAccumulatingStorage().addTime(loriTimePlayer.getUniqueId(), -timeToRemove);
             } catch (final Exception e) {
                 log.warn("Error while removing online time while afk for player " + loriTimePlayer.getUniqueId(), e);
             }
@@ -66,7 +66,7 @@ public class MasteredAfkPlayerHandling extends AfkHandling {
         log.debug("Stopping accumulation of online time for player " + loriTimePlayer.getName());
         final long now = System.currentTimeMillis();
         try {
-            loriTimePlugin.getTimeStorage().stopAccumulatingAndSaveOnlineTime(loriTimePlayer.getUniqueId(), now);
+            loriTimePlugin.getAccumulator().stopAccumulatingAndSaveOnlineTime(loriTimePlayer.getUniqueId(), now);
         } catch (final StorageException e) {
             log.error("error while stopping accumulation of online time for player " + loriTimePlayer.getName(), e);
         }
@@ -76,7 +76,8 @@ public class MasteredAfkPlayerHandling extends AfkHandling {
         log.debug("Starting accumulation of online time for player " + loriTimePlayer.getName());
         final long now = System.currentTimeMillis();
         try {
-            loriTimePlugin.getTimeStorage().startAccumulating(loriTimePlayer.getUniqueId(), now);
+            loriTimePlugin.getAccumulator().startAccumulating(loriTimePlayer.getUniqueId(), loriTimePlayer.getName(),
+                    "default", "global", now);
         } catch (final StorageException e) {
             log.error("error while starting accumulation of online time for player " + loriTimePlayer, e);
         }

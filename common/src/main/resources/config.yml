@@ -72,7 +72,7 @@ backup:
 # | => MariaDB
 #
 # A SQLite database is the default storage option.
-storage-method: 'sqlite'
+storageMethod: 'sqlite'
 
 # the following options are only relevant for the remote database storage-methods.
 data:

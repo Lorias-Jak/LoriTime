@@ -88,6 +88,13 @@ public final class MySQLMigration {
                                 + "REFERENCES `" + tablePrefix + "_world`(`id`) ON DELETE CASCADE"
                                 + ") ENGINE InnoDB"
                 )
+                .addFirstStartupQuery(
+                        "CREATE TABLE IF NOT EXISTS `" + tablePrefix + "_version` ("
+                                + "`version_no` INT NOT NULL,"
+                                + "`applied_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,"
+                                + "INDEX `idx_version_no` (`version_no`)"
+                                + ") ENGINE=InnoDB"
+                )
                 .addUnconditionalQuery(
                         "CREATE TABLE IF NOT EXISTS `" + tablePrefix + "_version` ("
                                 + "`version_no` INT NOT NULL,"

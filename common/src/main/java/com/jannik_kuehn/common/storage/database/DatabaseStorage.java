@@ -81,7 +81,7 @@ public class DatabaseStorage {
      * @throws StorageException if an error occurs during the initialization process
      */
     public void initialize() throws StorageException {
-        final String engineString = config.getString("data.storageMethod");
+        final String engineString = config.getString("storageMethod");
         if (engineString == null || engineString.isBlank()) {
             throw new IllegalArgumentException("Database engine configuration is missing");
         }

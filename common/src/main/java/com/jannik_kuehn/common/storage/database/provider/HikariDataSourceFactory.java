@@ -18,6 +18,10 @@ import com.zaxxer.hikari.HikariDataSource;
  */
 public final class HikariDataSourceFactory {
 
+    private static final String DATA_SECTION = "data.";
+
+    private static final String POOL_SECTION = DATA_SECTION + "poolSettings.";
+
     private HikariDataSourceFactory() {
     }
 
@@ -37,39 +41,39 @@ public final class HikariDataSourceFactory {
 
         final String jdbcUrl = String.format("%s%s:%s/%s",
                 startJdbcUrl,
-                config.getString("host"),
-                config.getString("port"),
-                config.getString("database"));
+                config.getString(DATA_SECTION + "host"),
+                config.getInt(DATA_SECTION + "port"),
+                config.getString(DATA_SECTION + "database"));
 
         databaseConfig.setJdbcUrl(jdbcUrl);
 
-        final String username = config.getString("user");
+        final String username = config.getString(DATA_SECTION + "user");
         if (username == null || username.isBlank()) {
             log.error("The database username is missing. Please check your config.yml.");
             return null;
         }
         databaseConfig.setUsername(username);
 
-        final String password = config.getString("password");
+        final String password = config.getString(DATA_SECTION + "password");
         if (password != null) {
             databaseConfig.setPassword(password);
         }
 
         databaseConfig.setPoolName("LoriTime-ConnectionPool");
 
-        final int maximumPoolSize = config.getInt("maximumPoolSize", 10);
+        final int maximumPoolSize = config.getInt(POOL_SECTION + "maximumPoolSize", 10);
         databaseConfig.setMaximumPoolSize(maximumPoolSize);
 
-        final int minimumIdle = config.getInt("minimumIdle", 10);
+        final int minimumIdle = config.getInt(POOL_SECTION + "minimumIdle", 10);
         databaseConfig.setMinimumIdle(minimumIdle);
 
-        final int maxLifetime = config.getInt("maximumLifetime", 1_800_000);
+        final int maxLifetime = config.getInt(POOL_SECTION + "maximumLifetime", 1_800_000);
         databaseConfig.setMaxLifetime(maxLifetime);
 
-        final int keepAliveTime = config.getInt("keepAliveTime", 0);
+        final int keepAliveTime = config.getInt(POOL_SECTION + "keepAliveTime", 0);
         databaseConfig.setKeepaliveTime(keepAliveTime);
 
-        final int connectionTimeout = config.getInt("connectionTimeout", 5_000);
+        final int connectionTimeout = config.getInt(POOL_SECTION + "connectionTimeout", 5_000);
         databaseConfig.setConnectionTimeout(connectionTimeout);
 
         final ThreadFactoryBuilder builder = new ThreadFactoryBuilder();

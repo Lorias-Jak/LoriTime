@@ -30,12 +30,7 @@ public final class TimeTable {
     /**
      * The player table name.
      */
-    private final String playerTableName;
-
-    /**
-     * The world table name.
-     */
-    private final String worldTableName;
+    private final PlayerTable playerTable;
 
     /**
      * The {@link SqlDialect} instance.
@@ -50,48 +45,31 @@ public final class TimeTable {
     /**
      * Default constructor.
      *
-     * @param tableName       the table name
-     * @param playerTableName the player table name
-     * @param worldTableName  the world table name
-     * @param dialect         the {@link SqlDialect} instance
+     * @param tableName   the table name
+     * @param playerTable the player table name
+     * @param dialect     the {@link SqlDialect} instance
      */
-    /* default */
-    public TimeTable(final String tableName, final String playerTableName, final String worldTableName, final SqlDialect dialect) {
-        this(tableName, playerTableName, worldTableName, dialect, Clock.systemUTC());
+    public TimeTable(final String tableName, final PlayerTable playerTable, final SqlDialect dialect) {
+        this(tableName, playerTable, dialect, Clock.systemUTC());
     }
 
     /**
      * Default constructor with a custom time source.
      *
-     * @param tableName       the table name
-     * @param playerTableName the player table name
-     * @param worldTableName  the world table name
-     * @param dialect         the {@link SqlDialect} instance
-     * @param clock           time source used to create join/leave timestamps
+     * @param tableName   the table name
+     * @param playerTable the player table name
+     * @param dialect     the {@link SqlDialect} instance
+     * @param clock       time source used to create join/leave timestamps
      */
     /* default */
     public TimeTable(final String tableName,
-                     final String playerTableName,
-                     final String worldTableName,
+                     final PlayerTable playerTable,
                      final SqlDialect dialect,
                      final Clock clock) {
         this.tableName = tableName;
-        this.playerTableName = playerTableName;
-        this.worldTableName = worldTableName;
+        this.playerTable = playerTable;
         this.dialect = dialect;
         this.clock = Objects.requireNonNull(clock);
-    }
-
-    /**
-     * Generates the SQL statement for creating the timetable.
-     * This method uses the associated SQL dialect to construct
-     * the CREATE TABLE statement.
-     *
-     * @return the SQL statement for creating the timetable
-     */
-    /* default */
-    public String createTableSql() {
-        return dialect.createTimeTable(tableName, playerTableName, worldTableName);
     }
 
     /**
@@ -108,7 +86,6 @@ public final class TimeTable {
      * @param reason          reason for writing the entry
      * @throws SQLException if persistence fails
      */
-    /* default */
     public void insertDuration(final Connection connection,
                                final long playerId,
                                final long worldId,
@@ -119,6 +96,63 @@ public final class TimeTable {
             return;
         }
         insertNewDuration(connection, playerId, worldId, durationSeconds, reason);
+    }
+
+    /**
+     * Calculates the total session duration for a player by summing up the recorded
+     * duration in the database for the specified player UUID.
+     *
+     * @param connection the database connection to use for the query
+     * @param uuid       the unique identifier of the player whose total duration is to be calculated
+     * @return an {@code OptionalLong} containing the total session duration in seconds if present,
+     * or an empty {@code OptionalLong} if no data exists for the specified player
+     * @throws SQLException if an SQL error occurs during the query execution
+     */
+    public OptionalLong sumForPlayer(final Connection connection, final UUID uuid) throws SQLException {
+        final String durationExpression = dialect.durationSecondsExpression("t.join_time", "t.leave_time");
+        final String sql = "SELECT SUM(" + durationExpression + ") AS total "
+                + "FROM `" + tableName + "` t "
+                + "JOIN `" + playerTable + "` p ON p.id = t.player_id "
+                + "WHERE p.uuid = ?";
+        try (PreparedStatement select = connection.prepareStatement(sql)) {
+            select.setBytes(1, UuidUtil.toBytes(uuid));
+            try (ResultSet result = select.executeQuery()) {
+                if (result.next()) {
+                    final long value = result.getLong("total");
+                    if (!result.wasNull()) {
+                        return OptionalLong.of(value);
+                    }
+                }
+            }
+            return OptionalLong.empty();
+        }
+    }
+
+    /**
+     * Retrieves the total session duration for all players from the database.
+     * The session duration is calculated by summing up the differences between
+     * join and leave timestamps for each player.
+     *
+     * @param connection the database connection to use for executing the query
+     * @return a map where the keys are player UUIDs (as strings), and the values are
+     * the total session durations in seconds
+     * @throws SQLException if an SQL error occurs during the query execution
+     */
+    public Map<String, Long> getAllTotals(final Connection connection) throws SQLException {
+        final Map<String, Long> totals = new HashMap<>();
+        final String durationExpression = dialect.durationSecondsExpression("t.join_time", "t.leave_time");
+        final String sql = "SELECT p.uuid AS uuid, SUM(" + durationExpression + ") AS total "
+                + "FROM `" + tableName + "` t "
+                + "JOIN `" + playerTable + "` p ON p.id = t.player_id "
+                + "GROUP BY p.uuid";
+        try (PreparedStatement select = connection.prepareStatement(sql)) {
+            try (ResultSet result = select.executeQuery()) {
+                while (result.next()) {
+                    totals.put(UuidUtil.fromBytes(result.getBytes("uuid")).toString(), result.getLong("total"));
+                }
+            }
+        }
+        return totals;
     }
 
     private boolean shouldUpdateLatest(final TimeEntryReason reason) {
@@ -173,64 +207,5 @@ public final class TimeTable {
             }
         }
         return null;
-    }
-
-    /**
-     * Calculates the total session duration for a player by summing up the recorded
-     * duration in the database for the specified player UUID.
-     *
-     * @param connection the database connection to use for the query
-     * @param uuid       the unique identifier of the player whose total duration is to be calculated
-     * @return an {@code OptionalLong} containing the total session duration in seconds if present,
-     * or an empty {@code OptionalLong} if no data exists for the specified player
-     * @throws SQLException if an SQL error occurs during the query execution
-     */
-    /* default */
-    public OptionalLong sumForPlayer(final Connection connection, final UUID uuid) throws SQLException {
-        final String durationExpression = dialect.durationSecondsExpression("t.join_time", "t.leave_time");
-        final String sql = "SELECT SUM(" + durationExpression + ") AS total "
-                + "FROM `" + tableName + "` t "
-                + "JOIN `" + playerTableName + "` p ON p.id = t.player_id "
-                + "WHERE p.uuid = ?";
-        try (PreparedStatement select = connection.prepareStatement(sql)) {
-            select.setBytes(1, UuidUtil.toBytes(uuid));
-            try (ResultSet result = select.executeQuery()) {
-                if (result.next()) {
-                    final long value = result.getLong("total");
-                    if (!result.wasNull()) {
-                        return OptionalLong.of(value);
-                    }
-                }
-            }
-            return OptionalLong.empty();
-        }
-    }
-
-    /**
-     * Retrieves the total session duration for all players from the database.
-     * The session duration is calculated by summing up the differences between
-     * join and leave timestamps for each player.
-     *
-     * @param connection the database connection to use for executing the query
-     * @return a map where the keys are player UUIDs (as strings), and the values are
-     * the total session durations in seconds
-     * @throws SQLException if an SQL error occurs during the query execution
-     */
-    /* default */
-    public Map<String, Long> getAllTotals(final Connection connection) throws SQLException {
-        final Map<String, Long> totals = new HashMap<>();
-        final String durationExpression = dialect.durationSecondsExpression("t.join_time", "t.leave_time");
-        final String sql = "SELECT p.uuid AS uuid, SUM(" + durationExpression + ") AS total "
-                + "FROM `" + tableName + "` t "
-                + "JOIN `" + playerTableName + "` p ON p.id = t.player_id "
-                + "GROUP BY p.uuid";
-        try (PreparedStatement select = connection.prepareStatement(sql)) {
-            try (ResultSet result = select.executeQuery()) {
-                while (result.next()) {
-                    totals.put(UuidUtil.fromBytes(result.getBytes("uuid")).toString(), result.getLong("total"));
-                }
-            }
-        }
-        return totals;
     }
 }

@@ -2,229 +2,217 @@ package com.jannik_kuehn.common.storage;
 
 import com.github.roleplaycauldron.spellbook.core.logger.WrappedLogger;
 import com.jannik_kuehn.common.LoriTimePlugin;
+import com.jannik_kuehn.common.api.storage.TimeEntryReason;
 import com.jannik_kuehn.common.config.Configuration;
-import com.jannik_kuehn.common.config.FileManager;
-import com.jannik_kuehn.common.exception.ConfigurationException;
+import com.jannik_kuehn.common.config.YamlConfiguration;
 import com.jannik_kuehn.common.exception.StorageException;
 import com.jannik_kuehn.common.storage.database.DatabaseStorage;
+import com.jannik_kuehn.common.storage.database.DatabaseTimeAndNameStorage;
+import com.jannik_kuehn.common.storage.database.migration.DatabaseMigrationPreflight;
+import com.jannik_kuehn.common.storage.database.table.PlayerTable;
+import com.jannik_kuehn.common.storage.database.table.ServerTable;
+import com.jannik_kuehn.common.storage.database.table.TimeTable;
+import com.jannik_kuehn.common.storage.database.table.WorldTable;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
-import java.time.Instant;
-import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 /**
- * Handles one-time startup migrations for storage/config changes.
+ * Handles storage migration before runtime storages are loaded.
  */
+@SuppressWarnings("PMD.TooManyMethods")
 public class StorageMigrationService {
 
     /**
-     * The string of the yml storage type
+     * Legacy file containing player names.
      */
-    public static final String YML = "yml";
+    private static final String NAMES_FILE = "names.yml";
 
     /**
-     * The current config version.
+     * Legacy file containing player times.
      */
-    private static final int CURRENT_CONFIG_VERSION = 2;
+    private static final String TIME_FILE = "time.yml";
 
     /**
-     * The {@link LoriTimePlugin} instance.
+     * Legacy subdirectory used by older flat-file storage.
+     */
+    private static final String LEGACY_DATA_DIRECTORY = "data";
+
+    /**
+     * The plugin instance.
      */
     private final LoriTimePlugin loriTime;
 
     /**
-     * The {@link WrappedLogger} instance.
-     */
-    private final WrappedLogger log;
-
-    /**
-     * The data folder of the plugin.
+     * The plugin data folder.
      */
     private final File dataFolder;
 
     /**
-     * The {@link FileManager} instance.
+     * The logger.
      */
-    private final FileManager fileManager;
+    private final WrappedLogger log;
 
     /**
-     * The {@link Configuration} instance.
-     */
-    private final Configuration config;
-
-    /**
-     * Creates a migration service.
+     * Creates a new storage migration service.
      *
-     * @param loriTime   plugin instance
-     * @param dataFolder data folder of the plugin
+     * @param loriTime   the plugin instance
+     * @param dataFolder the plugin data folder
      */
     public StorageMigrationService(final LoriTimePlugin loriTime, final File dataFolder) {
         this.loriTime = loriTime;
-        this.log = loriTime.getLoggerFactory().create(StorageMigrationService.class);
         this.dataFolder = dataFolder;
-        this.fileManager = loriTime.getFileManager();
-        this.config = loriTime.getConfig();
+        this.log = loriTime.getLoggerFactory().create(StorageMigrationService.class);
     }
 
     /**
-     * Executes pending startup migrations.
+     * Runs all storage migrations needed before normal storage loading.
      *
-     * @throws StorageException if a migration fails
+     * @throws StorageException if migration fails
      */
     public void migrateIfNecessary() throws StorageException {
-        final int currentVersion = readConfigVersion();
-        if (currentVersion >= CURRENT_CONFIG_VERSION) {
+        migrateLegacyFlatFilesIfPresent();
+        migrateSqlDatabaseIfNecessary();
+    }
+
+    /**
+     * Queues legacy flat-file storage for the normal startup backup.
+     */
+    public void addLegacyFilesToStartupBackup() {
+        final File namesFile = findLegacyFile(NAMES_FILE);
+        final File timeFile = findLegacyFile(TIME_FILE);
+        if (!namesFile.exists() && !timeFile.exists()) {
             return;
         }
 
-        final String configuredStorage = config.getString("general.storage", "sqlite").toLowerCase(Locale.ROOT);
-        if (YML.equals(configuredStorage)) {
-            migrateYmlToSqlite();
-        }
-
-        config.setValue("general.configVersion", CURRENT_CONFIG_VERSION);
+        loriTime.getFileManager().addToBackup(namesFile);
+        loriTime.getFileManager().addToBackup(timeFile);
     }
 
-    private int readConfigVersion() {
-        final Object configuredVersion = config.getObject("general.configVersion", 0);
-        if (configuredVersion instanceof Number) {
-            return ((Number) configuredVersion).intValue();
-        }
-        return 0;
-    }
-
-    private void migrateYmlToSqlite() throws StorageException {
-        final String migrationId = String.valueOf(Instant.now().toEpochMilli());
-        log.warn("Storage 'yml' is deprecated and will be migrated to SQLite now.");
-
-        final File dataDirectory = new File(dataFolder, "data");
-        if (!dataDirectory.exists() && !dataDirectory.mkdirs()) {
-            throw new StorageException("Failed to create data directory for yml migration.");
-        }
-
-        final File namesFile;
-        final File timeFile;
-        try {
-            namesFile = fileManager.getOrCreateFile(dataFolder + "/data/", "names.yml", false);
-            timeFile = fileManager.getOrCreateFile(dataFolder + "/data/", "time.yml", false);
-        } catch (final ConfigurationException e) {
-            throw new StorageException("Failed preparing yml files for migration.", e);
-        }
-
-        final Map<UUID, String> names = loadNames(namesFile);
-        final Map<UUID, Long> times = loadTimes(timeFile);
-
-        prepareSqliteFile(migrationId);
-
-        try (DatabaseStorage sqliteStorage = new DatabaseStorage(config, loriTime, dataFolder, false)) {
-            sqliteStorage.initialize();
-            sqliteStorage.setEntries(names);
-            sqliteStorage.addTimes(times);
-            config.setValue("general.storage", "sqlite");
-            archiveLegacyFile(namesFile, "names", migrationId);
-            archiveLegacyFile(timeFile, "time", migrationId);
-            log.info("Successfully migrated yml storage to SQLite. Imported " + names.size()
-                    + " names and " + times.size() + " time entries.");
-        }
-    }
-
-    private Map<UUID, String> loadNames(final File namesFile) throws StorageException {
-        final Map<UUID, String> names = new HashMap<>();
-        try {
-            final Configuration namesConfig = fileManager.getConfiguration(namesFile);
-            for (final Map.Entry<String, Object> entry : namesConfig.getAll().entrySet()) {
-                if (!(entry.getValue() instanceof String)) {
-                    continue;
-                }
+    private void migrateSqlDatabaseIfNecessary() throws StorageException {
+        final String storageMethod = loriTime.getConfig().getString("storageMethod", "sqlite");
+        switch (storageMethod.toLowerCase(Locale.ROOT)) {
+            case "mysql", "mariadb", "sqlite" -> {
+                final DatabaseStorage databaseStorage = new DatabaseStorage(loriTime.getLoggerFactory(), loriTime.getConfig(), dataFolder);
                 try {
-                    final UUID uuid = UUID.fromString((String) entry.getValue());
-                    names.put(uuid, entry.getKey());
-                } catch (final IllegalArgumentException ignored) {
-                    log.warn("Skipping malformed UUID in names.yml for key '" + entry.getKey() + "'.");
+                    new DatabaseMigrationPreflight(databaseStorage, log).migrateIfNecessary();
+                } finally {
+                    databaseStorage.shutdown();
                 }
             }
-            return names;
-        } catch (final ConfigurationException e) {
-            throw new StorageException("Failed reading names.yml for migration.", e);
+            default -> throw new StorageException("Unsupported storage method: " + storageMethod);
         }
     }
 
-    private Map<UUID, Long> loadTimes(final File timeFile) throws StorageException {
-        final Map<UUID, Long> times = new HashMap<>();
+    private void migrateLegacyFlatFilesIfPresent() throws StorageException {
+        final File namesFile = findLegacyFile(NAMES_FILE);
+        final File timeFile = findLegacyFile(TIME_FILE);
+        if (!namesFile.exists() && !timeFile.exists()) {
+            return;
+        }
+
+        log.info("Detected legacy flat-file storage. Migrating files to SQLite.");
+        loriTime.getConfig().setValue("storageMethod", "sqlite");
+
+        final DatabaseStorage databaseStorage = new DatabaseStorage(loriTime.getLoggerFactory(), loriTime.getConfig(), dataFolder);
         try {
-            final Configuration timeConfig = fileManager.getConfiguration(timeFile);
-            for (final Map.Entry<String, Object> entry : timeConfig.getAll().entrySet()) {
-                final Object value = entry.getValue();
-                if (!(value instanceof Number)) {
-                    continue;
-                }
-                try {
-                    final UUID uuid = UUID.fromString(entry.getKey());
-                    final long seconds = ((Number) value).longValue();
-                    if (seconds < 0) {
-                        log.warn("Skipping negative time value for UUID '" + uuid + "'.");
-                        continue;
-                    }
-                    times.merge(uuid, seconds, Long::sum);
-                } catch (final IllegalArgumentException ignored) {
-                    log.warn("Skipping malformed UUID key in time.yml: '" + entry.getKey() + "'.");
-                }
+            new DatabaseMigrationPreflight(databaseStorage, log).migrateIfNecessary();
+            importLegacyFiles(databaseStorage, namesFile, timeFile);
+            markMigrated(namesFile);
+            markMigrated(timeFile);
+        } finally {
+            databaseStorage.shutdown();
+        }
+    }
+
+    private File findLegacyFile(final String fileName) {
+        final File rootFile = new File(dataFolder, fileName);
+        if (rootFile.exists()) {
+            return rootFile;
+        }
+        return new File(new File(dataFolder, LEGACY_DATA_DIRECTORY), fileName);
+    }
+
+    @SuppressWarnings("PMD.CloseResource")
+    private void importLegacyFiles(final DatabaseStorage databaseStorage, final File namesFile, final File timeFile) throws StorageException {
+        final PlayerTable playerTable = new PlayerTable(databaseStorage.getTablePrefix() + "_player");
+        final ServerTable serverTable = new ServerTable(databaseStorage.getTablePrefix() + "_server");
+        final WorldTable worldTable = new WorldTable(databaseStorage.getTablePrefix() + "_world", serverTable);
+        final TimeTable timeTable = new TimeTable(databaseStorage.getTablePrefix() + "_time", playerTable, databaseStorage.getDialect());
+        final DatabaseTimeAndNameStorage storage = new DatabaseTimeAndNameStorage(
+                databaseStorage.getProvider(), playerTable, serverTable, worldTable, timeTable);
+
+        importNames(storage, namesFile);
+        importTimes(storage, timeFile);
+    }
+
+    private void importNames(final DatabaseTimeAndNameStorage storage, final File namesFile) throws StorageException {
+        if (!namesFile.exists()) {
+            return;
+        }
+        final Configuration names = new YamlConfiguration(namesFile.toString());
+        for (final Map.Entry<String, Object> entry : names.getAll().entrySet()) {
+            final Optional<UUID> uuid = parseUuid(entry.getValue());
+            if (uuid.isPresent()) {
+                storage.setEntry(uuid.get(), entry.getKey());
             }
-            return times;
-        } catch (final ConfigurationException e) {
-            throw new StorageException("Failed reading time.yml for migration.", e);
         }
     }
 
-    @SuppressWarnings("PMD.AvoidLiteralsInIfCondition")
-    private void prepareSqliteFile(final String migrationId) throws StorageException {
-        final File sqliteFile = resolveSqliteFile();
-        if (!sqliteFile.exists()) {
+    private void importTimes(final DatabaseTimeAndNameStorage storage, final File timeFile) throws StorageException {
+        if (!timeFile.exists()) {
             return;
         }
-        final long length = sqliteFile.length();
-        if (length == 0L && !sqliteFile.delete()) {
-            throw new StorageException("Could not cleanup empty sqlite database file before migration.");
+        final Configuration times = new YamlConfiguration(timeFile.toString());
+        for (final Map.Entry<String, Object> entry : times.getAll().entrySet()) {
+            final Optional<UUID> uuid = parseUuid(entry.getKey());
+            final Optional<Long> time = parseLong(entry.getValue());
+            if (uuid.isPresent() && time.isPresent()) {
+                storage.addTime(uuid.get(), time.get(), TimeEntryReason.LEGACY_IMPORT);
+            }
         }
-        if (length == 0L) {
+    }
+
+    private Optional<UUID> parseUuid(final Object value) {
+        if (value == null) {
+            return Optional.empty();
+        }
+        try {
+            return Optional.of(UUID.fromString(value.toString()));
+        } catch (final IllegalArgumentException ignored) {
+            return Optional.empty();
+        }
+    }
+
+    private Optional<Long> parseLong(final Object value) {
+        if (value instanceof final Number number) {
+            return Optional.of(number.longValue());
+        }
+        if (value == null) {
+            return Optional.empty();
+        }
+        try {
+            return Optional.of(Long.parseLong(value.toString()));
+        } catch (final NumberFormatException ignored) {
+            return Optional.empty();
+        }
+    }
+
+    private void markMigrated(final File file) throws StorageException {
+        if (!file.exists()) {
             return;
         }
-
-        final Path backupDir = dataFolder.toPath().resolve("migration-backups");
-        final Path backupFile = backupDir.resolve("sqlite-pre-yml-migration-" + migrationId + ".db");
+        final File migrated = new File(file.getParentFile(), file.getName() + ".migrated");
         try {
-            Files.createDirectories(backupDir);
-            Files.move(sqliteFile.toPath(), backupFile, StandardCopyOption.REPLACE_EXISTING);
-            log.warn("Existing sqlite database was moved to '" + backupFile + "' before yml migration.");
-        } catch (final IOException e) {
-            throw new StorageException("Could not backup existing sqlite database before migration.", e);
-        }
-    }
-
-    private File resolveSqliteFile() {
-        final String configuredPath = config.getString("sqlite.file", "loritime.db");
-        final File file = new File(configuredPath);
-        if (file.isAbsolute()) {
-            return file;
-        }
-        return new File(dataFolder, configuredPath);
-    }
-
-    private void archiveLegacyFile(final File source, final String fileType, final String migrationId) throws StorageException {
-        final Path archiveDir = dataFolder.toPath().resolve("migration-backups");
-        final Path target = archiveDir.resolve(fileType + "-yml-pre-sqlite-" + migrationId + ".yml");
-        try {
-            Files.createDirectories(archiveDir);
-            Files.move(source.toPath(), target, StandardCopyOption.REPLACE_EXISTING);
-        } catch (final IOException e) {
-            throw new StorageException("Could not archive legacy file '" + source.getName() + "' after migration.", e);
+            Files.move(file.toPath(), migrated.toPath(), StandardCopyOption.REPLACE_EXISTING);
+        } catch (final IOException ex) {
+            throw new StorageException("Could not mark legacy file as migrated: " + file.getName(), ex);
         }
     }
 }

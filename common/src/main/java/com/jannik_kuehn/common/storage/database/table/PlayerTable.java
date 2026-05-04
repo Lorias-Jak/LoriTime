@@ -1,6 +1,5 @@
 package com.jannik_kuehn.common.storage.database.table;
 
-import com.jannik_kuehn.common.storage.database.SqlDialect;
 import com.jannik_kuehn.common.utils.UuidUtil;
 
 import java.sql.Connection;
@@ -18,7 +17,7 @@ import java.util.UUID;
  * Table helper for player entries.
  */
 @SuppressWarnings("PMD.TooManyMethods")
-public final class PlayerTable {
+public class PlayerTable {
 
     /**
      * The table name.
@@ -26,39 +25,12 @@ public final class PlayerTable {
     private final String tableName;
 
     /**
-     * The {@link SqlDialect} instance.
-     */
-    private final SqlDialect dialect;
-
-    /**
      * Constructs a new instance of PlayerTable with the specified table name and SQL dialect.
      *
      * @param tableName the name of the table to be managed
-     * @param dialect   the SQL dialect to use for generating SQL statements
      */
-    public PlayerTable(final String tableName, final SqlDialect dialect) {
+    public PlayerTable(final String tableName) {
         this.tableName = tableName;
-        this.dialect = dialect;
-    }
-
-    /**
-     * Generates the SQL statement to create the table for player entries.
-     *
-     * @return the SQL CREATE TABLE statement for the player table
-     */
-    /* default */
-    public String createTableSql() {
-        return dialect.createPlayerTable(tableName);
-    }
-
-    /**
-     * Retrieves the name of the table managed by this instance.
-     *
-     * @return the name of the table as a String
-     */
-    /* default */
-    public String getTableName() {
-        return tableName;
     }
 
     /**
@@ -68,7 +40,6 @@ public final class PlayerTable {
      * @return true if the table contains at least one row, false otherwise
      * @throws SQLException if a database access error occurs
      */
-    /* default */
     public boolean hasAnyData(final Connection connection) throws SQLException {
         try (PreparedStatement statement = connection.prepareStatement(
                 "SELECT 1 FROM `" + tableName + "` LIMIT 1")) {
@@ -86,8 +57,7 @@ public final class PlayerTable {
      * @return an Optional containing the ID if found, or an empty Optional if no matching entry exists
      * @throws SQLException if an error occurs while accessing the database
      */
-    /* default */
-    Optional<Long> findIdByUuid(final Connection connection, final UUID uuid) throws SQLException {
+    public Optional<Long> findIdByUuid(final Connection connection, final UUID uuid) throws SQLException {
         try (PreparedStatement select = connection.prepareStatement(
                 "SELECT `id` FROM `" + tableName + "` WHERE `uuid` = ?")) {
             select.setBytes(1, UuidUtil.toBytes(uuid));
@@ -107,8 +77,7 @@ public final class PlayerTable {
      * @param name       the name for which the associated ID should be retrieved
      * @return an Optional containing the
      */
-    /* default */
-    Optional<Long> findIdByName(final Connection connection, final String name) throws SQLException {
+    public Optional<Long> findIdByName(final Connection connection, final String name) throws SQLException {
         try (PreparedStatement select = connection.prepareStatement(
                 "SELECT `id` FROM `" + tableName + "` WHERE `name` = ?")) {
             select.setString(1, name);
@@ -129,7 +98,6 @@ public final class PlayerTable {
      * @return an Optional containing the UUID if found, or an empty Optional if no matching entry exists
      * @throws SQLException if a database access error occurs
      */
-    /* default */
     public Optional<UUID> findUuidByName(final Connection connection, final String name) throws SQLException {
         try (PreparedStatement select = connection.prepareStatement(
                 "SELECT `uuid` FROM `" + tableName + "` WHERE `name` = ?")) {
@@ -150,7 +118,6 @@ public final class PlayerTable {
      * @param uuid       the UUID for which the associated name should be retrieved
      * @return an Optional containing the name if found, or
      */
-    /* default */
     public Optional<String> findNameByUuid(final Connection connection, final UUID uuid) throws SQLException {
         try (PreparedStatement select = connection.prepareStatement(
                 "SELECT `name` FROM `" + tableName + "` WHERE `uuid` = ?")) {
@@ -171,7 +138,6 @@ public final class PlayerTable {
      * @return a Set containing all unique names retrieved from the table
      * @throws SQLException if a database access error
      */
-    /* default */
     public Set<String> getAllNames(final Connection connection) throws SQLException {
         final Set<String> names = new HashSet<>();
         try (PreparedStatement select = connection.prepareStatement(
@@ -196,7 +162,6 @@ public final class PlayerTable {
      * @return the unique ID of the player in the database
      * @throws SQLException if a database access error occurs during the operation
      */
-    /* default */
     public long ensurePlayer(final Connection connection, final UUID uuid, final Optional<String> name) throws SQLException {
         final Optional<Long> existingId = findIdByUuid(connection, uuid);
         if (existingId.isPresent()) {
@@ -244,6 +209,11 @@ public final class PlayerTable {
             delete.setBytes(1, UuidUtil.toBytes(uuid));
             delete.executeUpdate();
         }
+    }
+
+    @Override
+    public String toString() {
+        return tableName;
     }
 
     private void releaseTakenName(final Connection connection, final String name, final UUID owner) throws SQLException {

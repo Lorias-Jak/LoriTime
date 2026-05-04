@@ -200,12 +200,12 @@
       <dependency>
         <groupId>com.github.roleplay-cauldron</groupId>
         <artifactId>spellbook-core</artifactId>
-        <version>0.0.6-alpha</version>
+        <version>0.0.9-alpha</version>
       </dependency>
       <dependency>
         <groupId>com.github.roleplay-cauldron</groupId>
         <artifactId>spellbook-database</artifactId>
-        <version>0.0.6-alpha</version>
+        <version>0.0.9-alpha</version>
       </dependency>
 
       <!-- Module specific imports -->

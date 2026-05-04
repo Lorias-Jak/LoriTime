@@ -1,7 +1,5 @@
 package com.jannik_kuehn.common.storage.database.table;
 
-import com.jannik_kuehn.common.storage.database.SqlDialect;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -25,32 +23,14 @@ public final class WorldTable {
     private final ServerTable serverTable;
 
     /**
-     * The {@link SqlDialect} instance.
-     */
-    private final SqlDialect dialect;
-
-    /**
      * Constructor
      *
-     * @param tableName the table name
+     * @param tableName   the table name
      * @param serverTable the {@link ServerTable}
-     * @param dialect the {@link SqlDialect}
      */
-    /* default */
-    public WorldTable(final String tableName, final ServerTable serverTable, final SqlDialect dialect) {
+    public WorldTable(final String tableName, final ServerTable serverTable) {
         this.tableName = tableName;
         this.serverTable = serverTable;
-        this.dialect = dialect;
-    }
-
-    /**
-     * Creation string of the sql table for the chosen dialect
-     *
-     * @return the DDL statement
-     */
-    /* default */
-    public String createTableSql() {
-        return dialect.createWorldTable(tableName, serverTableName());
     }
 
     /**
@@ -58,12 +38,11 @@ public final class WorldTable {
      * If the world does not already exist, it creates a new entry.
      *
      * @param connection the database connection to use
-     * @param server the name of the server
-     * @param world the name of the world
+     * @param server     the name of the server
+     * @param world      the name of the world
      * @return the unique identifier (ID) of the world entry
      * @throws SQLException if a database access error occurs or the world entry cannot be created
      */
-    /* default */
     public long ensureWorld(final Connection connection, final String server, final String world) throws SQLException {
         final long serverId = serverTable.ensureServer(connection, server);
         final Optional<Long> existing = findId(connection, serverId, world);
@@ -98,25 +77,5 @@ public final class WorldTable {
             }
         }
         return Optional.empty();
-    }
-
-    /**
-     * Retrieves the name of the database table associated with this instance.
-     *
-     * @return the name of the table as a {@link String}
-     */
-    /* default */
-    public String getTableName() {
-        return tableName;
-    }
-
-    /**
-     * Retrieves the name of the database table associated with the server.
-     *
-     * @return the name of the server-specific table as a {@link String}
-     */
-    /* default */
-    String serverTableName() {
-        return serverTable.getTableName();
     }
 }

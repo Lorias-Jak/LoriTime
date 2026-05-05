@@ -199,11 +199,11 @@ public abstract class PluginMessaging {
         final String name = input.readUTF();
         final String server = input.readUTF();
         final String world = input.readUTF();
-        final long startedAt = input.readLong();
-        final long stoppedAt = input.readLong();
+        final long startedAtMs = input.readLong();
+        final long stoppedAtMs = input.readLong();
         final TimeEntryReason reason = TimeEntryReason.valueOf(input.readUTF());
         loriTimePlugin.getStorage().persistSession(new PlayerSessionChunk(playerUUID, Optional.ofNullable(name),
-                server, world, startedAt, stoppedAt, reason));
+                server, world, startedAtMs, stoppedAtMs, reason));
     }
 
     private long getTime(final UUID playerUUID) {

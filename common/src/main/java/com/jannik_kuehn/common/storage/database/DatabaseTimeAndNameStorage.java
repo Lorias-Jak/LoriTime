@@ -227,8 +227,8 @@ public class DatabaseTimeAndNameStorage implements UnifiedStorage {
                 final long worldId = worldTable.ensureWorld(connection, session.server(), session.world());
                 final long playerId = playerTable.ensurePlayer(connection, session.uuid(), session.name());
                 timeTable.insertSession(connection, playerId, worldId,
-                        Instant.ofEpochMilli(session.startedAt()),
-                        Instant.ofEpochMilli(session.stoppedAt()),
+                        Instant.ofEpochMilli(session.startedAtMs()),
+                        Instant.ofEpochMilli(session.stoppedAtMs()),
                         session.reason());
             }
         } catch (final SQLException ex) {

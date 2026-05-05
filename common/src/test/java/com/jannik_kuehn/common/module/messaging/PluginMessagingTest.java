@@ -51,8 +51,8 @@ class PluginMessagingTest {
         assertEquals(Optional.of("Lorias_"), chunk.name());
         assertEquals("lobby", chunk.server());
         assertEquals("spawn", chunk.world());
-        assertEquals(1_000L, chunk.startedAt());
-        assertEquals(6_000L, chunk.stoppedAt());
+        assertEquals(1_000L, chunk.startedAtMs());
+        assertEquals(6_000L, chunk.stoppedAtMs());
         assertEquals(TimeEntryReason.PLAYER_LEAVE, chunk.reason());
     }
 

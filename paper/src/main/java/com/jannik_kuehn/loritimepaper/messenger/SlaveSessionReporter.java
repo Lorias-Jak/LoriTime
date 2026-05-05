@@ -65,15 +65,15 @@ public class SlaveSessionReporter extends PluginMessaging implements Listener, A
         }
     }
 
-    private ActiveRemoteSession context(final Player player, final long startedAt) {
+    private ActiveRemoteSession context(final Player player, final long startedAtMs) {
         return new ActiveRemoteSession(player.getUniqueId(), player.getName(), player.getServer().getName(),
-                player.getWorld().getName(), startedAt);
+                player.getWorld().getName(), startedAtMs);
     }
 
-    private void sendSession(final ActiveRemoteSession session, final long stoppedAt, final TimeEntryReason reason) {
+    private void sendSession(final ActiveRemoteSession session, final long stoppedAtMs, final TimeEntryReason reason) {
         log.debug("Reporting remote session for player " + session.uuid());
         sendPluginMessage(SLAVED_TIME_STORAGE, session.uuid(), "session", PROTOCOL_VERSION, session.name(),
-                session.server(), session.world(), session.startedAt(), stoppedAt, reason.name());
+                session.server(), session.world(), session.startedAtMs(), stoppedAtMs, reason.name());
     }
 
     @Override
@@ -87,9 +87,9 @@ public class SlaveSessionReporter extends PluginMessaging implements Listener, A
         flushSessions();
     }
 
-    private record ActiveRemoteSession(UUID uuid, String name, String server, String world, long startedAt) {
-        private ActiveRemoteSession withStartedAt(final long nextStartedAt) {
-            return new ActiveRemoteSession(uuid, name, server, world, nextStartedAt);
+    private record ActiveRemoteSession(UUID uuid, String name, String server, String world, long startedAtMs) {
+        private ActiveRemoteSession withStartedAt(final long nextStartedAtMs) {
+            return new ActiveRemoteSession(uuid, name, server, world, nextStartedAtMs);
         }
     }
 }

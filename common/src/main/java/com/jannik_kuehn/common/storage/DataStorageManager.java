@@ -10,6 +10,7 @@ import com.jannik_kuehn.common.api.storage.UnifiedStorage;
 import com.jannik_kuehn.common.exception.StorageException;
 import com.jannik_kuehn.common.storage.database.DatabaseStorage;
 import com.jannik_kuehn.common.storage.database.DatabaseTimeAndNameStorage;
+import com.jannik_kuehn.common.storage.database.table.ManualAdjustmentTable;
 import com.jannik_kuehn.common.storage.database.table.PlayerTable;
 import com.jannik_kuehn.common.storage.database.table.ServerTable;
 import com.jannik_kuehn.common.storage.database.table.TimeTable;
@@ -215,10 +216,27 @@ public class DataStorageManager {
         final ServerTable serverTable = new ServerTable(dbStorage.getTablePrefix() + "_server");
         final WorldTable worldTable = new WorldTable(dbStorage.getTablePrefix() + "_world", serverTable);
         final TimeTable timeTable = new TimeTable(dbStorage.getTablePrefix() + "_time", playerTable, dbStorage.getDialect());
+        final ManualAdjustmentTable adjustmentTable = new ManualAdjustmentTable(dbStorage.getTablePrefix() + "_time_adjustment", playerTable);
 
-        final DatabaseTimeAndNameStorage nameAndTimeStorage = new DatabaseTimeAndNameStorage(dbStorage.getProvider(), playerTable, serverTable, worldTable, timeTable);
+        final DatabaseTimeAndNameStorage nameAndTimeStorage = new DatabaseTimeAndNameStorage(dbStorage.getProvider(), playerTable,
+                serverTable, worldTable, timeTable, adjustmentTable, dbStorage.getDialect());
         this.storage = nameAndTimeStorage;
         this.accumulator = new AccumulatingTimeStorage(loriTime.getLoggerFactory().create(AccumulatingTimeStorage.class), nameAndTimeStorage);
+        runStorageCleanupIfEnabled();
+    }
+
+    private void runStorageCleanupIfEnabled() {
+        if (!loriTime.getConfig().getBoolean("storageCleanup.enabled", false)) {
+            return;
+        }
+        final long inactiveDays = loriTime.getConfig().getLong("storageCleanup.inactiveAfterDays", 365L);
+        try {
+            final int deletedRows = storage.deleteInactiveHistory(inactiveDays);
+            log.info("Storage cleanup removed " + deletedRows + " history rows for players inactive for more than "
+                    + inactiveDays + " days.");
+        } catch (final StorageException ex) {
+            log.error("Could not run storage cleanup", ex);
+        }
     }
 
     /**

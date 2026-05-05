@@ -1,10 +1,13 @@
 package com.jannik_kuehn.common.storage.database;
 
+import com.jannik_kuehn.common.api.storage.ManualTimeAdjustment;
 import com.jannik_kuehn.common.api.storage.PlayerSessionChunk;
+import com.jannik_kuehn.common.api.storage.PlayerSessionContext;
 import com.jannik_kuehn.common.api.storage.TimeEntryReason;
 import com.jannik_kuehn.common.api.storage.UnifiedStorage;
 import com.jannik_kuehn.common.exception.StorageException;
 import com.jannik_kuehn.common.storage.database.provider.LoriTimeConnectionProvider;
+import com.jannik_kuehn.common.storage.database.table.ManualAdjustmentTable;
 import com.jannik_kuehn.common.storage.database.table.PlayerTable;
 import com.jannik_kuehn.common.storage.database.table.ServerTable;
 import com.jannik_kuehn.common.storage.database.table.TimeTable;
@@ -14,6 +17,8 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.Instant;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -23,33 +28,82 @@ import java.util.UUID;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-@SuppressWarnings({"PMD.CommentRequired", "PMD.UnusedPrivateField", "PMD.TooManyMethods"})
+/**
+ * Database-backed unified storage implementation for player identity, sessions, and adjustments.
+ */
+@SuppressWarnings({"PMD.UnusedPrivateField", "PMD.TooManyMethods", "PMD.CouplingBetweenObjects"})
 public class DatabaseTimeAndNameStorage implements UnifiedStorage {
 
-    private static final String DEFAULT_SERVER_NAME = "default";
+    /**
+     * Actor label used when a legacy method does not provide explicit actor metadata.
+     */
+    private static final String SYSTEM_ACTOR = "SYSTEM";
 
-    private static final String DEFAULT_WORLD_NAME = "global";
-
+    /**
+     * Database connection provider.
+     */
     private final LoriTimeConnectionProvider provider;
 
+    /**
+     * SQL dialect used by this storage instance.
+     */
+    private final DatabaseDialect dialect;
+
+    /**
+     * Player table helper.
+     */
     private final PlayerTable playerTable;
 
+    /**
+     * Server table helper.
+     */
     private final ServerTable serverTable;
 
+    /**
+     * World table helper.
+     */
     private final WorldTable worldTable;
 
+    /**
+     * Session time table helper.
+     */
     private final TimeTable timeTable;
 
+    /**
+     * Manual adjustment table helper.
+     */
+    private final ManualAdjustmentTable adjustmentTable;
+
+    /**
+     * Lock protecting storage access while the provider is closing.
+     */
     private final ReadWriteLock poolLock;
 
+    /**
+     * Creates a database-backed unified storage instance.
+     *
+     * @param provider the connection provider.
+     * @param playerTable the player table helper.
+     * @param serverTable the server table helper.
+     * @param worldTable the world table helper.
+     * @param timeTable the time table helper.
+     * @param adjustmentTable the manual adjustment table helper.
+     * @param dialect the database dialect.
+     */
     public DatabaseTimeAndNameStorage(final LoriTimeConnectionProvider provider,
-                                      final PlayerTable playerTable, final ServerTable serverTable,
-                                      final WorldTable worldTable, final TimeTable timeTable) {
+                                      final PlayerTable playerTable,
+                                      final ServerTable serverTable,
+                                      final WorldTable worldTable,
+                                      final TimeTable timeTable,
+                                      final ManualAdjustmentTable adjustmentTable,
+                                      final DatabaseDialect dialect) {
         this.provider = provider;
+        this.dialect = dialect;
         this.playerTable = playerTable;
         this.serverTable = serverTable;
         this.worldTable = worldTable;
         this.timeTable = timeTable;
+        this.adjustmentTable = adjustmentTable;
         this.poolLock = new ReentrantReadWriteLock();
     }
 
@@ -58,7 +112,6 @@ public class DatabaseTimeAndNameStorage implements UnifiedStorage {
         Objects.requireNonNull(name);
         poolLock.readLock().lock();
         try {
-
             checkClosed();
             try (Connection connection = provider.getConnection()) {
                 return playerTable.findUuidByName(connection, name);
@@ -93,7 +146,19 @@ public class DatabaseTimeAndNameStorage implements UnifiedStorage {
         try {
             checkClosed();
             try (Connection connection = provider.getConnection()) {
-                return timeTable.sumForPlayer(connection, uniqueId);
+                final Optional<Long> playerId = playerTable.findIdByUuid(connection, uniqueId);
+                if (playerId.isEmpty()) {
+                    return OptionalLong.empty();
+                }
+                final OptionalLong sessionSum = timeTable.sumForPlayer(connection, uniqueId);
+                final OptionalLong adjustmentSum = adjustmentTable.sumForPlayer(connection, playerId.get());
+                if (sessionSum.isEmpty() && adjustmentSum.isEmpty()) {
+                    return OptionalLong.empty();
+                }
+                final long sessions = sessionSum.orElse(0L);
+                final long adjustments = adjustmentSum.orElse(0L);
+                final long total = sessions + adjustments;
+                return OptionalLong.of(total);
             }
         } catch (final SQLException ex) {
             throw new StorageException(ex);
@@ -104,15 +169,21 @@ public class DatabaseTimeAndNameStorage implements UnifiedStorage {
 
     @Override
     public void addTime(final UUID uuid, final long additionalTime, final TimeEntryReason reason) throws StorageException {
-        Objects.requireNonNull(uuid);
-        Objects.requireNonNull(reason);
+        addTime(new ManualTimeAdjustment(uuid, additionalTime, reason, SYSTEM_ACTOR));
+    }
+
+    @Override
+    public void addTime(final ManualTimeAdjustment adjustment) throws StorageException {
+        Objects.requireNonNull(adjustment);
+        Objects.requireNonNull(adjustment.playerUuid());
+        Objects.requireNonNull(adjustment.reason());
+        Objects.requireNonNull(adjustment.actorName());
         poolLock.readLock().lock();
         try {
             checkClosed();
             try (Connection connection = provider.getConnection()) {
-                final long worldId = worldTable.ensureWorld(connection, DEFAULT_SERVER_NAME, DEFAULT_WORLD_NAME);
-                final long playerId = playerTable.ensurePlayer(connection, uuid, Optional.empty());
-                timeTable.insertDuration(connection, playerId, worldId, additionalTime, reason);
+                final long playerId = playerTable.ensurePlayer(connection, adjustment.playerUuid(), Optional.empty());
+                adjustmentTable.insert(connection, playerId, adjustment);
             }
         } catch (final SQLException ex) {
             throw new StorageException(ex);
@@ -126,17 +197,62 @@ public class DatabaseTimeAndNameStorage implements UnifiedStorage {
         if (additionalTimes == null || additionalTimes.isEmpty()) {
             return;
         }
+        addAdjustments(additionalTimes.entrySet().stream()
+                .map(entry -> new ManualTimeAdjustment(entry.getKey(), entry.getValue(), reason, SYSTEM_ACTOR))
+                .toList());
+    }
+
+    @Override
+    public void addAdjustments(final List<ManualTimeAdjustment> adjustments) throws StorageException {
+        if (adjustments == null || adjustments.isEmpty()) {
+            return;
+        }
+        poolLock.readLock().lock();
+        try {
+            checkClosed();
+            try (Connection connection = provider.getConnection()) {
+                for (final ManualTimeAdjustment adjustment : adjustments) {
+                    final long playerId = playerTable.ensurePlayer(connection, adjustment.playerUuid(), Optional.empty());
+                    adjustmentTable.insert(connection, playerId, adjustment);
+                }
+            }
+        } catch (final SQLException ex) {
+            throw new StorageException(ex);
+        } finally {
+            poolLock.readLock().unlock();
+        }
+    }
+
+    @Override
+    public long startSession(final PlayerSessionContext context, final TimeEntryReason reason) throws StorageException {
+        Objects.requireNonNull(context);
         Objects.requireNonNull(reason);
         poolLock.readLock().lock();
         try {
             checkClosed();
             try (Connection connection = provider.getConnection()) {
-                final long worldId = worldTable.ensureWorld(connection, DEFAULT_SERVER_NAME, DEFAULT_WORLD_NAME);
-                for (final Map.Entry<UUID, Long> entry : additionalTimes.entrySet()) {
-                    final UUID uuid = entry.getKey();
-                    final long playerId = playerTable.ensurePlayer(connection, uuid, Optional.empty());
-                    timeTable.insertDuration(connection, playerId, worldId, entry.getValue(), reason);
-                }
+                final long worldId = worldTable.ensureWorld(connection, context.server(), context.world());
+                final long playerId = playerTable.ensurePlayer(connection, context.uuid(), context.name());
+                return timeTable.insertSession(connection, playerId, worldId,
+                        Instant.ofEpochMilli(context.startedAtMs()),
+                        Instant.ofEpochMilli(context.startedAtMs()),
+                        reason);
+            }
+        } catch (final SQLException ex) {
+            throw new StorageException(ex);
+        } finally {
+            poolLock.readLock().unlock();
+        }
+    }
+
+    @Override
+    public void updateSession(final long sessionId, final long stoppedAtMs, final TimeEntryReason reason) throws StorageException {
+        Objects.requireNonNull(reason);
+        poolLock.readLock().lock();
+        try {
+            checkClosed();
+            try (Connection connection = provider.getConnection()) {
+                timeTable.updateSession(connection, sessionId, Instant.ofEpochMilli(stoppedAtMs), reason);
             }
         } catch (final SQLException ex) {
             throw new StorageException(ex);
@@ -203,7 +319,9 @@ public class DatabaseTimeAndNameStorage implements UnifiedStorage {
         try {
             checkClosed();
             try (Connection connection = provider.getConnection()) {
-                return timeTable.getAllTotals(connection);
+                final Map<String, Long> totals = new HashMap<>(timeTable.getAllTotals(connection));
+                adjustmentTable.getAllTotals(connection).forEach((uuid, value) -> totals.merge(uuid, value, Long::sum));
+                return totals;
             }
         } catch (final SQLException ex) {
             throw new StorageException(ex);
@@ -213,8 +331,32 @@ public class DatabaseTimeAndNameStorage implements UnifiedStorage {
     }
 
     @Override
-    public void removePlayer(final UUID uniqueId) throws StorageException, SQLException {
+    public void deletePlayer(final UUID uniqueId) throws StorageException, SQLException {
         deleteUser(uniqueId);
+    }
+
+    @Override
+    public int deleteInactiveHistory(final long inactiveDays) throws StorageException {
+        if (inactiveDays < 0) {
+            return 0;
+        }
+        poolLock.readLock().lock();
+        try {
+            checkClosed();
+            try (Connection connection = provider.getConnection()) {
+                final String cutoffSql = switch (dialect) {
+                    case MYSQL, MARIADB -> "DATE_SUB(NOW(3), INTERVAL " + inactiveDays + " DAY)";
+                    case SQLITE -> "DATETIME('now', '-" + inactiveDays + " days')";
+                };
+                final int timeRows = timeTable.deleteInactiveHistory(connection, cutoffSql);
+                final int adjustmentRows = adjustmentTable.deleteInactiveHistory(connection, cutoffSql);
+                return timeRows + adjustmentRows;
+            }
+        } catch (final SQLException ex) {
+            throw new StorageException(ex);
+        } finally {
+            poolLock.readLock().unlock();
+        }
     }
 
     @Override
@@ -238,12 +380,6 @@ public class DatabaseTimeAndNameStorage implements UnifiedStorage {
         }
     }
 
-    /**
-     * Deletes a player entry by UUID.
-     *
-     * @param uuid the player UUID
-     * @throws StorageException if the deletion fails
-     */
     private void deleteUser(final UUID uuid) throws StorageException {
         if (uuid == null) {
             return;
@@ -252,6 +388,11 @@ public class DatabaseTimeAndNameStorage implements UnifiedStorage {
         try {
             checkClosed();
             try (Connection connection = provider.getConnection()) {
+                final Optional<Long> playerId = playerTable.findIdByUuid(connection, uuid);
+                if (playerId.isPresent()) {
+                    timeTable.deleteForPlayer(connection, playerId.get());
+                    adjustmentTable.deleteForPlayer(connection, playerId.get());
+                }
                 playerTable.deleteByUuid(connection, uuid);
             }
         } catch (final SQLException ex) {
@@ -272,11 +413,6 @@ public class DatabaseTimeAndNameStorage implements UnifiedStorage {
         }
     }
 
-    /**
-     * Throws an exception if the storage is already closed.
-     *
-     * @throws StorageException if the storage is closed
-     */
     private void checkClosed() throws StorageException {
         if (provider.isClosed()) {
             throw new StorageException("closed");

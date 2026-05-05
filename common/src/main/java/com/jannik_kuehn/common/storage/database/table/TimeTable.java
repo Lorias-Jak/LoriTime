@@ -8,6 +8,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
@@ -21,6 +22,7 @@ import java.util.UUID;
 /**
  * Table helper for time entries.
  */
+@SuppressWarnings("PMD.TooManyMethods")
 public final class TimeTable {
     /**
      * The table name.
@@ -109,7 +111,7 @@ public final class TimeTable {
      * @param reason     persistence reason
      * @throws SQLException if persistence fails
      */
-    public void insertSession(final Connection connection,
+    public long insertSession(final Connection connection,
                               final long playerId,
                               final long worldId,
                               final Instant join,
@@ -120,13 +122,43 @@ public final class TimeTable {
         Objects.requireNonNull(reason);
         try (PreparedStatement insert = connection.prepareStatement(
                 "INSERT INTO `" + tableName + "` (`player_id`, `world_id`, `join_time`, `leave_time`, `reason`) "
-                        + "VALUES (?, ?, ?, ?, ?)")) {
+                        + "VALUES (?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS)) {
             insert.setLong(1, playerId);
             insert.setLong(2, worldId);
             insert.setTimestamp(3, Timestamp.from(join));
             insert.setTimestamp(4, Timestamp.from(leave));
             insert.setString(5, reason.name());
             insert.executeUpdate();
+            try (ResultSet keys = insert.getGeneratedKeys()) {
+                if (keys.next()) {
+                    return keys.getLong(1);
+                }
+            }
+        }
+        throw new SQLException("Unable to insert session");
+    }
+
+    /**
+     * Updates the leave timestamp and reason for an existing session row.
+     *
+     * @param connection database connection
+     * @param sessionId  session id
+     * @param leave      leave timestamp
+     * @param reason     persistence reason
+     * @throws SQLException if update fails
+     */
+    public void updateSession(final Connection connection,
+                              final long sessionId,
+                              final Instant leave,
+                              final TimeEntryReason reason) throws SQLException {
+        Objects.requireNonNull(leave);
+        Objects.requireNonNull(reason);
+        try (PreparedStatement update = connection.prepareStatement(
+                "UPDATE `" + tableName + "` SET `leave_time` = ?, `reason` = ? WHERE `id` = ?")) {
+            update.setTimestamp(1, Timestamp.from(leave));
+            update.setString(2, reason.name());
+            update.setLong(3, sessionId);
+            update.executeUpdate();
         }
     }
 
@@ -185,6 +217,34 @@ public final class TimeTable {
             }
         }
         return totals;
+    }
+
+    /**
+     * Deletes time history for players inactive before the cutoff expression.
+     *
+     * @param connection database connection
+     * @param cutoffSql  SQL timestamp cutoff expression
+     * @return deleted rows
+     * @throws SQLException if delete fails
+     */
+    public int deleteInactiveHistory(final Connection connection, final String cutoffSql) throws SQLException {
+        return playerTable.deleteInactiveHistory(connection, tableName, cutoffSql);
+    }
+
+    /**
+     * Deletes all session rows for one player.
+     *
+     * @param connection database connection
+     * @param playerId   player id
+     * @return deleted rows
+     * @throws SQLException if delete fails
+     */
+    public int deleteForPlayer(final Connection connection, final long playerId) throws SQLException {
+        try (PreparedStatement delete = connection.prepareStatement(
+                "DELETE FROM `" + tableName + "` WHERE `player_id` = ?")) {
+            delete.setLong(1, playerId);
+            return delete.executeUpdate();
+        }
     }
 
     private boolean shouldUpdateLatest(final TimeEntryReason reason) {

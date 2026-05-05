@@ -14,7 +14,7 @@ public enum DatabaseDialect implements SqlDialect {
     MYSQL {
         @Override
         public String durationSecondsExpression(final String join, final String leave) {
-            return "CAST((" + leave + " - " + join + ") / 1000 AS INTEGER)";
+            return "TIMESTAMPDIFF(SECOND, " + join + ", " + leave + ")";
         }
     },
 
@@ -27,7 +27,7 @@ public enum DatabaseDialect implements SqlDialect {
     MARIADB {
         @Override
         public String durationSecondsExpression(final String join, final String leave) {
-            return "CAST((" + leave + " - " + join + ") / 1000 AS INTEGER)";
+            return "TIMESTAMPDIFF(SECOND, " + join + ", " + leave + ")";
         }
     },
 
@@ -39,7 +39,7 @@ public enum DatabaseDialect implements SqlDialect {
     SQLITE {
         @Override
         public String durationSecondsExpression(final String joinColumn, final String leaveColumn) {
-            return "TIMESTAMPDIFF(SECOND, " + joinColumn + ", " + leaveColumn + ")";
+            return "CAST((" + leaveColumn + " - " + joinColumn + ") / 1000 AS INTEGER)";
         }
     };
 

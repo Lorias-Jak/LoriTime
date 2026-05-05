@@ -21,6 +21,11 @@ public enum TimeEntryReason {
     MANUAL_ADJUSTMENT,
 
     /**
+     * Time was adjusted by AFK handling.
+     */
+    AFK_ADJUSTMENT,
+
+    /**
      * Player context changed (for example server/world switch).
      */
     CONTEXT_SWITCH,

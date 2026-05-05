@@ -5,6 +5,7 @@ import com.jannik_kuehn.common.LoriTimePlugin;
 import com.jannik_kuehn.common.exception.StorageException;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
@@ -43,7 +44,7 @@ public class TimeAccumulatorPaperListener implements Listener {
     public void playerJoin(final PlayerJoinEvent event) {
         final UUID uuid = event.getPlayer().getUniqueId();
         final String name = event.getPlayer().getName();
-        final String server = event.getPlayer().getServer().getName();
+        final String server = loriTimePlugin.getConfig().getString("server.name", "default");
         final String world = event.getPlayer().getWorld().getName();
         final long now = System.currentTimeMillis();
         loriTimePlugin.getScheduler().runAsyncOnce(() -> {
@@ -63,15 +64,34 @@ public class TimeAccumulatorPaperListener implements Listener {
     @EventHandler
     public void playerQuit(final PlayerQuitEvent event) {
         final UUID uuid = event.getPlayer().getUniqueId();
-        final String server = event.getPlayer().getServer().getName();
+        final long now = System.currentTimeMillis();
+        loriTimePlugin.getScheduler().runAsyncOnce(() -> {
+            try {
+                loriTimePlugin.getAccumulator().stopAccumulatingAndSaveOnlineTime(uuid, now);
+                loriTimePlugin.getPlayerConverter().removePlayerFromCache(uuid);
+            } catch (final StorageException e) {
+                log.warn("error while stopping accumulation of online time for player " + uuid, e);
+            }
+        });
+    }
+
+    /**
+     * Switches the accumulating context when a player changes worlds.
+     *
+     * @param event The {@link PlayerChangedWorldEvent} event.
+     */
+    @EventHandler
+    public void playerChangedWorld(final PlayerChangedWorldEvent event) {
+        final UUID uuid = event.getPlayer().getUniqueId();
+        final String name = event.getPlayer().getName();
+        final String server = loriTimePlugin.getConfig().getString("server.name", "default");
         final String world = event.getPlayer().getWorld().getName();
         final long now = System.currentTimeMillis();
         loriTimePlugin.getScheduler().runAsyncOnce(() -> {
             try {
-                loriTimePlugin.getAccumulator().stopAccumulatingAndSaveOnlineTime(uuid, server, world, now);
-                loriTimePlugin.getPlayerConverter().removePlayerFromCache(uuid);
+                loriTimePlugin.getAccumulator().switchContext(uuid, name, server, world, now);
             } catch (final StorageException e) {
-                log.warn("error while stopping accumulation of online time for player " + uuid, e);
+                log.warn("could not switch accumulating context for player " + uuid, e);
             }
         });
     }

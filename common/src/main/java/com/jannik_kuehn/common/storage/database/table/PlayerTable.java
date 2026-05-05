@@ -7,7 +7,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Timestamp;
 import java.sql.Types;
+import java.time.Instant;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -153,8 +155,8 @@ public class PlayerTable {
 
     /**
      * Ensures that a player with the specified UUID exists in the database. If the player exists,
-     * their name and last seen timestamp are updated as needed. If the player does not exist, they
-     * are inserted into the database with the provided UUID and, if present, the given name.
+     * their name and last seen timestamp are updated only when a name is provided. If the player
+     * does not exist, they are inserted into the database with the provided UUID and optional name.
      *
      * @param connection the database connection to use for the operation
      * @param uuid       the unique identifier of the player
@@ -169,7 +171,6 @@ public class PlayerTable {
                 releaseTakenName(connection, name.get(), uuid);
                 updatePlayerName(connection, existingId.get(), name.get());
             }
-            updateLastSeen(connection, existingId.get());
             return existingId.get();
         }
 
@@ -178,13 +179,15 @@ public class PlayerTable {
         }
 
         try (PreparedStatement insert = connection.prepareStatement(
-                "INSERT INTO `" + tableName + "` (`uuid`, `name`, `last_seen`) VALUES (?, ?, CURRENT_TIMESTAMP)",
+                "INSERT INTO `" + tableName + "` (`uuid`, `name`, `last_seen`) VALUES (?, ?, ?)",
                 Statement.RETURN_GENERATED_KEYS)) {
             insert.setBytes(1, UuidUtil.toBytes(uuid));
             if (name.isPresent()) {
                 insert.setString(2, name.get());
+                insert.setTimestamp(3, Timestamp.from(Instant.now()));
             } else {
                 insert.setNull(2, Types.VARCHAR);
+                insert.setNull(3, Types.TIMESTAMP);
             }
             insert.executeUpdate();
             try (ResultSet keys = insert.getGeneratedKeys()) {
@@ -208,6 +211,24 @@ public class PlayerTable {
                 "DELETE FROM `" + tableName + "` WHERE `uuid` = ?")) {
             delete.setBytes(1, UuidUtil.toBytes(uuid));
             delete.executeUpdate();
+        }
+    }
+
+    /**
+     * Deletes history rows owned by players inactive before the cutoff expression.
+     *
+     * @param connection       database connection
+     * @param historyTableName history table name
+     * @param cutoffSql        SQL timestamp cutoff expression
+     * @return deleted rows
+     * @throws SQLException if delete fails
+     */
+    public int deleteInactiveHistory(final Connection connection, final String historyTableName, final String cutoffSql)
+            throws SQLException {
+        try (PreparedStatement delete = connection.prepareStatement(
+                "DELETE FROM `" + historyTableName + "` WHERE `player_id` IN ("
+                        + "SELECT `id` FROM `" + tableName + "` WHERE `last_seen` IS NOT NULL AND `last_seen` < " + cutoffSql + ")")) {
+            return delete.executeUpdate();
         }
     }
 
@@ -243,11 +264,4 @@ public class PlayerTable {
         }
     }
 
-    private void updateLastSeen(final Connection connection, final long playerId) throws SQLException {
-        try (PreparedStatement update = connection.prepareStatement(
-                "UPDATE `" + tableName + "` SET `last_seen` = CURRENT_TIMESTAMP WHERE `id` = ?")) {
-            update.setLong(1, playerId);
-            update.executeUpdate();
-        }
-    }
 }

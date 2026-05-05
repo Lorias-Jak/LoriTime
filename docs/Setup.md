@@ -38,8 +38,9 @@ You **should** use MultiSetup if:
 - You can now edit the configuration file and localization if needed.
 ### 3. Configure the configs
 - It's important that you configure the configs on its own. You can nearly copy-paste the configuration per server. Not every Parameter is used on Proxy or on the subserver.
-- Set the Proxy `multiSetup.enabled` to `true` and the `multiSetup.mode` to `master`
-- Set the Sub-Server `multiSetup.enabled` to `true` and the `multiSetup.mode` to `slave`
+- Set the Proxy `multiSetup.mode` to `master`
+- Set each Paper/Folia Sub-Server `multiSetup.mode` to `slave`
+- Set each Paper/Folia Sub-Server `server.name` to the backend server name used by the proxy
 ### 4. start your server again.
 - The plugin should now load normally and you can enjoy LoriTime!
 
@@ -52,11 +53,7 @@ You **should** use MultiSetup if:
 ##############
 multiSetup:
 
-  # If true, the plugin will be enabled for multiple server setup.
-  # Only activate and set on master on proxy-server, use the slave mode on sub-servers.
-  enabled: true
-
-  # Options to set: "master", "slave".
+  # Options to set: "standalone", "master", "slave".
   mode: 'master'
 ```
 
@@ -71,12 +68,13 @@ multiSetup:
 ##############
 multiSetup:
 
-  # If true, the plugin will be enabled for multiple server setup.
-  # Only activate and set on master on proxy-server, use the slave mode on sub-servers.
-  enabled: true
-
-  # Options to set: "master", "slave".
+  # Options to set: "standalone", "master", "slave".
   mode: 'slave'
+
+server:
+  # Logical server name used in session context.
+  # In a proxy network this should match the backend server name.
+  name: 'survival-1'
 ```
 
 </details>

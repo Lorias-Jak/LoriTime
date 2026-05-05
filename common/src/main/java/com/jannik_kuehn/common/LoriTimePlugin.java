@@ -37,8 +37,7 @@ import java.util.Set;
 /**
  * The {@link LoriTimePlugin} is the main class of the plugin.
  */
-@SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.ConfusingTernary",
-        "PMD.AssignmentToNonFinalStatic", "PMD.CouplingBetweenObjects"})
+@SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.AssignmentToNonFinalStatic", "PMD.CouplingBetweenObjects"})
 public class LoriTimePlugin {
     /**
      * The {@link LoriTimePlugin} instance.
@@ -199,13 +198,12 @@ public class LoriTimePlugin {
     }
 
     private String getServerModeFromConfig() {
-        final String serverMode;
-        if (!isMultiSetupEnabled()) {
-            serverMode = StorageMode.STANDALONE.configValue();
-        } else {
-            serverMode = config.getString("multiSetup.mode", "master");
+        try {
+            return StorageMode.parse(config.getString("multiSetup.mode", StorageMode.STANDALONE.configValue())).configValue();
+        } catch (final IllegalArgumentException ex) {
+            log.warn("Invalid multiSetup.mode configured, falling back to standalone.", ex);
+            return StorageMode.STANDALONE.configValue();
         }
-        return serverMode;
     }
 
     /**
@@ -223,7 +221,7 @@ public class LoriTimePlugin {
      * @return {@code true} if the plugin is disabled, otherwise {@code false}.
      */
     public boolean isMultiSetupEnabled() {
-        return config.getBoolean("multiSetup.enabled", false);
+        return !StorageMode.STANDALONE.configValue().equalsIgnoreCase(getServerModeFromConfig());
     }
 
     /**

@@ -5,6 +5,7 @@ import com.jannik_kuehn.common.LoriTimePlugin;
 import com.jannik_kuehn.common.exception.StorageException;
 import net.md_5.bungee.api.event.PlayerDisconnectEvent;
 import net.md_5.bungee.api.event.PostLoginEvent;
+import net.md_5.bungee.api.event.ServerConnectedEvent;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.event.EventHandler;
 
@@ -43,14 +44,32 @@ public class TimeAccumulatorBungeeListener implements Listener {
     public void onPostLogin(final PostLoginEvent event) {
         final UUID uuid = event.getPlayer().getUniqueId();
         final String name = event.getPlayer().getName();
-        final String server = "default";
-        final String world = "global";
         final long now = System.currentTimeMillis();
         loriTimePlugin.getScheduler().runAsyncOnce(() -> {
             try {
-                loriTimePlugin.getAccumulator().startAccumulating(uuid, name, server, world, now);
+                loriTimePlugin.getAccumulator().startAccumulating(uuid, name, "default", "global", now);
             } catch (final StorageException ex) {
                 log.warn("could not start accumulating online time for player " + uuid, ex);
+            }
+        });
+    }
+
+    /**
+     * Switches the accumulating context when a player changes backend servers.
+     *
+     * @param event The {@link ServerConnectedEvent} event.
+     */
+    @EventHandler
+    public void onServerConnected(final ServerConnectedEvent event) {
+        final UUID uuid = event.getPlayer().getUniqueId();
+        final String name = event.getPlayer().getName();
+        final String server = event.getServer().getInfo().getName();
+        final long now = System.currentTimeMillis();
+        loriTimePlugin.getScheduler().runAsyncOnce(() -> {
+            try {
+                loriTimePlugin.getAccumulator().switchContext(uuid, name, server, "global", now);
+            } catch (final StorageException ex) {
+                log.warn("could not switch accumulating context for player " + uuid, ex);
             }
         });
     }
@@ -63,12 +82,10 @@ public class TimeAccumulatorBungeeListener implements Listener {
     @EventHandler
     public void onDisconnect(final PlayerDisconnectEvent event) {
         final UUID uuid = event.getPlayer().getUniqueId();
-        final String server = "default";
-        final String world = "global";
         final long now = System.currentTimeMillis();
         loriTimePlugin.getScheduler().runAsyncOnce(() -> {
             try {
-                loriTimePlugin.getAccumulator().stopAccumulatingAndSaveOnlineTime(uuid, server, world, now);
+                loriTimePlugin.getAccumulator().stopAccumulatingAndSaveOnlineTime(uuid, now);
                 loriTimePlugin.getPlayerConverter().removePlayerFromCache(uuid);
             } catch (final StorageException ex) {
                 log.warn("error while stopping accumulation of online time for player " + uuid, ex);

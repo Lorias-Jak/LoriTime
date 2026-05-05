@@ -6,6 +6,7 @@ import com.jannik_kuehn.common.exception.StorageException;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.connection.DisconnectEvent;
 import com.velocitypowered.api.event.connection.PostLoginEvent;
+import com.velocitypowered.api.event.player.ServerConnectedEvent;
 
 import java.util.UUID;
 
@@ -42,14 +43,32 @@ public class TimeAccumulatorVelocityListener {
     public void onPostLogin(final PostLoginEvent event) {
         final UUID uuid = event.getPlayer().getUniqueId();
         final String name = event.getPlayer().getUsername();
-        final String server = "default";
-        final String world = "global";
         final long now = System.currentTimeMillis();
         loriTimePlugin.getScheduler().runAsyncOnce(() -> {
             try {
-                loriTimePlugin.getAccumulator().startAccumulating(uuid, name, server, world, now);
+                loriTimePlugin.getAccumulator().startAccumulating(uuid, name, "default", "global", now);
             } catch (final StorageException ex) {
                 log.warn("could not start accumulating online time for player " + uuid, ex);
+            }
+        });
+    }
+
+    /**
+     * Switches the accumulating context when a player changes backend servers.
+     *
+     * @param event The {@link ServerConnectedEvent} event.
+     */
+    @Subscribe
+    public void onServerConnected(final ServerConnectedEvent event) {
+        final UUID uuid = event.getPlayer().getUniqueId();
+        final String name = event.getPlayer().getUsername();
+        final String server = event.getServer().getServerInfo().getName();
+        final long now = System.currentTimeMillis();
+        loriTimePlugin.getScheduler().runAsyncOnce(() -> {
+            try {
+                loriTimePlugin.getAccumulator().switchContext(uuid, name, server, "global", now);
+            } catch (final StorageException ex) {
+                log.warn("could not switch accumulating context for player " + uuid, ex);
             }
         });
     }
@@ -62,12 +81,10 @@ public class TimeAccumulatorVelocityListener {
     @Subscribe
     public void onDisconnect(final DisconnectEvent event) {
         final UUID uuid = event.getPlayer().getUniqueId();
-        final String server = "default";
-        final String world = "global";
         final long now = System.currentTimeMillis();
         loriTimePlugin.getScheduler().runAsyncOnce(() -> {
             try {
-                loriTimePlugin.getAccumulator().stopAccumulatingAndSaveOnlineTime(uuid, server, world, now);
+                loriTimePlugin.getAccumulator().stopAccumulatingAndSaveOnlineTime(uuid, now);
                 loriTimePlugin.getPlayerConverter().removePlayerFromCache(uuid);
             } catch (final StorageException ex) {
                 log.warn("error while stopping accumulation of online time for player " + uuid, ex);

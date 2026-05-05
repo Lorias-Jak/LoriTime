@@ -2,6 +2,7 @@ package com.jannik_kuehn.common.storage;
 
 import com.github.roleplaycauldron.spellbook.core.logger.WrappedLogger;
 import com.jannik_kuehn.common.LoriTimePlugin;
+import com.jannik_kuehn.common.api.storage.PlayerSessionChunk;
 import com.jannik_kuehn.common.api.storage.TimeEntryReason;
 import com.jannik_kuehn.common.config.Configuration;
 import com.jannik_kuehn.common.config.YamlConfiguration;
@@ -9,6 +10,7 @@ import com.jannik_kuehn.common.exception.StorageException;
 import com.jannik_kuehn.common.storage.database.DatabaseStorage;
 import com.jannik_kuehn.common.storage.database.DatabaseTimeAndNameStorage;
 import com.jannik_kuehn.common.storage.database.migration.DatabaseMigrationPreflight;
+import com.jannik_kuehn.common.storage.database.table.ManualAdjustmentTable;
 import com.jannik_kuehn.common.storage.database.table.PlayerTable;
 import com.jannik_kuehn.common.storage.database.table.ServerTable;
 import com.jannik_kuehn.common.storage.database.table.TimeTable;
@@ -145,8 +147,9 @@ public class StorageMigrationService {
         final ServerTable serverTable = new ServerTable(databaseStorage.getTablePrefix() + "_server");
         final WorldTable worldTable = new WorldTable(databaseStorage.getTablePrefix() + "_world", serverTable);
         final TimeTable timeTable = new TimeTable(databaseStorage.getTablePrefix() + "_time", playerTable, databaseStorage.getDialect());
+        final ManualAdjustmentTable adjustmentTable = new ManualAdjustmentTable(databaseStorage.getTablePrefix() + "_time_adjustment", playerTable);
         final DatabaseTimeAndNameStorage storage = new DatabaseTimeAndNameStorage(
-                databaseStorage.getProvider(), playerTable, serverTable, worldTable, timeTable);
+                databaseStorage.getProvider(), playerTable, serverTable, worldTable, timeTable, adjustmentTable, databaseStorage.getDialect());
 
         importNames(storage, namesFile);
         importTimes(storage, timeFile);
@@ -174,7 +177,9 @@ public class StorageMigrationService {
             final Optional<UUID> uuid = parseUuid(entry.getKey());
             final Optional<Long> time = parseLong(entry.getValue());
             if (uuid.isPresent() && time.isPresent()) {
-                storage.addTime(uuid.get(), time.get(), TimeEntryReason.LEGACY_IMPORT);
+                final long now = System.currentTimeMillis();
+                storage.persistSession(new PlayerSessionChunk(uuid.get(), Optional.empty(), "default", "global",
+                        now - time.get() * 1000L, now, TimeEntryReason.LEGACY_IMPORT));
             }
         }
     }

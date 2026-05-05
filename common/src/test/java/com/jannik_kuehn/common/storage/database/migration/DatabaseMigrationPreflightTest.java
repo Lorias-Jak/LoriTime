@@ -41,7 +41,7 @@ class DatabaseMigrationPreflightTest {
         migrate();
 
         try (Connection connection = openSqlite()) {
-            final DatabaseSnapshot expected = new DatabaseSnapshot(2, false, false, false, false, false, 0, 0, null, null);
+            final DatabaseSnapshot expected = new DatabaseSnapshot(2, false, false, false, false, false, false, 0, 0, null, null);
             assertEquals(expected, snapshot(connection), "versioned databases should use the update path");
         }
     }
@@ -70,7 +70,7 @@ class DatabaseMigrationPreflightTest {
         migrate();
 
         try (Connection connection = openSqlite()) {
-            final DatabaseSnapshot expected = new DatabaseSnapshot(2, false, true, true, true, true, 1, 1, "LEGACY_IMPORT", "global");
+            final DatabaseSnapshot expected = new DatabaseSnapshot(2, false, true, true, true, true, true, 1, 1, "LEGACY_IMPORT", "global");
             assertEquals(expected, snapshot(connection), "legacy SQL storage should migrate to the version 2 schema");
         }
     }
@@ -80,7 +80,7 @@ class DatabaseMigrationPreflightTest {
         migrate();
 
         try (Connection connection = openSqlite()) {
-            final DatabaseSnapshot expected = new DatabaseSnapshot(2, false, true, true, true, true, 0, 0, null, "global");
+            final DatabaseSnapshot expected = new DatabaseSnapshot(2, false, true, true, true, true, true, 0, 0, null, "global");
             assertEquals(expected, snapshot(connection), "fresh databases should run first startup schema creation");
         }
     }
@@ -156,6 +156,7 @@ class DatabaseMigrationPreflightTest {
         final boolean serverTableExists = tableExists(connection, TABLE_PREFIX + "_server");
         final boolean worldTableExists = tableExists(connection, TABLE_PREFIX + "_world");
         final boolean timeTableExists = tableExists(connection, TABLE_PREFIX + "_time");
+        final boolean adjustmentTableExists = tableExists(connection, TABLE_PREFIX + "_time_adjustment");
         return new DatabaseSnapshot(
                 maxVersion(connection),
                 tableExists(connection, TABLE_PREFIX),
@@ -163,6 +164,7 @@ class DatabaseMigrationPreflightTest {
                 serverTableExists,
                 worldTableExists,
                 timeTableExists,
+                adjustmentTableExists,
                 countRows(connection, TABLE_PREFIX + "_player"),
                 countRows(connection, TABLE_PREFIX + "_time"),
                 timeTableExists ? singleString(connection, "SELECT `reason` FROM `" + TABLE_PREFIX + "_time`") : null,
@@ -176,6 +178,7 @@ class DatabaseMigrationPreflightTest {
             boolean serverTableExists,
             boolean worldTableExists,
             boolean timeTableExists,
+            boolean adjustmentTableExists,
             int players,
             int timeEntries,
             String reason,

@@ -38,21 +38,55 @@ LoriTime has three storage responsibility modes:
 | `master` | The instance owns canonical storage for a multi-setup and answers slave read requests. |
 | `slave` | The instance sends session writes to a master and keeps a local read cache for local consumers. |
 
-If `multiSetup.enabled` is `false`, LoriTime runs as `standalone`. If `multiSetup.enabled` is `true`, `multiSetup.mode` must be one of `standalone`, `master`, or `slave`.
+`multiSetup.mode` is the authoritative setting. The default is `standalone`.
+
+```yml
+multiSetup:
+  mode: 'standalone'
+```
 
 Modes describe storage responsibility only. Platform modules decide what features they can provide in that mode.
 
 ## Platform Behavior
 
-Paper and Folia-compatible servers can provide player name, server, and world context for session rows. They are also the only supported target for PlaceholderAPI placeholders.
+| Platform | `standalone` | `master` | `slave` | Context source |
+|----------|--------------|----------|---------|----------------|
+| Paper/Folia | Supported | Supported | Supported | Configured server name plus Bukkit world |
+| Velocity | Supported | Supported | Not recommended | Backend server name plus `global` world |
+| Bungee | Supported | Supported | Not recommended | Backend server name plus `global` world |
 
-Velocity and Bungee can run as `standalone` or `master`, but they cannot provide PlaceholderAPI placeholders because PlaceholderAPI is not a proxy plugin. When a proxy writes session rows without world context, LoriTime stores them in the fallback scope:
+Paper and Folia-compatible servers can provide player name, configured server context, and world context for session rows. Set the logical server name on every Paper/Folia instance:
 
-- server: `default`
+```yml
+server:
+  name: 'survival-1'
+```
+
+In a proxy network, this value should match the backend server name used by the proxy. The world value is read from the player's current Bukkit world.
+
+Velocity and Bungee can derive backend server names from proxy server-switch events. Proxies do not know Bukkit worlds, so they store proxy-written rows with:
+
+- server: backend server name
 - world: `global`
 
-In a multi-setup, the slave servers are the instances that need placeholders. The master owns canonical storage; it does not need PlaceholderAPI for slave placeholder values.
+In a multi-setup, Paper/Folia slave servers report their configured server name and current world to the master. This is the most precise setup for PlaceholderAPI and per-world time.
 
-## Placeholder TODO
+## Session Context Updates
 
-Paper/Folia slave placeholder support is intentionally deferred in the unified storage refactor. The placeholder integration still needs to be updated to read from the slave read cache and to return deterministic values on cache misses while requesting a refresh from the master.
+Paper/Folia session context changes when the player's effective world changes. LoriTime ignores duplicate context events when the server and world did not change.
+
+Velocity and Bungee session context changes when the player connects to a different backend server.
+
+Flush and stop operations update the active session row so a crash preserves time up to the latest flush without splitting a continuous session into many rows.
+
+## Storage Cleanup
+
+Storage cleanup is disabled by default. When enabled, LoriTime deletes old time history for inactive players but keeps the player identity row.
+
+```yml
+storageCleanup:
+  enabled: false
+  inactiveAfterDays: 365
+```
+
+Cleanup removes session rows and manual adjustment rows for players whose activity timestamp is older than the configured threshold.

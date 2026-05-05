@@ -88,6 +88,18 @@ public final class SQLiteMigration {
                                 + ")"
                 )
                 .addFirstStartupQuery(
+                        "CREATE TABLE IF NOT EXISTS `" + tablePrefix + "_time_adjustment` ("
+                                + "`id` INTEGER PRIMARY KEY AUTOINCREMENT,"
+                                + "`player_id` INTEGER NOT NULL,"
+                                + "`amount_seconds` INTEGER NOT NULL,"
+                                + "`reason` TEXT NOT NULL DEFAULT 'MANUAL_ADJUSTMENT',"
+                                + "`actor_uuid` BLOB NULL,"
+                                + "`actor_name` TEXT NOT NULL,"
+                                + "`created_at` TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,"
+                                + "FOREIGN KEY (`player_id`) REFERENCES `" + tablePrefix + "_player`(`id`) ON DELETE CASCADE"
+                                + ")"
+                )
+                .addFirstStartupQuery(
                         "CREATE TABLE IF NOT EXISTS `" + tablePrefix + "_version` ("
                                 + "`version_no` INTEGER NOT NULL,"
                                 + "`applied_at` TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP"
@@ -100,6 +112,14 @@ public final class SQLiteMigration {
                 .addFirstStartupQuery(
                         "CREATE INDEX IF NOT EXISTS `idx_" + tablePrefix + "_time_world` "
                                 + "ON `" + tablePrefix + "_time` (`world_id`)"
+                )
+                .addFirstStartupQuery(
+                        "CREATE INDEX IF NOT EXISTS `idx_" + tablePrefix + "_adjustment_player` "
+                                + "ON `" + tablePrefix + "_time_adjustment` (`player_id`)"
+                )
+                .addFirstStartupQuery(
+                        "CREATE INDEX IF NOT EXISTS `idx_" + tablePrefix + "_adjustment_created` "
+                                + "ON `" + tablePrefix + "_time_adjustment` (`created_at`)"
                 )
                 .addFirstStartupQuery(
                         "CREATE INDEX IF NOT EXISTS `idx_" + tablePrefix + "_version_no` "
@@ -152,6 +172,18 @@ public final class SQLiteMigration {
                                 + ")"
                 )
                 .addUnconditionalQuery(
+                        "CREATE TABLE IF NOT EXISTS `" + tablePrefix + "_time_adjustment` ("
+                                + "`id` INTEGER PRIMARY KEY AUTOINCREMENT,"
+                                + "`player_id` INTEGER NOT NULL,"
+                                + "`amount_seconds` INTEGER NOT NULL,"
+                                + "`reason` TEXT NOT NULL DEFAULT 'MANUAL_ADJUSTMENT',"
+                                + "`actor_uuid` BLOB NULL,"
+                                + "`actor_name` TEXT NOT NULL,"
+                                + "`created_at` TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,"
+                                + "FOREIGN KEY (`player_id`) REFERENCES `" + tablePrefix + "_player`(`id`) ON DELETE CASCADE"
+                                + ")"
+                )
+                .addUnconditionalQuery(
                         "CREATE TABLE IF NOT EXISTS `" + tablePrefix + "_version` ("
                                 + "`version_no` INTEGER NOT NULL,"
                                 + "`applied_at` TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP"
@@ -164,6 +196,14 @@ public final class SQLiteMigration {
                 .addUnconditionalQuery(
                         "CREATE INDEX IF NOT EXISTS `idx_" + tablePrefix + "_time_world` "
                                 + "ON `" + tablePrefix + "_time` (`world_id`)"
+                )
+                .addUnconditionalQuery(
+                        "CREATE INDEX IF NOT EXISTS `idx_" + tablePrefix + "_adjustment_player` "
+                                + "ON `" + tablePrefix + "_time_adjustment` (`player_id`)"
+                )
+                .addUnconditionalQuery(
+                        "CREATE INDEX IF NOT EXISTS `idx_" + tablePrefix + "_adjustment_created` "
+                                + "ON `" + tablePrefix + "_time_adjustment` (`created_at`)"
                 )
                 .addUnconditionalQuery(
                         "CREATE INDEX IF NOT EXISTS `idx_" + tablePrefix + "_version_no` "

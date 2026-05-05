@@ -30,7 +30,7 @@ class AccumulatingTimeStorageTest {
         final AccumulatingTimeStorage accumulator = accumulator(storage);
 
         accumulator.startAccumulating(PLAYER, "Lorias_", "lobby", "spawn", 1_000L);
-        accumulator.stopAccumulatingAndSaveOnlineTime(PLAYER, "lobby", "spawn", 6_000L, TimeEntryReason.PLAYER_LEAVE);
+        accumulator.stopAccumulatingAndSaveOnlineTime(PLAYER, 6_000L, TimeEntryReason.PLAYER_LEAVE);
 
         assertEquals(1, storage.sessions.size());
         final PlayerSessionChunk chunk = storage.sessions.getFirst();
@@ -52,13 +52,12 @@ class AccumulatingTimeStorageTest {
 
         accumulator.startAccumulating(PLAYER, "Lorias_", "lobby", "spawn", start);
         accumulator.flushOnlineTimeCache();
-        accumulator.stopAccumulatingAndSaveOnlineTime(PLAYER, "lobby", "spawn", System.currentTimeMillis() + 2_000L,
+        accumulator.stopAccumulatingAndSaveOnlineTime(PLAYER, System.currentTimeMillis() + 2_000L,
                 TimeEntryReason.PLAYER_LEAVE);
 
-        assertEquals(2, storage.sessions.size());
-        assertEquals(TimeEntryReason.AUTO_FLUSH, storage.sessions.get(0).reason());
-        assertTrue(storage.sessions.get(0).durationSeconds() >= 4L);
-        assertEquals(TimeEntryReason.PLAYER_LEAVE, storage.sessions.get(1).reason());
+        assertEquals(1, storage.sessions.size());
+        assertEquals(TimeEntryReason.PLAYER_LEAVE, storage.sessions.get(0).reason());
+        assertTrue(storage.sessions.get(0).durationSeconds() >= 6L);
     }
 
     @Test
@@ -81,11 +80,11 @@ class AccumulatingTimeStorageTest {
 
         accumulator.startAccumulating(PLAYER, "Lorias_", "lobby", "spawn", 10_000L);
         accumulator.addTime(PLAYER, 5L, TimeEntryReason.MANUAL_ADJUSTMENT);
-        accumulator.stopAccumulatingAndSaveOnlineTime(PLAYER, "lobby", "spawn", 20_000L, TimeEntryReason.PLAYER_LEAVE);
+        accumulator.stopAccumulatingAndSaveOnlineTime(PLAYER, 20_000L, TimeEntryReason.PLAYER_LEAVE);
 
         assertEquals(1, storage.sessions.size());
-        assertEquals(15L, storage.sessions.getFirst().durationSeconds());
-        assertTrue(storage.directWrites.isEmpty());
+        assertEquals(10L, storage.sessions.getFirst().durationSeconds());
+        assertEquals(5L, storage.adjustments.get(PLAYER));
     }
 
     @Test
@@ -95,7 +94,7 @@ class AccumulatingTimeStorageTest {
 
         accumulator.addTime(PLAYER, 5L, TimeEntryReason.MANUAL_ADJUSTMENT);
 
-        assertEquals(5L, storage.directWrites.get(PLAYER));
+        assertEquals(5L, storage.adjustments.get(PLAYER));
         assertEquals(TimeEntryReason.MANUAL_ADJUSTMENT, storage.directWriteReasons.getFirst());
     }
 
@@ -106,7 +105,7 @@ class AccumulatingTimeStorageTest {
 
         accumulator.startAccumulating(PLAYER, "Lorias_", "lobby", "spawn", 1_000L);
         accumulator.switchContext(PLAYER, "Lorias_", "survival", "nether", 4_000L);
-        accumulator.stopAccumulatingAndSaveOnlineTime(PLAYER, "survival", "nether", 9_000L, TimeEntryReason.PLAYER_LEAVE);
+        accumulator.stopAccumulatingAndSaveOnlineTime(PLAYER, 9_000L, TimeEntryReason.PLAYER_LEAVE);
 
         assertEquals(2, storage.sessions.size());
         assertEquals("lobby", storage.sessions.get(0).server());
@@ -118,6 +117,21 @@ class AccumulatingTimeStorageTest {
         assertEquals(5L, storage.sessions.get(1).durationSeconds());
     }
 
+    @Test
+    void duplicateContextSwitchDoesNotCreateNewSession() throws StorageException {
+        final FakeUnifiedStorage storage = new FakeUnifiedStorage();
+        final AccumulatingTimeStorage accumulator = accumulator(storage);
+
+        accumulator.startAccumulating(PLAYER, "Lorias_", "lobby", "spawn", 1_000L);
+        accumulator.switchContext(PLAYER, "Lorias_", "lobby", "spawn", 4_000L);
+        accumulator.stopAccumulatingAndSaveOnlineTime(PLAYER, 9_000L, TimeEntryReason.PLAYER_LEAVE);
+
+        assertEquals(1, storage.sessions.size());
+        assertEquals("lobby", storage.sessions.getFirst().server());
+        assertEquals("spawn", storage.sessions.getFirst().world());
+        assertEquals(8L, storage.sessions.getFirst().durationSeconds());
+    }
+
     private AccumulatingTimeStorage accumulator(final FakeUnifiedStorage storage) {
         return new AccumulatingTimeStorage(mock(WrappedLogger.class), storage);
     }
@@ -126,7 +140,7 @@ class AccumulatingTimeStorageTest {
 
         private final List<PlayerSessionChunk> sessions = new ArrayList<>();
 
-        private final Map<UUID, Long> directWrites = new java.util.HashMap<>();
+        private final Map<UUID, Long> adjustments = new java.util.HashMap<>();
 
         private final List<TimeEntryReason> directWriteReasons = new ArrayList<>();
 
@@ -157,20 +171,47 @@ class AccumulatingTimeStorageTest {
 
         @Override
         public OptionalLong getTime(final UUID uniqueId) {
-            return OptionalLong.of(directWrites.getOrDefault(uniqueId, 0L)
+            return OptionalLong.of(adjustments.getOrDefault(uniqueId, 0L)
                     + sessions.stream().filter(session -> session.uuid().equals(uniqueId))
                     .mapToLong(PlayerSessionChunk::durationSeconds).sum());
         }
 
         @Override
         public void addTime(final UUID uuid, final long additionalTime, final TimeEntryReason reason) {
-            directWrites.merge(uuid, additionalTime, Long::sum);
+            adjustments.merge(uuid, additionalTime, Long::sum);
             directWriteReasons.add(reason);
+        }
+
+        @Override
+        public void addTime(final ManualTimeAdjustment adjustment) {
+            adjustments.merge(adjustment.playerUuid(), adjustment.amountSeconds(), Long::sum);
+            directWriteReasons.add(adjustment.reason());
         }
 
         @Override
         public void addTimes(final Map<UUID, Long> additionalTimes, final TimeEntryReason reason) {
             additionalTimes.forEach((uuid, time) -> addTime(uuid, time, reason));
+        }
+
+        @Override
+        public void addAdjustments(final List<ManualTimeAdjustment> adjustments) {
+            adjustments.forEach(this::addTime);
+        }
+
+        @Override
+        public long startSession(final PlayerSessionContext context, final TimeEntryReason reason) {
+            final PlayerSessionChunk session = new PlayerSessionChunk(context.uuid(), context.name(), context.server(), context.world(),
+                    context.startedAtMs(), context.startedAtMs(), reason);
+            sessions.add(session);
+            return sessions.size() - 1L;
+        }
+
+        @Override
+        public void updateSession(final long sessionId, final long stoppedAtMs, final TimeEntryReason reason) {
+            final int index = Math.toIntExact(sessionId);
+            final PlayerSessionChunk previous = sessions.get(index);
+            sessions.set(index, new PlayerSessionChunk(previous.uuid(), previous.name(), previous.server(), previous.world(),
+                    previous.startedAtMs(), stoppedAtMs, reason));
         }
 
         @Override
@@ -184,8 +225,13 @@ class AccumulatingTimeStorageTest {
         }
 
         @Override
-        public void removePlayer(final UUID uniqueId) throws SQLException {
-            directWrites.remove(uniqueId);
+        public void deletePlayer(final UUID uniqueId) throws SQLException {
+            adjustments.remove(uniqueId);
+        }
+
+        @Override
+        public int deleteInactiveHistory(final long inactiveDays) {
+            return 0;
         }
 
         @Override

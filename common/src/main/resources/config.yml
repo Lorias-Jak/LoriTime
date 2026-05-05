@@ -22,6 +22,16 @@ general:
   # The unit is seconds.
   saveInterval: 30
 
+##########
+# Server #
+##########
+server:
+
+  # Logical name of this Paper/Folia server for session context.
+  # In a proxy network, set this to the backend server name, e.g. "survival-1".
+  # Proxy platforms derive this from the connected backend server instead.
+  name: 'default'
+
 ###########
 # Updater #
 ###########
@@ -127,16 +137,24 @@ data:
 ##############
 multiSetup:
 
-  # If true, this instance uses the configured multi-setup mode.
-  # If false, the instance runs as standalone even if mode is set differently.
-  enabled: false
-
   # Storage responsibility for this instance.
   # Options to set: "standalone", "master", "slave".
   # Standalone: this instance reads and writes its own canonical storage.
   # Master: this instance owns canonical storage and answers slave read requests.
   # Slave: this instance reports session writes to a master and uses local read projections.
   mode: 'standalone'
+
+###################
+# Storage Cleanup #
+###################
+storageCleanup:
+
+  # If true, LoriTime deletes old time history for inactive players on startup.
+  # Player identity rows are preserved. Disabled by default.
+  enabled: false
+
+  # Delete history for players whose activity timestamp is older than this many days.
+  inactiveAfterDays: 365
 
 ###########
 #   AFK   #

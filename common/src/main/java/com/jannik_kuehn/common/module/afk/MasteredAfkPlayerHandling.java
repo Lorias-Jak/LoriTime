@@ -3,18 +3,36 @@ package com.jannik_kuehn.common.module.afk;
 import com.github.roleplaycauldron.spellbook.core.logger.WrappedLogger;
 import com.jannik_kuehn.common.LoriTimePlugin;
 import com.jannik_kuehn.common.api.LoriTimePlayer;
+import com.jannik_kuehn.common.api.storage.ManualTimeAdjustment;
+import com.jannik_kuehn.common.api.storage.TimeEntryReason;
 import com.jannik_kuehn.common.exception.StorageException;
 import com.jannik_kuehn.common.utils.TimeUtil;
 
-@SuppressWarnings("PMD.CommentRequired")
+/**
+ * Handles AFK actions on instances that own canonical time storage.
+ */
 public class MasteredAfkPlayerHandling extends AfkHandling {
+    /**
+     * Logger for mastered AFK handling.
+     */
     private final WrappedLogger log;
 
+    /**
+     * Creates a mastered AFK handler.
+     *
+     * @param plugin the plugin instance.
+     */
     public MasteredAfkPlayerHandling(final LoriTimePlugin plugin) {
         super(plugin);
         this.log = plugin.getLoggerFactory().create(MasteredAfkPlayerHandling.class, "MasteredAfkPlayerHandling");
     }
 
+    /**
+     * Applies AFK side effects for a player, including optional time removal and kick handling.
+     *
+     * @param loriTimePlayer the player that became AFK.
+     * @param timeToRemove the AFK time to remove in seconds.
+     */
     @Override
     @SuppressWarnings("PMD.AvoidCatchingGenericException")
     public void executePlayerAfk(final LoriTimePlayer loriTimePlayer, final long timeToRemove) {
@@ -29,7 +47,8 @@ public class MasteredAfkPlayerHandling extends AfkHandling {
                 log.debug("Removing online time for player " + loriTimePlayer.getUniqueId()
                         + ". Time to remove: " + timeToRemove);
                 loriTimePlugin.getAccumulator().flushOnlineTimeCache();
-                loriTimePlugin.getAccumulatingStorage().addTime(loriTimePlayer.getUniqueId(), -timeToRemove);
+                loriTimePlugin.getAccumulatingStorage().addTime(new ManualTimeAdjustment(loriTimePlayer.getUniqueId(),
+                        -timeToRemove, TimeEntryReason.AFK_ADJUSTMENT, "SYSTEM"));
             } catch (final Exception e) {
                 log.warn("Error while removing online time while afk for player " + loriTimePlayer.getUniqueId(), e);
             }
@@ -50,6 +69,11 @@ public class MasteredAfkPlayerHandling extends AfkHandling {
         }
     }
 
+    /**
+     * Applies resume side effects for a player leaving AFK state.
+     *
+     * @param loriTimePlayer the player that resumed.
+     */
     @Override
     public void executePlayerResume(final LoriTimePlayer loriTimePlayer) {
         log.debug("Executing resume for player: " + loriTimePlayer.getName());

@@ -77,7 +77,7 @@ public class PlayerTable {
      *
      * @param connection the database connection to use for executing the query
      * @param name       the name for which the associated ID should be retrieved
-     * @return an Optional containing the
+     * @return an Optional containing the ID if found, or empty if not found
      */
     public Optional<Long> findIdByName(final Connection connection, final String name) throws SQLException {
         try (PreparedStatement select = connection.prepareStatement(

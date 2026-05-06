@@ -5,11 +5,11 @@ general:
 
   # If true, the plugin debugger will be enabled.
   # This will print out more information in the console.
-  # Do not let this enabled, it will spam your console.
-  # This Config option has to be set manually! You cant change this via the in-game command!
+  # Do not let this be enabled, it will spam your console.
+  # This Config option has to be set manually! You can't change this via the in-game command!
   debug: false
 
-  # The time after wich the debugger will be disabled automatically.
+  # The time after which the debugger will be disabled automatically.
   # Set this to -1 to disable the auto-disable function of the debugger.
   # The unit for this is minutes.
   debugAutoDisableTime: 30
@@ -38,12 +38,12 @@ server:
 updater:
 
   # LoriTime will automatically check for Updates on Modrinth or GitHub.
-  # In case you use the multi-setup this will only be checked on the master.
+  # In case you use the multi-setup, this will only be checked on the master.
   # If you want to disable this feature, set this to false.
   checkForUpdates: true
 
   # The Strategy for the update command.
-  # Available options are 'MAJOR', 'MINOR', 'PATCH' in the format MAJOR.MINOR.PATCH (e.g. 1.2.5)
+  # Available options are 'MAJOR', 'MINOR', 'PATCH' in the format MAJOR.MINOR.PATCH (e.g., 1.2.5)
   updateStrategy: 'MINOR'
 
   # If the plugin should update itself automatically if a new release version is available.
@@ -52,7 +52,7 @@ updater:
 
   # If true, the plugin will send a message to the player if a new version is available.
   # The message will only appear on server join.
-  # It will only be sent once every 24 hours or after a server restart.
+  # It will only be sent once every 24 hours or after a server restarts.
   inGameNotification: true
 
 ###########
@@ -68,9 +68,9 @@ backup:
   # Set this to 0 to disable the deletion of old backups.
   maxBackups: 5
 
-##################
-#  Data Storage  #
-##################
+################
+# Data Storage #
+################
 # The desired storage-method for the plugin data.
 # Possible options:
 #
@@ -87,7 +87,7 @@ storageMethod: 'sqlite'
 # the following options are only relevant for the remote database storage-methods.
 data:
   # The prefix for the tables in the database.
-  # The plugin will automatically create tables with this prefix, if they don't exist yet.
+  # The plugin will automatically create tables with this prefix if they don't exist yet.
   # In migration scenarios, the plugin will not automatically rename the table-prefix.
   tablePrefix: 'loritime'
 
@@ -96,7 +96,7 @@ data:
   port: 3306
 
   # The name of the database to store LoriTime data in
-  # The database has to be created manually bevore the first plugin startup. Rename this value to your database name.
+  # The database has to be created manually before the first plugin startup. Rename this value to your database name.
   database: 'minecraft'
 
   # The credentials for the database.
@@ -121,7 +121,7 @@ data:
     minimumIdle: 10
 
     # Sets the maximum amount of time that a connection may remain idle in the pool.
-    # The minimum value should be 30 seconds less than any db or infrastructure imposed connection time limit.
+    # The minimum value should be 30 seconds less than any db or infrastructure-imposed connection time limit.
     maximumLifetime: 1800000 # 30 Minutes
 
     # Controls how often the pool will 'ping' a connection to prevent it from going into timeout.
@@ -164,14 +164,14 @@ afk:
   # In case you're using MultiSetup, this will change nothing for proxies.
   # Do not change the value while the server is running!
   # The required classes will not be loaded if this option is false on startup.
-  # If you change the value to false in runtime and reload the plugin, it could lead into issues with the afk detection.
+  # If you change the value to false in runtime and reload the plugin, it could lead to issues with the afk detection.
   enabled: false
 
   # The time after which a player is considered AFK. You can use the unit-modifier for this.
-  # Currently the player will be considered afk after 15 minutes.
+  # Currently, the player will be considered afk after 15 minutes.
   after: '15m'
 
-  # If true, the time that the player is afk, will be removed.
+  # If true, the time that the player is afk will be removed.
   removeTime: true
 
   # If true, the player will be kicked after the time specified in 'afk.after'.

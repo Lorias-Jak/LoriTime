@@ -69,7 +69,7 @@ public final class ManualAdjustmentTable {
      * @param connection database connection
      * @param playerId   player id
      * @return optional sum
-     * @throws SQLException if query fails
+     * @throws SQLException if the query fails
      */
     public OptionalLong sumForPlayer(final Connection connection, final long playerId) throws SQLException {
         try (PreparedStatement select = connection.prepareStatement(
@@ -92,7 +92,7 @@ public final class ManualAdjustmentTable {
      *
      * @param connection database connection
      * @return totals map
-     * @throws SQLException if query fails
+     * @throws SQLException if the query fails
      */
     public Map<String, Long> getAllTotals(final Connection connection) throws SQLException {
         final Map<String, Long> totals = new HashMap<>();

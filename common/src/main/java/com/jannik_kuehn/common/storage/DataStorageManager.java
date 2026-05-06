@@ -9,7 +9,7 @@ import com.jannik_kuehn.common.api.storage.StorageMode;
 import com.jannik_kuehn.common.api.storage.UnifiedStorage;
 import com.jannik_kuehn.common.exception.StorageException;
 import com.jannik_kuehn.common.storage.database.DatabaseStorage;
-import com.jannik_kuehn.common.storage.database.DatabaseTimeAndNameStorage;
+import com.jannik_kuehn.common.storage.database.UnifiedDatabaseStorage;
 import com.jannik_kuehn.common.storage.database.table.ManualAdjustmentTable;
 import com.jannik_kuehn.common.storage.database.table.PlayerTable;
 import com.jannik_kuehn.common.storage.database.table.ServerTable;
@@ -218,7 +218,7 @@ public class DataStorageManager {
         final TimeTable timeTable = new TimeTable(dbStorage.getTablePrefix() + "_time", playerTable, dbStorage.getDialect());
         final ManualAdjustmentTable adjustmentTable = new ManualAdjustmentTable(dbStorage.getTablePrefix() + "_time_adjustment", playerTable);
 
-        final DatabaseTimeAndNameStorage nameAndTimeStorage = new DatabaseTimeAndNameStorage(dbStorage.getProvider(), playerTable,
+        final UnifiedDatabaseStorage nameAndTimeStorage = new UnifiedDatabaseStorage(dbStorage.getProvider(), playerTable,
                 serverTable, worldTable, timeTable, adjustmentTable, dbStorage.getDialect());
         this.storage = nameAndTimeStorage;
         this.accumulator = new AccumulatingTimeStorage(loriTime.getLoggerFactory().create(AccumulatingTimeStorage.class), nameAndTimeStorage);

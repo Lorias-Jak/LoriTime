@@ -26,16 +26,11 @@ import java.util.OptionalLong;
 import java.util.UUID;
 import java.util.logging.Logger;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
-@SuppressWarnings({"PMD.UnitTestContainsTooManyAsserts", "PMD.UnitTestAssertionsShouldIncludeMessage",
-        "PMD.CloseResource", "PMD.CheckResultSet"})
-class DatabaseTimeAndNameStorageTest {
+@SuppressWarnings({"PMD.UnitTestContainsTooManyAsserts"})
+class UnifiedDatabaseStorageTest {
 
     private static final String TABLE_PREFIX = "loritime";
 
@@ -46,72 +41,78 @@ class DatabaseTimeAndNameStorageTest {
 
     @Test
     void totalsIncludeSessionAndManualAdjustmentWithConsoleActor() throws Exception {
-        final DatabaseTimeAndNameStorage storage = storage();
+        try (UnifiedDatabaseStorage storage = storage()) {
 
-        storage.setPlayerName(PLAYER, "Lorias_");
-        storage.persistSession(new PlayerSessionChunk(PLAYER, Optional.of("Lorias_"), "survival", "world",
-                1_000L, 11_000L, TimeEntryReason.PLAYER_LEAVE));
-        storage.addTime(new ManualTimeAdjustment(PLAYER, 5L, TimeEntryReason.MANUAL_ADJUSTMENT, "CONSOLE"));
+            storage.setPlayerName(PLAYER, "Lorias_");
+            storage.persistSession(new PlayerSessionChunk(PLAYER, Optional.of("Lorias_"), "survival", "world",
+                    1_000L, 11_000L, TimeEntryReason.PLAYER_LEAVE));
+            storage.addTime(new ManualTimeAdjustment(PLAYER, 5L, TimeEntryReason.MANUAL_ADJUSTMENT, "CONSOLE"));
 
-        assertEquals(OptionalLong.of(15L), storage.getTime(PLAYER));
-        assertEquals(15L, storage.getAllTimeEntries().get(PLAYER.toString()));
+            assertEquals(OptionalLong.of(15L), storage.getTime(PLAYER), "Expected the correct total");
+            assertEquals(15L, storage.getAllTimeEntries().get(PLAYER.toString()), "Expected the correct total");
+        }
         try (Connection connection = openSqlite();
              Statement statement = connection.createStatement();
              ResultSet result = statement.executeQuery("SELECT `actor_uuid`, `actor_name` FROM `" + TABLE_PREFIX + "_time_adjustment`")) {
-            assertTrue(result.next());
-            assertNull(result.getBytes("actor_uuid"));
-            assertEquals("CONSOLE", result.getString("actor_name"));
+            if (!result.next()) {
+                fail("Expected a result row");
+            }
+            assertNull(result.getBytes("actor_uuid"), "Expected a null actor UUID");
+            assertEquals("CONSOLE", result.getString("actor_name"), "Expected the correct actor name");
         }
     }
 
     @Test
     void deletePlayerDeletesIdentityAndOwnedHistory() throws Exception {
-        final DatabaseTimeAndNameStorage storage = storage();
+        try (UnifiedDatabaseStorage storage = storage()) {
 
-        storage.setPlayerName(PLAYER, "Lorias_");
-        storage.persistSession(new PlayerSessionChunk(PLAYER, Optional.of("Lorias_"), "survival", "world",
-                1_000L, 11_000L, TimeEntryReason.PLAYER_LEAVE));
-        storage.addTime(new ManualTimeAdjustment(PLAYER, 5L, TimeEntryReason.MANUAL_ADJUSTMENT, "CONSOLE"));
-        storage.deletePlayer(PLAYER);
+            storage.setPlayerName(PLAYER, "Lorias_");
+            storage.persistSession(new PlayerSessionChunk(PLAYER, Optional.of("Lorias_"), "survival", "world",
+                    1_000L, 11_000L, TimeEntryReason.PLAYER_LEAVE));
+            storage.addTime(new ManualTimeAdjustment(PLAYER, 5L, TimeEntryReason.MANUAL_ADJUSTMENT, "CONSOLE"));
+            storage.deletePlayer(PLAYER);
 
-        assertTrue(storage.getUuid("Lorias_").isEmpty());
-        assertEquals(0, countRows(TABLE_PREFIX + "_time"));
-        assertEquals(0, countRows(TABLE_PREFIX + "_time_adjustment"));
+            assertTrue(storage.getUuid("Lorias_").isEmpty(), "Expected the player to be deleted");
+        }
+        assertEquals(0, countRows(TABLE_PREFIX + "_time"), "Expected no time entries");
+        assertEquals(0, countRows(TABLE_PREFIX + "_time_adjustment"), "Expected no time adjustments");
     }
 
     @Test
     void inactiveCleanupDeletesOnlyHistory() throws Exception {
-        final DatabaseTimeAndNameStorage storage = storage();
+        try (UnifiedDatabaseStorage storage = storage()) {
 
-        storage.setPlayerName(PLAYER, "Lorias_");
-        storage.persistSession(new PlayerSessionChunk(PLAYER, Optional.of("Lorias_"), "survival", "world",
-                1_000L, 11_000L, TimeEntryReason.PLAYER_LEAVE));
-        storage.addTime(new ManualTimeAdjustment(PLAYER, 5L, TimeEntryReason.MANUAL_ADJUSTMENT, "CONSOLE"));
-        try (Connection connection = openSqlite();
-             Statement statement = connection.createStatement()) {
-            statement.executeUpdate("UPDATE `" + TABLE_PREFIX + "_player` SET `last_seen` = DATETIME('now', '-400 days')");
+            storage.setPlayerName(PLAYER, "Lorias_");
+            storage.persistSession(new PlayerSessionChunk(PLAYER, Optional.of("Lorias_"), "survival", "world",
+                    1_000L, 11_000L, TimeEntryReason.PLAYER_LEAVE));
+            storage.addTime(new ManualTimeAdjustment(PLAYER, 5L, TimeEntryReason.MANUAL_ADJUSTMENT, "CONSOLE"));
+            try (Connection connection = openSqlite();
+                 Statement statement = connection.createStatement()) {
+                statement.executeUpdate("UPDATE `" + TABLE_PREFIX + "_player` SET `last_seen` = DATETIME('now', '-400 days')");
+            }
+
+            assertEquals(2, storage.deleteInactiveHistory(365L), "Expected two rows to be deleted");
+            assertEquals(Optional.of(PLAYER), storage.getUuid("Lorias_"), "Expected the player to still be present");
         }
-
-        assertEquals(2, storage.deleteInactiveHistory(365L));
-        assertEquals(Optional.of(PLAYER), storage.getUuid("Lorias_"));
-        assertEquals(0, countRows(TABLE_PREFIX + "_time"));
-        assertEquals(0, countRows(TABLE_PREFIX + "_time_adjustment"));
+        assertEquals(0, countRows(TABLE_PREFIX + "_time"), "Expected no time entries");
+        assertEquals(0, countRows(TABLE_PREFIX + "_time_adjustment"), "Expected no time adjustments");
     }
 
     @Test
     void inactiveCleanupSkipsRecentPlayers() throws Exception {
-        final DatabaseTimeAndNameStorage storage = storage();
+        try (UnifiedDatabaseStorage storage = storage()) {
 
-        storage.setPlayerName(PLAYER, "Lorias_");
-        storage.persistSession(new PlayerSessionChunk(PLAYER, Optional.of("Lorias_"), "survival", "world",
-                1_000L, 11_000L, TimeEntryReason.PLAYER_LEAVE));
+            storage.setPlayerName(PLAYER, "Lorias_");
+            storage.persistSession(new PlayerSessionChunk(PLAYER, Optional.of("Lorias_"), "survival", "world",
+                    1_000L, 11_000L, TimeEntryReason.PLAYER_LEAVE));
 
-        assertEquals(0, storage.deleteInactiveHistory(365L));
-        assertEquals(1, countRows(TABLE_PREFIX + "_time"));
-        assertFalse(storage.getUuid("Lorias_").isEmpty());
+            assertEquals(0, storage.deleteInactiveHistory(365L), "Expected no rows to be deleted");
+            assertEquals(1, countRows(TABLE_PREFIX + "_time"), "Expected one row to be present");
+            assertFalse(storage.getUuid("Lorias_").isEmpty(), "Expected the player to still be present");
+        }
     }
 
-    private DatabaseTimeAndNameStorage storage() throws StorageException {
+    private UnifiedDatabaseStorage storage() throws StorageException {
         final LoggerFactory loggerFactory = new LoggerFactory(Logger.getLogger("test"));
         final DatabaseStorage databaseStorage = new DatabaseStorage(loggerFactory, config(), dataFolder);
         new DatabaseMigrationPreflight(databaseStorage, loggerFactory.create(DatabaseMigrationPreflight.class)).migrateIfNecessary();
@@ -120,7 +121,7 @@ class DatabaseTimeAndNameStorageTest {
         final WorldTable worldTable = new WorldTable(TABLE_PREFIX + "_world", serverTable);
         final TimeTable timeTable = new TimeTable(TABLE_PREFIX + "_time", playerTable, databaseStorage.getDialect());
         final ManualAdjustmentTable adjustmentTable = new ManualAdjustmentTable(TABLE_PREFIX + "_time_adjustment", playerTable);
-        return new DatabaseTimeAndNameStorage(databaseStorage.getProvider(), playerTable, serverTable, worldTable,
+        return new UnifiedDatabaseStorage(databaseStorage.getProvider(), playerTable, serverTable, worldTable,
                 timeTable, adjustmentTable, databaseStorage.getDialect());
     }
 
@@ -140,7 +141,9 @@ class DatabaseTimeAndNameStorageTest {
         try (Connection connection = openSqlite();
              Statement statement = connection.createStatement();
              ResultSet result = statement.executeQuery("SELECT COUNT(*) FROM `" + table + "`")) {
-            assertTrue(result.next());
+            if (!result.next()) {
+                fail("Expected a result row");
+            }
             return result.getInt(1);
         }
     }

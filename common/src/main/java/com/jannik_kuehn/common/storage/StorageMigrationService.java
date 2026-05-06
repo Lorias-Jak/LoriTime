@@ -8,7 +8,7 @@ import com.jannik_kuehn.common.config.Configuration;
 import com.jannik_kuehn.common.config.YamlConfiguration;
 import com.jannik_kuehn.common.exception.StorageException;
 import com.jannik_kuehn.common.storage.database.DatabaseStorage;
-import com.jannik_kuehn.common.storage.database.DatabaseTimeAndNameStorage;
+import com.jannik_kuehn.common.storage.database.UnifiedDatabaseStorage;
 import com.jannik_kuehn.common.storage.database.migration.DatabaseMigrationPreflight;
 import com.jannik_kuehn.common.storage.database.table.ManualAdjustmentTable;
 import com.jannik_kuehn.common.storage.database.table.PlayerTable;
@@ -148,14 +148,14 @@ public class StorageMigrationService {
         final WorldTable worldTable = new WorldTable(databaseStorage.getTablePrefix() + "_world", serverTable);
         final TimeTable timeTable = new TimeTable(databaseStorage.getTablePrefix() + "_time", playerTable, databaseStorage.getDialect());
         final ManualAdjustmentTable adjustmentTable = new ManualAdjustmentTable(databaseStorage.getTablePrefix() + "_time_adjustment", playerTable);
-        final DatabaseTimeAndNameStorage storage = new DatabaseTimeAndNameStorage(
+        final UnifiedDatabaseStorage storage = new UnifiedDatabaseStorage(
                 databaseStorage.getProvider(), playerTable, serverTable, worldTable, timeTable, adjustmentTable, databaseStorage.getDialect());
 
         importNames(storage, namesFile);
         importTimes(storage, timeFile);
     }
 
-    private void importNames(final DatabaseTimeAndNameStorage storage, final File namesFile) throws StorageException {
+    private void importNames(final UnifiedDatabaseStorage storage, final File namesFile) throws StorageException {
         if (!namesFile.exists()) {
             return;
         }
@@ -168,7 +168,7 @@ public class StorageMigrationService {
         }
     }
 
-    private void importTimes(final DatabaseTimeAndNameStorage storage, final File timeFile) throws StorageException {
+    private void importTimes(final UnifiedDatabaseStorage storage, final File timeFile) throws StorageException {
         if (!timeFile.exists()) {
             return;
         }

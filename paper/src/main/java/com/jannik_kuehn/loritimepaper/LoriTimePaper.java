@@ -29,13 +29,37 @@ import org.bstats.bukkit.Metrics;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
-@SuppressWarnings({"PMD.CommentRequired", "PMD.AtLeastOneConstructor"})
+/**
+ * The {@code LoriTimePaper} class serves as the main plugin class for the LoriTime plugin
+ * on Paper servers. It extends the {@code JavaPlugin} class to interface with Bukkit's
+ * plugin lifecycle, including enabling, disabling, and registering commands and events.
+ * <p>
+ * This class is responsible for initializing and managing the various features, services,
+ * and dependencies of the LoriTime plugin, depending on the configured server mode. It
+ * supports three modes of operation: standalone, master, and slave.
+ * <p>
+ * Functionalities include:
+ * - Registering server commands and event listeners.
+ * - Initializing integration with third-party APIs like PlaceholderAPI.
+ * - Handling different server modes and configurations.
+ * - Providing communication channels for inter-server messaging in a networked environment.
+ */
+@SuppressWarnings({"PMD.AtLeastOneConstructor"})
 public class LoriTimePaper extends JavaPlugin {
 
+    /**
+     * The {@link LoriTimePlugin} instance.
+     */
     private LoriTimePlugin loriTimePlugin;
 
+    /**
+     * The {@link PaperPluginMessenger} instance.
+     */
     private PaperPluginMessenger paperPluginMessenger;
 
+    /**
+     * The {@link SlaveSessionReporter} instance.
+     */
     private SlaveSessionReporter slaveSessionReporter;
 
     @Override
@@ -119,10 +143,20 @@ public class LoriTimePaper extends JavaPlugin {
         loriTimePlugin.disable();
     }
 
+    /**
+     * Gets the {@link PaperPluginMessenger} instance.
+     *
+     * @return the {@link PaperPluginMessenger} instance.
+     */
     public PaperPluginMessenger getPaperPluginMessenger() {
         return paperPluginMessenger;
     }
 
+    /**
+     * Gets the {@link LoriTimePlugin} instance.
+     *
+     * @return the {@link LoriTimePlugin} instance.
+     */
     public LoriTimePlugin getPlugin() {
         return loriTimePlugin;
     }

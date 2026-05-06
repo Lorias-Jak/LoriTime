@@ -145,7 +145,7 @@ public final class TimeTable {
      * @param sessionId  session id
      * @param leave      leave timestamp
      * @param reason     persistence reason
-     * @throws SQLException if update fails
+     * @throws SQLException if the update fails
      */
     public void updateSession(final Connection connection,
                               final long sessionId,

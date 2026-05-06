@@ -32,7 +32,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  * Database-backed unified storage implementation for player identity, sessions, and adjustments.
  */
 @SuppressWarnings({"PMD.UnusedPrivateField", "PMD.TooManyMethods", "PMD.CouplingBetweenObjects"})
-public class DatabaseTimeAndNameStorage implements UnifiedStorage {
+public class UnifiedDatabaseStorage implements UnifiedStorage {
 
     /**
      * Actor label used when a legacy method does not provide explicit actor metadata.
@@ -65,7 +65,7 @@ public class DatabaseTimeAndNameStorage implements UnifiedStorage {
     private final WorldTable worldTable;
 
     /**
-     * Session time table helper.
+     * Session timetable helper.
      */
     private final TimeTable timeTable;
 
@@ -82,21 +82,21 @@ public class DatabaseTimeAndNameStorage implements UnifiedStorage {
     /**
      * Creates a database-backed unified storage instance.
      *
-     * @param provider the connection provider.
-     * @param playerTable the player table helper.
-     * @param serverTable the server table helper.
-     * @param worldTable the world table helper.
-     * @param timeTable the time table helper.
+     * @param provider        the connection provider.
+     * @param playerTable     the player table helper.
+     * @param serverTable     the server table helper.
+     * @param worldTable      the world table helper.
+     * @param timeTable       the timetable helper.
      * @param adjustmentTable the manual adjustment table helper.
-     * @param dialect the database dialect.
+     * @param dialect         the database dialect.
      */
-    public DatabaseTimeAndNameStorage(final LoriTimeConnectionProvider provider,
-                                      final PlayerTable playerTable,
-                                      final ServerTable serverTable,
-                                      final WorldTable worldTable,
-                                      final TimeTable timeTable,
-                                      final ManualAdjustmentTable adjustmentTable,
-                                      final DatabaseDialect dialect) {
+    public UnifiedDatabaseStorage(final LoriTimeConnectionProvider provider,
+                                  final PlayerTable playerTable,
+                                  final ServerTable serverTable,
+                                  final WorldTable worldTable,
+                                  final TimeTable timeTable,
+                                  final ManualAdjustmentTable adjustmentTable,
+                                  final DatabaseDialect dialect) {
         this.provider = provider;
         this.dialect = dialect;
         this.playerTable = playerTable;

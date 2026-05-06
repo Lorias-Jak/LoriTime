@@ -22,15 +22,28 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Read cache for slave instances.
  */
-@SuppressWarnings("PMD.CommentRequired")
 public class SlaveReadCache extends PluginMessaging implements PluginMessageListener, Listener {
-
+    /**
+     * The {@link PaperPluginMessenger} instance.
+     */
     private final PaperPluginMessenger pluginMessenger;
 
+    /**
+     * The {@link WrappedLogger} instance.
+     */
     private final WrappedLogger log;
 
+    /**
+     * The cached times.
+     */
     private final Map<UUID, Long> cachedTimes;
 
+    /**
+     * Initializes a new instance of the {@code SlaveReadCache} class.
+     *
+     * @param loriTimePaper   The {@link LoriTimePaper} instance, providing access to the plugin's main features.
+     * @param pluginMessenger The {@link PaperPluginMessenger} instance used for sending plugin messages.
+     */
     public SlaveReadCache(final LoriTimePaper loriTimePaper, final PaperPluginMessenger pluginMessenger) {
         super(loriTimePaper.getPlugin());
         this.pluginMessenger = pluginMessenger;
@@ -38,11 +51,24 @@ public class SlaveReadCache extends PluginMessaging implements PluginMessageList
         this.cachedTimes = new ConcurrentHashMap<>();
     }
 
+    /**
+     * Retrieves the cached time associated with the specified UUID.
+     *
+     * @param uuid The UUID of the entity for which the cached time is being retrieved.
+     * @return {@code OptionalLong} containing the cached time if present, or an empty {@code OptionalLong} if no time
+     * is cached for the given UUID.
+     */
     public OptionalLong getTime(final UUID uuid) {
         final Long value = cachedTimes.get(uuid);
         return value == null ? OptionalLong.empty() : OptionalLong.of(value);
     }
 
+    /**
+     * Sends a request to refresh the cached time data for the specified UUID. This method utilizes
+     * the plugin messaging system to communicate the request to the designated storage channel.
+     *
+     * @param uuid The unique identifier of the entity for which the refresh request is being made.
+     */
     public void requestRefresh(final UUID uuid) {
         pluginMessenger.sendPluginMessage(SLAVED_TIME_STORAGE, uuid, "get");
     }
@@ -72,6 +98,14 @@ public class SlaveReadCache extends PluginMessaging implements PluginMessageList
         pluginMessenger.sendPluginMessage(channelIdentifier, message);
     }
 
+    /**
+     * Handles the event triggered when a player joins the server. Upon a player joining, their unique identifier (UUID)
+     * is mapped to an initial cached time in the local cache. Additionally, an asynchronous task is scheduled
+     * to request a refresh of the cached time data for the player after a delay.
+     *
+     * @param event The {@link PlayerJoinEvent} that is triggered when a player joins the server. This event provides
+     *              access to the player's data and interactions, including their unique identifier.
+     */
     @EventHandler
     public void onPlayerJoin(final PlayerJoinEvent event) {
         final UUID uuid = event.getPlayer().getUniqueId();
@@ -79,6 +113,14 @@ public class SlaveReadCache extends PluginMessaging implements PluginMessageList
         loriTimePlugin.getScheduler().runAsyncOnceLater(1L, () -> requestRefresh(uuid));
     }
 
+    /**
+     * Handles the event triggered when a player leaves the server.
+     * Upon a player leaving, their unique identifier (UUID) is removed
+     * from the local cache to free up resources associated with the player.
+     *
+     * @param event The {@link PlayerQuitEvent} that is triggered when a player leaves the server.
+     *              This event provides access to the player's data, including their unique identifier.
+     */
     @EventHandler
     public void onPlayerLeave(final PlayerQuitEvent event) {
         cachedTimes.remove(event.getPlayer().getUniqueId());

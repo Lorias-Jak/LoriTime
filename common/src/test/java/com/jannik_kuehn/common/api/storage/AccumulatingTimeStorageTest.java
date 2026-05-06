@@ -14,12 +14,10 @@ import java.util.OptionalLong;
 import java.util.Set;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.mock;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
-@SuppressWarnings({"PMD.CloseResource", "PMD.UncommentedEmptyMethodBody",
-        "PMD.UnitTestAssertionsShouldIncludeMessage", "PMD.UnitTestContainsTooManyAsserts"})
+@SuppressWarnings({"PMD.CloseResource", "PMD.UnitTestContainsTooManyAsserts"})
 class AccumulatingTimeStorageTest {
 
     private static final UUID PLAYER = UUID.fromString("44174cf6-e76c-4994-899c-3387284ecd62");
@@ -32,16 +30,16 @@ class AccumulatingTimeStorageTest {
         accumulator.startAccumulating(PLAYER, "Lorias_", "lobby", "spawn", 1_000L);
         accumulator.stopAccumulatingAndSaveOnlineTime(PLAYER, 6_000L, TimeEntryReason.PLAYER_LEAVE);
 
-        assertEquals(1, storage.sessions.size());
+        assertEquals(1, storage.sessions.size(), "Expected one session chunk after stopAccumulatingAndSaveOnlineTime");
         final PlayerSessionChunk chunk = storage.sessions.getFirst();
-        assertEquals(PLAYER, chunk.uuid());
-        assertEquals(Optional.of("Lorias_"), chunk.name());
-        assertEquals("lobby", chunk.server());
-        assertEquals("spawn", chunk.world());
-        assertEquals(1_000L, chunk.startedAtMs());
-        assertEquals(6_000L, chunk.stoppedAtMs());
-        assertEquals(5L, chunk.durationSeconds());
-        assertEquals(TimeEntryReason.PLAYER_LEAVE, chunk.reason());
+        assertEquals(PLAYER, chunk.uuid(), "Expected the same UUID as the one passed to startAccumulating");
+        assertEquals(Optional.of("Lorias_"), chunk.name(), "Expected the same name as the one passed to startAccumulating");
+        assertEquals("lobby", chunk.server(), "Expected the same server as the one passed to startAccumulating");
+        assertEquals("spawn", chunk.world(), "Expected the same world as the one passed to startAccumulating");
+        assertEquals(1_000L, chunk.startedAtMs(), "Expected the same start time as the one passed to startAccumulating");
+        assertEquals(6_000L, chunk.stoppedAtMs(), "Expected the same stop time as the one passed to stopAccumulatingAndSaveOnlineTime");
+        assertEquals(5L, chunk.durationSeconds(), "Expected the correct duration in seconds");
+        assertEquals(TimeEntryReason.PLAYER_LEAVE, chunk.reason(), "Expected the same reason as the one passed to stopAccumulatingAndSaveOnlineTime");
     }
 
     @Test
@@ -55,9 +53,9 @@ class AccumulatingTimeStorageTest {
         accumulator.stopAccumulatingAndSaveOnlineTime(PLAYER, System.currentTimeMillis() + 2_000L,
                 TimeEntryReason.PLAYER_LEAVE);
 
-        assertEquals(1, storage.sessions.size());
-        assertEquals(TimeEntryReason.PLAYER_LEAVE, storage.sessions.get(0).reason());
-        assertTrue(storage.sessions.get(0).durationSeconds() >= 6L);
+        assertEquals(1, storage.sessions.size(), "Expected one session chunk after flushOnlineTimeCache");
+        assertEquals(TimeEntryReason.PLAYER_LEAVE, storage.sessions.getFirst().reason(), "Expected the same reason as the one passed to stopAccumulatingAndSaveOnlineTime");
+        assertTrue(storage.sessions.getFirst().durationSeconds() >= 6L, "Expected duration to be at least 6 seconds");
     }
 
     @Test
@@ -68,9 +66,9 @@ class AccumulatingTimeStorageTest {
         accumulator.startAccumulating(PLAYER, "Lorias_", "lobby", "spawn", System.currentTimeMillis() - 3_000L);
         accumulator.close();
 
-        assertEquals(1, storage.sessions.size());
-        assertEquals(TimeEntryReason.SHUTDOWN_FLUSH, storage.sessions.getFirst().reason());
-        assertTrue(storage.closed);
+        assertEquals(1, storage.sessions.size(), "Expected one session chunk after close");
+        assertEquals(TimeEntryReason.SHUTDOWN_FLUSH, storage.sessions.getFirst().reason(), "Expected the reason to be SHUTDOWN_FLUSH");
+        assertTrue(storage.closed, "Expected close to have been called");
     }
 
     @Test
@@ -82,9 +80,9 @@ class AccumulatingTimeStorageTest {
         accumulator.addTime(PLAYER, 5L, TimeEntryReason.MANUAL_ADJUSTMENT);
         accumulator.stopAccumulatingAndSaveOnlineTime(PLAYER, 20_000L, TimeEntryReason.PLAYER_LEAVE);
 
-        assertEquals(1, storage.sessions.size());
-        assertEquals(10L, storage.sessions.getFirst().durationSeconds());
-        assertEquals(5L, storage.adjustments.get(PLAYER));
+        assertEquals(1, storage.sessions.size(), "Expected one session chunk after stopAccumulatingAndSaveOnlineTime");
+        assertEquals(10L, storage.sessions.getFirst().durationSeconds(), "Expected the correct duration in seconds");
+        assertEquals(5L, storage.adjustments.get(PLAYER), "Expected the correct adjustment");
     }
 
     @Test
@@ -94,8 +92,8 @@ class AccumulatingTimeStorageTest {
 
         accumulator.addTime(PLAYER, 5L, TimeEntryReason.MANUAL_ADJUSTMENT);
 
-        assertEquals(5L, storage.adjustments.get(PLAYER));
-        assertEquals(TimeEntryReason.MANUAL_ADJUSTMENT, storage.directWriteReasons.getFirst());
+        assertEquals(5L, storage.adjustments.get(PLAYER), "Expected the correct adjustment");
+        assertEquals(TimeEntryReason.MANUAL_ADJUSTMENT, storage.directWriteReasons.getFirst(), "Expected the correct reason");
     }
 
     @Test
@@ -107,14 +105,14 @@ class AccumulatingTimeStorageTest {
         accumulator.switchContext(PLAYER, "Lorias_", "survival", "nether", 4_000L);
         accumulator.stopAccumulatingAndSaveOnlineTime(PLAYER, 9_000L, TimeEntryReason.PLAYER_LEAVE);
 
-        assertEquals(2, storage.sessions.size());
-        assertEquals("lobby", storage.sessions.get(0).server());
-        assertEquals("spawn", storage.sessions.get(0).world());
-        assertEquals(TimeEntryReason.CONTEXT_SWITCH, storage.sessions.get(0).reason());
-        assertEquals(3L, storage.sessions.get(0).durationSeconds());
-        assertEquals("survival", storage.sessions.get(1).server());
-        assertEquals("nether", storage.sessions.get(1).world());
-        assertEquals(5L, storage.sessions.get(1).durationSeconds());
+        assertEquals(2, storage.sessions.size(), "Expected two session chunks after stopAccumulatingAndSaveOnlineTime");
+        assertEquals("lobby", storage.sessions.getFirst().server(), "Expected the same server as the one passed to startAccumulating");
+        assertEquals("spawn", storage.sessions.getFirst().world(), "Expected the same world as the one passed to startAccumulating");
+        assertEquals(TimeEntryReason.CONTEXT_SWITCH, storage.sessions.get(0).reason(), "Expected the reason to be CONTEXT_SWITCH");
+        assertEquals(3L, storage.sessions.get(0).durationSeconds(), "Expected the correct duration in seconds");
+        assertEquals("survival", storage.sessions.get(1).server(), "Expected the same server as the one passed to switchContext");
+        assertEquals("nether", storage.sessions.get(1).world(), "Expected the same world as the one passed to switchContext");
+        assertEquals(5L, storage.sessions.get(1).durationSeconds(), "Expected the correct duration in seconds");
     }
 
     @Test
@@ -126,10 +124,10 @@ class AccumulatingTimeStorageTest {
         accumulator.switchContext(PLAYER, "Lorias_", "lobby", "spawn", 4_000L);
         accumulator.stopAccumulatingAndSaveOnlineTime(PLAYER, 9_000L, TimeEntryReason.PLAYER_LEAVE);
 
-        assertEquals(1, storage.sessions.size());
-        assertEquals("lobby", storage.sessions.getFirst().server());
-        assertEquals("spawn", storage.sessions.getFirst().world());
-        assertEquals(8L, storage.sessions.getFirst().durationSeconds());
+        assertEquals(1, storage.sessions.size(), "Expected one session chunk after stopAccumulatingAndSaveOnlineTime");
+        assertEquals("lobby", storage.sessions.getFirst().server(), "Expected the same server as the one passed to startAccumulating");
+        assertEquals("spawn", storage.sessions.getFirst().world(), "Expected the same world as the one passed to startAccumulating");
+        assertEquals(8L, storage.sessions.getFirst().durationSeconds(), "Expected the correct duration in seconds");
     }
 
     private AccumulatingTimeStorage accumulator(final FakeUnifiedStorage storage) {
@@ -158,10 +156,12 @@ class AccumulatingTimeStorageTest {
 
         @Override
         public void setPlayerName(final UUID uniqueId, final String name) {
+            // Empty
         }
 
         @Override
         public void setPlayerNames(final Map<UUID, String> entries) {
+            // Empty
         }
 
         @Override

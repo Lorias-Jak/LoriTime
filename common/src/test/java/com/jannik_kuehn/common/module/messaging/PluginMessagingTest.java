@@ -19,17 +19,11 @@ import java.util.OptionalLong;
 import java.util.UUID;
 import java.util.logging.Logger;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
-@SuppressWarnings({"PMD.CloseResource", "PMD.TestClassWithoutTestCases", "PMD.UnitTestAssertionsShouldIncludeMessage",
-        "PMD.UnitTestContainsTooManyAsserts"})
+@SuppressWarnings({"PMD.CloseResource", "PMD.UnitTestContainsTooManyAsserts"})
 class PluginMessagingTest {
 
     private static final UUID PLAYER = UUID.fromString("44174cf6-e76c-4994-899c-3387284ecd62");
@@ -39,7 +33,7 @@ class PluginMessagingTest {
         final LoriTimePlugin plugin = pluginWithInlineScheduler();
         final UnifiedStorage storage = mock(UnifiedStorage.class);
         when(plugin.getStorage()).thenReturn(storage);
-        final TestPluginMessaging messaging = new TestPluginMessaging(plugin);
+        final CapturingPluginMessaging messaging = new CapturingPluginMessaging(plugin);
 
         messaging.processPluginMessage("loritime:storage", messaging.data(PLAYER, "session", 2, "Lorias_", "lobby", "spawn",
                 1_000L, 6_000L, TimeEntryReason.PLAYER_LEAVE.name()));
@@ -47,13 +41,13 @@ class PluginMessagingTest {
         final ArgumentCaptor<PlayerSessionChunk> captor = ArgumentCaptor.forClass(PlayerSessionChunk.class);
         verify(storage).persistSession(captor.capture());
         final PlayerSessionChunk chunk = captor.getValue();
-        assertEquals(PLAYER, chunk.uuid());
-        assertEquals(Optional.of("Lorias_"), chunk.name());
-        assertEquals("lobby", chunk.server());
-        assertEquals("spawn", chunk.world());
-        assertEquals(1_000L, chunk.startedAtMs());
-        assertEquals(6_000L, chunk.stoppedAtMs());
-        assertEquals(TimeEntryReason.PLAYER_LEAVE, chunk.reason());
+        assertEquals(PLAYER, chunk.uuid(), "Expected the same UUID as the one passed to the plugin messaging");
+        assertEquals(Optional.of("Lorias_"), chunk.name(), "Expected the same name as the one passed to the plugin messaging");
+        assertEquals("lobby", chunk.server(), "Expected the same server as the one passed to the plugin messaging");
+        assertEquals("spawn", chunk.world(), "Expected the same world as the one passed to the plugin messaging");
+        assertEquals(1_000L, chunk.startedAtMs(), "Expected the same start time as the one passed to the plugin messaging");
+        assertEquals(6_000L, chunk.stoppedAtMs(), "Expected the same stop time as the one passed to the plugin messaging");
+        assertEquals(TimeEntryReason.PLAYER_LEAVE, chunk.reason(), "Expected the same reason as the one passed to the plugin messaging");
     }
 
     @Test
@@ -61,7 +55,7 @@ class PluginMessagingTest {
         final LoriTimePlugin plugin = pluginWithInlineScheduler();
         final UnifiedStorage storage = mock(UnifiedStorage.class);
         when(plugin.getStorage()).thenReturn(storage);
-        final TestPluginMessaging messaging = new TestPluginMessaging(plugin);
+        final CapturingPluginMessaging messaging = new CapturingPluginMessaging(plugin);
 
         messaging.processPluginMessage("loritime:storage", messaging.data(PLAYER, "session", 999, "Lorias_", "lobby", "spawn",
                 1_000L, 6_000L, TimeEntryReason.PLAYER_LEAVE.name()));
@@ -75,30 +69,30 @@ class PluginMessagingTest {
         final AccumulatingTimeStorage storage = mock(AccumulatingTimeStorage.class);
         when(plugin.getAccumulatingStorage()).thenReturn(storage);
         when(storage.getTime(PLAYER)).thenReturn(OptionalLong.of(44L));
-        final TestPluginMessaging messaging = new TestPluginMessaging(plugin);
+        final CapturingPluginMessaging messaging = new CapturingPluginMessaging(plugin);
 
         messaging.processPluginMessage("loritime:storage", messaging.data(PLAYER, "get"));
 
-        assertEquals(1, messaging.sentMessages.size());
+        assertEquals(1, messaging.sentMessages.size(), "Expected one message to be sent");
         final SentMessage sent = messaging.sentMessages.getFirst();
-        assertEquals("loritime:storage", sent.channel());
-        assertEquals(3, sent.payload().length);
-        assertEquals(PLAYER, sent.payload()[0]);
-        assertEquals("send", sent.payload()[1]);
-        assertEquals(44L, sent.payload()[2]);
+        assertEquals("loritime:storage", sent.channel(), "Expected the correct channel");
+        assertEquals(3, sent.payload().length, "Expected three payload elements");
+        assertEquals(PLAYER, sent.payload()[0], "Expected the same UUID as the one passed to the plugin messaging");
+        assertEquals("send", sent.payload()[1], "Expected the correct payload element");
+        assertEquals(44L, sent.payload()[2], "Expected the correct payload element");
     }
 
     @Test
     void serializesUuidAsSixteenBytes() {
         final LoriTimePlugin plugin = pluginWithInlineScheduler();
-        final TestPluginMessaging messaging = new TestPluginMessaging(plugin);
+        final CapturingPluginMessaging messaging = new CapturingPluginMessaging(plugin);
 
         final byte[] bytes = messaging.data(PLAYER);
 
-        assertArrayEquals(new byte[] {
+        assertArrayEquals(new byte[]{
                 0x44, 0x17, 0x4c, (byte) 0xf6, (byte) 0xe7, 0x6c, 0x49, (byte) 0x94,
                 (byte) 0x89, (byte) 0x9c, 0x33, (byte) 0x87, 0x28, 0x4e, (byte) 0xcd, 0x62
-        }, bytes);
+        }, bytes, "Expected the correct byte array");
     }
 
     private LoriTimePlugin pluginWithInlineScheduler() {
@@ -114,11 +108,11 @@ class PluginMessagingTest {
         return plugin;
     }
 
-    private static final class TestPluginMessaging extends PluginMessaging {
+    private static final class CapturingPluginMessaging extends PluginMessaging {
 
         private final List<SentMessage> sentMessages = new ArrayList<>();
 
-        private TestPluginMessaging(final LoriTimePlugin loriTimePlugin) {
+        private CapturingPluginMessaging(final LoriTimePlugin loriTimePlugin) {
             super(loriTimePlugin);
         }
 

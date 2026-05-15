@@ -7,7 +7,7 @@
     <revision>2.0.0</revision>
     <changelist>-SNAPSHOT</changelist>
     <loritime.version>${revision}-DEV-UNOFFICIAL</loritime.version>
-    <minecraft.api.version>1.25</minecraft.api.version>
+    <minecraft.api.version>1.20</minecraft.api.version>
     <java.api.version>25</java.api.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>

@@ -262,6 +262,24 @@ public class UnifiedDatabaseStorage implements UnifiedStorage {
     }
 
     @Override
+    public void updateSessionWorld(final long sessionId, final String server, final String world) throws StorageException {
+        Objects.requireNonNull(server);
+        Objects.requireNonNull(world);
+        poolLock.readLock().lock();
+        try {
+            checkClosed();
+            try (Connection connection = provider.getConnection()) {
+                final long worldId = worldTable.ensureWorld(connection, server, world);
+                timeTable.updateSessionWorld(connection, sessionId, worldId);
+            }
+        } catch (final SQLException ex) {
+            throw new StorageException(ex);
+        } finally {
+            poolLock.readLock().unlock();
+        }
+    }
+
+    @Override
     public void setPlayerName(final UUID uuid, final String name) throws StorageException {
         Objects.requireNonNull(uuid);
         Objects.requireNonNull(name);

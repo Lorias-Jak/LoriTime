@@ -160,6 +160,16 @@ public interface UnifiedStorage extends AutoCloseable {
     void updateSession(long sessionId, long stoppedAtMs, TimeEntryReason reason) throws StorageException;
 
     /**
+     * Updates the world context for an existing session row without changing its time range.
+     *
+     * @param sessionId the persisted session id.
+     * @param server the canonical server context.
+     * @param world the current world context.
+     * @throws StorageException if the update fails.
+     */
+    void updateSessionWorld(long sessionId, String server, String world) throws StorageException;
+
+    /**
      * Persists a completed session chunk.
      *
      * @param session the session chunk.

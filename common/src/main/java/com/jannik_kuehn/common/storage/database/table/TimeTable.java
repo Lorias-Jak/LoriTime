@@ -163,6 +163,25 @@ public final class TimeTable {
     }
 
     /**
+     * Updates the world context for an existing session row.
+     *
+     * @param connection database connection
+     * @param sessionId  session id
+     * @param worldId    world id
+     * @throws SQLException if the update fails
+     */
+    public void updateSessionWorld(final Connection connection,
+                                   final long sessionId,
+                                   final long worldId) throws SQLException {
+        try (PreparedStatement update = connection.prepareStatement(
+                "UPDATE `" + tableName + "` SET `world_id` = ? WHERE `id` = ?")) {
+            update.setLong(1, worldId);
+            update.setLong(2, sessionId);
+            update.executeUpdate();
+        }
+    }
+
+    /**
      * Calculates the total session duration for a player by summing up the recorded
      * duration in the database for the specified player UUID.
      *

@@ -67,6 +67,16 @@ public interface TimeAccumulator extends AutoCloseable {
     void switchContext(UUID uuid, String name, String server, String world, long when) throws StorageException;
 
     /**
+     * Updates the current world context for a master-owned active session.
+     *
+     * @param uuid the player UUID.
+     * @param world the current world context.
+     * @param observedAtMs the observation timestamp in epoch milliseconds.
+     * @throws StorageException if the active session cannot be updated.
+     */
+    void updateWorldContext(UUID uuid, String world, long observedAtMs) throws StorageException;
+
+    /**
      * Flushes active session progress to storage.
      *
      * @throws StorageException if any session cannot be updated.

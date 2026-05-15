@@ -27,9 +27,9 @@ general:
 ##########
 server:
 
-  # Logical name of this Paper/Folia server for session context.
-  # In a proxy network, set this to the backend server name, e.g. "survival-1".
-  # Proxy platforms derive this from the connected backend server instead.
+  # Logical name of this Paper/Folia server when it owns local session rows.
+  # In proxy slave mode, canonical session rows use the proxy backend server name instead.
+  # Proxy platforms derive their server context from the connected backend server.
   name: 'default'
 
 ###########
@@ -141,7 +141,7 @@ multiSetup:
   # Options to set: "standalone", "master", "slave".
   # Standalone: this instance reads and writes its own canonical storage.
   # Master: this instance owns canonical storage and answers slave read requests.
-  # Slave: this instance reports session writes to a master and uses local read projections.
+  # Slave: this instance reports slave-owned context or writes to a master and uses local read projections.
   mode: 'standalone'
 
 ###################

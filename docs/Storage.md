@@ -36,7 +36,7 @@ LoriTime has three storage responsibility modes:
 |------|----------------|
 | `standalone` | The instance reads and writes its own canonical storage. |
 | `master` | The instance owns canonical storage for a multi-setup and answers slave read requests. |
-| `slave` | The instance sends session writes to a master and keeps a local read cache for local consumers. |
+| `slave` | The instance reports slave-owned context or writes to a master and keeps a local read cache for local consumers. |
 
 `multiSetup.mode` is the authoritative setting. The default is `standalone`.
 
@@ -51,9 +51,9 @@ Modes describe storage responsibility only. Platform modules decide what feature
 
 | Platform | `standalone` | `master` | `slave` | Context source |
 |----------|--------------|----------|---------|----------------|
-| Paper/Folia | Supported | Supported | Supported | Configured server name plus Bukkit world |
-| Velocity | Supported | Supported | Not recommended | Backend server name plus `global` world |
-| Bungee | Supported | Supported | Not recommended | Backend server name plus `global` world |
+| Paper/Folia | Supported | Supported | Supported | Configured server name plus Bukkit world outside proxy-owned sessions; current Bukkit world only as a proxy slave |
+| Velocity | Supported | Supported | Not recommended | Backend server name plus latest slave-reported world or `global` fallback |
+| Bungee | Supported | Supported | Not recommended | Backend server name plus latest slave-reported world or `global` fallback |
 
 Paper and Folia-compatible servers can provide player name, configured server context, and world context for session rows. Set the logical server name on every Paper/Folia instance:
 
@@ -62,18 +62,18 @@ server:
   name: 'survival-1'
 ```
 
-In a proxy network, this value should match the backend server name used by the proxy. The world value is read from the player's current Bukkit world.
+In a proxy multi-setup where the proxy runs as `master` and Paper/Folia servers run as `slave`, this value does not create canonical server entries. The proxy backend server name is the canonical server context, and the Paper/Folia slave reports only the player's current Bukkit world to enrich the master-owned active row.
 
-Velocity and Bungee can derive backend server names from proxy server-switch events. Proxies do not know Bukkit worlds, so they store proxy-written rows with:
+Velocity and Bungee can derive backend server names from proxy server-switch events. Proxies store proxy-written rows with:
 
 - server: backend server name
-- world: `global`
+- world: latest Paper/Folia slave-reported world when available, otherwise `global`
 
-In a multi-setup, Paper/Folia slave servers report their configured server name and current world to the master. This is the most precise setup for PlaceholderAPI and per-world time.
+In a multi-setup, Paper/Folia slave servers report current world context to the master. They do not report completed session chunks and do not create separate canonical server entries.
 
 ## Session Context Updates
 
-Paper/Folia session context changes when the player's effective world changes. LoriTime ignores duplicate context events when the server and world did not change.
+Paper/Folia standalone or master session context changes when the player's effective world changes. Paper/Folia slave world changes update the current world context on the proxy master without creating a new time row.
 
 Velocity and Bungee session context changes when the player connects to a different backend server.
 

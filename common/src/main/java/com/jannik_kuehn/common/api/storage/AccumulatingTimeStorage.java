@@ -121,6 +121,11 @@ public class AccumulatingTimeStorage implements UnifiedStorage, TimeAccumulator 
     }
 
     @Override
+    public void updateSessionWorld(final long sessionId, final String server, final String world) throws StorageException {
+        storage.updateSessionWorld(sessionId, server, world);
+    }
+
+    @Override
     public void deletePlayer(final UUID uniqueId) throws StorageException, SQLException {
         onlineSessions.remove(uniqueId);
         storage.deletePlayer(uniqueId);
@@ -170,6 +175,20 @@ public class AccumulatingTimeStorage implements UnifiedStorage, TimeAccumulator 
         final PersistedPlayerSession previous = onlineSessions.put(uuid, new PersistedPlayerSession(sessionId, next));
         if (previous != null) {
             storage.updateSession(previous.sessionId(), when, TimeEntryReason.CONTEXT_SWITCH);
+        }
+    }
+
+    @Override
+    public void updateWorldContext(final UUID uuid, final String world, final long observedAtMs) throws StorageException {
+        final PersistedPlayerSession current = onlineSessions.get(uuid);
+        if (current == null || current.context().world().equals(world) || observedAtMs < current.context().startedAtMs()) {
+            return;
+        }
+        final PlayerSessionContext previous = current.context();
+        final PlayerSessionContext updated = new PlayerSessionContext(previous.uuid(), previous.name(),
+                previous.server(), world, previous.startedAtMs());
+        if (onlineSessions.replace(uuid, current, new PersistedPlayerSession(current.sessionId(), updated))) {
+            storage.updateSessionWorld(current.sessionId(), updated.server(), updated.world());
         }
     }
 

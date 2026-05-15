@@ -116,6 +116,57 @@ class AccumulatingTimeStorageTest {
     }
 
     @Test
+    void initialProxyBackendConnectionStartsSessionWithoutContextSwitchRow() throws StorageException {
+        final FakeUnifiedStorage storage = new FakeUnifiedStorage();
+        final AccumulatingTimeStorage accumulator = accumulator(storage);
+
+        accumulator.switchContext(PLAYER, "Lorias_", "survival", "global", 1_000L);
+        accumulator.stopAccumulatingAndSaveOnlineTime(PLAYER, 9_000L, TimeEntryReason.PLAYER_LEAVE);
+
+        assertEquals(1, storage.sessions.size(), "Expected initial backend connection to create only one row");
+        assertEquals("survival", storage.sessions.getFirst().server(), "Expected first row to use the backend server");
+        assertEquals("global", storage.sessions.getFirst().world(), "Expected first row to use the fallback world");
+        assertEquals(TimeEntryReason.PLAYER_LEAVE, storage.sessions.getFirst().reason(), "Expected no context-switch row on initial join");
+        assertEquals(8L, storage.sessions.getFirst().durationSeconds(), "Expected the correct duration");
+    }
+
+    @Test
+    void autoflushAroundBackendSwitchKeepsOneRowPerBackendSession() throws StorageException {
+        final FakeUnifiedStorage storage = new FakeUnifiedStorage();
+        final AccumulatingTimeStorage accumulator = accumulator(storage);
+
+        accumulator.startAccumulating(PLAYER, "Lorias_", "lobby", "global", System.currentTimeMillis() - 10_000L);
+        accumulator.updateWorldContext(PLAYER, "spawn", System.currentTimeMillis() - 9_000L);
+        accumulator.flushOnlineTimeCache();
+        accumulator.switchContext(PLAYER, "Lorias_", "survival", "global", System.currentTimeMillis() - 5_000L);
+        accumulator.updateWorldContext(PLAYER, "world", System.currentTimeMillis() - 4_000L);
+        accumulator.flushOnlineTimeCache();
+        accumulator.stopAccumulatingAndSaveOnlineTime(PLAYER, System.currentTimeMillis(), TimeEntryReason.PLAYER_LEAVE);
+
+        assertEquals(2, storage.sessions.size(), "Expected one row per backend server session");
+        assertEquals("lobby", storage.sessions.get(0).server(), "Expected first backend context");
+        assertEquals("spawn", storage.sessions.get(0).world(), "Expected first row to keep reported Paper world");
+        assertEquals(TimeEntryReason.CONTEXT_SWITCH, storage.sessions.get(0).reason(), "Expected switch to close the first row");
+        assertEquals("survival", storage.sessions.get(1).server(), "Expected second backend context");
+        assertEquals("world", storage.sessions.get(1).world(), "Expected second row to keep reported Paper world");
+        assertEquals(TimeEntryReason.PLAYER_LEAVE, storage.sessions.get(1).reason(), "Expected leave to close the second row");
+    }
+
+    @Test
+    void paperConfiguredServerNameCannotCreateDuplicateCanonicalRowsThroughWorldContext() throws StorageException {
+        final FakeUnifiedStorage storage = new FakeUnifiedStorage();
+        final AccumulatingTimeStorage accumulator = accumulator(storage);
+
+        accumulator.startAccumulating(PLAYER, "Lorias_", "velocity-backend-name", "global", 1_000L);
+        accumulator.updateWorldContext(PLAYER, "paper-world", 2_000L);
+        accumulator.stopAccumulatingAndSaveOnlineTime(PLAYER, 9_000L, TimeEntryReason.PLAYER_LEAVE);
+
+        assertEquals(1, storage.sessions.size(), "Expected the world update not to create a Paper server row");
+        assertEquals("velocity-backend-name", storage.sessions.getFirst().server(), "Expected proxy backend server name to remain canonical");
+        assertEquals("paper-world", storage.sessions.getFirst().world(), "Expected only the world context to change");
+    }
+
+    @Test
     void duplicateContextSwitchDoesNotCreateNewSession() throws StorageException {
         final FakeUnifiedStorage storage = new FakeUnifiedStorage();
         final AccumulatingTimeStorage accumulator = accumulator(storage);
@@ -128,6 +179,32 @@ class AccumulatingTimeStorageTest {
         assertEquals("lobby", storage.sessions.getFirst().server(), "Expected the same server as the one passed to startAccumulating");
         assertEquals("spawn", storage.sessions.getFirst().world(), "Expected the same world as the one passed to startAccumulating");
         assertEquals(8L, storage.sessions.getFirst().durationSeconds(), "Expected the correct duration in seconds");
+    }
+
+    @Test
+    void remoteWorldContextUpdatesActiveSessionWithoutNewRow() throws StorageException {
+        final FakeUnifiedStorage storage = new FakeUnifiedStorage();
+        final AccumulatingTimeStorage accumulator = accumulator(storage);
+
+        accumulator.startAccumulating(PLAYER, "Lorias_", "survival", "global", 1_000L);
+        accumulator.updateWorldContext(PLAYER, "world_nether", 2_000L);
+        accumulator.flushOnlineTimeCache();
+        accumulator.stopAccumulatingAndSaveOnlineTime(PLAYER, 9_000L, TimeEntryReason.PLAYER_LEAVE);
+
+        assertEquals(1, storage.sessions.size(), "Expected world context updates to keep one active row");
+        assertEquals("survival", storage.sessions.getFirst().server(), "Expected the canonical proxy server to be preserved");
+        assertEquals("world_nether", storage.sessions.getFirst().world(), "Expected the reported world to update the active row");
+        assertEquals(TimeEntryReason.PLAYER_LEAVE, storage.sessions.getFirst().reason(), "Expected leave to close the same active row");
+    }
+
+    @Test
+    void remoteWorldContextWithoutActiveSessionIsIgnored() throws StorageException {
+        final FakeUnifiedStorage storage = new FakeUnifiedStorage();
+        final AccumulatingTimeStorage accumulator = accumulator(storage);
+
+        accumulator.updateWorldContext(PLAYER, "world_nether", 2_000L);
+
+        assertTrue(storage.sessions.isEmpty(), "Expected no standalone session row to be created");
     }
 
     private AccumulatingTimeStorage accumulator(final FakeUnifiedStorage storage) {
@@ -212,6 +289,14 @@ class AccumulatingTimeStorageTest {
             final PlayerSessionChunk previous = sessions.get(index);
             sessions.set(index, new PlayerSessionChunk(previous.uuid(), previous.name(), previous.server(), previous.world(),
                     previous.startedAtMs(), stoppedAtMs, reason));
+        }
+
+        @Override
+        public void updateSessionWorld(final long sessionId, final String server, final String world) {
+            final int index = Math.toIntExact(sessionId);
+            final PlayerSessionChunk previous = sessions.get(index);
+            sessions.set(index, new PlayerSessionChunk(previous.uuid(), previous.name(), server, world,
+                    previous.startedAtMs(), previous.stoppedAtMs(), previous.reason()));
         }
 
         @Override

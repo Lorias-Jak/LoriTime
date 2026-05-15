@@ -5,16 +5,13 @@ import com.jannik_kuehn.common.LoriTimePlugin;
 import com.jannik_kuehn.common.api.scheduler.PluginScheduler;
 import com.jannik_kuehn.common.api.scheduler.PluginTask;
 import com.jannik_kuehn.common.api.storage.AccumulatingTimeStorage;
-import com.jannik_kuehn.common.api.storage.PlayerSessionChunk;
 import com.jannik_kuehn.common.api.storage.TimeEntryReason;
 import com.jannik_kuehn.common.api.storage.UnifiedStorage;
 import com.jannik_kuehn.common.exception.StorageException;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.UUID;
 import java.util.logging.Logger;
@@ -29,25 +26,16 @@ class PluginMessagingTest {
     private static final UUID PLAYER = UUID.fromString("44174cf6-e76c-4994-899c-3387284ecd62");
 
     @Test
-    void persistsVersionedRemoteSessionMessage() throws StorageException {
+    void ignoresStaleRemoteSessionMessage() throws StorageException {
         final LoriTimePlugin plugin = pluginWithInlineScheduler();
         final UnifiedStorage storage = mock(UnifiedStorage.class);
         when(plugin.getStorage()).thenReturn(storage);
         final CapturingPluginMessaging messaging = new CapturingPluginMessaging(plugin);
 
-        messaging.processPluginMessage("loritime:storage", messaging.data(PLAYER, "session", 2, "Lorias_", "lobby", "spawn",
+        messaging.processPluginMessage("loritime:storage", messaging.data(PLAYER, "session", 3, "Lorias_", "lobby", "spawn",
                 1_000L, 6_000L, TimeEntryReason.PLAYER_LEAVE.name()));
 
-        final ArgumentCaptor<PlayerSessionChunk> captor = ArgumentCaptor.forClass(PlayerSessionChunk.class);
-        verify(storage).persistSession(captor.capture());
-        final PlayerSessionChunk chunk = captor.getValue();
-        assertEquals(PLAYER, chunk.uuid(), "Expected the same UUID as the one passed to the plugin messaging");
-        assertEquals(Optional.of("Lorias_"), chunk.name(), "Expected the same name as the one passed to the plugin messaging");
-        assertEquals("lobby", chunk.server(), "Expected the same server as the one passed to the plugin messaging");
-        assertEquals("spawn", chunk.world(), "Expected the same world as the one passed to the plugin messaging");
-        assertEquals(1_000L, chunk.startedAtMs(), "Expected the same start time as the one passed to the plugin messaging");
-        assertEquals(6_000L, chunk.stoppedAtMs(), "Expected the same stop time as the one passed to the plugin messaging");
-        assertEquals(TimeEntryReason.PLAYER_LEAVE, chunk.reason(), "Expected the same reason as the one passed to the plugin messaging");
+        verify(storage, never()).persistSession(any());
     }
 
     @Test
@@ -61,6 +49,30 @@ class PluginMessagingTest {
                 1_000L, 6_000L, TimeEntryReason.PLAYER_LEAVE.name()));
 
         verify(storage, never()).persistSession(any());
+    }
+
+    @Test
+    void appliesRemoteWorldContextToAccumulator() throws StorageException {
+        final LoriTimePlugin plugin = pluginWithInlineScheduler();
+        final AccumulatingTimeStorage accumulator = mock(AccumulatingTimeStorage.class);
+        when(plugin.getAccumulator()).thenReturn(accumulator);
+        final CapturingPluginMessaging messaging = new CapturingPluginMessaging(plugin);
+
+        messaging.processPluginMessage("loritime:storage", messaging.data(PLAYER, "world", 3, "world_nether", 7_000L));
+
+        verify(accumulator).updateWorldContext(PLAYER, "world_nether", 7_000L);
+    }
+
+    @Test
+    void ignoresUnsupportedWorldContextProtocolVersion() throws StorageException {
+        final LoriTimePlugin plugin = pluginWithInlineScheduler();
+        final AccumulatingTimeStorage accumulator = mock(AccumulatingTimeStorage.class);
+        when(plugin.getAccumulator()).thenReturn(accumulator);
+        final CapturingPluginMessaging messaging = new CapturingPluginMessaging(plugin);
+
+        messaging.processPluginMessage("loritime:storage", messaging.data(PLAYER, "world", 2, "world_nether", 7_000L));
+
+        verify(accumulator, never()).updateWorldContext(any(), anyString(), anyLong());
     }
 
     @Test

@@ -4,7 +4,6 @@ import com.github.roleplaycauldron.spellbook.core.logger.WrappedLogger;
 import com.jannik_kuehn.common.LoriTimePlugin;
 import com.jannik_kuehn.common.exception.StorageException;
 import net.md_5.bungee.api.event.PlayerDisconnectEvent;
-import net.md_5.bungee.api.event.PostLoginEvent;
 import net.md_5.bungee.api.event.ServerConnectedEvent;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.event.EventHandler;
@@ -33,25 +32,6 @@ public class TimeAccumulatorBungeeListener implements Listener {
     public TimeAccumulatorBungeeListener(final LoriTimePlugin loriTimePlugin) {
         this.loriTimePlugin = loriTimePlugin;
         this.log = loriTimePlugin.getLoggerFactory().create(TimeAccumulatorBungeeListener.class);
-    }
-
-    /**
-     * Starts accumulating online time when a player joins the server.
-     *
-     * @param event The {@link PostLoginEvent} event.
-     */
-    @EventHandler
-    public void onPostLogin(final PostLoginEvent event) {
-        final UUID uuid = event.getPlayer().getUniqueId();
-        final String name = event.getPlayer().getName();
-        final long now = System.currentTimeMillis();
-        loriTimePlugin.getScheduler().runAsyncOnce(() -> {
-            try {
-                loriTimePlugin.getAccumulator().startAccumulating(uuid, name, "default", "global", now);
-            } catch (final StorageException ex) {
-                log.warn("could not start accumulating online time for player " + uuid, ex);
-            }
-        });
     }
 
     /**

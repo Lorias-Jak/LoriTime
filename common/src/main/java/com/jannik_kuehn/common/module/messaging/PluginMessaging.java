@@ -4,8 +4,6 @@ import com.github.roleplaycauldron.spellbook.core.logger.WrappedLogger;
 import com.jannik_kuehn.common.LoriTimePlugin;
 import com.jannik_kuehn.common.api.LoriTimePlayer;
 import com.jannik_kuehn.common.api.common.CommonSender;
-import com.jannik_kuehn.common.api.storage.PlayerSessionChunk;
-import com.jannik_kuehn.common.api.storage.TimeEntryReason;
 import com.jannik_kuehn.common.exception.PluginMessageException;
 import com.jannik_kuehn.common.exception.StorageException;
 import com.jannik_kuehn.common.utils.UuidUtil;
@@ -27,7 +25,7 @@ public abstract class PluginMessaging {
     /**
      * Current storage plugin message protocol version.
      */
-    private static final int STORAGE_PROTOCOL_VERSION = 2;
+    private static final int STORAGE_PROTOCOL_VERSION = 3;
 
     /**
      * The identifier for the afk-identifier channel.
@@ -176,7 +174,10 @@ public abstract class PluginMessaging {
                     loriTimePlugin.getAccumulatingStorage().addTime(playerUUID, input.readLong());
                     break;
                 case "session":
-                    persistRemoteSession(playerUUID, input);
+                    rejectRemoteSession(input);
+                    break;
+                case "world":
+                    updateRemoteWorldContext(playerUUID, input);
                     break;
                 default:
                     log.warn("received invalid status: " + inputString);
@@ -190,20 +191,24 @@ public abstract class PluginMessaging {
         }
     }
 
-    private void persistRemoteSession(final UUID playerUUID, final DataInputStream input) throws IOException, StorageException {
+    private void rejectRemoteSession(final DataInputStream input) throws IOException {
         final int protocolVersion = input.readInt();
         if (protocolVersion != STORAGE_PROTOCOL_VERSION) {
             log.warn("received unsupported storage protocol version: " + protocolVersion);
             return;
         }
-        final String name = input.readUTF();
-        final String server = input.readUTF();
+        log.warn("received stale completed remote session message; ignoring");
+    }
+
+    private void updateRemoteWorldContext(final UUID playerUUID, final DataInputStream input) throws IOException, StorageException {
+        final int protocolVersion = input.readInt();
+        if (protocolVersion != STORAGE_PROTOCOL_VERSION) {
+            log.warn("received unsupported storage protocol version: " + protocolVersion);
+            return;
+        }
         final String world = input.readUTF();
-        final long startedAtMs = input.readLong();
-        final long stoppedAtMs = input.readLong();
-        final TimeEntryReason reason = TimeEntryReason.valueOf(input.readUTF());
-        loriTimePlugin.getStorage().persistSession(new PlayerSessionChunk(playerUUID, Optional.ofNullable(name),
-                server, world, startedAtMs, stoppedAtMs, reason));
+        final long observedAtMs = input.readLong();
+        loriTimePlugin.getAccumulator().updateWorldContext(playerUUID, world, observedAtMs);
     }
 
     private long getTime(final UUID playerUUID) {

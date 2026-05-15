@@ -112,6 +112,32 @@ class UnifiedDatabaseStorageTest {
         }
     }
 
+    @Test
+    void updateSessionWorldChangesContextWithoutCreatingTimeRows() throws Exception {
+        final long sessionId;
+        try (UnifiedDatabaseStorage storage = storage()) {
+
+            storage.setPlayerName(PLAYER, "Lorias_");
+            sessionId = storage.startSession(new com.jannik_kuehn.common.api.storage.PlayerSessionContext(PLAYER,
+                    "Lorias_", "survival", "global", 1_000L), TimeEntryReason.PLAYER_JOIN);
+            storage.updateSessionWorld(sessionId, "survival", "world_nether");
+            storage.updateSession(sessionId, 9_000L, TimeEntryReason.PLAYER_LEAVE);
+
+            assertEquals(OptionalLong.of(8L), storage.getTime(PLAYER), "Expected the duration to be unchanged");
+        }
+        assertEquals(1, countRows(TABLE_PREFIX + "_time"), "Expected the same active time row to be updated");
+        try (Connection connection = openSqlite();
+             Statement statement = connection.createStatement();
+             ResultSet result = statement.executeQuery("SELECT w.`world` FROM `" + TABLE_PREFIX + "_time` t "
+                     + "JOIN `" + TABLE_PREFIX + "_world` w ON w.`id` = t.`world_id` "
+                     + "WHERE t.`id` = " + sessionId)) {
+            if (!result.next()) {
+                fail("Expected a result row");
+            }
+            assertEquals("world_nether", result.getString("world"), "Expected the updated world context");
+        }
+    }
+
     private UnifiedDatabaseStorage storage() throws StorageException {
         final LoggerFactory loggerFactory = new LoggerFactory(Logger.getLogger("test"));
         final DatabaseStorage databaseStorage = new DatabaseStorage(loggerFactory, config(), dataFolder);

@@ -5,7 +5,6 @@ import com.jannik_kuehn.common.LoriTimePlugin;
 import com.jannik_kuehn.common.exception.StorageException;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.connection.DisconnectEvent;
-import com.velocitypowered.api.event.connection.PostLoginEvent;
 import com.velocitypowered.api.event.player.ServerConnectedEvent;
 
 import java.util.UUID;
@@ -32,25 +31,6 @@ public class TimeAccumulatorVelocityListener {
     public TimeAccumulatorVelocityListener(final LoriTimePlugin loriTimePlugin) {
         this.loriTimePlugin = loriTimePlugin;
         this.log = loriTimePlugin.getLoggerFactory().create(TimeAccumulatorVelocityListener.class);
-    }
-
-    /**
-     * Starts accumulating online time when a player joins the server.
-     *
-     * @param event The {@link PostLoginEvent} event.
-     */
-    @Subscribe
-    public void onPostLogin(final PostLoginEvent event) {
-        final UUID uuid = event.getPlayer().getUniqueId();
-        final String name = event.getPlayer().getUsername();
-        final long now = System.currentTimeMillis();
-        loriTimePlugin.getScheduler().runAsyncOnce(() -> {
-            try {
-                loriTimePlugin.getAccumulator().startAccumulating(uuid, name, "default", "global", now);
-            } catch (final StorageException ex) {
-                log.warn("could not start accumulating online time for player " + uuid, ex);
-            }
-        });
     }
 
     /**

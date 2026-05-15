@@ -2,7 +2,6 @@ package com.jannik_kuehn.loritimepaper.messenger;
 
 import com.github.roleplaycauldron.spellbook.core.logger.WrappedLogger;
 import com.jannik_kuehn.common.api.scheduler.PluginTask;
-import com.jannik_kuehn.common.api.storage.TimeEntryReason;
 import com.jannik_kuehn.common.module.messaging.PluginMessaging;
 import com.jannik_kuehn.loritimepaper.LoriTimePaper;
 import org.bukkit.entity.Player;
@@ -17,14 +16,14 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Reports slave-observed session chunks to the master.
+ * Reports slave-observed world context to the master.
  */
 public class SlaveSessionReporter extends PluginMessaging implements Listener, AutoCloseable {
 
     /**
-     * Protocol version for slave session messages.
+     * Protocol version for slave world context messages.
      */
-    private static final int PROTOCOL_VERSION = 2;
+    private static final int PROTOCOL_VERSION = 3;
 
     /**
      * Messenger used for outgoing plugin messages.
@@ -37,14 +36,14 @@ public class SlaveSessionReporter extends PluginMessaging implements Listener, A
     private final WrappedLogger log;
 
     /**
-     * Active remote sessions keyed by player UUID.
+     * Active world contexts keyed by player UUID.
      */
-    private final Map<UUID, ActiveRemoteSession> activeSessions;
+    private final Map<UUID, ActiveRemoteWorld> activeWorlds;
 
     /**
-     * Periodic task that flushes active sessions to the master.
+     * Periodic task that reports active world contexts to the master.
      */
-    private final PluginTask flushTask;
+    private final PluginTask updateTask;
 
     /**
      * Creates a slave session reporter.
@@ -57,8 +56,8 @@ public class SlaveSessionReporter extends PluginMessaging implements Listener, A
         super(loriTimePaper.getPlugin());
         this.pluginMessenger = pluginMessenger;
         this.log = loriTimePaper.getPlugin().getLoggerFactory().create(SlaveSessionReporter.class);
-        this.activeSessions = new ConcurrentHashMap<>();
-        this.flushTask = loriTimePlugin.getScheduler().scheduleAsync(updateInterval / 2L, updateInterval, this::flushSessions);
+        this.activeWorlds = new ConcurrentHashMap<>();
+        this.updateTask = loriTimePlugin.getScheduler().scheduleAsync(updateInterval / 2L, updateInterval, this::reportWorlds);
     }
 
     /**
@@ -69,7 +68,7 @@ public class SlaveSessionReporter extends PluginMessaging implements Listener, A
     @EventHandler
     public void onPlayerJoin(final PlayerJoinEvent event) {
         final Player player = event.getPlayer();
-        activeSessions.put(player.getUniqueId(), context(player, System.currentTimeMillis()));
+        reportWorld(player);
     }
 
     /**
@@ -79,11 +78,8 @@ public class SlaveSessionReporter extends PluginMessaging implements Listener, A
      */
     @EventHandler
     public void onPlayerLeave(final PlayerQuitEvent event) {
-        final UUID uuid = event.getPlayer().getUniqueId();
-        final ActiveRemoteSession session = activeSessions.remove(uuid);
-        if (session != null) {
-            sendSession(session, System.currentTimeMillis(), TimeEntryReason.PLAYER_LEAVE);
-        }
+        reportWorld(event.getPlayer());
+        activeWorlds.remove(event.getPlayer().getUniqueId());
     }
 
     /**
@@ -95,38 +91,35 @@ public class SlaveSessionReporter extends PluginMessaging implements Listener, A
     public void onPlayerChangedWorld(final PlayerChangedWorldEvent event) {
         final Player player = event.getPlayer();
         final UUID uuid = player.getUniqueId();
-        final long now = System.currentTimeMillis();
-        final ActiveRemoteSession next = context(player, now);
-        final ActiveRemoteSession previous = activeSessions.get(uuid);
-        if (previous == null || (previous.server().equals(next.server()) && previous.world().equals(next.world()))) {
+        final ActiveRemoteWorld next = context(player, System.currentTimeMillis());
+        final ActiveRemoteWorld previous = activeWorlds.get(uuid);
+        if (previous != null && previous.world().equals(next.world())) {
             return;
         }
-        if (activeSessions.replace(uuid, previous, next)) {
-            sendSession(previous, now, TimeEntryReason.CONTEXT_SWITCH);
+        activeWorlds.put(uuid, next);
+        sendWorld(next);
+    }
+
+    private void reportWorlds() {
+        for (final ActiveRemoteWorld context : activeWorlds.values()) {
+            sendWorld(context.withObservedAt(System.currentTimeMillis()));
         }
     }
 
-    private void flushSessions() {
-        final long now = System.currentTimeMillis();
-        for (final Map.Entry<UUID, ActiveRemoteSession> entry : activeSessions.entrySet()) {
-            final ActiveRemoteSession session = entry.getValue();
-            final ActiveRemoteSession next = session.withStartedAt(now);
-            if (activeSessions.replace(entry.getKey(), session, next)) {
-                sendSession(session, now, TimeEntryReason.AUTO_FLUSH);
-            }
-        }
+    private void reportWorld(final Player player) {
+        final ActiveRemoteWorld context = context(player, System.currentTimeMillis());
+        activeWorlds.put(player.getUniqueId(), context);
+        sendWorld(context);
     }
 
-    private ActiveRemoteSession context(final Player player, final long startedAtMs) {
-        return new ActiveRemoteSession(player.getUniqueId(), player.getName(),
-                loriTimePlugin.getConfig().getString("server.name", "default"),
-                player.getWorld().getName(), startedAtMs);
+    private ActiveRemoteWorld context(final Player player, final long observedAtMs) {
+        return new ActiveRemoteWorld(player.getUniqueId(), player.getWorld().getName(), observedAtMs);
     }
 
-    private void sendSession(final ActiveRemoteSession session, final long stoppedAtMs, final TimeEntryReason reason) {
-        log.debug("Reporting remote session for player " + session.uuid());
-        sendPluginMessage(SLAVED_TIME_STORAGE, session.uuid(), "session", PROTOCOL_VERSION, session.name(),
-                session.server(), session.world(), session.startedAtMs(), stoppedAtMs, reason.name());
+    private void sendWorld(final ActiveRemoteWorld context) {
+        log.debug("Reporting remote world context for player " + context.uuid());
+        sendPluginMessage(SLAVED_TIME_STORAGE, context.uuid(), "world", PROTOCOL_VERSION,
+                context.world(), context.observedAtMs());
     }
 
     /**
@@ -145,13 +138,13 @@ public class SlaveSessionReporter extends PluginMessaging implements Listener, A
      */
     @Override
     public void close() {
-        flushTask.cancel();
-        flushSessions();
+        updateTask.cancel();
+        reportWorlds();
     }
 
-    private record ActiveRemoteSession(UUID uuid, String name, String server, String world, long startedAtMs) {
-        private ActiveRemoteSession withStartedAt(final long nextStartedAtMs) {
-            return new ActiveRemoteSession(uuid, name, server, world, nextStartedAtMs);
+    private record ActiveRemoteWorld(UUID uuid, String world, long observedAtMs) {
+        private ActiveRemoteWorld withObservedAt(final long nextObservedAtMs) {
+            return new ActiveRemoteWorld(uuid, world, nextObservedAtMs);
         }
     }
 }

@@ -193,6 +193,21 @@ public class AccumulatingTimeStorage implements UnifiedStorage, TimeAccumulator 
     }
 
     @Override
+    public void switchWorldContext(final UUID uuid, final String world, final long observedAtMs) throws StorageException {
+        final PersistedPlayerSession current = onlineSessions.get(uuid);
+        if (current == null || current.context().world().equals(world) || observedAtMs < current.context().startedAtMs()) {
+            return;
+        }
+        final PlayerSessionContext previous = current.context();
+        final PlayerSessionContext next = new PlayerSessionContext(previous.uuid(), previous.name(),
+                previous.server(), world, observedAtMs);
+        final long sessionId = storage.startSession(next, TimeEntryReason.PLAYER_JOIN);
+        if (onlineSessions.replace(uuid, current, new PersistedPlayerSession(sessionId, next))) {
+            storage.updateSession(current.sessionId(), observedAtMs, TimeEntryReason.WORLD_SWITCH);
+        }
+    }
+
+    @Override
     public void flushOnlineTimeCache() throws StorageException {
         if (onlineSessions.isEmpty()) {
             return;

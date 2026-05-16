@@ -92,7 +92,7 @@ public class SlaveSessionReporter extends PluginMessaging implements Listener, A
             return;
         }
         activeWorlds.put(uuid, next);
-        sendWorld(next);
+        sendWorldSwitch(next);
     }
 
     private void reportWorlds() {
@@ -114,6 +114,12 @@ public class SlaveSessionReporter extends PluginMessaging implements Listener, A
     private void sendWorld(final ActiveRemoteWorld context) {
         log.debug("Reporting remote world context for player " + context.uuid());
         sendPluginMessage(SLAVED_TIME_STORAGE, context.uuid(), "world", STORAGE_PROTOCOL_VERSION,
+                context.world(), context.observedAtMs());
+    }
+
+    private void sendWorldSwitch(final ActiveRemoteWorld context) {
+        log.debug("Reporting remote world switch for player " + context.uuid());
+        sendPluginMessage(SLAVED_TIME_STORAGE, context.uuid(), "world_switch", STORAGE_PROTOCOL_VERSION,
                 context.world(), context.observedAtMs());
     }
 

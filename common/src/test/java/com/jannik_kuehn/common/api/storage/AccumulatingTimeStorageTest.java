@@ -222,6 +222,24 @@ class AccumulatingTimeStorageTest {
     }
 
     @Test
+    void remoteWorldSwitchCreatesNewSessionRow() throws StorageException {
+        final FakeUnifiedStorage storage = new FakeUnifiedStorage();
+        final AccumulatingTimeStorage accumulator = accumulator(storage);
+
+        accumulator.startAccumulating(PLAYER, "Lorias_", "survival", "world", 1_000L);
+        accumulator.switchWorldContext(PLAYER, "world_nether", 4_000L);
+        accumulator.stopAccumulatingAndSaveOnlineTime(PLAYER, 9_000L, TimeEntryReason.PLAYER_LEAVE);
+
+        assertEquals(2, storage.sessions.size(), "Expected world switch to split the active row");
+        assertEquals("survival", storage.sessions.get(0).server(), "Expected canonical server to remain on the old row");
+        assertEquals("world", storage.sessions.get(0).world(), "Expected old world to remain on the old row");
+        assertEquals(TimeEntryReason.WORLD_SWITCH, storage.sessions.get(0).reason(), "Expected world switch to close the old row");
+        assertEquals("survival", storage.sessions.get(1).server(), "Expected canonical server to remain on the new row");
+        assertEquals("world_nether", storage.sessions.get(1).world(), "Expected new world to be tracked on the new row");
+        assertEquals(TimeEntryReason.PLAYER_LEAVE, storage.sessions.get(1).reason(), "Expected leave to close the new row");
+    }
+
+    @Test
     void remoteWorldContextWithoutActiveSessionIsIgnored() throws StorageException {
         final FakeUnifiedStorage storage = new FakeUnifiedStorage();
         final AccumulatingTimeStorage accumulator = accumulator(storage);

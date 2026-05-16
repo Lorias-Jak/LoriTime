@@ -71,6 +71,18 @@ class PluginMessagingTest {
     }
 
     @Test
+    void appliesRemoteWorldSwitchToAccumulator() throws StorageException {
+        final LoriTimePlugin plugin = pluginWithInlineScheduler();
+        final TimeAccumulator accumulator = mock(TimeAccumulator.class);
+        when(plugin.getAccumulator()).thenReturn(accumulator);
+        final CapturingPluginMessaging messaging = new CapturingPluginMessaging(plugin);
+
+        messaging.processPluginMessage("loritime:storage", messaging.data(PLAYER, "world_switch", 2, "world_nether", 7_000L));
+
+        verify(accumulator).switchWorldContext(PLAYER, "world_nether", 7_000L);
+    }
+
+    @Test
     void ignoresUnsupportedWorldContextProtocolVersion() throws StorageException {
         final LoriTimePlugin plugin = pluginWithInlineScheduler();
         final TimeAccumulator accumulator = mock(TimeAccumulator.class);
@@ -80,6 +92,18 @@ class PluginMessagingTest {
         messaging.processPluginMessage("loritime:storage", messaging.data(PLAYER, "world", 999, "world_nether", 7_000L));
 
         verify(accumulator, never()).updateWorldContext(any(), anyString(), anyLong());
+    }
+
+    @Test
+    void ignoresUnsupportedWorldSwitchProtocolVersion() throws StorageException {
+        final LoriTimePlugin plugin = pluginWithInlineScheduler();
+        final TimeAccumulator accumulator = mock(TimeAccumulator.class);
+        when(plugin.getAccumulator()).thenReturn(accumulator);
+        final CapturingPluginMessaging messaging = new CapturingPluginMessaging(plugin);
+
+        messaging.processPluginMessage("loritime:storage", messaging.data(PLAYER, "world_switch", 999, "world_nether", 7_000L));
+
+        verify(accumulator, never()).switchWorldContext(any(), anyString(), anyLong());
     }
 
     @Test

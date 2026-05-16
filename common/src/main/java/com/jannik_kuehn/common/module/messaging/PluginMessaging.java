@@ -194,6 +194,9 @@ public abstract class PluginMessaging {
                 case "world":
                     updateRemoteWorldContext(playerUUID, input);
                     break;
+                case "world_switch":
+                    switchRemoteWorldContext(playerUUID, input);
+                    break;
                 default:
                     log.warn("received invalid status: " + inputString);
                     break;
@@ -224,6 +227,17 @@ public abstract class PluginMessaging {
         final String world = input.readUTF();
         final long observedAtMs = input.readLong();
         loriTimePlugin.getAccumulator().updateWorldContext(playerUUID, world, observedAtMs);
+    }
+
+    private void switchRemoteWorldContext(final UUID playerUUID, final DataInputStream input) throws IOException, StorageException {
+        final int protocolVersion = input.readInt();
+        if (protocolVersion != STORAGE_PROTOCOL_VERSION) {
+            log.warn("received unsupported storage protocol version: " + protocolVersion);
+            return;
+        }
+        final String world = input.readUTF();
+        final long observedAtMs = input.readLong();
+        loriTimePlugin.getAccumulator().switchWorldContext(playerUUID, world, observedAtMs);
     }
 
     private long getTime(final UUID playerUUID) {

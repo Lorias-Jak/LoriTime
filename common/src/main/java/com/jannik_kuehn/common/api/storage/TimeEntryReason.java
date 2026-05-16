@@ -21,9 +21,19 @@ public enum TimeEntryReason {
     MANUAL_ADJUSTMENT,
 
     /**
-     * Player context changed (for example server/world switch).
+     * Time was adjusted by AFK handling.
      */
-    CONTEXT_SWITCH,
+    AFK_ADJUSTMENT,
+
+    /**
+     * Player moved to another server context.
+     */
+    SERVER_SWITCH,
+
+    /**
+     * Player moved to another world context on the same server.
+     */
+    WORLD_SWITCH,
 
     /**
      * When a player joins the Server
@@ -34,6 +44,16 @@ public enum TimeEntryReason {
      * Player left and current session was persisted.
      */
     PLAYER_LEAVE,
+
+    /**
+     * Player session was stopped because the player became AFK.
+     */
+    PLAYER_AFK,
+
+    /**
+     * Player session was stopped because the player was kicked for being AFK.
+     */
+    PLAYER_AFK_KICK,
 
     /**
      * Online cache flush persisted partial session time.

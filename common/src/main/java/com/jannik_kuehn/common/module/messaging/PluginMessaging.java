@@ -6,12 +6,14 @@ import com.jannik_kuehn.common.api.LoriTimePlayer;
 import com.jannik_kuehn.common.api.common.CommonSender;
 import com.jannik_kuehn.common.exception.PluginMessageException;
 import com.jannik_kuehn.common.exception.StorageException;
+import com.jannik_kuehn.common.module.afk.AfkTransitionType;
 import com.jannik_kuehn.common.utils.UuidUtil;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.EOFException;
 import java.io.IOException;
 import java.util.Optional;
 import java.util.OptionalLong;
@@ -19,8 +21,9 @@ import java.util.UUID;
 
 /**
  * The PluginMessaging class is responsible for sending and computing PluginMessages.
- * Theyre used to communicate between proxy and subserver.
+ * They're used to communicate between proxy and subserver.
  */
+@SuppressWarnings("PMD.TooManyMethods")
 public abstract class PluginMessaging {
     /**
      * The identifier for the afk-identifier channel.
@@ -31,6 +34,16 @@ public abstract class PluginMessaging {
      * The identifier for the storage-identifier channel.
      */
     protected static final String SLAVED_TIME_STORAGE = "loritime:storage";
+
+    /**
+     * Current storage plugin message protocol version.
+     */
+    protected static final int STORAGE_PROTOCOL_VERSION = StorageMessageProtocol.VERSION;
+
+    /**
+     * Prefix for ignored storage plugin message warnings.
+     */
+    private static final String STORAGE_IGNORED_PREFIX = "Storage plugin message ignored for player ";
 
     /**
      * The {@link LoriTimePlugin} instance.
@@ -117,7 +130,7 @@ public abstract class PluginMessaging {
     }
 
     private void setAfkStatus(final byte[] data) {
-        log.debug("Setting AFK Status");
+        log.debug("Processing AFK plugin message");
         try (ByteArrayInputStream byteInputStream = new ByteArrayInputStream(data);
              DataInputStream input = new DataInputStream(byteInputStream)) {
 
@@ -131,59 +144,135 @@ public abstract class PluginMessaging {
             }
             final LoriTimePlayer player = loriTimePlugin.getPlayerConverter().getOnlinePlayer(playerUUID);
 
-            switch (input.readUTF()) {
-                case "true":
-                    log.debug("Setting player '" + player.getName() + "' to AFK");
-                    loriTimePlugin.getAfkStatusProvider().setPlayerAFK(player, input.readLong());
-                    break;
-                case "false":
-                    log.debug("Resuming player '" + player.getName() + "' from AFK");
-                    loriTimePlugin.getAfkStatusProvider().resumePlayerAFK(player);
-                    break;
-                default:
-                    log.warn("received invalid afk status!");
-                    break;
+            final int protocolVersion = input.readInt();
+            if (!AfkMessageProtocol.isSupportedVersion(protocolVersion)) {
+                log.warn("AFK plugin message ignored: unsupported protocol version " + protocolVersion
+                        + " for player " + playerUUID);
+                return;
             }
+            final String transitionValue = input.readUTF();
+            final Optional<AfkTransitionType> transition = AfkMessageProtocol.parseTransition(transitionValue);
+            if (transition.isEmpty()) {
+                log.warn("AFK plugin message ignored for player " + playerUUID
+                        + ": invalid transition '" + transitionValue + "'");
+                return;
+            }
+            if (!AfkMessageProtocol.isSlaveTransition(transition.get())) {
+                log.warn("AFK plugin message ignored for player " + playerUUID
+                        + ": transition '" + transitionValue + "' is not accepted from slaves");
+                return;
+            }
+            if (transition.get() == AfkTransitionType.START) {
+                log.debug("Setting player '" + player.getName() + "' to AFK");
+                loriTimePlugin.getAfkStatusProvider().setPlayerAFK(player, input.readLong());
+            } else {
+                log.debug("Resuming player '" + player.getName() + "' from AFK");
+                loriTimePlugin.getAfkStatusProvider().resumePlayerAFK(player);
+            }
+        } catch (final EOFException e) {
+            log.warn("AFK plugin message ignored: malformed payload");
         } catch (final IOException e) {
             final PluginMessageException pluginMessageException = new PluginMessageException(e);
-            log.error("could not deserialize plugin message", pluginMessageException);
+            log.error("AFK plugin message failed during decoding", pluginMessageException);
         }
     }
 
     private void slavedTimeStorageHandling(final byte[] data) {
-        log.debug("Handling Slaved Time Storage");
+        log.debug("Processing storage plugin message");
+        String operationValue = "<unknown>";
         try (ByteArrayInputStream byteInputStream = new ByteArrayInputStream(data);
              DataInputStream input = new DataInputStream(byteInputStream)) {
 
             final byte[] uuidBytes = new byte[16];
             input.readFully(uuidBytes);
             final UUID playerUUID = UuidUtil.fromBytes(uuidBytes);
-            final String inputString = input.readUTF();
-            switch (inputString) {
-                case "get":
-                    log.debug("Sending time for player '" + playerUUID + "'");
-                    sendPluginMessage(SLAVED_TIME_STORAGE, playerUUID, "send", getTime(playerUUID));
-                    break;
-                case "add":
-                    log.debug("Adding time for player '" + playerUUID + "'");
-                    loriTimePlugin.getTimeStorage().addTime(playerUUID, input.readLong());
-                    break;
-                default:
-                    log.warn("received invalid status: " + inputString);
-                    break;
+            operationValue = input.readUTF();
+            final Optional<StorageMessageType> messageType = StorageMessageProtocol.parseType(operationValue);
+            if (messageType.isEmpty()) {
+                warnStorageIgnored(playerUUID, "unknown operation '" + operationValue + "'");
+                return;
             }
+            handleStorageMessage(playerUUID, messageType.get(), input);
+        } catch (final EOFException e) {
+            log.warn("Storage plugin message ignored: malformed payload for operation '" + operationValue + "'");
         } catch (final IOException e) {
             final PluginMessageException pluginMessageException = new PluginMessageException(e);
-            log.error("could not deserialize plugin message", pluginMessageException);
+            log.error("Storage plugin message failed during decoding for operation '" + operationValue + "'",
+                    pluginMessageException);
         } catch (final StorageException e) {
-            log.error("could not add time", e);
+            log.error("Storage plugin message failed while applying operation '" + operationValue + "'", e);
         }
+    }
+
+    private void handleStorageMessage(final UUID playerUUID, final StorageMessageType messageType, final DataInputStream input)
+            throws IOException, StorageException {
+        switch (messageType) {
+            case GET:
+                log.debug("Sending time for player '" + playerUUID + "'");
+                sendPluginMessage(SLAVED_TIME_STORAGE, playerUUID, StorageMessageType.SEND.wireValue(), getTime(playerUUID));
+                break;
+            case ADD:
+                log.debug("Adding time for player '" + playerUUID + "'");
+                loriTimePlugin.getStorage().addTime(playerUUID, input.readLong());
+                break;
+            case SESSION:
+                rejectRemoteSession(playerUUID, input);
+                break;
+            case WORLD:
+                updateRemoteWorldContext(playerUUID, input);
+                break;
+            case WORLD_SWITCH:
+                switchRemoteWorldContext(playerUUID, input);
+                break;
+            case SEND:
+                warnStorageIgnored(playerUUID, "operation '" + messageType.wireValue() + "' is not accepted by the master");
+                break;
+        }
+    }
+
+    private void rejectRemoteSession(final UUID playerUUID, final DataInputStream input) throws IOException {
+        final int protocolVersion = input.readInt();
+        if (!isSupportedStorageVersion(StorageMessageType.SESSION, protocolVersion, playerUUID)) {
+            return;
+        }
+        warnStorageIgnored(playerUUID, "stale completed remote session payload");
+    }
+
+    private void updateRemoteWorldContext(final UUID playerUUID, final DataInputStream input) throws IOException, StorageException {
+        if (!isSupportedStorageVersion(StorageMessageType.WORLD, input.readInt(), playerUUID)) {
+            return;
+        }
+        final String world = input.readUTF();
+        final long observedAtMs = input.readLong();
+        loriTimePlugin.getAccumulator().updateWorldContext(playerUUID, world, observedAtMs);
+    }
+
+    private void switchRemoteWorldContext(final UUID playerUUID, final DataInputStream input) throws IOException, StorageException {
+        if (!isSupportedStorageVersion(StorageMessageType.WORLD_SWITCH, input.readInt(), playerUUID)) {
+            return;
+        }
+        final String world = input.readUTF();
+        final long observedAtMs = input.readLong();
+        loriTimePlugin.getAccumulator().switchWorldContext(playerUUID, world, observedAtMs);
+    }
+
+    private boolean isSupportedStorageVersion(final StorageMessageType messageType, final int protocolVersion, final UUID playerUUID) {
+        if (protocolVersion == StorageMessageProtocol.VERSION) {
+            return true;
+        }
+        warnStorageIgnored(playerUUID, "operation '" + messageType.wireValue()
+                + "' uses unsupported protocol version " + protocolVersion);
+        return false;
+    }
+
+    private void warnStorageIgnored(final UUID playerUUID, final String reason) {
+        log.warn(STORAGE_IGNORED_PREFIX + playerUUID + ": " + reason);
     }
 
     private long getTime(final UUID playerUUID) {
         OptionalLong time = OptionalLong.empty();
         try {
-            time = loriTimePlugin.getTimeStorage().getTime(playerUUID);
+            time = loriTimePlugin.getStorage().getTime(playerUUID);
         } catch (final StorageException e) {
             log.error("could not get time for " + playerUUID, e);
         }

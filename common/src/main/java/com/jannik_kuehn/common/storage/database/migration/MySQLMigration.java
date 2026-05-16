@@ -89,6 +89,21 @@ public final class MySQLMigration {
                                 + ") ENGINE InnoDB"
                 )
                 .addFirstStartupQuery(
+                        "CREATE TABLE IF NOT EXISTS `" + tablePrefix + "_time_adjustment` ("
+                                + "`id` BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,"
+                                + "`player_id` BIGINT NOT NULL,"
+                                + "`amount_seconds` BIGINT NOT NULL,"
+                                + "`reason` VARCHAR(32) NOT NULL DEFAULT 'MANUAL_ADJUSTMENT',"
+                                + "`actor_uuid` BINARY(16) NULL,"
+                                + "`actor_name` VARCHAR(64) CHARACTER SET utf8mb4 NOT NULL,"
+                                + "`created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),"
+                                + "INDEX `idx_adjustment_player` (`player_id`),"
+                                + "INDEX `idx_adjustment_created` (`created_at`),"
+                                + "CONSTRAINT `fk_adjustment_player` FOREIGN KEY (`player_id`) "
+                                + "REFERENCES `" + tablePrefix + "_player`(`id`) ON DELETE CASCADE"
+                                + ") ENGINE InnoDB"
+                )
+                .addFirstStartupQuery(
                         "CREATE TABLE IF NOT EXISTS `" + tablePrefix + "_version` ("
                                 + "`version_no` INT NOT NULL,"
                                 + "`applied_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,"
@@ -150,6 +165,21 @@ public final class MySQLMigration {
                                 + "REFERENCES `" + tablePrefix + "_player`(`id`) ON DELETE CASCADE,"
                                 + "CONSTRAINT `fk_time_world` FOREIGN KEY (`world_id`) "
                                 + "REFERENCES `" + tablePrefix + "_world`(`id`) ON DELETE CASCADE"
+                                + ") ENGINE InnoDB"
+                )
+                .addUnconditionalQuery(
+                        "CREATE TABLE IF NOT EXISTS `" + tablePrefix + "_time_adjustment` ("
+                                + "`id` BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,"
+                                + "`player_id` BIGINT NOT NULL,"
+                                + "`amount_seconds` BIGINT NOT NULL,"
+                                + "`reason` VARCHAR(32) NOT NULL DEFAULT 'MANUAL_ADJUSTMENT',"
+                                + "`actor_uuid` BINARY(16) NULL,"
+                                + "`actor_name` VARCHAR(64) CHARACTER SET utf8mb4 NOT NULL,"
+                                + "`created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),"
+                                + "INDEX `idx_adjustment_player` (`player_id`),"
+                                + "INDEX `idx_adjustment_created` (`created_at`),"
+                                + "CONSTRAINT `fk_adjustment_player` FOREIGN KEY (`player_id`) "
+                                + "REFERENCES `" + tablePrefix + "_player`(`id`) ON DELETE CASCADE"
                                 + ") ENGINE InnoDB"
                 )
                 .addUnconditionalQuery(

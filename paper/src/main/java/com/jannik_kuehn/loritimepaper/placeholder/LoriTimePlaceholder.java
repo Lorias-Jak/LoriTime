@@ -3,7 +3,7 @@ package com.jannik_kuehn.loritimepaper.placeholder;
 import com.github.roleplaycauldron.spellbook.core.logger.WrappedLogger;
 import com.jannik_kuehn.common.LoriTimePlugin;
 import com.jannik_kuehn.common.api.LoriTimePlayer;
-import com.jannik_kuehn.common.api.storage.TimeStorage;
+import com.jannik_kuehn.common.api.storage.UnifiedStorage;
 import com.jannik_kuehn.common.exception.StorageException;
 import com.jannik_kuehn.common.utils.TimeUtil;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
@@ -22,16 +22,16 @@ public class LoriTimePlaceholder extends PlaceholderExpansion {
 
     private final LoriTimePlugin loriTimePlugin;
 
-    private final TimeStorage timeStorage;
+    private final UnifiedStorage storage;
 
     private final WrappedLogger log;
 
     private final Map<UUID, Long> offlinePlayerTime;
 
-    public LoriTimePlaceholder(final LoriTimePlugin plugin, final TimeStorage timeStorage) {
+    public LoriTimePlaceholder(final LoriTimePlugin plugin, final UnifiedStorage storage) {
         super();
         this.loriTimePlugin = plugin;
-        this.timeStorage = timeStorage;
+        this.storage = storage;
 
         this.log = loriTimePlugin.getLoggerFactory().create(LoriTimePlaceholder.class);
         this.offlinePlayerTime = new HashMap<>();
@@ -76,7 +76,7 @@ public class LoriTimePlaceholder extends PlaceholderExpansion {
         }
         long onlineTime = 0;
         try {
-            final OptionalLong optionalLong = timeStorage.getTime(player.getUniqueId());
+            final OptionalLong optionalLong = storage.getTime(player.getUniqueId());
             if (optionalLong.isPresent()) {
                 onlineTime = optionalLong.getAsLong();
             }

@@ -3,6 +3,8 @@ package com.jannik_kuehn.loritimepaper.afk;
 import com.github.roleplaycauldron.spellbook.core.logger.WrappedLogger;
 import com.jannik_kuehn.common.api.LoriTimePlayer;
 import com.jannik_kuehn.common.module.afk.AfkHandling;
+import com.jannik_kuehn.common.module.afk.AfkTransitionType;
+import com.jannik_kuehn.common.module.messaging.AfkMessageProtocol;
 import com.jannik_kuehn.loritimepaper.LoriTimePaper;
 
 /**
@@ -35,13 +37,13 @@ public class PaperSlavedAfkHandling extends AfkHandling {
         log.debug("Executing AFK for player: " + loriTimePlayer.getName() + ". Time to remove: "
                 + timeToRemove + ". Sending PluginMessage");
         loriTimePaper.getPaperPluginMessenger().sendPluginMessage("loritime:afk",
-                loriTimePlayer.getUniqueId(), "true", timeToRemove);
+                loriTimePlayer.getUniqueId(), AfkMessageProtocol.VERSION, AfkTransitionType.START.name(), timeToRemove);
     }
 
     @Override
     public void executePlayerResume(final LoriTimePlayer loriTimePlayer) {
         log.debug("Executing resume for player: " + loriTimePlayer.getName() + ". Sending PluginMessage");
         loriTimePaper.getPaperPluginMessenger().sendPluginMessage("loritime:afk",
-                loriTimePlayer.getUniqueId(), "false");
+                loriTimePlayer.getUniqueId(), AfkMessageProtocol.VERSION, AfkTransitionType.RESUME.name());
     }
 }

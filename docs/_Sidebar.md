@@ -4,6 +4,7 @@ Home
 Guide
 - [Setup](https://github.com/Lorias-Jak/LoriTime/wiki/Setup)
 - [Commands](https://github.com/Lorias-Jak/LoriTime/wiki/Commands)
+- [Migrating from V1 to V2](https://github.com/Lorias-Jak/LoriTime/wiki/Migrating-from-V1-to-V2)
 
 Documentation
 - [AFK](https://github.com/Lorias-Jak/LoriTime/wiki/AFK)

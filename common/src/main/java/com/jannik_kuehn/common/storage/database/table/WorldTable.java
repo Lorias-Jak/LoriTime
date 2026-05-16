@@ -41,7 +41,7 @@ public final class WorldTable {
      * @param server     the name of the server
      * @param world      the name of the world
      * @return the unique identifier (ID) of the world entry
-     * @throws SQLException if a database access error occurs or the world entry cannot be created
+     * @throws SQLException if a database access error occurs, or the world entry cannot be created
      */
     public long ensureWorld(final Connection connection, final String server, final String world) throws SQLException {
         final long serverId = serverTable.ensureServer(connection, server);

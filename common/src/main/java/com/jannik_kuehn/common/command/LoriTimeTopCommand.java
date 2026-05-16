@@ -3,7 +3,7 @@ package com.jannik_kuehn.common.command;
 import com.jannik_kuehn.common.LoriTimePlugin;
 import com.jannik_kuehn.common.api.common.CommonCommand;
 import com.jannik_kuehn.common.api.common.CommonSender;
-import com.jannik_kuehn.common.api.storage.NameStorage;
+import com.jannik_kuehn.common.api.storage.UnifiedStorage;
 import com.jannik_kuehn.common.config.localization.Localization;
 import com.jannik_kuehn.common.exception.StorageException;
 import com.jannik_kuehn.common.utils.TimeUtil;
@@ -63,7 +63,7 @@ public class LoriTimeTopCommand implements CommonCommand {
         final List<Map.Entry<String, Long>> timeEntriesList;
         final Map<String, Long> rawTimeEntries = new HashMap<>();
         try {
-            for (final Map.Entry<String, ?> allEntry : plugin.getTimeStorage().getAllTimeEntries().entrySet()) {
+            for (final Map.Entry<String, ?> allEntry : plugin.getStorage().getAllTimeEntries().entrySet()) {
                 if (allEntry.getValue() instanceof Long) {
                     rawTimeEntries.put(allEntry.getKey(), (Long) allEntry.getValue());
                 } else if (allEntry.getValue() instanceof Integer) {
@@ -117,12 +117,12 @@ public class LoriTimeTopCommand implements CommonCommand {
                 .replace("[totalTime]", TimeUtil.formatTime(totalTimeSum, localization))
         ));
         try {
-            final NameStorage nameStorage = plugin.getNameStorage();
+            final UnifiedStorage storage = plugin.getStorage();
             int place = minValue;
             for (final Map.Entry<String, Long> topEntry : timeEntriesList.subList(minValue, maxValue)) {
                 place++;
                 final UUID uuid = UUID.fromString(topEntry.getKey());
-                final Optional<String> optionalName = nameStorage.getName(uuid);
+                final Optional<String> optionalName = storage.getName(uuid);
                 if (optionalName.isEmpty()) {
                     continue;
                 }

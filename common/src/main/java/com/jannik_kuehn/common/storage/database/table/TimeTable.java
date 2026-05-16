@@ -8,6 +8,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
@@ -21,6 +22,7 @@ import java.util.UUID;
 /**
  * Table helper for time entries.
  */
+@SuppressWarnings("PMD.TooManyMethods")
 public final class TimeTable {
     /**
      * The table name.
@@ -75,7 +77,8 @@ public final class TimeTable {
     /**
      * Inserts or updates a player's session duration with the given reason.
      *
-     * <p>Reasons {@link TimeEntryReason#PLAYER_LEAVE}, {@link TimeEntryReason#AUTO_FLUSH} and
+     * <p>Reasons {@link TimeEntryReason#PLAYER_LEAVE}, {@link TimeEntryReason#PLAYER_AFK},
+     * {@link TimeEntryReason#PLAYER_AFK_KICK}, {@link TimeEntryReason#AUTO_FLUSH} and
      * {@link TimeEntryReason#SHUTDOWN_FLUSH} update the latest entry by setting the leave timestamp
      * to the current moment and replacing the reason. Other reasons create a fresh entry.</p>
      *
@@ -96,6 +99,87 @@ public final class TimeTable {
             return;
         }
         insertNewDuration(connection, playerId, worldId, durationSeconds, reason);
+    }
+
+    /**
+     * Inserts a session with explicit join and leave timestamps.
+     *
+     * @param connection the database connection
+     * @param playerId   player id
+     * @param worldId    world id
+     * @param join       join timestamp
+     * @param leave      leave timestamp
+     * @param reason     persistence reason
+     * @throws SQLException if persistence fails
+     */
+    public long insertSession(final Connection connection,
+                              final long playerId,
+                              final long worldId,
+                              final Instant join,
+                              final Instant leave,
+                              final TimeEntryReason reason) throws SQLException {
+        Objects.requireNonNull(join);
+        Objects.requireNonNull(leave);
+        Objects.requireNonNull(reason);
+        try (PreparedStatement insert = connection.prepareStatement(
+                "INSERT INTO `" + tableName + "` (`player_id`, `world_id`, `join_time`, `leave_time`, `reason`) "
+                        + "VALUES (?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS)) {
+            insert.setLong(1, playerId);
+            insert.setLong(2, worldId);
+            insert.setTimestamp(3, Timestamp.from(join));
+            insert.setTimestamp(4, Timestamp.from(leave));
+            insert.setString(5, reason.name());
+            insert.executeUpdate();
+            try (ResultSet keys = insert.getGeneratedKeys()) {
+                if (keys.next()) {
+                    return keys.getLong(1);
+                }
+            }
+        }
+        throw new SQLException("Unable to insert session");
+    }
+
+    /**
+     * Updates the leave timestamp and reason for an existing session row.
+     *
+     * @param connection database connection
+     * @param sessionId  session id
+     * @param leave      leave timestamp
+     * @param reason     persistence reason
+     * @throws SQLException if the update fails
+     */
+    public void updateSession(final Connection connection,
+                              final long sessionId,
+                              final Instant leave,
+                              final TimeEntryReason reason) throws SQLException {
+        Objects.requireNonNull(leave);
+        Objects.requireNonNull(reason);
+        try (PreparedStatement update = connection.prepareStatement(
+                "UPDATE `" + tableName + "` SET `leave_time` = ?, `reason` = ? WHERE `id` = ?")) {
+            update.setTimestamp(1, Timestamp.from(leave));
+            update.setString(2, reason.name());
+            update.setLong(3, sessionId);
+            update.executeUpdate();
+        }
+    }
+
+    /**
+     * Updates the world context for an existing session row.
+     *
+     * @param connection database connection
+     * @param sessionId  session id
+     * @param worldId    world id
+     * @throws SQLException if the update fails
+     */
+    public void updateSessionWorld(final Connection connection,
+                                   final long sessionId,
+                                   final long worldId) throws SQLException {
+        try (PreparedStatement update = connection.prepareStatement(
+                "UPDATE `" + tableName + "` SET `world_id` = ? WHERE `id` = ?")) {
+            update.setLong(1, worldId);
+            update.setLong(2, sessionId);
+            update.executeUpdate();
+        }
     }
 
     /**
@@ -155,8 +239,38 @@ public final class TimeTable {
         return totals;
     }
 
+    /**
+     * Deletes time history for players inactive before the cutoff expression.
+     *
+     * @param connection database connection
+     * @param cutoffSql  SQL timestamp cutoff expression
+     * @return deleted rows
+     * @throws SQLException if delete fails
+     */
+    public int deleteInactiveHistory(final Connection connection, final String cutoffSql) throws SQLException {
+        return playerTable.deleteInactiveHistory(connection, tableName, cutoffSql);
+    }
+
+    /**
+     * Deletes all session rows for one player.
+     *
+     * @param connection database connection
+     * @param playerId   player id
+     * @return deleted rows
+     * @throws SQLException if delete fails
+     */
+    public int deleteForPlayer(final Connection connection, final long playerId) throws SQLException {
+        try (PreparedStatement delete = connection.prepareStatement(
+                "DELETE FROM `" + tableName + "` WHERE `player_id` = ?")) {
+            delete.setLong(1, playerId);
+            return delete.executeUpdate();
+        }
+    }
+
     private boolean shouldUpdateLatest(final TimeEntryReason reason) {
-        return EnumSet.of(TimeEntryReason.PLAYER_LEAVE, TimeEntryReason.AUTO_FLUSH, TimeEntryReason.SHUTDOWN_FLUSH).contains(reason);
+        return EnumSet.of(TimeEntryReason.PLAYER_LEAVE, TimeEntryReason.PLAYER_AFK,
+                TimeEntryReason.PLAYER_AFK_KICK, TimeEntryReason.AUTO_FLUSH, TimeEntryReason.SHUTDOWN_FLUSH)
+                .contains(reason);
     }
 
     private void insertNewDuration(final Connection connection,

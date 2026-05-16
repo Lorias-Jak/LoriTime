@@ -6,7 +6,9 @@ import com.jannik_kuehn.common.api.LoriTimePlayerConverter;
 import com.jannik_kuehn.common.api.common.CommonServer;
 import com.jannik_kuehn.common.api.scheduler.PluginScheduler;
 import com.jannik_kuehn.common.api.storage.AccumulatingTimeStorage;
-import com.jannik_kuehn.common.api.storage.NameStorage;
+import com.jannik_kuehn.common.api.storage.StorageMode;
+import com.jannik_kuehn.common.api.storage.TimeAccumulator;
+import com.jannik_kuehn.common.api.storage.UnifiedStorage;
 import com.jannik_kuehn.common.config.Configuration;
 import com.jannik_kuehn.common.config.FileManager;
 import com.jannik_kuehn.common.config.localization.Localization;
@@ -28,15 +30,17 @@ import com.jannik_kuehn.common.utils.TimeParser;
 
 import java.io.File;
 import java.time.InstantSource;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * The {@link LoriTimePlugin} is the main class of the plugin.
  */
-@SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.ConfusingTernary", "PMD.LiteralsFirstInComparisons",
-        "PMD.AssignmentToNonFinalStatic", "PMD.CouplingBetweenObjects"})
+@SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.AssignmentToNonFinalStatic", "PMD.CouplingBetweenObjects"})
 public class LoriTimePlugin {
     /**
      * The {@link LoriTimePlugin} instance.
@@ -82,6 +86,11 @@ public class LoriTimePlugin {
      * The {@link LoriTimePlayerConverter} instance.
      */
     private final LoriTimePlayerConverter playerConverter;
+
+    /**
+     * Players whose next leave/disconnect should be persisted as AFK-caused.
+     */
+    private final Set<UUID> afkKickMarkers;
 
     /**
      * The {@link Configuration} instance.
@@ -134,6 +143,7 @@ public class LoriTimePlugin {
         this.fileManager = new FileManager(loggerFactory, dataFolder);
         this.dataStorageManager = new DataStorageManager(this, dataFolder);
         this.playerConverter = new LoriTimePlayerConverter(loggerFactory, this);
+        this.afkKickMarkers = Collections.newSetFromMap(new ConcurrentHashMap<>());
     }
 
     /**
@@ -142,6 +152,7 @@ public class LoriTimePlugin {
      * @return the {@link LoriTimePlugin} instance.
      */
     public static LoriTimePlugin getInstance() {
+        // ToDo Remove this
         return instance;
     }
 
@@ -154,14 +165,14 @@ public class LoriTimePlugin {
         server.setServerMode(getServerModeFromConfig());
         setupUpdater();
 
-        if (server.getServerMode().equalsIgnoreCase("master")) {
-            enableAsMaster();
+        if (!StorageMode.SLAVE.configValue().equalsIgnoreCase(server.getServerMode())) {
+            enableCanonicalStorage();
         }
 
         log.debug("Enabled main class of the plugin, enabling the rest of the plugin..");
     }
 
-    private void enableAsMaster() {
+    private void enableCanonicalStorage() {
         try {
             final StorageMigrationService storageMigrationService = new StorageMigrationService(this, dataFolder);
             storageMigrationService.migrateIfNecessary();
@@ -197,13 +208,12 @@ public class LoriTimePlugin {
     }
 
     private String getServerModeFromConfig() {
-        final String serverMode;
-        if (!isMultiSetupEnabled()) {
-            serverMode = "master";
-        } else {
-            serverMode = config.getString("multiSetup.mode", "master");
+        try {
+            return StorageMode.parse(config.getString("multiSetup.mode", StorageMode.STANDALONE.configValue())).configValue();
+        } catch (final IllegalArgumentException ex) {
+            log.warn("Invalid multiSetup.mode configured, falling back to standalone.", ex);
+            return StorageMode.STANDALONE.configValue();
         }
-        return serverMode;
     }
 
     /**
@@ -221,7 +231,7 @@ public class LoriTimePlugin {
      * @return {@code true} if the plugin is disabled, otherwise {@code false}.
      */
     public boolean isMultiSetupEnabled() {
-        return config.getBoolean("multiSetup.enabled", false);
+        return !StorageMode.STANDALONE.configValue().equalsIgnoreCase(getServerModeFromConfig());
     }
 
     /**
@@ -231,6 +241,27 @@ public class LoriTimePlugin {
      */
     public boolean isAfkEnabled() {
         return config.getBoolean("afk.enabled", false);
+    }
+
+    /**
+     * Marks a player whose disconnect is caused by AFK kick enforcement.
+     *
+     * @param uniqueId player UUID
+     */
+    public void markAfkKick(final UUID uniqueId) {
+        if (uniqueId != null) {
+            afkKickMarkers.add(uniqueId);
+        }
+    }
+
+    /**
+     * Consumes the AFK kick marker for a player.
+     *
+     * @param uniqueId player UUID
+     * @return true when the next disconnect should be recorded as AFK-caused
+     */
+    public boolean consumeAfkKick(final UUID uniqueId) {
+        return uniqueId != null && afkKickMarkers.remove(uniqueId);
     }
 
     /**
@@ -249,6 +280,7 @@ public class LoriTimePlugin {
         localization.reloadTranslation();
         if (afkStatusProvider != null) {
             afkStatusProvider.reloadConfigValues();
+            afkStatusProvider.restartAfkCheck();
         }
 
         reloadMasteredFunctions();
@@ -376,21 +408,32 @@ public class LoriTimePlugin {
     }
 
     /**
-     * Getter of the {@link NameStorage}.
+     * Getter of the {@link UnifiedStorage}.
      *
-     * @return the {@link NameStorage}.
+     * @return the {@link UnifiedStorage}.
      */
-    public NameStorage getNameStorage() {
-        return dataStorageManager.getNameStorage();
+    public UnifiedStorage getStorage() {
+        return dataStorageManager.getStorage();
     }
 
     /**
-     * Getter of the {@link AccumulatingTimeStorage}.
+     * Getter of the {@link TimeAccumulator}.
      *
-     * @return the {@link AccumulatingTimeStorage}.
+     * @return the {@link TimeAccumulator}.
      */
-    public AccumulatingTimeStorage getTimeStorage() {
-        return dataStorageManager.getTimeStorage();
+    public TimeAccumulator getAccumulator() {
+        return dataStorageManager.getAccumulator();
+    }
+
+    /**
+     * Getter of the accumulated unified storage.
+     *
+     * @return the accumulated unified storage
+     * @deprecated use {@link #getStorage()} for storage reads/writes or {@link #getAccumulator()} for session lifecycle.
+     */
+    @Deprecated(since = "2.0.0", forRemoval = true)
+    public AccumulatingTimeStorage getAccumulatingStorage() {
+        return (AccumulatingTimeStorage) dataStorageManager.getAccumulator();
     }
 
     /**

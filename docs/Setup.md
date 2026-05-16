@@ -38,8 +38,9 @@ You **should** use MultiSetup if:
 - You can now edit the configuration file and localization if needed.
 ### 3. Configure the configs
 - It's important that you configure the configs on its own. You can nearly copy-paste the configuration per server. Not every Parameter is used on Proxy or on the subserver.
-- Set the Proxy `multiSetup.enabled` to `true` and the `multiSetup.mode` to `master`
-- Set the Sub-Server `multiSetup.enabled` to `true` and the `multiSetup.mode` to `slave`
+- Set the Proxy `multiSetup.mode` to `master`
+- Set each Paper/Folia Sub-Server `multiSetup.mode` to `slave`
+- The proxy backend server name is used for canonical session rows. Paper/Folia slave `server.name` is not used for canonical server entries in this setup.
 ### 4. start your server again.
 - The plugin should now load normally and you can enjoy LoriTime!
 
@@ -52,11 +53,7 @@ You **should** use MultiSetup if:
 ##############
 multiSetup:
 
-  # If true, the plugin will be enabled for multiple server setup.
-  # Only activate and set on master on proxy-server, use the slave mode on sub-servers.
-  enabled: true
-
-  # Options to set: "master", "slave".
+  # Options to set: "standalone", "master", "slave".
   mode: 'master'
 ```
 
@@ -71,12 +68,13 @@ multiSetup:
 ##############
 multiSetup:
 
-  # If true, the plugin will be enabled for multiple server setup.
-  # Only activate and set on master on proxy-server, use the slave mode on sub-servers.
-  enabled: true
-
-  # Options to set: "master", "slave".
+  # Options to set: "standalone", "master", "slave".
   mode: 'slave'
+
+server:
+  # Used only when this Paper/Folia instance owns local session rows.
+  # In proxy slave mode, the proxy backend name is canonical instead.
+  name: 'survival-1'
 ```
 
 </details>

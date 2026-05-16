@@ -75,7 +75,7 @@ public class BungeeServer implements CommonServer, CommonSender {
 
     @Override
     public boolean isProxy() {
-        return false;
+        return true;
     }
 
     @Override

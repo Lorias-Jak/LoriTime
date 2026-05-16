@@ -2,13 +2,16 @@ package com.jannik_kuehn.common.storage;
 
 import com.github.roleplaycauldron.spellbook.core.logger.WrappedLogger;
 import com.jannik_kuehn.common.LoriTimePlugin;
+import com.jannik_kuehn.common.api.storage.PlayerSessionChunk;
+import com.jannik_kuehn.common.api.storage.SessionContextDefaults;
 import com.jannik_kuehn.common.api.storage.TimeEntryReason;
 import com.jannik_kuehn.common.config.Configuration;
 import com.jannik_kuehn.common.config.YamlConfiguration;
 import com.jannik_kuehn.common.exception.StorageException;
 import com.jannik_kuehn.common.storage.database.DatabaseStorage;
-import com.jannik_kuehn.common.storage.database.DatabaseTimeAndNameStorage;
+import com.jannik_kuehn.common.storage.database.UnifiedDatabaseStorage;
 import com.jannik_kuehn.common.storage.database.migration.DatabaseMigrationPreflight;
+import com.jannik_kuehn.common.storage.database.table.ManualAdjustmentTable;
 import com.jannik_kuehn.common.storage.database.table.PlayerTable;
 import com.jannik_kuehn.common.storage.database.table.ServerTable;
 import com.jannik_kuehn.common.storage.database.table.TimeTable;
@@ -145,14 +148,15 @@ public class StorageMigrationService {
         final ServerTable serverTable = new ServerTable(databaseStorage.getTablePrefix() + "_server");
         final WorldTable worldTable = new WorldTable(databaseStorage.getTablePrefix() + "_world", serverTable);
         final TimeTable timeTable = new TimeTable(databaseStorage.getTablePrefix() + "_time", playerTable, databaseStorage.getDialect());
-        final DatabaseTimeAndNameStorage storage = new DatabaseTimeAndNameStorage(
-                databaseStorage.getProvider(), playerTable, serverTable, worldTable, timeTable);
+        final ManualAdjustmentTable adjustmentTable = new ManualAdjustmentTable(databaseStorage.getTablePrefix() + "_time_adjustment", playerTable);
+        final UnifiedDatabaseStorage storage = new UnifiedDatabaseStorage(
+                databaseStorage.getProvider(), playerTable, serverTable, worldTable, timeTable, adjustmentTable, databaseStorage.getDialect());
 
         importNames(storage, namesFile);
         importTimes(storage, timeFile);
     }
 
-    private void importNames(final DatabaseTimeAndNameStorage storage, final File namesFile) throws StorageException {
+    private void importNames(final UnifiedDatabaseStorage storage, final File namesFile) throws StorageException {
         if (!namesFile.exists()) {
             return;
         }
@@ -160,12 +164,12 @@ public class StorageMigrationService {
         for (final Map.Entry<String, Object> entry : names.getAll().entrySet()) {
             final Optional<UUID> uuid = parseUuid(entry.getValue());
             if (uuid.isPresent()) {
-                storage.setEntry(uuid.get(), entry.getKey());
+                storage.setPlayerName(uuid.get(), entry.getKey());
             }
         }
     }
 
-    private void importTimes(final DatabaseTimeAndNameStorage storage, final File timeFile) throws StorageException {
+    private void importTimes(final UnifiedDatabaseStorage storage, final File timeFile) throws StorageException {
         if (!timeFile.exists()) {
             return;
         }
@@ -174,7 +178,10 @@ public class StorageMigrationService {
             final Optional<UUID> uuid = parseUuid(entry.getKey());
             final Optional<Long> time = parseLong(entry.getValue());
             if (uuid.isPresent() && time.isPresent()) {
-                storage.addTime(uuid.get(), time.get(), TimeEntryReason.LEGACY_IMPORT);
+                final long now = System.currentTimeMillis();
+                storage.persistSession(new PlayerSessionChunk(uuid.get(), Optional.empty(),
+                        SessionContextDefaults.SERVER, SessionContextDefaults.WORLD, now - time.get() * 1000L, now,
+                        TimeEntryReason.LEGACY_IMPORT));
             }
         }
     }

@@ -1,50 +1,92 @@
-Currently LoriTime stores data in a database.<br>
-You can choose between SQLite (file-based) and MySQL/MariaDB (server-based).<br>
+LoriTime stores data in a database. You can choose between SQLite for a local file database and MySQL/MariaDB for a remote database.
 
-## Types
-> ⚠️ Only MariaDB and SQLite are tested, not mysql. In case you have any problems, pls report them<br>
+## Storage Types
 
-| Type | Description | 
+| Type | Description |
 |------|-------------|
-| mysql | A database hosted on a MySQL server |
-| mariadb | A database hosted on a MariaDB server |
-| sqlite | A file-based SQLite database |
+| `sqlite` | File-based SQLite database |
+| `mysql` | Database hosted on a MySQL server |
+| `mariadb` | Database hosted on a MariaDB server |
 
-> ℹ️ Legacy `yml` storage is no longer a regular storage mode. If detected on startup,
-> LoriTime automatically migrates `data/names.yml` and `data/time.yml` to SQLite.
+Only MariaDB and SQLite are tested regularly. Legacy `yml` storage is no longer a regular storage mode. If LoriTime detects `data/names.yml` or `data/time.yml` on startup, it migrates them to SQLite.
 
-## Setting up the database
-<p>To change the storage type, open your `config.yml`, set <code>general.storage</code> to <code>mysql</code>, <code>mariadb</code> or <code>sqlite</code>, and enter all database properties.</p>
-<details>
-<summary>Database properties (config.yml)</summary>
+## Database Configuration
+
+Set `storageMethod` in `config.yml`:
 
 ```yml
-###########
-#  Mysql  #
-###########
-mysql:
+storageMethod: 'sqlite'
+
+data:
+  tablePrefix: 'loritime'
   host: 'localhost'
   port: 3306
-  database: 'test'
+  database: 'minecraft'
   user: 'user'
-  password: '123ABC!'
-  tablePrefix: 'loritime'
-
-###########
-# SQLite  #
-###########
-sqlite:
-  file: 'loritime.db'
-  tablePrefix: 'loritime'
+  password: 'pw'
 ```
 
-</details>
+The `data` section is only used for remote database storage methods, except `tablePrefix`, which is shared by all SQL backends.
 
-## Proxy-only usage with database storage
-If LoriTime runs only on a proxy (multi-setup master on Velocity / Bungee) and no world-specific source is available,
-LoriTime stores accumulated time in a synthetic scope:
+## Storage Modes
 
-- server: `default`
-- world: `global`
+LoriTime has three storage responsibility modes:
 
-This keeps proxy-only deployments compatible with the normalized database schema, because no paper world data is required.
+| Mode | Responsibility |
+|------|----------------|
+| `standalone` | The instance reads and writes its own canonical storage. |
+| `master` | The instance owns canonical storage for a multi-setup and answers slave read requests. |
+| `slave` | The instance reports slave-owned context or writes to a master and keeps a local read cache for local consumers. |
+
+`multiSetup.mode` is the authoritative setting. The default is `standalone`.
+
+```yml
+multiSetup:
+  mode: 'standalone'
+```
+
+Modes describe storage responsibility only. Platform modules decide what features they can provide in that mode.
+
+## Platform Behavior
+
+| Platform | `standalone` | `master` | `slave` | Context source |
+|----------|--------------|----------|---------|----------------|
+| Paper/Folia | Supported | Supported | Supported | Configured server name plus Bukkit world outside proxy-owned sessions; current Bukkit world only as a proxy slave |
+| Velocity | Supported | Supported | Not recommended | Backend server name plus latest slave-reported world or `global` fallback |
+| Bungee | Supported | Supported | Not recommended | Backend server name plus latest slave-reported world or `global` fallback |
+
+Paper and Folia-compatible servers can provide player name, configured server context, and world context for session rows. Set the logical server name on every Paper/Folia instance:
+
+```yml
+server:
+  name: 'survival-1'
+```
+
+In a proxy multi-setup where the proxy runs as `master` and Paper/Folia servers run as `slave`, this value does not create canonical server entries. The proxy backend server name is the canonical server context, and the Paper/Folia slave reports only the player's current Bukkit world to enrich the master-owned active row.
+
+Velocity and Bungee can derive backend server names from proxy server-switch events. Proxies store proxy-written rows with:
+
+- server: backend server name
+- world: latest Paper/Folia slave-reported world when available, otherwise `global`
+
+In a multi-setup, Paper/Folia slave servers report current world context to the master. They do not report completed session chunks and do not create separate canonical server entries.
+
+## Session Context Updates
+
+Paper/Folia standalone or master session context changes when the player's effective world changes. Paper/Folia slave world changes update the current world context on the proxy master without creating a new time row.
+
+Velocity and Bungee session context changes when the player connects to a different backend server.
+
+Flush and stop operations update the active session row so a crash preserves time up to the latest flush without splitting a continuous session into many rows.
+
+## Storage Cleanup
+
+Storage cleanup is disabled by default. When enabled, LoriTime deletes old time history for inactive players but keeps the player identity row.
+
+```yml
+storageCleanup:
+  enabled: false
+  inactiveAfterDays: 365
+```
+
+Cleanup removes session rows and manual adjustment rows for players whose activity timestamp is older than the configured threshold.

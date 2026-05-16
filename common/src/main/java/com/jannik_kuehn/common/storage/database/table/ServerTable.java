@@ -34,7 +34,7 @@ public class ServerTable {
      * @param connection the database connection to use for the operation
      * @param server     the name of the server to ensure exists in the database
      * @return the ID of the server entry
-     * @throws SQLException if a database access error occurs or the server entry cannot be created
+     * @throws SQLException if a database access error occurs, or the server entry cannot be created
      */
     public long ensureServer(final Connection connection, final String server) throws SQLException {
         final Optional<Long> existing = findId(connection, server);

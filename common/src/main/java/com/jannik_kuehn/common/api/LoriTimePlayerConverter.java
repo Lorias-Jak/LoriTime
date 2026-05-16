@@ -86,7 +86,7 @@ public class LoriTimePlayerConverter {
      */
     public LoriTimePlayer getOfflinePlayer(final UUID uuid) {
         try {
-            final Optional<String> optionalName = loriTimePlugin.getNameStorage().getName(uuid);
+            final Optional<String> optionalName = loriTimePlugin.getStorage().getName(uuid);
             if (optionalName.isEmpty()) {
                 log.warn("Could not get name for UUID " + uuid);
                 return null;

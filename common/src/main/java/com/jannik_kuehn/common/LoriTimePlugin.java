@@ -88,6 +88,11 @@ public class LoriTimePlugin {
     private final LoriTimePlayerConverter playerConverter;
 
     /**
+     * Players whose next leave/disconnect should be persisted as AFK-caused.
+     */
+    private final Set<UUID> afkKickMarkers;
+
+    /**
      * The {@link Configuration} instance.
      */
     private Configuration config;
@@ -111,11 +116,6 @@ public class LoriTimePlugin {
      * The {@link Updater} instance.
      */
     private Updater updater;
-
-    /**
-     * Players whose next leave/disconnect should be persisted as AFK-caused.
-     */
-    private final Set<UUID> afkKickMarkers;
 
     /**
      * {@code true} if an error occurred and the plugin should be
@@ -152,6 +152,7 @@ public class LoriTimePlugin {
      * @return the {@link LoriTimePlugin} instance.
      */
     public static LoriTimePlugin getInstance() {
+        // ToDo Remove this
         return instance;
     }
 

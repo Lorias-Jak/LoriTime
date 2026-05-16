@@ -26,9 +26,14 @@ public enum TimeEntryReason {
     AFK_ADJUSTMENT,
 
     /**
-     * Player context changed (for example server/world switch).
+     * Player moved to another server context.
      */
-    CONTEXT_SWITCH,
+    SERVER_SWITCH,
+
+    /**
+     * Player moved to another world context on the same server.
+     */
+    WORLD_SWITCH,
 
     /**
      * When a player joins the Server

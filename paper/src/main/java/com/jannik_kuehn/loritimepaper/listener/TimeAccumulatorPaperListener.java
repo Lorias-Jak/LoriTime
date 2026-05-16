@@ -2,6 +2,7 @@ package com.jannik_kuehn.loritimepaper.listener;
 
 import com.github.roleplaycauldron.spellbook.core.logger.WrappedLogger;
 import com.jannik_kuehn.common.LoriTimePlugin;
+import com.jannik_kuehn.common.api.storage.SessionContextDefaults;
 import com.jannik_kuehn.common.api.storage.TimeEntryReason;
 import com.jannik_kuehn.common.exception.StorageException;
 import org.bukkit.event.EventHandler;
@@ -45,7 +46,7 @@ public class TimeAccumulatorPaperListener implements Listener {
     public void playerJoin(final PlayerJoinEvent event) {
         final UUID uuid = event.getPlayer().getUniqueId();
         final String name = event.getPlayer().getName();
-        final String server = loriTimePlugin.getConfig().getString("server.name", "default");
+        final String server = loriTimePlugin.getConfig().getString("server.name", SessionContextDefaults.SERVER);
         final String world = event.getPlayer().getWorld().getName();
         final long now = System.currentTimeMillis();
         loriTimePlugin.getScheduler().runAsyncOnce(() -> {
@@ -87,7 +88,7 @@ public class TimeAccumulatorPaperListener implements Listener {
     public void playerChangedWorld(final PlayerChangedWorldEvent event) {
         final UUID uuid = event.getPlayer().getUniqueId();
         final String name = event.getPlayer().getName();
-        final String server = loriTimePlugin.getConfig().getString("server.name", "default");
+        final String server = loriTimePlugin.getConfig().getString("server.name", SessionContextDefaults.SERVER);
         final String world = event.getPlayer().getWorld().getName();
         final long now = System.currentTimeMillis();
         loriTimePlugin.getScheduler().runAsyncOnce(() -> {

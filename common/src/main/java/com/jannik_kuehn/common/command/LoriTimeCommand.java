@@ -75,7 +75,7 @@ public class LoriTimeCommand implements CommonCommand {
 
                 final long time;
                 try {
-                    final OptionalLong optionalTime = loriTimePlugin.getAccumulatingStorage().getTime(targetPlayer.getUniqueId());
+                    final OptionalLong optionalTime = loriTimePlugin.getStorage().getTime(targetPlayer.getUniqueId());
                     if (optionalTime.isPresent()) {
                         time = optionalTime.getAsLong();
                     } else {

@@ -21,11 +21,6 @@ import java.util.concurrent.ConcurrentHashMap;
 public class SlaveSessionReporter extends PluginMessaging implements Listener, AutoCloseable {
 
     /**
-     * Protocol version for slave world context messages.
-     */
-    private static final int PROTOCOL_VERSION = 3;
-
-    /**
      * Messenger used for outgoing plugin messages.
      */
     private final PaperPluginMessenger pluginMessenger;
@@ -83,7 +78,7 @@ public class SlaveSessionReporter extends PluginMessaging implements Listener, A
     }
 
     /**
-     * Reports a context switch when a player changes worlds on the slave.
+     * Reports a world switch when a player changes worlds on the slave.
      *
      * @param event the world-change event.
      */
@@ -118,7 +113,7 @@ public class SlaveSessionReporter extends PluginMessaging implements Listener, A
 
     private void sendWorld(final ActiveRemoteWorld context) {
         log.debug("Reporting remote world context for player " + context.uuid());
-        sendPluginMessage(SLAVED_TIME_STORAGE, context.uuid(), "world", PROTOCOL_VERSION,
+        sendPluginMessage(SLAVED_TIME_STORAGE, context.uuid(), "world", STORAGE_PROTOCOL_VERSION,
                 context.world(), context.observedAtMs());
     }
 

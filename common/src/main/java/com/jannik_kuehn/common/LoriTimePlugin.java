@@ -429,9 +429,11 @@ public class LoriTimePlugin {
      * Getter of the accumulated unified storage.
      *
      * @return the accumulated unified storage
+     * @deprecated use {@link #getStorage()} for storage reads/writes or {@link #getAccumulator()} for session lifecycle.
      */
+    @Deprecated(since = "2.0.0", forRemoval = true)
     public AccumulatingTimeStorage getAccumulatingStorage() {
-        return dataStorageManager.getAccumulator();
+        return (AccumulatingTimeStorage) dataStorageManager.getAccumulator();
     }
 
     /**

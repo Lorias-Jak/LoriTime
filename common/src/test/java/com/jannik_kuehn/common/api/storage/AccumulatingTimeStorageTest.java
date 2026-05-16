@@ -108,7 +108,7 @@ class AccumulatingTimeStorageTest {
         assertEquals(2, storage.sessions.size(), "Expected two session chunks after stopAccumulatingAndSaveOnlineTime");
         assertEquals("lobby", storage.sessions.getFirst().server(), "Expected the same server as the one passed to startAccumulating");
         assertEquals("spawn", storage.sessions.getFirst().world(), "Expected the same world as the one passed to startAccumulating");
-        assertEquals(TimeEntryReason.CONTEXT_SWITCH, storage.sessions.get(0).reason(), "Expected the reason to be CONTEXT_SWITCH");
+        assertEquals(TimeEntryReason.SERVER_SWITCH, storage.sessions.get(0).reason(), "Expected the reason to be SERVER_SWITCH");
         assertEquals(3L, storage.sessions.get(0).durationSeconds(), "Expected the correct duration in seconds");
         assertEquals("survival", storage.sessions.get(1).server(), "Expected the same server as the one passed to switchContext");
         assertEquals("nether", storage.sessions.get(1).world(), "Expected the same world as the one passed to switchContext");
@@ -120,14 +120,27 @@ class AccumulatingTimeStorageTest {
         final FakeUnifiedStorage storage = new FakeUnifiedStorage();
         final AccumulatingTimeStorage accumulator = accumulator(storage);
 
-        accumulator.switchContext(PLAYER, "Lorias_", "survival", "global", 1_000L);
+        accumulator.switchContext(PLAYER, "Lorias_", "survival", SessionContextDefaults.WORLD, 1_000L);
         accumulator.stopAccumulatingAndSaveOnlineTime(PLAYER, 9_000L, TimeEntryReason.PLAYER_LEAVE);
 
         assertEquals(1, storage.sessions.size(), "Expected initial backend connection to create only one row");
         assertEquals("survival", storage.sessions.getFirst().server(), "Expected first row to use the backend server");
-        assertEquals("global", storage.sessions.getFirst().world(), "Expected first row to use the fallback world");
+        assertEquals(SessionContextDefaults.WORLD, storage.sessions.getFirst().world(), "Expected first row to use the fallback world");
         assertEquals(TimeEntryReason.PLAYER_LEAVE, storage.sessions.getFirst().reason(), "Expected no context-switch row on initial join");
         assertEquals(8L, storage.sessions.getFirst().durationSeconds(), "Expected the correct duration");
+    }
+
+    @Test
+    void defaultStartAccumulatingUsesSharedContextDefaults() throws StorageException {
+        final FakeUnifiedStorage storage = new FakeUnifiedStorage();
+        final AccumulatingTimeStorage accumulator = accumulator(storage);
+
+        accumulator.startAccumulating(PLAYER, 1_000L);
+        accumulator.stopAccumulatingAndSaveOnlineTime(PLAYER, 9_000L, TimeEntryReason.PLAYER_LEAVE);
+
+        assertEquals(1, storage.sessions.size(), "Expected one session chunk after stopAccumulatingAndSaveOnlineTime");
+        assertEquals(SessionContextDefaults.SERVER, storage.sessions.getFirst().server(), "Expected fallback server context");
+        assertEquals(SessionContextDefaults.WORLD, storage.sessions.getFirst().world(), "Expected fallback world context");
     }
 
     @Test
@@ -146,7 +159,7 @@ class AccumulatingTimeStorageTest {
         assertEquals(2, storage.sessions.size(), "Expected one row per backend server session");
         assertEquals("lobby", storage.sessions.get(0).server(), "Expected first backend context");
         assertEquals("spawn", storage.sessions.get(0).world(), "Expected first row to keep reported Paper world");
-        assertEquals(TimeEntryReason.CONTEXT_SWITCH, storage.sessions.get(0).reason(), "Expected switch to close the first row");
+        assertEquals(TimeEntryReason.SERVER_SWITCH, storage.sessions.get(0).reason(), "Expected switch to close the first row");
         assertEquals("survival", storage.sessions.get(1).server(), "Expected second backend context");
         assertEquals("world", storage.sessions.get(1).world(), "Expected second row to keep reported Paper world");
         assertEquals(TimeEntryReason.PLAYER_LEAVE, storage.sessions.get(1).reason(), "Expected leave to close the second row");
@@ -179,6 +192,17 @@ class AccumulatingTimeStorageTest {
         assertEquals("lobby", storage.sessions.getFirst().server(), "Expected the same server as the one passed to startAccumulating");
         assertEquals("spawn", storage.sessions.getFirst().world(), "Expected the same world as the one passed to startAccumulating");
         assertEquals(8L, storage.sessions.getFirst().durationSeconds(), "Expected the correct duration in seconds");
+    }
+
+    @Test
+    void worldOnlyContextSwitchUsesWorldSwitchReason() throws StorageException {
+        final FakeUnifiedStorage storage = new FakeUnifiedStorage();
+        final AccumulatingTimeStorage accumulator = accumulator(storage);
+
+        accumulator.startAccumulating(PLAYER, "Lorias_", "lobby", "spawn", 1_000L);
+        accumulator.switchContext(PLAYER, "Lorias_", "lobby", "nether", 4_000L);
+
+        assertEquals(TimeEntryReason.WORLD_SWITCH, storage.sessions.getFirst().reason(), "Expected the old row to use WORLD_SWITCH");
     }
 
     @Test

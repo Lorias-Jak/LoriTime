@@ -2,16 +2,23 @@ package com.jannik_kuehn.common.module.messaging;
 
 import com.github.roleplaycauldron.spellbook.core.logger.LoggerFactory;
 import com.jannik_kuehn.common.LoriTimePlugin;
+import com.jannik_kuehn.common.api.LoriTimePlayer;
+import com.jannik_kuehn.common.api.LoriTimePlayerConverter;
+import com.jannik_kuehn.common.api.common.CommonSender;
+import com.jannik_kuehn.common.api.common.CommonServer;
 import com.jannik_kuehn.common.api.scheduler.PluginScheduler;
 import com.jannik_kuehn.common.api.scheduler.PluginTask;
-import com.jannik_kuehn.common.api.storage.AccumulatingTimeStorage;
+import com.jannik_kuehn.common.api.storage.TimeAccumulator;
 import com.jannik_kuehn.common.api.storage.TimeEntryReason;
 import com.jannik_kuehn.common.api.storage.UnifiedStorage;
 import com.jannik_kuehn.common.exception.StorageException;
+import com.jannik_kuehn.common.module.afk.AfkStatusProvider;
+import com.jannik_kuehn.common.module.afk.AfkTransitionType;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.UUID;
 import java.util.logging.Logger;
@@ -54,11 +61,11 @@ class PluginMessagingTest {
     @Test
     void appliesRemoteWorldContextToAccumulator() throws StorageException {
         final LoriTimePlugin plugin = pluginWithInlineScheduler();
-        final AccumulatingTimeStorage accumulator = mock(AccumulatingTimeStorage.class);
+        final TimeAccumulator accumulator = mock(TimeAccumulator.class);
         when(plugin.getAccumulator()).thenReturn(accumulator);
         final CapturingPluginMessaging messaging = new CapturingPluginMessaging(plugin);
 
-        messaging.processPluginMessage("loritime:storage", messaging.data(PLAYER, "world", 3, "world_nether", 7_000L));
+        messaging.processPluginMessage("loritime:storage", messaging.data(PLAYER, "world", 2, "world_nether", 7_000L));
 
         verify(accumulator).updateWorldContext(PLAYER, "world_nether", 7_000L);
     }
@@ -66,11 +73,11 @@ class PluginMessagingTest {
     @Test
     void ignoresUnsupportedWorldContextProtocolVersion() throws StorageException {
         final LoriTimePlugin plugin = pluginWithInlineScheduler();
-        final AccumulatingTimeStorage accumulator = mock(AccumulatingTimeStorage.class);
+        final TimeAccumulator accumulator = mock(TimeAccumulator.class);
         when(plugin.getAccumulator()).thenReturn(accumulator);
         final CapturingPluginMessaging messaging = new CapturingPluginMessaging(plugin);
 
-        messaging.processPluginMessage("loritime:storage", messaging.data(PLAYER, "world", 2, "world_nether", 7_000L));
+        messaging.processPluginMessage("loritime:storage", messaging.data(PLAYER, "world", 999, "world_nether", 7_000L));
 
         verify(accumulator, never()).updateWorldContext(any(), anyString(), anyLong());
     }
@@ -78,8 +85,8 @@ class PluginMessagingTest {
     @Test
     void answersSlaveReadRequestWithCurrentTotal() throws StorageException {
         final LoriTimePlugin plugin = pluginWithInlineScheduler();
-        final AccumulatingTimeStorage storage = mock(AccumulatingTimeStorage.class);
-        when(plugin.getAccumulatingStorage()).thenReturn(storage);
+        final UnifiedStorage storage = mock(UnifiedStorage.class);
+        when(plugin.getStorage()).thenReturn(storage);
         when(storage.getTime(PLAYER)).thenReturn(OptionalLong.of(44L));
         final CapturingPluginMessaging messaging = new CapturingPluginMessaging(plugin);
 
@@ -92,6 +99,69 @@ class PluginMessagingTest {
         assertEquals(PLAYER, sent.payload()[0], "Expected the same UUID as the one passed to the plugin messaging");
         assertEquals("send", sent.payload()[1], "Expected the correct payload element");
         assertEquals(44L, sent.payload()[2], "Expected the correct payload element");
+    }
+
+    @Test
+    void appliesSupportedAfkStartMessage() {
+        final AfkMessagingContext context = new AfkMessagingContext();
+        final CapturingPluginMessaging messaging = new CapturingPluginMessaging(context.plugin());
+
+        messaging.processPluginMessage("loritime:afk", messaging.data(PLAYER, AfkMessageProtocol.VERSION,
+                AfkTransitionType.START.name(), 15L));
+
+        verify(context.afkStatusProvider()).setPlayerAFK(context.player(), 15L);
+    }
+
+    @Test
+    void appliesSupportedAfkResumeMessage() {
+        final AfkMessagingContext context = new AfkMessagingContext();
+        final CapturingPluginMessaging messaging = new CapturingPluginMessaging(context.plugin());
+
+        messaging.processPluginMessage("loritime:afk", messaging.data(PLAYER, AfkMessageProtocol.VERSION,
+                AfkTransitionType.RESUME.name()));
+
+        verify(context.afkStatusProvider()).resumePlayerAFK(context.player());
+    }
+
+    @Test
+    void ignoresUnsupportedAfkProtocolVersion() {
+        final AfkMessagingContext context = new AfkMessagingContext();
+        final CapturingPluginMessaging messaging = new CapturingPluginMessaging(context.plugin());
+
+        messaging.processPluginMessage("loritime:afk", messaging.data(PLAYER, 999, AfkTransitionType.START.name(), 15L));
+
+        verifyNoInteractions(context.afkStatusProvider());
+    }
+
+    @Test
+    void ignoresInvalidAfkTransition() {
+        final AfkMessagingContext context = new AfkMessagingContext();
+        final CapturingPluginMessaging messaging = new CapturingPluginMessaging(context.plugin());
+
+        messaging.processPluginMessage("loritime:afk", messaging.data(PLAYER, AfkMessageProtocol.VERSION, "INVALID", 15L));
+
+        verifyNoInteractions(context.afkStatusProvider());
+    }
+
+    @Test
+    void ignoresLegacyUnversionedAfkPayload() {
+        final AfkMessagingContext context = new AfkMessagingContext();
+        final CapturingPluginMessaging messaging = new CapturingPluginMessaging(context.plugin());
+
+        messaging.processPluginMessage("loritime:afk", messaging.data(PLAYER, "true", 15L));
+
+        verifyNoInteractions(context.afkStatusProvider());
+    }
+
+    @Test
+    void ignoresMalformedAfkPayload() {
+        final AfkMessagingContext context = new AfkMessagingContext();
+        final CapturingPluginMessaging messaging = new CapturingPluginMessaging(context.plugin());
+
+        messaging.processPluginMessage("loritime:afk", messaging.data(PLAYER, AfkMessageProtocol.VERSION,
+                AfkTransitionType.START.name()));
+
+        verifyNoInteractions(context.afkStatusProvider());
     }
 
     @Test
@@ -139,5 +209,25 @@ class PluginMessagingTest {
     }
 
     private record SentMessage(String channel, Object[] payload) {
+    }
+
+    private record AfkMessagingContext(LoriTimePlugin plugin, AfkStatusProvider afkStatusProvider,
+                                       LoriTimePlayer player) {
+
+        private AfkMessagingContext() {
+            this(pluginWithAfkMessaging(), mock(AfkStatusProvider.class), new LoriTimePlayer(PLAYER, "Lorias_"));
+            final CommonServer server = mock(CommonServer.class);
+            final CommonSender sender = mock(CommonSender.class);
+            final LoriTimePlayerConverter converter = mock(LoriTimePlayerConverter.class);
+            when(plugin().getServer()).thenReturn(server);
+            when(plugin().getPlayerConverter()).thenReturn(converter);
+            when(plugin().getAfkStatusProvider()).thenReturn(afkStatusProvider());
+            when(server.getPlayer(PLAYER)).thenReturn(Optional.of(sender));
+            when(converter.getOnlinePlayer(PLAYER)).thenReturn(player());
+        }
+
+        private static LoriTimePlugin pluginWithAfkMessaging() {
+            return new PluginMessagingTest().pluginWithInlineScheduler();
+        }
     }
 }

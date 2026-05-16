@@ -2,6 +2,7 @@ package com.jannik_kuehn.loritimevelocity.listener;
 
 import com.github.roleplaycauldron.spellbook.core.logger.WrappedLogger;
 import com.jannik_kuehn.common.LoriTimePlugin;
+import com.jannik_kuehn.common.api.storage.SessionContextDefaults;
 import com.jannik_kuehn.common.api.storage.TimeEntryReason;
 import com.jannik_kuehn.common.exception.StorageException;
 import com.velocitypowered.api.event.Subscribe;
@@ -47,7 +48,7 @@ public class TimeAccumulatorVelocityListener {
         final long now = System.currentTimeMillis();
         loriTimePlugin.getScheduler().runAsyncOnce(() -> {
             try {
-                loriTimePlugin.getAccumulator().switchContext(uuid, name, server, "global", now);
+                loriTimePlugin.getAccumulator().switchContext(uuid, name, server, SessionContextDefaults.WORLD, now);
             } catch (final StorageException ex) {
                 log.warn("could not switch accumulating context for player " + uuid, ex);
             }

@@ -102,7 +102,7 @@ public class LoriTimePaper extends JavaPlugin {
         new PaperCommand(this, new LoriTimeTopCommand(loriTimePlugin, loriTimePlugin.getLocalization()));
 
         if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null && loriTimePlugin.getConfig().getBoolean("integrations.PlaceholderAPI", true)) {
-            new LoriTimePlaceholder(loriTimePlugin, loriTimePlugin.getAccumulatingStorage()).register();
+            new LoriTimePlaceholder(loriTimePlugin, loriTimePlugin.getStorage()).register();
         }
     }
 

@@ -30,7 +30,7 @@ public interface TimeAccumulator extends AutoCloseable {
      * @throws StorageException if the session cannot be created.
      */
     default void startAccumulating(final UUID uuid, final long when) throws StorageException {
-        startAccumulating(uuid, null, "default", "global", when);
+        startAccumulating(uuid, null, SessionContextDefaults.SERVER, SessionContextDefaults.WORLD, when);
     }
 
     /**

@@ -3,6 +3,7 @@ package com.jannik_kuehn.common.storage;
 import com.github.roleplaycauldron.spellbook.core.logger.WrappedLogger;
 import com.jannik_kuehn.common.LoriTimePlugin;
 import com.jannik_kuehn.common.api.storage.PlayerSessionChunk;
+import com.jannik_kuehn.common.api.storage.SessionContextDefaults;
 import com.jannik_kuehn.common.api.storage.TimeEntryReason;
 import com.jannik_kuehn.common.config.Configuration;
 import com.jannik_kuehn.common.config.YamlConfiguration;
@@ -178,8 +179,9 @@ public class StorageMigrationService {
             final Optional<Long> time = parseLong(entry.getValue());
             if (uuid.isPresent() && time.isPresent()) {
                 final long now = System.currentTimeMillis();
-                storage.persistSession(new PlayerSessionChunk(uuid.get(), Optional.empty(), "default", "global",
-                        now - time.get() * 1000L, now, TimeEntryReason.LEGACY_IMPORT));
+                storage.persistSession(new PlayerSessionChunk(uuid.get(), Optional.empty(),
+                        SessionContextDefaults.SERVER, SessionContextDefaults.WORLD, now - time.get() * 1000L, now,
+                        TimeEntryReason.LEGACY_IMPORT));
             }
         }
     }

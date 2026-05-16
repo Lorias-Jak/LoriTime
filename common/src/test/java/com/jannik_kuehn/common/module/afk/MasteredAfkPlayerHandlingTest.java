@@ -5,6 +5,7 @@ import com.jannik_kuehn.common.LoriTimePlugin;
 import com.jannik_kuehn.common.api.LoriTimePlayer;
 import com.jannik_kuehn.common.api.common.CommonSender;
 import com.jannik_kuehn.common.api.common.CommonServer;
+import com.jannik_kuehn.common.api.storage.SessionContextDefaults;
 import com.jannik_kuehn.common.api.storage.TimeAccumulator;
 import com.jannik_kuehn.common.api.storage.TimeEntryReason;
 import com.jannik_kuehn.common.config.Configuration;
@@ -78,8 +79,8 @@ class MasteredAfkPlayerHandlingTest {
         clearInvocations(context.sender());
         handling.executePlayerResume(player);
 
-        verify(context.accumulator()).startAccumulating(eq(PLAYER_ID), eq("Lorias_"), eq("default"), eq("global"),
-                anyLong());
+        verify(context.accumulator()).startAccumulating(eq(PLAYER_ID), eq("Lorias_"), eq(SessionContextDefaults.SERVER),
+                eq(SessionContextDefaults.WORLD), anyLong());
         verify(context.sender()).sendMessage(any(TextComponent.class));
     }
 
@@ -94,8 +95,8 @@ class MasteredAfkPlayerHandlingTest {
         clearInvocations(context.sender());
         handling.executePlayerResume(player);
 
-        verify(context.accumulator(), never()).startAccumulating(eq(PLAYER_ID), eq("Lorias_"), eq("default"),
-                eq("global"), anyLong());
+        verify(context.accumulator(), never()).startAccumulating(eq(PLAYER_ID), eq("Lorias_"),
+                eq(SessionContextDefaults.SERVER), eq(SessionContextDefaults.WORLD), anyLong());
         verify(context.sender()).sendMessage(any(TextComponent.class));
     }
 

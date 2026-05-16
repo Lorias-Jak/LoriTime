@@ -154,7 +154,7 @@ public class LoriTimeAdminCommand implements CommonCommand {
 
         final long currentTime;
         try {
-            final OptionalLong optionalCurrentTime = loriTimePlugin.getAccumulatingStorage().getTime(player.getUniqueId());
+            final OptionalLong optionalCurrentTime = loriTimePlugin.getStorage().getTime(player.getUniqueId());
             if (optionalCurrentTime.isPresent()) {
                 currentTime = optionalCurrentTime.getAsLong();
             } else {
@@ -199,7 +199,7 @@ public class LoriTimeAdminCommand implements CommonCommand {
         final long currentTime;
         final LoriTimePlayer player = loriTimePlugin.getPlayerConverter().getOnlinePlayer(optionalUUID.get());
         try {
-            final OptionalLong optionalCurrentTime = loriTimePlugin.getAccumulatingStorage().getTime(player.getUniqueId());
+            final OptionalLong optionalCurrentTime = loriTimePlugin.getStorage().getTime(player.getUniqueId());
             if (optionalCurrentTime.isPresent()) {
                 currentTime = optionalCurrentTime.getAsLong();
             } else {
@@ -242,7 +242,7 @@ public class LoriTimeAdminCommand implements CommonCommand {
 
         final long currentTime;
         try {
-            final OptionalLong optionalCurrentTime = loriTimePlugin.getAccumulatingStorage().getTime(player.getUniqueId());
+            final OptionalLong optionalCurrentTime = loriTimePlugin.getStorage().getTime(player.getUniqueId());
             if (optionalCurrentTime.isPresent()) {
                 currentTime = optionalCurrentTime.getAsLong();
             } else {
@@ -282,7 +282,7 @@ public class LoriTimeAdminCommand implements CommonCommand {
 
         final LoriTimePlayer player = loriTimePlugin.getPlayerConverter().getOnlinePlayer(optionalUUID.get());
         try {
-            loriTimePlugin.getAccumulatingStorage().deletePlayer(player.getUniqueId());
+            loriTimePlugin.getStorage().deletePlayer(player.getUniqueId());
             sender.sendMessage(localization.formatTextComponent(localization
                     .getRawMessage("message.command.loritimeadmin.deleteUser.success")
                     .replace("[player]", player.getName())));
@@ -307,7 +307,7 @@ public class LoriTimeAdminCommand implements CommonCommand {
         try {
             final UUID actorUuid = sender.isConsole() ? null : sender.getUniqueId();
             final String actorName = sender.isConsole() ? "CONSOLE" : sender.getName();
-            loriTimePlugin.getAccumulatingStorage().addTime(new ManualTimeAdjustment(uuid, modifyBy,
+            loriTimePlugin.getStorage().addTime(new ManualTimeAdjustment(uuid, modifyBy,
                     TimeEntryReason.MANUAL_ADJUSTMENT, actorUuid, actorName));
         } catch (final StorageException ex) {
             log.error("could not modify online time of " + uuid.toString(), ex);

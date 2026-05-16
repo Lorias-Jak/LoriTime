@@ -148,7 +148,7 @@ public class AccumulatingTimeStorage implements UnifiedStorage, TimeAccumulator 
         final long sessionId = storage.startSession(context, TimeEntryReason.PLAYER_JOIN);
         final PersistedPlayerSession previous = onlineSessions.put(uuid, new PersistedPlayerSession(sessionId, context));
         if (previous != null) {
-            storage.updateSession(previous.sessionId(), when, TimeEntryReason.CONTEXT_SWITCH);
+            storage.updateSession(previous.sessionId(), when, switchReason(previous.context(), context));
         }
     }
 
@@ -174,7 +174,7 @@ public class AccumulatingTimeStorage implements UnifiedStorage, TimeAccumulator 
         final long sessionId = storage.startSession(next, TimeEntryReason.PLAYER_JOIN);
         final PersistedPlayerSession previous = onlineSessions.put(uuid, new PersistedPlayerSession(sessionId, next));
         if (previous != null) {
-            storage.updateSession(previous.sessionId(), when, TimeEntryReason.CONTEXT_SWITCH);
+            storage.updateSession(previous.sessionId(), when, switchReason(previous.context(), next));
         }
     }
 
@@ -224,5 +224,12 @@ public class AccumulatingTimeStorage implements UnifiedStorage, TimeAccumulator 
         } finally {
             this.storage.close();
         }
+    }
+
+    private TimeEntryReason switchReason(final PlayerSessionContext previous, final PlayerSessionContext next) {
+        if (!previous.server().equals(next.server())) {
+            return TimeEntryReason.SERVER_SWITCH;
+        }
+        return TimeEntryReason.WORLD_SWITCH;
     }
 }

@@ -6,12 +6,14 @@ import com.jannik_kuehn.common.api.LoriTimePlayer;
 import com.jannik_kuehn.common.api.common.CommonSender;
 import com.jannik_kuehn.common.exception.PluginMessageException;
 import com.jannik_kuehn.common.exception.StorageException;
+import com.jannik_kuehn.common.module.afk.AfkTransitionType;
 import com.jannik_kuehn.common.utils.UuidUtil;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.EOFException;
 import java.io.IOException;
 import java.util.Optional;
 import java.util.OptionalLong;
@@ -35,7 +37,7 @@ public abstract class PluginMessaging {
     /**
      * Current storage plugin message protocol version.
      */
-    private static final int STORAGE_PROTOCOL_VERSION = 2;
+    protected static final int STORAGE_PROTOCOL_VERSION = 2;
 
     /**
      * The {@link LoriTimePlugin} instance.
@@ -136,19 +138,32 @@ public abstract class PluginMessaging {
             }
             final LoriTimePlayer player = loriTimePlugin.getPlayerConverter().getOnlinePlayer(playerUUID);
 
-            switch (input.readUTF()) {
-                case "true":
+            final int protocolVersion = input.readInt();
+            if (protocolVersion != AfkMessageProtocol.VERSION) {
+                log.warn("received unsupported AFK protocol version: " + protocolVersion);
+                return;
+            }
+            final String transitionValue = input.readUTF();
+            final Optional<AfkTransitionType> transition = AfkMessageProtocol.parseTransition(transitionValue);
+            if (transition.isEmpty()) {
+                log.warn("received invalid AFK transition: " + transitionValue);
+                return;
+            }
+            switch (transition.get()) {
+                case START:
                     log.debug("Setting player '" + player.getName() + "' to AFK");
                     loriTimePlugin.getAfkStatusProvider().setPlayerAFK(player, input.readLong());
                     break;
-                case "false":
+                case RESUME:
                     log.debug("Resuming player '" + player.getName() + "' from AFK");
                     loriTimePlugin.getAfkStatusProvider().resumePlayerAFK(player);
                     break;
-                default:
-                    log.warn("received invalid afk status!");
+                case KICK:
+                    log.warn("received invalid AFK transition: " + transitionValue);
                     break;
             }
+        } catch (final EOFException e) {
+            log.warn("received malformed AFK payload");
         } catch (final IOException e) {
             final PluginMessageException pluginMessageException = new PluginMessageException(e);
             log.error("could not deserialize plugin message", pluginMessageException);
@@ -171,7 +186,7 @@ public abstract class PluginMessaging {
                     break;
                 case "add":
                     log.debug("Adding time for player '" + playerUUID + "'");
-                    loriTimePlugin.getAccumulatingStorage().addTime(playerUUID, input.readLong());
+                    loriTimePlugin.getStorage().addTime(playerUUID, input.readLong());
                     break;
                 case "session":
                     rejectRemoteSession(input);
@@ -214,7 +229,7 @@ public abstract class PluginMessaging {
     private long getTime(final UUID playerUUID) {
         OptionalLong time = OptionalLong.empty();
         try {
-            time = loriTimePlugin.getAccumulatingStorage().getTime(playerUUID);
+            time = loriTimePlugin.getStorage().getTime(playerUUID);
         } catch (final StorageException e) {
             log.error("could not get time for " + playerUUID, e);
         }

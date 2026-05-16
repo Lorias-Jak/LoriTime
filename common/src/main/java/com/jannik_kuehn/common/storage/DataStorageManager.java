@@ -6,6 +6,7 @@ import com.jannik_kuehn.common.LoriTimePlugin;
 import com.jannik_kuehn.common.api.scheduler.PluginTask;
 import com.jannik_kuehn.common.api.storage.AccumulatingTimeStorage;
 import com.jannik_kuehn.common.api.storage.StorageMode;
+import com.jannik_kuehn.common.api.storage.TimeAccumulator;
 import com.jannik_kuehn.common.api.storage.UnifiedStorage;
 import com.jannik_kuehn.common.exception.StorageException;
 import com.jannik_kuehn.common.storage.database.DatabaseStorage;
@@ -21,9 +22,9 @@ import java.util.Locale;
 
 /**
  * The {@link DataStorageManager} is responsible for holding the
- * {@link UnifiedStorage} and {@link AccumulatingTimeStorage}.
+ * {@link UnifiedStorage} and {@link TimeAccumulator} runtime contracts.
  * It also manages the loading and reloading of the storages.
- * You're able to inject custom storages by calling {@link #injectCustomStorage(UnifiedStorage, AccumulatingTimeStorage)}.
+ * You're able to inject custom storages by calling {@link #injectCustomStorage(UnifiedStorage, TimeAccumulator)}.
  * The {@link DataStorageManager} also handles the cache flushing for the time storage.
  */
 public class DataStorageManager {
@@ -53,9 +54,14 @@ public class DataStorageManager {
     private UnifiedStorage storage;
 
     /**
-     * The {@link AccumulatingTimeStorage}.
+     * Runtime storage contract that includes active session totals.
      */
-    private AccumulatingTimeStorage accumulator;
+    private UnifiedStorage runtimeStorage;
+
+    /**
+     * The active session accumulator.
+     */
+    private TimeAccumulator accumulator;
 
     /**
      * The configured storage responsibility mode.
@@ -87,22 +93,23 @@ public class DataStorageManager {
     }
 
     /**
-     * Injects a custom {@link UnifiedStorage} and {@link AccumulatingTimeStorage} to the plugin.
-     * If the {@link UnifiedStorage} or {@link AccumulatingTimeStorage} is {@code null}, the injection will fail.
-     * The {@link DataStorageManager} will use the injected storages instead of the default ones.
+     * Injects custom storage contracts to the plugin.
+     * If the {@link UnifiedStorage} or {@link TimeAccumulator} is {@code null}, the injection will fail.
+     * The {@link DataStorageManager} will use the injected contracts instead of the default ones.
      * The default storages will not be able to load or save data anymore.
      * On plugin reload, the injected storages will not be reloaded on {@link #reloadStorages()}.
      * Note that the {@link DataStorageManager} will not close the injected storages when the plugin is disabled.
      *
-     * @param storage     the {@link UnifiedStorage}.
-     * @param accumulator the {@link AccumulatingTimeStorage}.
+     * @param storage     the runtime {@link UnifiedStorage}.
+     * @param accumulator the {@link TimeAccumulator}.
      */
-    public void injectCustomStorage(final UnifiedStorage storage, final AccumulatingTimeStorage accumulator) {
+    public void injectCustomStorage(final UnifiedStorage storage, final TimeAccumulator accumulator) {
         if (storage == null || accumulator == null) {
             log.error("Custom storage injection failed: storage and accumulator must not be null!");
             return;
         }
         this.storage = storage;
+        this.runtimeStorage = storage;
         this.accumulator = accumulator;
         externalStorage = true;
     }
@@ -130,7 +137,7 @@ public class DataStorageManager {
     /**
      * Loads the default plugin storages.
      * It will not load the storages if an external {@link UnifiedStorage}
-     * or {@link AccumulatingTimeStorage} is injected.
+     * or {@link TimeAccumulator} is injected.
      *
      * @throws StorageException if an exception occurred while loading the storages.
      */
@@ -156,7 +163,7 @@ public class DataStorageManager {
     }
 
     /**
-     * Reloads the {@link UnifiedStorage} and {@link AccumulatingTimeStorage} if no external storage is injected.
+     * Reloads the {@link UnifiedStorage} and {@link TimeAccumulator} if no external storage is injected.
      */
     public void reloadStorages() {
         if (externalStorage) {
@@ -172,7 +179,7 @@ public class DataStorageManager {
     }
 
     /**
-     * Closes the {@link UnifiedStorage} and {@link AccumulatingTimeStorage}.
+     * Closes the {@link UnifiedStorage} and {@link TimeAccumulator}.
      * External storages will be closed too.
      * If you want to load the custom storages again, you have to inject them again.
      */
@@ -191,11 +198,12 @@ public class DataStorageManager {
             }
         }
         storage = null;
+        runtimeStorage = null;
         accumulator = null;
     }
 
     /**
-     * Flushes the online time cache of the {@link AccumulatingTimeStorage}.
+     * Flushes the online time cache of the {@link TimeAccumulator}.
      */
     public void flushOnlineTimeCache() {
         try {
@@ -220,8 +228,11 @@ public class DataStorageManager {
 
         final UnifiedDatabaseStorage nameAndTimeStorage = new UnifiedDatabaseStorage(dbStorage.getProvider(), playerTable,
                 serverTable, worldTable, timeTable, adjustmentTable, dbStorage.getDialect());
+        final AccumulatingTimeStorage accumulatingStorage = new AccumulatingTimeStorage(
+                loriTime.getLoggerFactory().create(AccumulatingTimeStorage.class), nameAndTimeStorage);
         this.storage = nameAndTimeStorage;
-        this.accumulator = new AccumulatingTimeStorage(loriTime.getLoggerFactory().create(AccumulatingTimeStorage.class), nameAndTimeStorage);
+        this.runtimeStorage = accumulatingStorage;
+        this.accumulator = accumulatingStorage;
         runStorageCleanupIfEnabled();
     }
 
@@ -245,15 +256,15 @@ public class DataStorageManager {
      * @return the {@link UnifiedStorage}.
      */
     public UnifiedStorage getStorage() {
-        return storage;
+        return runtimeStorage == null ? storage : runtimeStorage;
     }
 
     /**
-     * Getter of the {@link AccumulatingTimeStorage}.
+     * Getter of the {@link TimeAccumulator}.
      *
-     * @return the {@link AccumulatingTimeStorage}.
+     * @return the {@link TimeAccumulator}.
      */
-    public AccumulatingTimeStorage getAccumulator() {
+    public TimeAccumulator getAccumulator() {
         return accumulator;
     }
 

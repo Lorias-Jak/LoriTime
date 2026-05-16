@@ -98,7 +98,7 @@ public class DataStorageManager {
      * The {@link DataStorageManager} will use the injected contracts instead of the default ones.
      * The default storages will not be able to load or save data anymore.
      * On plugin reload, the injected storages will not be reloaded on {@link #reloadStorages()}.
-     * Note that the {@link DataStorageManager} will not close the injected storages when the plugin is disabled.
+     * Note that the {@link DataStorageManager} will close the injected accumulator when storages are closed.
      *
      * @param storage     the runtime {@link UnifiedStorage}.
      * @param accumulator the {@link TimeAccumulator}.
@@ -180,7 +180,7 @@ public class DataStorageManager {
 
     /**
      * Closes the {@link UnifiedStorage} and {@link TimeAccumulator}.
-     * External storages will be closed too.
+     * External storages will be closed too through the injected accumulator.
      * If you want to load the custom storages again, you have to inject them again.
      */
     public void closeStorages() {

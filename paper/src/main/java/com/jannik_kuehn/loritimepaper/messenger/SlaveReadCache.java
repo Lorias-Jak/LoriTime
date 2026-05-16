@@ -2,6 +2,8 @@ package com.jannik_kuehn.loritimepaper.messenger;
 
 import com.github.roleplaycauldron.spellbook.core.logger.WrappedLogger;
 import com.jannik_kuehn.common.module.messaging.PluginMessaging;
+import com.jannik_kuehn.common.module.messaging.StorageMessageProtocol;
+import com.jannik_kuehn.common.module.messaging.StorageMessageType;
 import com.jannik_kuehn.common.utils.UuidUtil;
 import com.jannik_kuehn.loritimepaper.LoriTimePaper;
 import org.bukkit.entity.Player;
@@ -13,8 +15,10 @@ import org.bukkit.plugin.messaging.PluginMessageListener;
 
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
+import java.io.EOFException;
 import java.io.IOException;
 import java.util.Map;
+import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -70,11 +74,10 @@ public class SlaveReadCache extends PluginMessaging implements PluginMessageList
      * @param uuid The unique identifier of the entity for which the refresh request is being made.
      */
     public void requestRefresh(final UUID uuid) {
-        pluginMessenger.sendPluginMessage(SLAVED_TIME_STORAGE, uuid, "get");
+        pluginMessenger.sendPluginMessage(SLAVED_TIME_STORAGE, uuid, StorageMessageType.GET.wireValue());
     }
 
     @Override
-    @SuppressWarnings("PMD.AvoidLiteralsInIfCondition")
     public void onPluginMessageReceived(final String channel, final Player player, final byte[] message) {
         if (!SLAVED_TIME_STORAGE.equalsIgnoreCase(channel)) {
             return;
@@ -85,11 +88,17 @@ public class SlaveReadCache extends PluginMessaging implements PluginMessageList
             input.readFully(uuidBytes);
             final UUID playerUUID = UuidUtil.fromBytes(uuidBytes);
             final String action = input.readUTF();
-            if ("send".equals(action)) {
+            final Optional<StorageMessageType> messageType = StorageMessageProtocol.parseType(action);
+            if (messageType.isPresent() && messageType.get() == StorageMessageType.SEND) {
                 cachedTimes.put(playerUUID, input.readLong());
+            } else {
+                log.warn("Storage plugin message ignored by slave read cache for player " + playerUUID
+                        + ": unexpected operation '" + action + "'");
             }
+        } catch (final EOFException e) {
+            log.warn("Storage plugin message ignored by slave read cache: malformed payload");
         } catch (final IOException e) {
-            log.error("could not deserialize slave read cache message", e);
+            log.error("Storage plugin message failed during slave read cache decoding", e);
         }
     }
 

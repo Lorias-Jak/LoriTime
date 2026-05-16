@@ -39,7 +39,8 @@ class PluginMessagingTest {
         when(plugin.getStorage()).thenReturn(storage);
         final CapturingPluginMessaging messaging = new CapturingPluginMessaging(plugin);
 
-        messaging.processPluginMessage("loritime:storage", messaging.data(PLAYER, "session", 3, "Lorias_", "lobby", "spawn",
+        messaging.processPluginMessage("loritime:storage", messaging.data(PLAYER, StorageMessageType.SESSION.wireValue(), 3,
+                "Lorias_", "lobby", "spawn",
                 1_000L, 6_000L, TimeEntryReason.PLAYER_LEAVE.name()));
 
         verify(storage, never()).persistSession(any());
@@ -52,10 +53,50 @@ class PluginMessagingTest {
         when(plugin.getStorage()).thenReturn(storage);
         final CapturingPluginMessaging messaging = new CapturingPluginMessaging(plugin);
 
-        messaging.processPluginMessage("loritime:storage", messaging.data(PLAYER, "session", 999, "Lorias_", "lobby", "spawn",
-                1_000L, 6_000L, TimeEntryReason.PLAYER_LEAVE.name()));
+        messaging.processPluginMessage("loritime:storage", messaging.data(PLAYER, StorageMessageType.SESSION.wireValue(),
+                999, "Lorias_", "lobby", "spawn", 1_000L, 6_000L, TimeEntryReason.PLAYER_LEAVE.name()));
 
         verify(storage, never()).persistSession(any());
+    }
+
+    @Test
+    void appliesRemoteAddOperationToStorage() throws StorageException {
+        final LoriTimePlugin plugin = pluginWithInlineScheduler();
+        final UnifiedStorage storage = mock(UnifiedStorage.class);
+        when(plugin.getStorage()).thenReturn(storage);
+        final CapturingPluginMessaging messaging = new CapturingPluginMessaging(plugin);
+
+        messaging.processPluginMessage("loritime:storage", messaging.data(PLAYER, StorageMessageType.ADD.wireValue(), 12L));
+
+        verify(storage).addTime(PLAYER, 12L);
+    }
+
+    @Test
+    void ignoresUnknownStorageOperation() throws StorageException {
+        final LoriTimePlugin plugin = pluginWithInlineScheduler();
+        final UnifiedStorage storage = mock(UnifiedStorage.class);
+        final TimeAccumulator accumulator = mock(TimeAccumulator.class);
+        when(plugin.getStorage()).thenReturn(storage);
+        when(plugin.getAccumulator()).thenReturn(accumulator);
+        final CapturingPluginMessaging messaging = new CapturingPluginMessaging(plugin);
+
+        messaging.processPluginMessage("loritime:storage", messaging.data(PLAYER, "unknown_operation", 2));
+
+        verifyNoInteractions(storage, accumulator);
+    }
+
+    @Test
+    void ignoresMasterOnlySendOperation() throws StorageException {
+        final LoriTimePlugin plugin = pluginWithInlineScheduler();
+        final UnifiedStorage storage = mock(UnifiedStorage.class);
+        final TimeAccumulator accumulator = mock(TimeAccumulator.class);
+        when(plugin.getStorage()).thenReturn(storage);
+        when(plugin.getAccumulator()).thenReturn(accumulator);
+        final CapturingPluginMessaging messaging = new CapturingPluginMessaging(plugin);
+
+        messaging.processPluginMessage("loritime:storage", messaging.data(PLAYER, StorageMessageType.SEND.wireValue(), 44L));
+
+        verifyNoInteractions(storage, accumulator);
     }
 
     @Test
@@ -65,7 +106,8 @@ class PluginMessagingTest {
         when(plugin.getAccumulator()).thenReturn(accumulator);
         final CapturingPluginMessaging messaging = new CapturingPluginMessaging(plugin);
 
-        messaging.processPluginMessage("loritime:storage", messaging.data(PLAYER, "world", 2, "world_nether", 7_000L));
+        messaging.processPluginMessage("loritime:storage", messaging.data(PLAYER, StorageMessageType.WORLD.wireValue(),
+                StorageMessageProtocol.VERSION, "world_nether", 7_000L));
 
         verify(accumulator).updateWorldContext(PLAYER, "world_nether", 7_000L);
     }
@@ -77,7 +119,8 @@ class PluginMessagingTest {
         when(plugin.getAccumulator()).thenReturn(accumulator);
         final CapturingPluginMessaging messaging = new CapturingPluginMessaging(plugin);
 
-        messaging.processPluginMessage("loritime:storage", messaging.data(PLAYER, "world_switch", 2, "world_nether", 7_000L));
+        messaging.processPluginMessage("loritime:storage", messaging.data(PLAYER, StorageMessageType.WORLD_SWITCH.wireValue(),
+                StorageMessageProtocol.VERSION, "world_nether", 7_000L));
 
         verify(accumulator).switchWorldContext(PLAYER, "world_nether", 7_000L);
     }
@@ -89,7 +132,8 @@ class PluginMessagingTest {
         when(plugin.getAccumulator()).thenReturn(accumulator);
         final CapturingPluginMessaging messaging = new CapturingPluginMessaging(plugin);
 
-        messaging.processPluginMessage("loritime:storage", messaging.data(PLAYER, "world", 999, "world_nether", 7_000L));
+        messaging.processPluginMessage("loritime:storage", messaging.data(PLAYER, StorageMessageType.WORLD.wireValue(),
+                999, "world_nether", 7_000L));
 
         verify(accumulator, never()).updateWorldContext(any(), anyString(), anyLong());
     }
@@ -101,9 +145,23 @@ class PluginMessagingTest {
         when(plugin.getAccumulator()).thenReturn(accumulator);
         final CapturingPluginMessaging messaging = new CapturingPluginMessaging(plugin);
 
-        messaging.processPluginMessage("loritime:storage", messaging.data(PLAYER, "world_switch", 999, "world_nether", 7_000L));
+        messaging.processPluginMessage("loritime:storage", messaging.data(PLAYER, StorageMessageType.WORLD_SWITCH.wireValue(),
+                999, "world_nether", 7_000L));
 
         verify(accumulator, never()).switchWorldContext(any(), anyString(), anyLong());
+    }
+
+    @Test
+    void ignoresMalformedStoragePayload() throws StorageException {
+        final LoriTimePlugin plugin = pluginWithInlineScheduler();
+        final TimeAccumulator accumulator = mock(TimeAccumulator.class);
+        when(plugin.getAccumulator()).thenReturn(accumulator);
+        final CapturingPluginMessaging messaging = new CapturingPluginMessaging(plugin);
+
+        messaging.processPluginMessage("loritime:storage", messaging.data(PLAYER, StorageMessageType.WORLD.wireValue(),
+                StorageMessageProtocol.VERSION));
+
+        verifyNoInteractions(accumulator);
     }
 
     @Test
@@ -114,14 +172,14 @@ class PluginMessagingTest {
         when(storage.getTime(PLAYER)).thenReturn(OptionalLong.of(44L));
         final CapturingPluginMessaging messaging = new CapturingPluginMessaging(plugin);
 
-        messaging.processPluginMessage("loritime:storage", messaging.data(PLAYER, "get"));
+        messaging.processPluginMessage("loritime:storage", messaging.data(PLAYER, StorageMessageType.GET.wireValue()));
 
         assertEquals(1, messaging.sentMessages.size(), "Expected one message to be sent");
         final SentMessage sent = messaging.sentMessages.getFirst();
         assertEquals("loritime:storage", sent.channel(), "Expected the correct channel");
         assertEquals(3, sent.payload().length, "Expected three payload elements");
         assertEquals(PLAYER, sent.payload()[0], "Expected the same UUID as the one passed to the plugin messaging");
-        assertEquals("send", sent.payload()[1], "Expected the correct payload element");
+        assertEquals(StorageMessageType.SEND.wireValue(), sent.payload()[1], "Expected the correct payload element");
         assertEquals(44L, sent.payload()[2], "Expected the correct payload element");
     }
 
@@ -163,6 +221,17 @@ class PluginMessagingTest {
         final CapturingPluginMessaging messaging = new CapturingPluginMessaging(context.plugin());
 
         messaging.processPluginMessage("loritime:afk", messaging.data(PLAYER, AfkMessageProtocol.VERSION, "INVALID", 15L));
+
+        verifyNoInteractions(context.afkStatusProvider());
+    }
+
+    @Test
+    void ignoresSlaveAfkKickTransition() {
+        final AfkMessagingContext context = new AfkMessagingContext();
+        final CapturingPluginMessaging messaging = new CapturingPluginMessaging(context.plugin());
+
+        messaging.processPluginMessage("loritime:afk", messaging.data(PLAYER, AfkMessageProtocol.VERSION,
+                AfkTransitionType.KICK.name()));
 
         verifyNoInteractions(context.afkStatusProvider());
     }

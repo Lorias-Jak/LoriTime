@@ -30,4 +30,24 @@ public final class AfkMessageProtocol {
                 .filter(type -> type.name().equals(value))
                 .findFirst();
     }
+
+    /**
+     * Checks whether the payload version is supported.
+     *
+     * @param version raw protocol version
+     * @return true when the version is supported
+     */
+    public static boolean isSupportedVersion(final int version) {
+        return version == VERSION;
+    }
+
+    /**
+     * Checks whether a transition may be sent by a slave.
+     *
+     * @param transition transition type
+     * @return true when slave messages may request the transition
+     */
+    public static boolean isSlaveTransition(final AfkTransitionType transition) {
+        return transition == AfkTransitionType.START || transition == AfkTransitionType.RESUME;
+    }
 }

@@ -3,6 +3,7 @@ package com.jannik_kuehn.loritimepaper.messenger;
 import com.github.roleplaycauldron.spellbook.core.logger.WrappedLogger;
 import com.jannik_kuehn.common.api.scheduler.PluginTask;
 import com.jannik_kuehn.common.module.messaging.PluginMessaging;
+import com.jannik_kuehn.common.module.messaging.StorageMessageType;
 import com.jannik_kuehn.loritimepaper.LoriTimePaper;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -113,13 +114,13 @@ public class SlaveSessionReporter extends PluginMessaging implements Listener, A
 
     private void sendWorld(final ActiveRemoteWorld context) {
         log.debug("Reporting remote world context for player " + context.uuid());
-        sendPluginMessage(SLAVED_TIME_STORAGE, context.uuid(), "world", STORAGE_PROTOCOL_VERSION,
+        sendPluginMessage(SLAVED_TIME_STORAGE, context.uuid(), StorageMessageType.WORLD.wireValue(), STORAGE_PROTOCOL_VERSION,
                 context.world(), context.observedAtMs());
     }
 
     private void sendWorldSwitch(final ActiveRemoteWorld context) {
         log.debug("Reporting remote world switch for player " + context.uuid());
-        sendPluginMessage(SLAVED_TIME_STORAGE, context.uuid(), "world_switch", STORAGE_PROTOCOL_VERSION,
+        sendPluginMessage(SLAVED_TIME_STORAGE, context.uuid(), StorageMessageType.WORLD_SWITCH.wireValue(), STORAGE_PROTOCOL_VERSION,
                 context.world(), context.observedAtMs());
     }
 

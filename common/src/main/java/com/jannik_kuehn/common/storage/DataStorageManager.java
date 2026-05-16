@@ -229,7 +229,7 @@ public class DataStorageManager {
         if (!loriTime.getConfig().getBoolean("storageCleanup.enabled", false)) {
             return;
         }
-        final long inactiveDays = loriTime.getConfig().getLong("storageCleanup.inactiveAfterDays", 365L);
+        final long inactiveDays = loriTime.getConfig().getInt("storageCleanup.inactiveAfterDays", 365);
         try {
             final int deletedRows = storage.deleteInactiveHistory(inactiveDays);
             log.info("Storage cleanup removed " + deletedRows + " history rows for players inactive for more than "

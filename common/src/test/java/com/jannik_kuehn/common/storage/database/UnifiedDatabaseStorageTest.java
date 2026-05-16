@@ -138,6 +138,49 @@ class UnifiedDatabaseStorageTest {
         }
     }
 
+    @Test
+    void updateSessionPersistsAfkSessionReason() throws Exception {
+        final long sessionId;
+        try (UnifiedDatabaseStorage storage = storage()) {
+
+            storage.setPlayerName(PLAYER, "Lorias_");
+            sessionId = storage.startSession(new com.jannik_kuehn.common.api.storage.PlayerSessionContext(PLAYER,
+                    "Lorias_", "survival", "global", 1_000L), TimeEntryReason.PLAYER_JOIN);
+            storage.updateSession(sessionId, 9_000L, TimeEntryReason.PLAYER_AFK);
+        }
+        try (Connection connection = openSqlite();
+             Statement statement = connection.createStatement();
+             ResultSet result = statement.executeQuery("SELECT `reason` FROM `" + TABLE_PREFIX + "_time` "
+                     + "WHERE `id` = " + sessionId)) {
+            if (!result.next()) {
+                fail("Expected a result row");
+            }
+            assertEquals(TimeEntryReason.PLAYER_AFK.name(), result.getString("reason"), "Expected the AFK session reason");
+        }
+    }
+
+    @Test
+    void updateSessionPersistsAfkKickSessionReason() throws Exception {
+        final long sessionId;
+        try (UnifiedDatabaseStorage storage = storage()) {
+
+            storage.setPlayerName(PLAYER, "Lorias_");
+            sessionId = storage.startSession(new com.jannik_kuehn.common.api.storage.PlayerSessionContext(PLAYER,
+                    "Lorias_", "survival", "global", 1_000L), TimeEntryReason.PLAYER_JOIN);
+            storage.updateSession(sessionId, 9_000L, TimeEntryReason.PLAYER_AFK_KICK);
+        }
+        try (Connection connection = openSqlite();
+             Statement statement = connection.createStatement();
+             ResultSet result = statement.executeQuery("SELECT `reason` FROM `" + TABLE_PREFIX + "_time` "
+                     + "WHERE `id` = " + sessionId)) {
+            if (!result.next()) {
+                fail("Expected a result row");
+            }
+            assertEquals(TimeEntryReason.PLAYER_AFK_KICK.name(), result.getString("reason"),
+                    "Expected the AFK kick session reason");
+        }
+    }
+
     private UnifiedDatabaseStorage storage() throws StorageException {
         final LoggerFactory loggerFactory = new LoggerFactory(Logger.getLogger("test"));
         final DatabaseStorage databaseStorage = new DatabaseStorage(loggerFactory, config(), dataFolder);

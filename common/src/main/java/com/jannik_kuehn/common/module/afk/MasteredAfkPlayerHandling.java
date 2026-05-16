@@ -8,6 +8,10 @@ import com.jannik_kuehn.common.api.storage.TimeEntryReason;
 import com.jannik_kuehn.common.exception.StorageException;
 import com.jannik_kuehn.common.utils.TimeUtil;
 
+import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+
 /**
  * Handles AFK actions on instances that own canonical time storage.
  */
@@ -18,6 +22,11 @@ public class MasteredAfkPlayerHandling extends AfkHandling {
     private final WrappedLogger log;
 
     /**
+     * Players whose active accumulation was stopped while they were AFK.
+     */
+    private final Set<UUID> playersStoppedForAfk;
+
+    /**
      * Creates a mastered AFK handler.
      *
      * @param plugin the plugin instance.
@@ -25,6 +34,7 @@ public class MasteredAfkPlayerHandling extends AfkHandling {
     public MasteredAfkPlayerHandling(final LoriTimePlugin plugin) {
         super(plugin);
         this.log = plugin.getLoggerFactory().create(MasteredAfkPlayerHandling.class, "MasteredAfkPlayerHandling");
+        this.playersStoppedForAfk = ConcurrentHashMap.newKeySet();
     }
 
     /**
@@ -56,15 +66,19 @@ public class MasteredAfkPlayerHandling extends AfkHandling {
 
         if (autoKickEnabled && !hasPermission(loriTimePlayer, "loritime.afk.bypass.kick")) {
             log.debug("Kicking player " + loriTimePlayer.getName() + " because he's afk for too long");
+            loriTimePlugin.markAfkKick(loriTimePlayer.getUniqueId());
             loriTimePlugin.getServer().kickPlayer(loriTimePlayer, loriTimePlugin.getLocalization()
                     .formatTextComponentWithoutPrefix(loriTimePlugin.getLocalization().getRawMessage("message.afk.kick")
                             .replace("[player]", loriTimePlayer.getName())
                             .replace("[time]", TimeUtil.formatTime(timeToRemove, loriTimePlugin.getLocalization()))
                     ));
             sendKickAnnounce(loriTimePlayer, timeToRemove, "loritime.afk.announce.kick");
-        } else if (hasPermission(loriTimePlayer, "loritime.afk.bypass.stopCount")) {
-            chatAnnounce(loriTimePlayer, "message.afk.afkAnnounce", "loritime.afk.announce.afkAnnounce");
-            selfAfkMessage(loriTimePlayer, "message.afk.afkSelf");
+            return;
+        }
+
+        chatAnnounce(loriTimePlayer, "message.afk.afkAnnounce", "loritime.afk.announce.afkAnnounce");
+        selfAfkMessage(loriTimePlayer, "message.afk.afkSelf");
+        if (!hasPermission(loriTimePlayer, "loritime.afk.bypass.stopCount")) {
             stopAccumulatingAndSaveOnlineTime(loriTimePlayer);
         }
     }
@@ -83,14 +97,18 @@ public class MasteredAfkPlayerHandling extends AfkHandling {
         }
         chatAnnounce(loriTimePlayer, "message.afk.resumeAnnounce", "loritime.afk.announce.afkAnnounce");
         selfAfkMessage(loriTimePlayer, "message.afk.afkResume");
-        startAccumulatingOnlineTime(loriTimePlayer);
+        if (playersStoppedForAfk.remove(loriTimePlayer.getUniqueId())) {
+            startAccumulatingOnlineTime(loriTimePlayer);
+        }
     }
 
     private void stopAccumulatingAndSaveOnlineTime(final LoriTimePlayer loriTimePlayer) {
         log.debug("Stopping accumulation of online time for player " + loriTimePlayer.getName());
         final long now = System.currentTimeMillis();
         try {
-            loriTimePlugin.getAccumulator().stopAccumulatingAndSaveOnlineTime(loriTimePlayer.getUniqueId(), now);
+            loriTimePlugin.getAccumulator().stopAccumulatingAndSaveOnlineTime(loriTimePlayer.getUniqueId(), now,
+                    TimeEntryReason.PLAYER_AFK);
+            playersStoppedForAfk.add(loriTimePlayer.getUniqueId());
         } catch (final StorageException e) {
             log.error("error while stopping accumulation of online time for player " + loriTimePlayer.getName(), e);
         }

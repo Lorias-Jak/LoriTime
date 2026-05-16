@@ -2,6 +2,7 @@ package com.jannik_kuehn.loritimepaper.listener;
 
 import com.github.roleplaycauldron.spellbook.core.logger.WrappedLogger;
 import com.jannik_kuehn.common.LoriTimePlugin;
+import com.jannik_kuehn.common.api.storage.TimeEntryReason;
 import com.jannik_kuehn.common.exception.StorageException;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -67,7 +68,9 @@ public class TimeAccumulatorPaperListener implements Listener {
         final long now = System.currentTimeMillis();
         loriTimePlugin.getScheduler().runAsyncOnce(() -> {
             try {
-                loriTimePlugin.getAccumulator().stopAccumulatingAndSaveOnlineTime(uuid, now);
+                final TimeEntryReason reason = loriTimePlugin.consumeAfkKick(uuid)
+                        ? TimeEntryReason.PLAYER_AFK_KICK : TimeEntryReason.PLAYER_LEAVE;
+                loriTimePlugin.getAccumulator().stopAccumulatingAndSaveOnlineTime(uuid, now, reason);
                 loriTimePlugin.getPlayerConverter().removePlayerFromCache(uuid);
             } catch (final StorageException e) {
                 log.warn("error while stopping accumulation of online time for player " + uuid, e);

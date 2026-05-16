@@ -30,9 +30,12 @@ import com.jannik_kuehn.common.utils.TimeParser;
 
 import java.io.File;
 import java.time.InstantSource;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * The {@link LoriTimePlugin} is the main class of the plugin.
@@ -110,6 +113,11 @@ public class LoriTimePlugin {
     private Updater updater;
 
     /**
+     * Players whose next leave/disconnect should be persisted as AFK-caused.
+     */
+    private final Set<UUID> afkKickMarkers;
+
+    /**
      * {@code true} if an error occurred and the plugin should be
      */
     private boolean errorDisable;
@@ -135,6 +143,7 @@ public class LoriTimePlugin {
         this.fileManager = new FileManager(loggerFactory, dataFolder);
         this.dataStorageManager = new DataStorageManager(this, dataFolder);
         this.playerConverter = new LoriTimePlayerConverter(loggerFactory, this);
+        this.afkKickMarkers = Collections.newSetFromMap(new ConcurrentHashMap<>());
     }
 
     /**
@@ -234,6 +243,27 @@ public class LoriTimePlugin {
     }
 
     /**
+     * Marks a player whose disconnect is caused by AFK kick enforcement.
+     *
+     * @param uniqueId player UUID
+     */
+    public void markAfkKick(final UUID uniqueId) {
+        if (uniqueId != null) {
+            afkKickMarkers.add(uniqueId);
+        }
+    }
+
+    /**
+     * Consumes the AFK kick marker for a player.
+     *
+     * @param uniqueId player UUID
+     * @return true when the next disconnect should be recorded as AFK-caused
+     */
+    public boolean consumeAfkKick(final UUID uniqueId) {
+        return uniqueId != null && afkKickMarkers.remove(uniqueId);
+    }
+
+    /**
      * Disables the plugin.
      */
     public void disable() {
@@ -249,6 +279,7 @@ public class LoriTimePlugin {
         localization.reloadTranslation();
         if (afkStatusProvider != null) {
             afkStatusProvider.reloadConfigValues();
+            afkStatusProvider.restartAfkCheck();
         }
 
         reloadMasteredFunctions();

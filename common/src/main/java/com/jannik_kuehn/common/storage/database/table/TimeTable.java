@@ -77,7 +77,8 @@ public final class TimeTable {
     /**
      * Inserts or updates a player's session duration with the given reason.
      *
-     * <p>Reasons {@link TimeEntryReason#PLAYER_LEAVE}, {@link TimeEntryReason#AUTO_FLUSH} and
+     * <p>Reasons {@link TimeEntryReason#PLAYER_LEAVE}, {@link TimeEntryReason#PLAYER_AFK},
+     * {@link TimeEntryReason#PLAYER_AFK_KICK}, {@link TimeEntryReason#AUTO_FLUSH} and
      * {@link TimeEntryReason#SHUTDOWN_FLUSH} update the latest entry by setting the leave timestamp
      * to the current moment and replacing the reason. Other reasons create a fresh entry.</p>
      *
@@ -267,7 +268,9 @@ public final class TimeTable {
     }
 
     private boolean shouldUpdateLatest(final TimeEntryReason reason) {
-        return EnumSet.of(TimeEntryReason.PLAYER_LEAVE, TimeEntryReason.AUTO_FLUSH, TimeEntryReason.SHUTDOWN_FLUSH).contains(reason);
+        return EnumSet.of(TimeEntryReason.PLAYER_LEAVE, TimeEntryReason.PLAYER_AFK,
+                TimeEntryReason.PLAYER_AFK_KICK, TimeEntryReason.AUTO_FLUSH, TimeEntryReason.SHUTDOWN_FLUSH)
+                .contains(reason);
     }
 
     private void insertNewDuration(final Connection connection,

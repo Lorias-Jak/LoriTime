@@ -19,14 +19,9 @@ import java.util.UUID;
 
 /**
  * The PluginMessaging class is responsible for sending and computing PluginMessages.
- * Theyre used to communicate between proxy and subserver.
+ * They're used to communicate between proxy and subserver.
  */
 public abstract class PluginMessaging {
-    /**
-     * Current storage plugin message protocol version.
-     */
-    private static final int STORAGE_PROTOCOL_VERSION = 3;
-
     /**
      * The identifier for the afk-identifier channel.
      */
@@ -36,6 +31,11 @@ public abstract class PluginMessaging {
      * The identifier for the storage-identifier channel.
      */
     protected static final String SLAVED_TIME_STORAGE = "loritime:storage";
+
+    /**
+     * Current storage plugin message protocol version.
+     */
+    private static final int STORAGE_PROTOCOL_VERSION = 2;
 
     /**
      * The {@link LoriTimePlugin} instance.

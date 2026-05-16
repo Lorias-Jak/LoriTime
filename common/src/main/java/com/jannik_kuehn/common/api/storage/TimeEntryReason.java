@@ -41,6 +41,16 @@ public enum TimeEntryReason {
     PLAYER_LEAVE,
 
     /**
+     * Player session was stopped because the player became AFK.
+     */
+    PLAYER_AFK,
+
+    /**
+     * Player session was stopped because the player was kicked for being AFK.
+     */
+    PLAYER_AFK_KICK,
+
+    /**
      * Online cache flush persisted partial session time.
      */
     AUTO_FLUSH,

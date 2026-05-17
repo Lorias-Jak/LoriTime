@@ -4,9 +4,14 @@ import com.github.roleplaycauldron.spellbook.core.file.FileBackupService;
 import com.github.roleplaycauldron.spellbook.core.file.FileException;
 import com.github.roleplaycauldron.spellbook.core.logger.LoggerFactory;
 import com.github.roleplaycauldron.spellbook.core.logger.WrappedLogger;
+import com.jannik_kuehn.common.config.migration.ConfigMigrationPipeline;
+import com.jannik_kuehn.common.config.migration.ConfigMigrationResult;
+import com.jannik_kuehn.common.config.migration.ConfigSchema;
+import com.jannik_kuehn.common.config.migration.ConfigTemplateMerger;
 import com.jannik_kuehn.common.exception.ConfigurationException;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.error.YAMLException;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -15,21 +20,38 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
+import java.util.Objects;
 
 /**
  * The {@link FileManager} is responsible for managing the files of the plugin including updating and backing up.
  */
 @SuppressWarnings({"PMD.TooManyMethods", "PMD.GodClass"})
 public class FileManager {
+    /**
+     * Name of the main plugin config resource.
+     */
+    private static final String CONFIG_FILE_NAME = "config.yml";
+
+    /**
+     * English localization resource.
+     */
+    private static final String ENGLISH_LOCALIZATION_FILE_NAME = "en.yml";
+
+    /**
+     * German localization resource.
+     */
+    private static final String GERMAN_LOCALIZATION_FILE_NAME = "de.yml";
 
     /**
      * The {@link WrappedLogger} instance.
      */
     private final WrappedLogger log;
+
+    /**
+     * The {@link LoggerFactory} used by loaded configuration files.
+     */
+    private final LoggerFactory loggerFactory;
 
     /**
      * The data folder of the plugin.
@@ -54,6 +76,7 @@ public class FileManager {
      */
     @SuppressWarnings("PMD.ConstructorCallsOverridableMethod")
     public FileManager(final LoggerFactory loggerFactory, final File dataFolder) {
+        this.loggerFactory = loggerFactory;
         this.log = loggerFactory.create(FileManager.class);
         this.dataFolder = dataFolder;
 
@@ -69,62 +92,17 @@ public class FileManager {
             log.error("An error occurred while creating the plugin folder.");
         }
         Configuration tempConfig = null;
-        File file = new File(dataFolder.toString(), "config.yml");
+        final File file = new File(dataFolder.toString(), CONFIG_FILE_NAME);
         try {
             if (doesFileNotExist(file)) {
-                file = getOrCreateFile(dataFolder.toString(), "config.yml", true);
+                createFile(file);
+                createFromResources(file.toPath(), CONFIG_FILE_NAME);
             }
-            tempConfig = getConfiguration(file);
+            tempConfig = getHumanConfiguration(file);
         } catch (final ConfigurationException e) {
             log.error("An error occurred while loading the backup manager configuration.", e);
         }
         return tempConfig;
-    }
-
-    @SuppressWarnings("PMD.UseProperClassLoader")
-    private boolean checkFileForUpdate(final File oldFile, final String newFileName) throws ConfigurationException {
-        final Yaml yaml = new Yaml();
-        final Set<String> oldKeys;
-
-        try (InputStream oldFileStream = Files.newInputStream(oldFile.toPath())) {
-            final Map<String, Object> oldConfig = yaml.load(oldFileStream);
-            oldKeys = extractKeys(oldConfig);
-        } catch (final IOException e) {
-            throw new ConfigurationException("An error occurred while loading the file: " + oldFile.getName() + " to check it for updates", e);
-        }
-
-        final Set<String> newKeys;
-        try (InputStream resourceStream = getClass().getClassLoader().getResourceAsStream(newFileName)) {
-            if (resourceStream == null) {
-                throw new ConfigurationException("Resource file '" + newFileName + "' not found.");
-            }
-            final Map<String, Object> newConfig = yaml.load(resourceStream);
-            newKeys = extractKeys(newConfig);
-        } catch (final IOException e) {
-            throw new ConfigurationException("An error occurred while loading the file: " + newFileName + " to check it for updates", e);
-        }
-
-        return !oldKeys.equals(newKeys);
-    }
-
-    private Set<String> extractKeys(final Map<String, Object> config) {
-        final Set<String> keys = new HashSet<>();
-        if (config != null) {
-            flattenKeys("", config, keys);
-        }
-        return keys;
-    }
-
-    private void flattenKeys(final String parentKey, final Map<String, Object> map, final Set<String> keys) {
-        for (final Map.Entry<String, Object> entry : map.entrySet()) {
-            final String fullKey = parentKey.isEmpty() ? entry.getKey() : parentKey + "." + entry.getKey();
-            keys.add(fullKey);
-
-            if (entry.getValue() instanceof Map) {
-                @SuppressWarnings("unchecked") final Map<String, Object> childMap = (Map<String, Object>) entry.getValue();
-                flattenKeys(fullKey, childMap, keys);
-            }
-        }
     }
 
     /**
@@ -144,9 +122,8 @@ public class FileManager {
             createFromResources(file.toPath(), fileName);
         } else if (doesFileNotExist(file)) {
             createFile(file);
-        } else if (backupsEnabled && needCopy && checkFileForUpdate(file, fileName)) {
-            backupService.addFileToBackup(file);
-            updateConfigFromResource(file, fileName);
+        } else if (needCopy) {
+            updateHumanConfigFromResourceIfNeeded(file, fileName);
         }
         return file;
     }
@@ -165,10 +142,9 @@ public class FileManager {
         }
     }
 
-    @SuppressWarnings("PMD.UseProperClassLoader")
     private void createFromResources(final Path createdFile, final String nameFromSourceOfReplacement) throws ConfigurationException {
-        try {
-            Files.copy(this.getClass().getClassLoader().getResource(nameFromSourceOfReplacement).openStream(), createdFile, StandardCopyOption.REPLACE_EXISTING);
+        try (InputStream resourceStream = openResourceStream(nameFromSourceOfReplacement)) {
+            Files.copy(resourceStream, createdFile, StandardCopyOption.REPLACE_EXISTING);
         } catch (final IOException e) {
             throw new ConfigurationException("Could not copy the file content to the file '" + nameFromSourceOfReplacement + "'. Pls delete the file and try again.", e);
         }
@@ -183,7 +159,18 @@ public class FileManager {
      * @throws ConfigurationException if the file could not be converted to a {@link Configuration} object
      */
     public Configuration getConfiguration(final File fileToChange) throws ConfigurationException {
-        final Configuration configurationFile = new YamlConfiguration(fileToChange.toString());
+        return getHumanConfiguration(fileToChange);
+    }
+
+    /**
+     * Loads a human-managed configuration file.
+     *
+     * @param fileToChange the file to load
+     * @return the loaded configuration
+     * @throws ConfigurationException if the file could not be loaded
+     */
+    public Configuration getHumanConfiguration(final File fileToChange) throws ConfigurationException {
+        final Configuration configurationFile = new YamlConfiguration(fileToChange.toString(), loggerFactory);
         if (configurationFile.isLoaded()) {
             return configurationFile;
         } else {
@@ -191,65 +178,110 @@ public class FileManager {
         }
     }
 
-    @SuppressWarnings({"PMD.UseProperClassLoader", "PMD.CyclomaticComplexity"})
-    private void updateConfigFromResource(final File oldConfigFile, final String resourceFileName) throws ConfigurationException {
-        Yaml yaml = new Yaml();
-        Map<String, Object> oldConfig;
-        try (InputStream oldConfigStream = Files.newInputStream(oldConfigFile.toPath())) {
-            oldConfig = yaml.load(oldConfigStream);
-        } catch (final IOException e) {
-            throw new ConfigurationException("An exception occurred while loading the file '" + oldConfigFile.getName() + "'.", e);
+    /**
+     * Loads a flat data file without applying human config template migrations.
+     *
+     * @param fileToChange the file to load
+     * @return the loaded configuration
+     * @throws ConfigurationException if the file could not be loaded
+     */
+    public Configuration getFlatDataConfiguration(final File fileToChange) throws ConfigurationException {
+        final Configuration configurationFile = new YamlConfiguration(fileToChange.toString(), loggerFactory);
+        if (configurationFile.isLoaded()) {
+            return configurationFile;
+        } else {
+            throw new ConfigurationException("An issue occurred while loading the file '" + fileToChange.getName() + "'. The File is null, there should be data.");
+        }
+    }
+
+    private void updateHumanConfigFromResourceIfNeeded(final File oldConfigFile, final String resourceFileName) throws ConfigurationException {
+        final StructuredConfigurationDocument current = loadDocument(oldConfigFile.toPath(), oldConfigFile.getName());
+        final StructuredConfigurationDocument template = loadResourceDocument(resourceFileName);
+        final StructuredConfigurationDocument updated;
+        final boolean changed;
+
+        final ConfigSchema schema = schemaForResource(resourceFileName);
+        if (schema != null) {
+            final ConfigMigrationResult migrationResult = new ConfigMigrationPipeline(schema).migrate(current);
+            updated = new ConfigTemplateMerger().merge(template, migrationResult.document());
+            changed = migrationResult.changed() || !Objects.equals(updated.asMap(), current.asMap());
+        } else {
+            updated = new ConfigTemplateMerger().merge(template, current);
+            changed = !Objects.equals(updated.asMap(), current.asMap());
         }
 
-        if (oldConfig == null) {
-            oldConfig = new HashMap<>();
+        if (!changed) {
+            return;
         }
 
-        final Map<String, Object> newConfig;
-        try (InputStream resourceStream = getClass().getClassLoader().getResourceAsStream(resourceFileName)) {
-            if (resourceStream == null) {
-                throw new ConfigurationException("Resource file '" + resourceFileName + "' not found.");
-            }
-            newConfig = yaml.load(resourceStream);
+        backupService.addFileToBackup(oldConfigFile);
+        writeDocument(oldConfigFile.toPath(), updated);
+    }
+
+    private ConfigSchema schemaForResource(final String resourceFileName) {
+        return switch (resourceFileName) {
+            case CONFIG_FILE_NAME -> ConfigSchema.loriTimeConfig();
+            case ENGLISH_LOCALIZATION_FILE_NAME, GERMAN_LOCALIZATION_FILE_NAME -> ConfigSchema.localization();
+            default -> null;
+        };
+    }
+
+    private StructuredConfigurationDocument loadResourceDocument(final String resourceFileName) throws ConfigurationException {
+        try (InputStream resourceStream = openResourceStream(resourceFileName)) {
+            return loadDocument(resourceStream, resourceFileName);
         } catch (final IOException e) {
             throw new ConfigurationException("An exception occurred while loading the resource file '" + resourceFileName + "'.", e);
         }
+    }
 
-        if (newConfig == null) {
-            throw new ConfigurationException("Resource file '" + resourceFileName + "' is empty or invalid.");
+    @SuppressWarnings("PMD.UseProperClassLoader")
+    private InputStream openResourceStream(final String resourceFileName) throws ConfigurationException {
+        final ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
+        InputStream resourceStream = contextClassLoader == null ? null : contextClassLoader.getResourceAsStream(resourceFileName);
+        if (resourceStream == null) {
+            resourceStream = FileManager.class.getClassLoader().getResourceAsStream(resourceFileName);
         }
+        if (resourceStream == null) {
+            throw new ConfigurationException("Resource file '" + resourceFileName + "' not found.");
+        }
+        return resourceStream;
+    }
 
-        overwriteConfigs(newConfig, oldConfig);
+    private StructuredConfigurationDocument loadDocument(final Path path, final String displayName) throws ConfigurationException {
+        try (InputStream inputStream = Files.newInputStream(path)) {
+            return loadDocument(inputStream, displayName);
+        } catch (final IOException e) {
+            throw new ConfigurationException("An exception occurred while loading the file '" + displayName + "'.", e);
+        }
+    }
 
+    private StructuredConfigurationDocument loadDocument(final InputStream inputStream, final String displayName) throws ConfigurationException {
+        final Object loaded;
+        try {
+            loaded = new Yaml().load(inputStream);
+        } catch (final YAMLException ex) {
+            throw new ConfigurationException("Malformed YAML in '" + displayName + "'.", ex);
+        }
+        if (loaded == null) {
+            return new StructuredConfigurationDocument();
+        }
+        if (!(loaded instanceof Map<?, ?> map)) {
+            throw new ConfigurationException("YAML file '" + displayName + "' must contain a section at the root.");
+        }
+        return new StructuredConfigurationDocument(map);
+    }
+
+    private void writeDocument(final Path path, final StructuredConfigurationDocument document) throws ConfigurationException {
         final DumperOptions dumperOptions = new DumperOptions();
         dumperOptions.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
         dumperOptions.setIndent(2);
         dumperOptions.setPrettyFlow(true);
 
-        yaml = new Yaml(dumperOptions);
-        try (BufferedWriter writer = Files.newBufferedWriter(oldConfigFile.toPath())) {
-            yaml.dump(newConfig, writer);
+        final Yaml yaml = new Yaml(dumperOptions);
+        try (BufferedWriter writer = Files.newBufferedWriter(path)) {
+            yaml.dump(document.asMap(), writer);
         } catch (final IOException e) {
-            throw new ConfigurationException("An exception occurred while updating the file '" + oldConfigFile.getName() + "'.", e);
-        }
-    }
-
-    private void overwriteConfigs(final Map<String, Object> newConfig, final Map<String, Object> oldConfig) {
-        for (final Map.Entry<String, Object> entry : newConfig.entrySet()) {
-            final String key = entry.getKey();
-            final Object newValue = entry.getValue();
-
-            if (oldConfig.containsKey(key)) {
-                final Object oldValue = oldConfig.get(key);
-
-                if (newValue instanceof Map && oldValue instanceof Map) {
-                    @SuppressWarnings("unchecked") final Map<String, Object> newChild = (Map<String, Object>) newValue;
-                    @SuppressWarnings("unchecked") final Map<String, Object> oldChild = (Map<String, Object>) oldValue;
-                    overwriteConfigs(newChild, oldChild);
-                } else {
-                    newConfig.put(key, oldValue);
-                }
-            }
+            throw new ConfigurationException("An exception occurred while updating the file '" + path.getFileName() + "'.", e);
         }
     }
 

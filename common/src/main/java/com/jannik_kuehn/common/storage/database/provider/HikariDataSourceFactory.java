@@ -2,6 +2,7 @@ package com.jannik_kuehn.common.storage.database.provider;
 
 import com.github.roleplaycauldron.spellbook.core.logger.WrappedLogger;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import com.jannik_kuehn.common.config.ConfigSection;
 import com.jannik_kuehn.common.config.Configuration;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
@@ -67,19 +68,22 @@ public final class HikariDataSourceFactory {
 
         databaseConfig.setPoolName("LoriTime-ConnectionPool");
 
-        final int maximumPoolSize = config.getInt(POOL_SECTION + "maximumPoolSize", 10);
+        final ConfigSection poolSettings = config.getSection(DATA_SECTION + "poolSettings")
+                .orElse(config.getRootSection());
+
+        final int maximumPoolSize = poolSettings.getInt("maximumPoolSize", config.getInt(POOL_SECTION + "maximumPoolSize", 10));
         databaseConfig.setMaximumPoolSize(maximumPoolSize);
 
-        final int minimumIdle = config.getInt(POOL_SECTION + "minimumIdle", 10);
+        final int minimumIdle = poolSettings.getInt("minimumIdle", config.getInt(POOL_SECTION + "minimumIdle", 10));
         databaseConfig.setMinimumIdle(minimumIdle);
 
-        final int maxLifetime = config.getInt(POOL_SECTION + "maximumLifetime", 1_800_000);
+        final int maxLifetime = poolSettings.getInt("maximumLifetime", config.getInt(POOL_SECTION + "maximumLifetime", 1_800_000));
         databaseConfig.setMaxLifetime(maxLifetime);
 
-        final int keepAliveTime = config.getInt(POOL_SECTION + "keepAliveTime", 0);
+        final int keepAliveTime = poolSettings.getInt("keepAliveTime", config.getInt(POOL_SECTION + "keepAliveTime", 0));
         databaseConfig.setKeepaliveTime(keepAliveTime);
 
-        final int connectionTimeout = config.getInt(POOL_SECTION + "connectionTimeout", 5_000);
+        final int connectionTimeout = poolSettings.getInt("connectionTimeout", config.getInt(POOL_SECTION + "connectionTimeout", 5_000));
         databaseConfig.setConnectionTimeout(connectionTimeout);
 
         final ThreadFactoryBuilder builder = new ThreadFactoryBuilder();

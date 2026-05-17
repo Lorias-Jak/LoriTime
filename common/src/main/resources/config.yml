@@ -88,7 +88,7 @@ storageMethod: 'sqlite'
 data:
   # The prefix for the tables in the database.
   # The plugin will automatically create tables with this prefix if they don't exist yet.
-  # In migration scenarios, the plugin will not automatically rename the table-prefix.
+  # V2 migration defaults new normalized storage to the 'loritime' prefix.
   tablePrefix: 'loritime'
 
   # The default address and port for the database.
@@ -156,6 +156,15 @@ storageCleanup:
   # Delete history for players whose activity timestamp is older than this many days.
   inactiveAfterDays: 365
 
+#####################
+# Storage Migration #
+#####################
+storageMigration:
+
+  # Internal migration marker for importing legacy yml storage into SQLite.
+  # This is set automatically when an old config with general.storage: 'yml' is migrated.
+  legacyFlatFileImport: false
+
 ###########
 #   AFK   #
 ###########
@@ -215,3 +224,8 @@ command:
 ################
 integrations:
   PlaceholderAPI: true
+
+################
+# DO NOT TOUCH #
+################
+configSchemaVersion: 2

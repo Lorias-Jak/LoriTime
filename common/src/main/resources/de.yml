@@ -110,3 +110,8 @@ message:
     alreadyDownloaded: '<#FF3232>Das Update wurde bereits heruntergeladen. Bitte starte den Server neu um das Update final durchzuführen.'
     notFound: '<#FF3232>Es wurde kein Update gefunden.'
     updateSuccess: '<#1AFA29>Das Update <#50CBAB>[newVersion] <#1AFA29>wurde erfolgreich heruntergeladen. <#A4A4A4>Bitte starte den Server neu um das Update final durchzuführen.'
+
+################
+# DO NOT TOUCH #
+################
+configSchemaVersion: 1

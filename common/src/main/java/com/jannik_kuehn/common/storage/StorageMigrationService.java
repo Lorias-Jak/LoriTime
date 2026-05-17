@@ -48,6 +48,21 @@ public class StorageMigrationService {
     private static final String LEGACY_DATA_DIRECTORY = "data";
 
     /**
+     * Config marker that requests a legacy flat-file import after config migration.
+     */
+    private static final String LEGACY_FLAT_FILE_IMPORT_PATH = "storageMigration.legacyFlatFileImport";
+
+    /**
+     * SQLite storage method value.
+     */
+    private static final String SQLITE_STORAGE_METHOD = "sqlite";
+
+    /**
+     * Canonical table prefix used when importing legacy flat-file data.
+     */
+    private static final String CANONICAL_TABLE_PREFIX = "loritime";
+
+    /**
      * The plugin instance.
      */
     private final LoriTimePlugin loriTime;
@@ -116,19 +131,27 @@ public class StorageMigrationService {
     private void migrateLegacyFlatFilesIfPresent() throws StorageException {
         final File namesFile = findLegacyFile(NAMES_FILE);
         final File timeFile = findLegacyFile(TIME_FILE);
+        final boolean importRequested = loriTime.getConfig().getBoolean(LEGACY_FLAT_FILE_IMPORT_PATH, false);
+        if (!importRequested && !namesFile.exists() && !timeFile.exists()) {
+            return;
+        }
         if (!namesFile.exists() && !timeFile.exists()) {
+            log.warn("Legacy flat-file import was requested, but no legacy names.yml or time.yml file was found.");
+            loriTime.getConfig().setValue(LEGACY_FLAT_FILE_IMPORT_PATH, false);
             return;
         }
 
         log.info("Detected legacy flat-file storage. Migrating files to SQLite.");
-        loriTime.getConfig().setValue("storageMethod", "sqlite");
+        loriTime.getConfig().setValue("storageMethod", SQLITE_STORAGE_METHOD);
 
-        final DatabaseStorage databaseStorage = new DatabaseStorage(loriTime.getLoggerFactory(), loriTime.getConfig(), dataFolder);
+        final DatabaseStorage databaseStorage = new DatabaseStorage(
+                loriTime.getLoggerFactory(), loriTime.getConfig(), dataFolder, CANONICAL_TABLE_PREFIX);
         try {
             new DatabaseMigrationPreflight(databaseStorage, log).migrateIfNecessary();
             importLegacyFiles(databaseStorage, namesFile, timeFile);
             markMigrated(namesFile);
             markMigrated(timeFile);
+            loriTime.getConfig().setValue(LEGACY_FLAT_FILE_IMPORT_PATH, false);
         } finally {
             databaseStorage.shutdown();
         }
@@ -160,7 +183,7 @@ public class StorageMigrationService {
         if (!namesFile.exists()) {
             return;
         }
-        final Configuration names = new YamlConfiguration(namesFile.toString());
+        final Configuration names = loadFlatDataFile(namesFile);
         for (final Map.Entry<String, Object> entry : names.getAll().entrySet()) {
             final Optional<UUID> uuid = parseUuid(entry.getValue());
             if (uuid.isPresent()) {
@@ -173,7 +196,7 @@ public class StorageMigrationService {
         if (!timeFile.exists()) {
             return;
         }
-        final Configuration times = new YamlConfiguration(timeFile.toString());
+        final Configuration times = loadFlatDataFile(timeFile);
         for (final Map.Entry<String, Object> entry : times.getAll().entrySet()) {
             final Optional<UUID> uuid = parseUuid(entry.getKey());
             final Optional<Long> time = parseLong(entry.getValue());
@@ -184,6 +207,14 @@ public class StorageMigrationService {
                         TimeEntryReason.LEGACY_IMPORT));
             }
         }
+    }
+
+    private Configuration loadFlatDataFile(final File file) throws StorageException {
+        final Configuration configuration = new YamlConfiguration(file.toString(), loriTime.getLoggerFactory());
+        if (!configuration.isLoaded()) {
+            throw new StorageException("Could not load legacy flat data file: " + file.getName());
+        }
+        return configuration;
     }
 
     private Optional<UUID> parseUuid(final Object value) {

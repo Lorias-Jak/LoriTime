@@ -5,7 +5,6 @@ import com.github.roleplaycauldron.spellbook.core.logger.WrappedLogger;
 import com.jannik_kuehn.common.api.LoriTimePlayerConverter;
 import com.jannik_kuehn.common.api.common.CommonServer;
 import com.jannik_kuehn.common.api.scheduler.PluginScheduler;
-import com.jannik_kuehn.common.api.storage.AccumulatingTimeStorage;
 import com.jannik_kuehn.common.api.storage.StorageMode;
 import com.jannik_kuehn.common.api.storage.TimeAccumulator;
 import com.jannik_kuehn.common.api.storage.UnifiedStorage;
@@ -412,17 +411,6 @@ public class LoriTimePlugin {
      */
     public TimeAccumulator getAccumulator() {
         return dataStorageManager.getAccumulator();
-    }
-
-    /**
-     * Getter of the accumulated unified storage.
-     *
-     * @return the accumulated unified storage
-     * @deprecated use {@link #getStorage()} for storage reads/writes or {@link #getAccumulator()} for session lifecycle.
-     */
-    @Deprecated(since = "2.0.0", forRemoval = true)
-    public AccumulatingTimeStorage getAccumulatingStorage() {
-        return (AccumulatingTimeStorage) dataStorageManager.getAccumulator();
     }
 
     /**

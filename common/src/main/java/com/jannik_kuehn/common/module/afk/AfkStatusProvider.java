@@ -107,12 +107,12 @@ public class AfkStatusProvider {
         log.debug("Switching player afk status from '" + player.getName() + "'");
         if (player.isAfk()) {
             log.debug("Resuming player '" + player.getName() + "'");
-            player.setAFk(false);
+            player.setAfk(false);
             afkPlayerHandling.executePlayerResume(player);
             return;
         }
         log.debug("Setting player" + player.getName() + "to afk");
-        player.setAFk(true);
+        player.setAfk(true);
         afkPlayerHandling.executePlayerAfk(player, timeToRemove);
     }
 
@@ -122,7 +122,7 @@ public class AfkStatusProvider {
             log.debug("Player '" + player.getName() + "' is already afk. Skipping the process...");
             return;
         }
-        player.setAFk(true);
+        player.setAfk(true);
         afkPlayerHandling.executePlayerAfk(player, timeToRemove);
     }
 
@@ -132,7 +132,7 @@ public class AfkStatusProvider {
             log.debug("Player '" + player.getName() + "' is not afk. Skipping the resuming");
             return;
         }
-        player.setAFk(false);
+        player.setAfk(false);
         afkPlayerHandling.executePlayerResume(player);
     }
 }

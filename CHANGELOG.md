@@ -13,6 +13,9 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Changed
 - The way the plugin stores its internal data in the storages for more flexibility.
 - Bumped minimum java version from `21` to `25`
+- Updated the migrator of configs
+- Overhauled the API
+- Updated the docs
 ### Deprecated
 ### Removed
 - The storage type `yml`

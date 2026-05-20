@@ -73,7 +73,7 @@ public class LoriTimePlayer {
      *
      * @param afk {@code true} if the player is AFK, otherwise {@code false}.
      */
-    public void setAFk(final boolean afk) {
+    public void setAfk(final boolean afk) {
         this.afkStatus = afk;
     }
 
@@ -108,6 +108,6 @@ public class LoriTimePlayer {
 
     @Override
     public int hashCode() {
-        return Objects.hash(uuid, name);
+        return Objects.hash(uuid);
     }
 }

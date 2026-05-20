@@ -6,7 +6,6 @@ import com.jannik_kuehn.common.config.Configuration;
 import com.jannik_kuehn.common.exception.StorageException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
-import org.mockito.MockedStatic;
 
 import java.io.File;
 import java.io.IOException;
@@ -18,15 +17,15 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.logging.Logger;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.mockStatic;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
+@SuppressWarnings("PMD.UnitTestContainsTooManyAsserts")
 class StorageMigrationServiceTest {
 
     private static final String TABLE_PREFIX = "loritime";
+
+    private static final String CUSTOM_TABLE_PREFIX = "custom_prefix";
 
     @TempDir
     private File dataFolder;
@@ -46,14 +45,12 @@ class StorageMigrationServiceTest {
         final Configuration config = config();
         final LoriTimePlugin plugin = pluginWithConfig(config);
 
-        try (MockedStatic<LoriTimePlugin> pluginStatic = mockStatic(LoriTimePlugin.class)) {
-            pluginStatic.when(LoriTimePlugin::getInstance).thenReturn(plugin);
-            final StorageMigrationService service = new StorageMigrationService(plugin, dataFolder);
-            service.migrateIfNecessary();
-            service.migrateIfNecessary();
-        }
+        final StorageMigrationService service = new StorageMigrationService(plugin, dataFolder);
+        service.migrateIfNecessary();
+        service.migrateIfNecessary();
 
         verify(config).setValue("storageMethod", "sqlite");
+        verify(config).setValue("storageMigration.legacyFlatFileImport", false);
         assertEquals(expectedMigrationResult(), migrationResult(legacyDataFolder), "legacy flat files should be imported once");
     }
 
@@ -68,7 +65,8 @@ class StorageMigrationServiceTest {
         final Configuration config = mock(Configuration.class);
         when(config.getString("storageMethod", "sqlite")).thenReturn("sqlite");
         when(config.getString("storageMethod")).thenReturn("sqlite");
-        when(config.getString("data.tablePrefix", TABLE_PREFIX)).thenReturn(TABLE_PREFIX);
+        when(config.getString("data.tablePrefix", TABLE_PREFIX)).thenReturn(CUSTOM_TABLE_PREFIX);
+        when(config.getBoolean("storageMigration.legacyFlatFileImport", false)).thenReturn(true, false);
         return config;
     }
 

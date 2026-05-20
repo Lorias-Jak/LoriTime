@@ -77,7 +77,9 @@ Existing historical rows are not migrated to `PLAYER_AFK_KICK`. The new reason i
 
 ## After Updating
 
-Check startup logs for migration messages, then verify:
+After the first successful migration startup, regenerate all LoriTime-managed configuration and localization files. The automated migration preserves values where possible, but rewritten files lose their original formatting and comments; regenerating `config.yml` and language files gives you the clean LoriTime 2 templates to reapply your settings to.
+
+Then check startup logs for migration messages, and verify:
 
 - The selected `storageMethod` is correct.
 - `multiSetup.mode` is correct on every instance.

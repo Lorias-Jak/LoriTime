@@ -1,7 +1,7 @@
 package com.jannik_kuehn.common.config;
 
+import com.github.roleplaycauldron.spellbook.core.logger.LoggerFactory;
 import com.github.roleplaycauldron.spellbook.core.logger.WrappedLogger;
-import com.jannik_kuehn.common.LoriTimePlugin;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
@@ -19,43 +19,66 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-@SuppressWarnings("PMD.CommentRequired")
+/**
+ * YAML-backed flat key-value store for legacy data files.
+ */
 public class YamlKeyValueStore implements KeyValueStore {
+    /**
+     * Backing file path.
+     */
     private final String filePath;
 
+    /**
+     * Logger for storage diagnostics.
+     */
     private final WrappedLogger log;
 
+    /**
+     * Flattened stored values.
+     */
     private final Map<String, Object> data;
 
+    /**
+     * True when the backing file loaded successfully.
+     */
     private boolean loaded;
 
+    /**
+     * Creates a flat YAML key-value store.
+     *
+     * @param filePath      backing file path
+     * @param loggerFactory logger factory for diagnostics
+     */
     @SuppressFBWarnings("CT_CONSTRUCTOR_THROW")
-    public YamlKeyValueStore(final String filePath) {
+    public YamlKeyValueStore(final String filePath, final LoggerFactory loggerFactory) {
         this.filePath = filePath;
-        final LoriTimePlugin loriTimePlugin = LoriTimePlugin.getInstance();
-        this.log = loriTimePlugin.getLoggerFactory().create(YamlKeyValueStore.class);
+        this.log = loggerFactory.create(YamlKeyValueStore.class);
         this.data = new HashMap<>();
         loaded = false;
 
         loadFromFile();
     }
 
+    /** {@inheritDoc} */
     @Override
     public void set(final String key, final Object value) {
         data.put(key, value);
         saveToFile();
     }
 
+    /** {@inheritDoc} */
     @Override
     public void setTemporary(final String key, final Object value) {
         data.put(key, value);
     }
 
+    /** {@inheritDoc} */
     @Override
     public Object get(final String key) {
         return data.get(key);
     }
 
+    /** {@inheritDoc} */
     @Override
     public Object get(final String key, final Object defaultValue) {
         final Object obj = data.get(key);
@@ -65,21 +88,29 @@ public class YamlKeyValueStore implements KeyValueStore {
         return obj;
     }
 
+    /** {@inheritDoc} */
     @Override
     public Map<String, Object> getAll() {
         return data;
     }
 
+    /**
+     * Replaces all values and persists them.
+     *
+     * @param dataMap values to store
+     */
     public void setAll(final Map<String, ?> dataMap) {
         data.putAll(dataMap);
         saveToFile();
     }
 
+    /** {@inheritDoc} */
     @Override
     public List<String> getKeys() {
         return new ArrayList<>(data.keySet());
     }
 
+    /** {@inheritDoc} */
     @Override
     public Set<Map.Entry<String, Object>> entrySet() {
         return data.entrySet();
@@ -137,16 +168,19 @@ public class YamlKeyValueStore implements KeyValueStore {
         }
     }
 
+    /** {@inheritDoc} */
     @Override
     public boolean isLoaded() {
         return loaded;
     }
 
+    /** {@inheritDoc} */
     @Override
     public void reload() {
         loadFromFile();
     }
 
+    /** {@inheritDoc} */
     @Override
     public void remove(final String key) {
         data.remove(key);

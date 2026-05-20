@@ -40,13 +40,8 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * The {@link LoriTimePlugin} is the main class of the plugin.
  */
-@SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.AssignmentToNonFinalStatic", "PMD.CouplingBetweenObjects"})
+@SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.CouplingBetweenObjects"})
 public class LoriTimePlugin {
-    /**
-     * The {@link LoriTimePlugin} instance.
-     */
-    private static LoriTimePlugin instance;
-
     /**
      * The {@link LoggerFactory} instance.
      */
@@ -131,7 +126,6 @@ public class LoriTimePlugin {
      * @param loggerTopic the logger topic.
      */
     public LoriTimePlugin(final LoggerFactory loggerFactory, final File dataFolder, final PluginScheduler scheduler, final CommonServer server, final String loggerTopic) {
-        instance = this;
         this.dataFolder = dataFolder;
         this.scheduler = scheduler;
         this.server = server;
@@ -147,20 +141,15 @@ public class LoriTimePlugin {
     }
 
     /**
-     * Getter of the {@link LoriTimePlugin} instance.
-     *
-     * @return the {@link LoriTimePlugin} instance.
-     */
-    public static LoriTimePlugin getInstance() {
-        // ToDo Remove this
-        return instance;
-    }
-
-    /**
      * Enables the plugin-Core.
      */
     public void enable() {
         loadOrCreateConfigs();
+        if (errorDisable) {
+            log.error("Disabling the plugin because of an issue.");
+            disable();
+            return;
+        }
         log.debug("Enabling LoriTime main class");
         server.setServerMode(getServerModeFromConfig());
         setupUpdater();

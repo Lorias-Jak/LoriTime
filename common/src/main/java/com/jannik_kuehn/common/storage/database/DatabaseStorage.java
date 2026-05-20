@@ -67,10 +67,23 @@ public class DatabaseStorage {
      * @param dataFolder    the data folder of the plugin
      */
     public DatabaseStorage(final LoggerFactory loggerFactory, final Configuration config, final File dataFolder) {
+        this(loggerFactory, config, dataFolder, config.getString("data.tablePrefix", "loritime"));
+    }
+
+    /**
+     * Creates a database storage using an explicit table prefix.
+     *
+     * @param loggerFactory the {@link LoggerFactory} instance
+     * @param config        the {@link Configuration} instance
+     * @param dataFolder    the data folder of the plugin
+     * @param tablePrefix   table prefix to use for this storage instance
+     */
+    public DatabaseStorage(final LoggerFactory loggerFactory, final Configuration config,
+                           final File dataFolder, final String tablePrefix) {
         this.loggerFactory = loggerFactory;
         this.log = loggerFactory.create(DatabaseStorage.class);
         this.config = config;
-        this.tablePrefix = config.getString("data.tablePrefix", "loritime");
+        this.tablePrefix = tablePrefix;
         this.dataFolder = dataFolder;
     }
 

@@ -1,15 +1,10 @@
 package com.jannik_kuehn.common.api.common;
 
+import com.jannik_kuehn.common.api.LoriTimePlayer;
 import net.kyori.adventure.text.TextComponent;
 
-import java.util.UUID;
-
 @SuppressWarnings("PMD.CommentRequired")
-public interface CommonSender {
-
-    UUID getUniqueId();
-
-    String getName();
+public interface CommonSender extends LoriTimePlayer {
 
     boolean hasPermission(String permission);
 

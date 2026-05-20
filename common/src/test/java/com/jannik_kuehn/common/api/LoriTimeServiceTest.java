@@ -89,6 +89,15 @@ class LoriTimeServiceTest {
     }
 
     @Test
+    void returnsOnlineTimeByPlayerIdentity() throws StorageException {
+        final LoriTimePlayer player = new LoriTimePlayerRef(PLAYER_ID, "Renamed");
+        when(storage.getTime(PLAYER_ID)).thenReturn(OptionalLong.of(120));
+
+        assertEquals(Optional.of(Duration.ofSeconds(120)), service.getOnlineTime(player),
+                "Player overload should query by UUID");
+    }
+
+    @Test
     void addsSystemManualAdjustment() throws StorageException {
         service.addTime(PLAYER_ID, Duration.ofSeconds(30));
 
@@ -97,8 +106,29 @@ class LoriTimeServiceTest {
     }
 
     @Test
+    void addsSystemManualAdjustmentByPlayerIdentity() throws StorageException {
+        final LoriTimePlayer player = new LoriTimePlayerRef(PLAYER_ID, "Renamed");
+
+        service.addTime(player, Duration.ofSeconds(30));
+
+        verify(storage).addTime(new ManualTimeAdjustment(PLAYER_ID, 30L,
+                TimeEntryReason.MANUAL_ADJUSTMENT, (UUID) null, LoriTimeService.API_ACTOR));
+    }
+
+    @Test
     void addsActorAwareManualAdjustment() throws StorageException {
         service.addTime(PLAYER_ID, Duration.ofSeconds(-45), ACTOR_ID, "Admin");
+
+        verify(storage).addTime(new ManualTimeAdjustment(PLAYER_ID, -45L,
+                TimeEntryReason.MANUAL_ADJUSTMENT, ACTOR_ID, "Admin"));
+    }
+
+    @Test
+    void addsActorAwareManualAdjustmentByPlayerIdentities() throws StorageException {
+        final LoriTimePlayer player = new LoriTimePlayerRef(PLAYER_ID, "Renamed");
+        final LoriTimePlayer actor = new LoriTimePlayerRef(ACTOR_ID, "Admin");
+
+        service.addTime(player, Duration.ofSeconds(-45), actor);
 
         verify(storage).addTime(new ManualTimeAdjustment(PLAYER_ID, -45L,
                 TimeEntryReason.MANUAL_ADJUSTMENT, ACTOR_ID, "Admin"));
@@ -117,11 +147,31 @@ class LoriTimeServiceTest {
         assertAll(
                 () -> assertThrows(NullPointerException.class, () -> service.findUuid(null)),
                 () -> assertThrows(NullPointerException.class, () -> service.findName(null)),
-                () -> assertThrows(NullPointerException.class, () -> service.getOnlineTime(null)),
-                () -> assertThrows(NullPointerException.class, () -> service.addTime(null, Duration.ofSeconds(1))),
+                () -> assertThrows(NullPointerException.class, () -> service.getOnlineTime((UUID) null)),
+                () -> assertThrows(NullPointerException.class, () -> service.getOnlineTime((LoriTimePlayer) null)),
+                () -> assertThrows(NullPointerException.class, () -> service.addTime((UUID) null, Duration.ofSeconds(1))),
+                () -> assertThrows(NullPointerException.class,
+                        () -> service.addTime((LoriTimePlayer) null, Duration.ofSeconds(1))),
                 () -> assertThrows(NullPointerException.class, () -> service.addTime(PLAYER_ID, null)),
                 () -> assertThrows(NullPointerException.class,
                         () -> service.addTime(PLAYER_ID, Duration.ofSeconds(1), ACTOR_ID, null))
+        );
+        verify(storage, never()).addTime(any(ManualTimeAdjustment.class));
+    }
+
+    @Test
+    void rejectsInvalidPlayerIdentityBeforeWriting() throws StorageException {
+        final LoriTimePlayer missingName = mock(LoriTimePlayer.class);
+        when(missingName.getUniqueId()).thenReturn(PLAYER_ID);
+        when(missingName.getName()).thenReturn(" ");
+
+        assertAll(
+                () -> assertThrows(IllegalArgumentException.class, () -> service.getOnlineTime(missingName)),
+                () -> assertThrows(IllegalArgumentException.class,
+                        () -> service.addTime(missingName, Duration.ofSeconds(1))),
+                () -> assertThrows(IllegalArgumentException.class,
+                        () -> service.addTime(new LoriTimePlayerRef(PLAYER_ID, "Lorias_"),
+                                Duration.ofSeconds(1), missingName))
         );
         verify(storage, never()).addTime(any(ManualTimeAdjustment.class));
     }

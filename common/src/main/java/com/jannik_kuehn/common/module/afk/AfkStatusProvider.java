@@ -2,8 +2,8 @@ package com.jannik_kuehn.common.module.afk;
 
 import com.github.roleplaycauldron.spellbook.core.logger.WrappedLogger;
 import com.jannik_kuehn.common.LoriTimePlugin;
-import com.jannik_kuehn.common.api.LoriTimePlayer;
 import com.jannik_kuehn.common.api.scheduler.PluginTask;
+import com.jannik_kuehn.common.player.TrackedLoriTimePlayer;
 
 import java.util.OptionalLong;
 
@@ -74,7 +74,7 @@ public class AfkStatusProvider {
         loriTimePlugin.getPlayerConverter().getOnlinePlayers().forEach(this::computeAfkPlayers);
     }
 
-    private void computeAfkPlayers(final LoriTimePlayer loriTimePlayer) {
+    private void computeAfkPlayers(final TrackedLoriTimePlayer loriTimePlayer) {
         if (loriTimePlugin.getServer().getPlayer(loriTimePlayer.getUniqueId()).isEmpty()) {
             log.debug("Player is not online anymore. Continue with next player");
             return;
@@ -92,18 +92,18 @@ public class AfkStatusProvider {
         }
     }
 
-    public void resetTimer(final LoriTimePlayer player) {
+    public void resetTimer(final TrackedLoriTimePlayer player) {
         if (player.isAfk()) {
             resumePlayerAFK(player);
         }
         player.setLastResumeTime();
     }
 
-    public void switchPlayerAfk(final LoriTimePlayer player) {
+    public void switchPlayerAfk(final TrackedLoriTimePlayer player) {
         switchPlayerAFK(player, 0);
     }
 
-    public void switchPlayerAFK(final LoriTimePlayer player, final long timeToRemove) {
+    public void switchPlayerAFK(final TrackedLoriTimePlayer player, final long timeToRemove) {
         log.debug("Switching player afk status from '" + player.getName() + "'");
         if (player.isAfk()) {
             log.debug("Resuming player '" + player.getName() + "'");
@@ -116,7 +116,7 @@ public class AfkStatusProvider {
         afkPlayerHandling.executePlayerAfk(player, timeToRemove);
     }
 
-    public void setPlayerAFK(final LoriTimePlayer player, final long timeToRemove) {
+    public void setPlayerAFK(final TrackedLoriTimePlayer player, final long timeToRemove) {
         log.debug("Setting player '" + player.getName() + "' to afk");
         if (player.isAfk()) {
             log.debug("Player '" + player.getName() + "' is already afk. Skipping the process...");
@@ -126,7 +126,7 @@ public class AfkStatusProvider {
         afkPlayerHandling.executePlayerAfk(player, timeToRemove);
     }
 
-    public void resumePlayerAFK(final LoriTimePlayer player) {
+    public void resumePlayerAFK(final TrackedLoriTimePlayer player) {
         log.debug("Resuming player '" + player.getName() + "'");
         if (!player.isAfk()) {
             log.debug("Player '" + player.getName() + "' is not afk. Skipping the resuming");

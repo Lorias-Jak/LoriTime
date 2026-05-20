@@ -2,9 +2,9 @@ package com.jannik_kuehn.loritimepaper.placeholder;
 
 import com.github.roleplaycauldron.spellbook.core.logger.WrappedLogger;
 import com.jannik_kuehn.common.LoriTimePlugin;
-import com.jannik_kuehn.common.api.LoriTimePlayer;
 import com.jannik_kuehn.common.api.storage.UnifiedStorage;
 import com.jannik_kuehn.common.exception.StorageException;
+import com.jannik_kuehn.common.player.TrackedLoriTimePlayer;
 import com.jannik_kuehn.common.utils.TimeUtil;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
@@ -59,7 +59,7 @@ public class LoriTimePlaceholder extends PlaceholderExpansion {
             case "years_total" -> TimeUtil.getTotalYears(getUnformattedOnlineTime(player));
             case "afk" -> {
                 if (loriTimePlugin.isAfkEnabled()) {
-                    final LoriTimePlayer loriTimePlayer = loriTimePlugin.getPlayerConverter().getOnlinePlayer(player.getUniqueId());
+                    final TrackedLoriTimePlayer loriTimePlayer = loriTimePlugin.getPlayerConverter().getOnlinePlayer(player.getUniqueId());
                     yield String.valueOf(loriTimePlayer.isAfk());
                 }
                 yield "Feature not enabled!";

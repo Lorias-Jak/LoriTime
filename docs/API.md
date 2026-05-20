@@ -66,6 +66,18 @@ If LoriTime is a hard dependency and your plugin enables after LoriTime, the opt
 
 ## Reading Player Data
 
+## Public Player Model
+
+`LoriTimePlayer` is the stable public player identity contract. It exposes only the player's UUID and latest known name. Time operations always use the UUID as the exact player identity; the name is display or audit metadata.
+
+Use `LoriTimePlayerRef` when your plugin needs to keep or create a player reference:
+
+```java
+LoriTimePlayer player = new LoriTimePlayerRef(uniqueId, playerName);
+```
+
+LoriTime internals may use richer sender objects for permissions, messages, console state, or online state. Those sender details are not part of the public `LoriTimePlayer` contract.
+
 ### Resolve UUID by Name
 
 ```java
@@ -88,6 +100,12 @@ onlineTime.ifPresent(duration -> {
 });
 ```
 
+If you already have a `LoriTimePlayer`, use the player overload:
+
+```java
+Optional<Duration> onlineTime = loriTime.getOnlineTime(player);
+```
+
 An empty result means LoriTime does not currently have stored data for that player.
 
 ## Writing Manual Adjustments
@@ -101,6 +119,12 @@ loriTime.addTime(uniqueId, Duration.ofMinutes(10));
 loriTime.addTime(uniqueId, Duration.ofMinutes(-5));
 ```
 
+The same operation can target a public player reference:
+
+```java
+loriTime.addTime(player, Duration.ofMinutes(10));
+```
+
 These adjustments are stored with LoriTime's stable API actor name.
 
 ### Actor-Aware Adjustment
@@ -111,6 +135,16 @@ loriTime.addTime(
         Duration.ofMinutes(10),
         actorUniqueId,
         actorName
+);
+```
+
+Or pass public player identities for both target and actor:
+
+```java
+loriTime.addTime(
+        targetPlayer,
+        Duration.ofMinutes(10),
+        actorPlayer
 );
 ```
 
@@ -136,6 +170,6 @@ In slave mode, facade reads follow the same deterministic fallback behavior as L
 
 ## API Surface
 
-`LoriTimeAPI.service()` and `LoriTimeService` are the stable public integration surface for normal third-party plugins.
+`LoriTimeAPI.service()`, `LoriTimeService`, `LoriTimePlayer`, and immutable public player references are the stable public integration surface for normal third-party plugins.
 
 Internal classes such as `LoriTimePlugin`, storage lifecycle managers, accumulators, configuration, localization, and updater state are not part of the public integration API. Storage contracts such as `UnifiedStorage` and `TimeAccumulator` remain internal runtime contracts unless a future change introduces a dedicated advanced extension API.

@@ -2,11 +2,11 @@ package com.jannik_kuehn.common.module.messaging;
 
 import com.github.roleplaycauldron.spellbook.core.logger.WrappedLogger;
 import com.jannik_kuehn.common.LoriTimePlugin;
-import com.jannik_kuehn.common.api.LoriTimePlayer;
 import com.jannik_kuehn.common.api.common.CommonSender;
 import com.jannik_kuehn.common.exception.PluginMessageException;
 import com.jannik_kuehn.common.exception.StorageException;
 import com.jannik_kuehn.common.module.afk.AfkTransitionType;
+import com.jannik_kuehn.common.player.TrackedLoriTimePlayer;
 import com.jannik_kuehn.common.utils.UuidUtil;
 
 import java.io.ByteArrayInputStream;
@@ -142,7 +142,7 @@ public abstract class PluginMessaging {
                 log.debug("Player with the uuid '" + playerUUID + "' is not online or cant be found");
                 return;
             }
-            final LoriTimePlayer player = loriTimePlugin.getPlayerConverter().getOnlinePlayer(playerUUID);
+            final TrackedLoriTimePlayer player = loriTimePlugin.getPlayerConverter().getOnlinePlayer(playerUUID);
 
             final int protocolVersion = input.readInt();
             if (!AfkMessageProtocol.isSupportedVersion(protocolVersion)) {

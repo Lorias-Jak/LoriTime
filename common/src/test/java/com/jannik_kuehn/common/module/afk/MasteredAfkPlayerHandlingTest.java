@@ -2,7 +2,6 @@ package com.jannik_kuehn.common.module.afk;
 
 import com.github.roleplaycauldron.spellbook.core.logger.LoggerFactory;
 import com.jannik_kuehn.common.LoriTimePlugin;
-import com.jannik_kuehn.common.api.LoriTimePlayer;
 import com.jannik_kuehn.common.api.common.CommonSender;
 import com.jannik_kuehn.common.api.common.CommonServer;
 import com.jannik_kuehn.common.api.storage.SessionContextDefaults;
@@ -10,6 +9,7 @@ import com.jannik_kuehn.common.api.storage.TimeAccumulator;
 import com.jannik_kuehn.common.api.storage.TimeEntryReason;
 import com.jannik_kuehn.common.config.Configuration;
 import com.jannik_kuehn.common.config.localization.Localization;
+import com.jannik_kuehn.common.player.TrackedLoriTimePlayer;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import org.junit.jupiter.api.Test;
@@ -38,7 +38,7 @@ class MasteredAfkPlayerHandlingTest {
         final TestContext context = new TestContext(false, false);
         final MasteredAfkPlayerHandling handling = new MasteredAfkPlayerHandling(context.plugin());
 
-        handling.executePlayerAfk(new LoriTimePlayer(PLAYER_ID, "Lorias_"), 15L);
+        handling.executePlayerAfk(new TrackedLoriTimePlayer(PLAYER_ID, "Lorias_"), 15L);
 
         verify(context.accumulator()).stopAccumulatingAndSaveOnlineTime(eq(PLAYER_ID), anyLong(),
                 eq(TimeEntryReason.PLAYER_AFK));
@@ -51,7 +51,7 @@ class MasteredAfkPlayerHandlingTest {
         when(context.sender().hasPermission("loritime.afk.bypass.stopCount")).thenReturn(true);
         final MasteredAfkPlayerHandling handling = new MasteredAfkPlayerHandling(context.plugin());
 
-        handling.executePlayerAfk(new LoriTimePlayer(PLAYER_ID, "Lorias_"), 15L);
+        handling.executePlayerAfk(new TrackedLoriTimePlayer(PLAYER_ID, "Lorias_"), 15L);
 
         verify(context.accumulator(), never()).stopAccumulatingAndSaveOnlineTime(eq(PLAYER_ID), anyLong(),
                 eq(TimeEntryReason.PLAYER_AFK));
@@ -64,7 +64,7 @@ class MasteredAfkPlayerHandlingTest {
         when(context.sender().hasPermission("loritime.afk.announce.afkAnnounce")).thenReturn(true);
         final MasteredAfkPlayerHandling handling = new MasteredAfkPlayerHandling(context.plugin());
 
-        handling.executePlayerAfk(new LoriTimePlayer(PLAYER_ID, "Lorias_"), 15L);
+        handling.executePlayerAfk(new TrackedLoriTimePlayer(PLAYER_ID, "Lorias_"), 15L);
 
         verify(context.sender(), times(2)).sendMessage(any(TextComponent.class));
     }
@@ -72,7 +72,7 @@ class MasteredAfkPlayerHandlingTest {
     @Test
     void resumeRestartsOnlyWhenAfkStoppedCounting() throws Exception {
         final TestContext context = new TestContext(false, false);
-        final LoriTimePlayer player = new LoriTimePlayer(PLAYER_ID, "Lorias_");
+        final TrackedLoriTimePlayer player = new TrackedLoriTimePlayer(PLAYER_ID, "Lorias_");
         final MasteredAfkPlayerHandling handling = new MasteredAfkPlayerHandling(context.plugin());
 
         handling.executePlayerAfk(player, 15L);
@@ -88,7 +88,7 @@ class MasteredAfkPlayerHandlingTest {
     void resumeDoesNotRestartWhenStopCountWasBypassed() throws Exception {
         final TestContext context = new TestContext(false, false);
         when(context.sender().hasPermission("loritime.afk.bypass.stopCount")).thenReturn(true);
-        final LoriTimePlayer player = new LoriTimePlayer(PLAYER_ID, "Lorias_");
+        final TrackedLoriTimePlayer player = new TrackedLoriTimePlayer(PLAYER_ID, "Lorias_");
         final MasteredAfkPlayerHandling handling = new MasteredAfkPlayerHandling(context.plugin());
 
         handling.executePlayerAfk(player, 15L);
@@ -103,7 +103,7 @@ class MasteredAfkPlayerHandlingTest {
     @Test
     void autoKickMarksNextDisconnectAsAfk() throws Exception {
         final TestContext context = new TestContext(false, true);
-        final LoriTimePlayer player = new LoriTimePlayer(PLAYER_ID, "Lorias_");
+        final TrackedLoriTimePlayer player = new TrackedLoriTimePlayer(PLAYER_ID, "Lorias_");
         final MasteredAfkPlayerHandling handling = new MasteredAfkPlayerHandling(context.plugin());
 
         handling.executePlayerAfk(player, 15L);

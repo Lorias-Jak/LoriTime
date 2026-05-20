@@ -82,6 +82,16 @@ public final class LoriTimeService {
     }
 
     /**
+     * Returns the current total online time for a player.
+     *
+     * @param player the player identity.
+     * @return the total online time, if LoriTime has stored time for the player.
+     */
+    public Optional<Duration> getOnlineTime(final LoriTimePlayer player) {
+        return getOnlineTime(validate(player, "player").getUniqueId());
+    }
+
+    /**
      * Adds a signed manual time adjustment using the stable API actor.
      *
      * @param uniqueId the player UUID.
@@ -89,6 +99,16 @@ public final class LoriTimeService {
      */
     public void addTime(final UUID uniqueId, final Duration amount) {
         addTime(uniqueId, amount, null, API_ACTOR);
+    }
+
+    /**
+     * Adds a signed manual time adjustment using the stable API actor.
+     *
+     * @param player the player identity.
+     * @param amount the signed amount to add or remove.
+     */
+    public void addTime(final LoriTimePlayer player, final Duration amount) {
+        addTime(validate(player, "player").getUniqueId(), amount);
     }
 
     /**
@@ -102,6 +122,9 @@ public final class LoriTimeService {
     public void addTime(final UUID uniqueId, final Duration amount, final UUID actorUuid, final String actorName) {
         Objects.requireNonNull(uniqueId, "uniqueId");
         Objects.requireNonNull(actorName, "actorName");
+        if (actorName.isBlank()) {
+            throw new IllegalArgumentException("actorName must not be blank");
+        }
         final long seconds = seconds(amount);
         try {
             plugin.getStorage().addTime(new ManualTimeAdjustment(uniqueId, seconds,
@@ -109,6 +132,29 @@ public final class LoriTimeService {
         } catch (final StorageException ex) {
             throw new LoriTimeApiException("Could not add time adjustment for UUID " + uniqueId, ex);
         }
+    }
+
+    /**
+     * Adds a signed manual time adjustment with actor player metadata.
+     *
+     * @param player the target player identity.
+     * @param amount the signed amount to add or remove.
+     * @param actor  the actor player identity.
+     */
+    public void addTime(final LoriTimePlayer player, final Duration amount, final LoriTimePlayer actor) {
+        final LoriTimePlayer validPlayer = validate(player, "player");
+        final LoriTimePlayer validActor = validate(actor, "actor");
+        addTime(validPlayer.getUniqueId(), amount, validActor.getUniqueId(), validActor.getName());
+    }
+
+    private LoriTimePlayer validate(final LoriTimePlayer player, final String parameterName) {
+        Objects.requireNonNull(player, parameterName);
+        Objects.requireNonNull(player.getUniqueId(), parameterName + ".uniqueId");
+        final String name = Objects.requireNonNull(player.getName(), parameterName + ".name");
+        if (name.isBlank()) {
+            throw new IllegalArgumentException(parameterName + ".name must not be blank");
+        }
+        return player;
     }
 
     private long seconds(final Duration amount) {

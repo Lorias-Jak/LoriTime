@@ -1,10 +1,10 @@
 package com.jannik_kuehn.common.command;
 
 import com.jannik_kuehn.common.LoriTimePlugin;
-import com.jannik_kuehn.common.api.LoriTimePlayer;
 import com.jannik_kuehn.common.api.common.CommonCommand;
 import com.jannik_kuehn.common.api.common.CommonSender;
 import com.jannik_kuehn.common.config.localization.Localization;
+import com.jannik_kuehn.common.player.TrackedLoriTimePlayer;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,7 +33,7 @@ public class LoriTimeAfkCommand implements CommonCommand {
             return;
         }
         plugin.getScheduler().runAsyncOnce(() -> {
-            final LoriTimePlayer player = plugin.getPlayerConverter().getOnlinePlayer(sender.getUniqueId());
+            final TrackedLoriTimePlayer player = plugin.getPlayerConverter().getOnlinePlayer(sender.getUniqueId());
             plugin.getAfkStatusProvider().switchPlayerAfk(player);
         });
     }

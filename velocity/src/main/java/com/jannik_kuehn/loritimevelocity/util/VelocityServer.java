@@ -1,19 +1,20 @@
 package com.jannik_kuehn.loritimevelocity.util;
 
 import com.jannik_kuehn.common.api.LoriTimePlayer;
+import com.jannik_kuehn.common.api.common.CommonConsoleSender;
+import com.jannik_kuehn.common.api.common.CommonPlayerSender;
 import com.jannik_kuehn.common.api.common.CommonSender;
 import com.jannik_kuehn.common.api.common.CommonServer;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
 import net.kyori.adventure.text.TextComponent;
-import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 
 import java.util.Optional;
 import java.util.UUID;
 
 @SuppressWarnings("PMD.CommentRequired")
-public class VelocityServer implements CommonServer, CommonSender {
+public class VelocityServer implements CommonServer {
 
     private ProxyServer server;
 
@@ -31,35 +32,37 @@ public class VelocityServer implements CommonServer, CommonSender {
     }
 
     @Override
-    public Optional<CommonSender> getPlayer(final UUID uniqueId) {
+    public Optional<CommonPlayerSender> getPlayer(final UUID uniqueId) {
         final Optional<Player> player = server.getPlayer(uniqueId);
         return Optional.ofNullable(player.map(VelocityPlayer::new).orElse(null));
     }
 
     @Override
-    public Optional<CommonSender> getPlayer(final String name) {
+    public Optional<CommonPlayerSender> getPlayer(final String name) {
         final Optional<Player> player = server.getPlayer(name);
         return Optional.ofNullable(player.map(VelocityPlayer::new).orElse(null));
     }
 
     @Override
-    public CommonSender[] getOnlinePlayers() {
+    public CommonPlayerSender[] getOnlinePlayers() {
         return server.getAllPlayers().stream()
                 .map(VelocityPlayer::new)
-                .toList().toArray(new VelocityPlayer[0]);
+                .toList().toArray(new CommonPlayerSender[0]);
     }
 
     @Override
     public boolean dispatchCommand(final CommonSender sender, final String command) {
         final CommandSource commandSource;
-        if (sender.isConsole()) {
+        if (sender instanceof CommonConsoleSender) {
             commandSource = server.getConsoleCommandSource();
-        } else {
-            if (server.getPlayer(sender.getName()).isPresent()) {
-                commandSource = server.getPlayer(sender.getName()).get();
-            } else {
+        } else if (sender instanceof CommonPlayerSender playerSender) {
+            final Optional<Player> optionalPlayer = server.getPlayer(playerSender.getUniqueId());
+            if (optionalPlayer.isEmpty()) {
                 return false;
             }
+            commandSource = optionalPlayer.get();
+        } else {
+            return false;
         }
         server.getCommandManager().executeImmediatelyAsync(commandSource, command);
         return true;
@@ -113,38 +116,4 @@ public class VelocityServer implements CommonServer, CommonSender {
         return "LoriTimeVelocity.jar";
     }
 
-    @Override
-    public UUID getUniqueId() {
-        return null;
-    }
-
-    @Override
-    public String getName() {
-        return "CONSOLE";
-    }
-
-    @Override
-    public boolean hasPermission(final String permission) {
-        return true;
-    }
-
-    @Override
-    public void sendMessage(final String message) {
-        server.getConsoleCommandSource().sendMessage(LegacyComponentSerializer.legacy('&').deserialize(message));
-    }
-
-    @Override
-    public void sendMessage(final TextComponent message) {
-        server.getConsoleCommandSource().sendMessage(message);
-    }
-
-    @Override
-    public boolean isConsole() {
-        return true;
-    }
-
-    @Override
-    public boolean isOnline() {
-        return true;
-    }
 }

@@ -2,12 +2,16 @@ package com.jannik_kuehn.common.module.updater;
 
 import com.github.roleplaycauldron.spellbook.core.logger.WrappedLogger;
 import com.jannik_kuehn.common.LoriTimePlugin;
+import com.jannik_kuehn.common.api.common.CommonConsoleSender;
+import com.jannik_kuehn.common.api.common.CommonPlayerSender;
 import com.jannik_kuehn.common.api.common.CommonSender;
 import com.jannik_kuehn.common.config.Configuration;
 import com.jannik_kuehn.common.exception.UpdateException;
 import com.jannik_kuehn.common.module.updater.download.Downloader;
 import com.jannik_kuehn.common.module.updater.version.Strategy;
 import com.jannik_kuehn.common.module.updater.version.Version;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.io.File;
@@ -115,7 +119,7 @@ public class Updater {
 
             log.info("An update has been found. Current Version: " + loriTime.getServer().getPluginVersion() + ", New Version: " + latestVersion.getKey());
             if (config.getBoolean("updater.autoUpdate", false)) {
-                update((CommonSender) loriTime.getServer());
+                update(consoleSender());
             }
         });
     }
@@ -173,12 +177,14 @@ public class Updater {
      * @param sender the {@link CommonSender} that should receive the update information
      */
     public void sendPlayerUpdateNotification(final CommonSender sender) {
-        if (loriTime.getConfig().getBoolean("updater.inGameNotification", true) && !sender.isConsole()) {
+        if (loriTime.getConfig().getBoolean("updater.inGameNotification", true)
+                && sender instanceof CommonPlayerSender playerSender) {
             final Instant current = instantSource.instant();
-            if (lastAnnounce.containsKey(sender.getUniqueId()) && lastAnnounce.get(sender.getUniqueId()).plus(ANNOUNCE_PLAYER_DELAY).isAfter(current)) {
+            if (lastAnnounce.containsKey(playerSender.getUniqueId())
+                    && lastAnnounce.get(playerSender.getUniqueId()).plus(ANNOUNCE_PLAYER_DELAY).isAfter(current)) {
                 return;
             }
-            lastAnnounce.put(sender.getUniqueId(), current);
+            lastAnnounce.put(playerSender.getUniqueId(), current);
 
             if (isUpdateAvailable()) {
                 sender.sendMessage(loriTime.getLocalization().formatTextComponent(loriTime.getLocalization().getRawMessage("message.updater.available")));
@@ -235,5 +241,29 @@ public class Updater {
 
     private boolean isUpdateCheckEnabled() {
         return loriTime.getConfig().getBoolean("updater.checkForUpdates", true);
+    }
+
+    private CommonConsoleSender consoleSender() {
+        return new CommonConsoleSender() {
+            @Override
+            public String getName() {
+                return "CONSOLE";
+            }
+
+            @Override
+            public boolean hasPermission(final String permission) {
+                return true;
+            }
+
+            @Override
+            public void sendMessage(final String message) {
+                loriTime.getServer().sendMessageToConsole(Component.text(message));
+            }
+
+            @Override
+            public void sendMessage(final TextComponent message) {
+                loriTime.getServer().sendMessageToConsole(message);
+            }
+        };
     }
 }

@@ -1,6 +1,6 @@
 package com.jannik_kuehn.loritimevelocity.util;
 
-import com.jannik_kuehn.common.api.common.CommonSender;
+import com.jannik_kuehn.common.api.common.CommonPlayerSender;
 import com.velocitypowered.api.proxy.Player;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
@@ -8,7 +8,7 @@ import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import java.util.UUID;
 
 @SuppressWarnings("PMD.CommentRequired")
-public class VelocityPlayer implements CommonSender {
+public class VelocityPlayer implements CommonPlayerSender {
     private final Player player;
 
     private final UUID uuid;
@@ -41,11 +41,6 @@ public class VelocityPlayer implements CommonSender {
     @Override
     public void sendMessage(final TextComponent message) {
         player.sendMessage(message);
-    }
-
-    @Override
-    public boolean isConsole() {
-        return false;
     }
 
     @Override

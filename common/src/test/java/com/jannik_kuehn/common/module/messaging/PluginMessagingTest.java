@@ -3,7 +3,7 @@ package com.jannik_kuehn.common.module.messaging;
 import com.github.roleplaycauldron.spellbook.core.logger.LoggerFactory;
 import com.jannik_kuehn.common.LoriTimePlugin;
 import com.jannik_kuehn.common.api.LoriTimePlayerConverter;
-import com.jannik_kuehn.common.api.common.CommonSender;
+import com.jannik_kuehn.common.api.common.CommonPlayerSender;
 import com.jannik_kuehn.common.api.common.CommonServer;
 import com.jannik_kuehn.common.api.scheduler.PluginScheduler;
 import com.jannik_kuehn.common.api.scheduler.PluginTask;
@@ -310,7 +310,7 @@ class PluginMessagingTest {
         private AfkMessagingContext() {
             this(pluginWithAfkMessaging(), mock(AfkStatusProvider.class), new TrackedLoriTimePlayer(PLAYER, "Lorias_"));
             final CommonServer server = mock(CommonServer.class);
-            final CommonSender sender = mock(CommonSender.class);
+            final CommonPlayerSender sender = mock(CommonPlayerSender.class);
             final LoriTimePlayerConverter converter = mock(LoriTimePlayerConverter.class);
             when(plugin().getServer()).thenReturn(server);
             when(plugin().getPlayerConverter()).thenReturn(converter);

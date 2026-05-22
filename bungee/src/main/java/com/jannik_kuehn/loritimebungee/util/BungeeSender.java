@@ -1,16 +1,13 @@
 package com.jannik_kuehn.loritimebungee.util;
 
-import com.jannik_kuehn.common.api.common.CommonSender;
+import com.jannik_kuehn.common.api.common.CommonConsoleSender;
 import net.kyori.adventure.platform.bungeecord.BungeeAudiences;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.md_5.bungee.api.CommandSender;
-import net.md_5.bungee.api.connection.ProxiedPlayer;
-
-import java.util.UUID;
 
 @SuppressWarnings("PMD.CommentRequired")
-public class BungeeSender implements CommonSender {
+public class BungeeSender implements CommonConsoleSender {
 
     private final BungeeAudiences audiences;
 
@@ -22,13 +19,8 @@ public class BungeeSender implements CommonSender {
     }
 
     @Override
-    public UUID getUniqueId() {
-        return isConsole() ? null : ((ProxiedPlayer) source).getUniqueId();
-    }
-
-    @Override
     public String getName() {
-        return isConsole() ? "CONSOLE" : source.getName();
+        return "CONSOLE";
     }
 
     @Override
@@ -46,13 +38,4 @@ public class BungeeSender implements CommonSender {
         audiences.sender(source).sendMessage(message);
     }
 
-    @Override
-    public boolean isConsole() {
-        return !(source instanceof ProxiedPlayer);
-    }
-
-    @Override
-    public boolean isOnline() {
-        return isConsole() || ((ProxiedPlayer) source).getServer().isConnected();
-    }
 }

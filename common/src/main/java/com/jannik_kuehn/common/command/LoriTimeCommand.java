@@ -4,6 +4,7 @@ import com.github.roleplaycauldron.spellbook.core.logger.WrappedLogger;
 import com.jannik_kuehn.common.LoriTimePlugin;
 import com.jannik_kuehn.common.api.LoriTimePlayer;
 import com.jannik_kuehn.common.api.common.CommonCommand;
+import com.jannik_kuehn.common.api.common.CommonPlayerSender;
 import com.jannik_kuehn.common.api.common.CommonSender;
 import com.jannik_kuehn.common.config.localization.Localization;
 import com.jannik_kuehn.common.exception.StorageException;
@@ -18,7 +19,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @SuppressWarnings({"PMD.CommentRequired", "PMD.AvoidLiteralsInIfCondition", "PMD.CognitiveComplexity",
-        "PMD.AvoidThrowingRawExceptionTypes", "PMD.ConfusingTernary"})
+        "PMD.AvoidThrowingRawExceptionTypes"})
 public class LoriTimeCommand implements CommonCommand {
 
     private final LoriTimePlugin loriTimePlugin;
@@ -59,15 +60,15 @@ public class LoriTimeCommand implements CommonCommand {
                         return;
                     }
                 } else {
-                    if (!sender.isConsole()) {
-                        targetPlayer = loriTimePlugin.getPlayerConverter().getOnlinePlayer(sender.getUniqueId());
-                    } else {
+                    if (!(sender instanceof CommonPlayerSender playerSender)) {
                         sender.sendMessage(localization.formatTextComponent(localization.getRawMessage("message.command.loritime.consoleself")));
                         return;
                     }
+                    targetPlayer = loriTimePlugin.getPlayerConverter().getOnlinePlayer(playerSender.getUniqueId());
                 }
 
-                final boolean isTargetSender = targetPlayer.getUniqueId().equals(sender.getUniqueId());
+                final boolean isTargetSender = sender instanceof CommonPlayerSender playerSender
+                        && targetPlayer.getUniqueId().equals(playerSender.getUniqueId());
                 if (!isTargetSender && !sender.hasPermission("loritime.see.other")) {
                     printUtilityMessage(sender, "message.nopermission");
                     return;

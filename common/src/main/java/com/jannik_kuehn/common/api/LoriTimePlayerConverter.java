@@ -3,7 +3,7 @@ package com.jannik_kuehn.common.api;
 import com.github.roleplaycauldron.spellbook.core.logger.LoggerFactory;
 import com.github.roleplaycauldron.spellbook.core.logger.WrappedLogger;
 import com.jannik_kuehn.common.LoriTimePlugin;
-import com.jannik_kuehn.common.api.common.CommonSender;
+import com.jannik_kuehn.common.api.common.CommonPlayerSender;
 import com.jannik_kuehn.common.exception.StorageException;
 import com.jannik_kuehn.common.player.TrackedLoriTimePlayer;
 
@@ -55,7 +55,7 @@ public class LoriTimePlayerConverter {
      */
     public TrackedLoriTimePlayer getOnlinePlayer(final UUID uuid) {
         return playerCache.computeIfAbsent(uuid, key -> {
-            final Optional<CommonSender> optionalPlayer = loriTimePlugin.getServer().getPlayer(uuid);
+            final Optional<CommonPlayerSender> optionalPlayer = loriTimePlugin.getServer().getPlayer(uuid);
             if (optionalPlayer.isEmpty()) {
                 return getOfflinePlayer(uuid);
             }

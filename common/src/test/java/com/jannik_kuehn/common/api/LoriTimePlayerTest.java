@@ -1,5 +1,6 @@
 package com.jannik_kuehn.common.api;
 
+import com.jannik_kuehn.common.api.common.CommonPlayerSender;
 import com.jannik_kuehn.common.api.common.CommonSender;
 import com.jannik_kuehn.common.player.TrackedLoriTimePlayer;
 import org.junit.jupiter.api.Test;
@@ -53,9 +54,11 @@ class LoriTimePlayerTest {
     }
 
     @Test
-    void commonSenderSatisfiesPublicPlayerContract() {
-        assertTrue(LoriTimePlayer.class.isAssignableFrom(CommonSender.class),
-                "CommonSender should be usable wherever LoriTimePlayer is accepted");
+    void onlyPlayerSenderSatisfiesPublicPlayerContract() {
+        assertFalse(LoriTimePlayer.class.isAssignableFrom(CommonSender.class),
+                "Generic senders should not be usable as player identities");
+        assertTrue(LoriTimePlayer.class.isAssignableFrom(CommonPlayerSender.class),
+                "Player senders should be usable wherever LoriTimePlayer is accepted");
     }
 
     @Test

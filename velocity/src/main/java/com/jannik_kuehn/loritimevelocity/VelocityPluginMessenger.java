@@ -1,7 +1,7 @@
 package com.jannik_kuehn.loritimevelocity;
 
 import com.github.roleplaycauldron.spellbook.core.logger.WrappedLogger;
-import com.jannik_kuehn.common.api.common.CommonSender;
+import com.jannik_kuehn.common.api.common.CommonPlayerSender;
 import com.jannik_kuehn.common.module.messaging.PluginMessaging;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.connection.PluginMessageEvent;
@@ -87,7 +87,7 @@ public class VelocityPluginMessenger extends PluginMessaging {
             return null;
         }
 
-        final Optional<CommonSender> optionalCommonSender = loriTimePlugin.getServer().getPlayer((UUID) message[0]);
+        final Optional<CommonPlayerSender> optionalCommonSender = loriTimePlugin.getServer().getPlayer((UUID) message[0]);
         if (optionalCommonSender.isEmpty()) {
             return null;
         }

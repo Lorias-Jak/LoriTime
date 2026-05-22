@@ -2,8 +2,7 @@ package com.jannik_kuehn.loritimebungee.listener;
 
 import com.jannik_kuehn.common.LoriTimePlugin;
 import com.jannik_kuehn.common.api.common.CommonSender;
-import com.jannik_kuehn.loritimebungee.util.BungeeSender;
-import net.kyori.adventure.platform.bungeecord.BungeeAudiences;
+import com.jannik_kuehn.loritimebungee.util.BungeePlayer;
 import net.md_5.bungee.api.event.PostLoginEvent;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.event.EventHandler;
@@ -18,19 +17,12 @@ public class LoriTimeUpdateBungeeListener implements Listener {
     private final LoriTimePlugin loriTime;
 
     /**
-     * The {@link BungeeAudiences} instance.
-     */
-    private final BungeeAudiences bungeeAudiences;
-
-    /**
      * Creates a new {@link LoriTimeUpdateBungeeListener} instance.
      *
-     * @param loriTime        The {@link LoriTimePlugin} instance.
-     * @param bungeeAudiences The {@link BungeeAudiences} instance.
+     * @param loriTime The {@link LoriTimePlugin} instance.
      */
-    public LoriTimeUpdateBungeeListener(final LoriTimePlugin loriTime, final BungeeAudiences bungeeAudiences) {
+    public LoriTimeUpdateBungeeListener(final LoriTimePlugin loriTime) {
         this.loriTime = loriTime;
-        this.bungeeAudiences = bungeeAudiences;
     }
 
     /**
@@ -40,7 +32,7 @@ public class LoriTimeUpdateBungeeListener implements Listener {
      */
     @EventHandler
     public void onPostLogin(final PostLoginEvent event) {
-        final CommonSender sender = new BungeeSender(bungeeAudiences, event.getPlayer());
+        final CommonSender sender = new BungeePlayer(event.getPlayer());
         loriTime.getUpdater().sendPlayerUpdateNotification(sender);
     }
 }

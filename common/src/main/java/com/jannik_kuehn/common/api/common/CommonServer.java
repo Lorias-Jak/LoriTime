@@ -9,11 +9,11 @@ import java.util.UUID;
 @SuppressWarnings("PMD.CommentRequired")
 public interface CommonServer {
 
-    Optional<CommonSender> getPlayer(UUID uniqueId);
+    Optional<CommonPlayerSender> getPlayer(UUID uniqueId);
 
-    Optional<CommonSender> getPlayer(String name);
+    Optional<CommonPlayerSender> getPlayer(String name);
 
-    CommonSender[] getOnlinePlayers();
+    CommonPlayerSender[] getOnlinePlayers();
 
     String getPluginVersion();
 

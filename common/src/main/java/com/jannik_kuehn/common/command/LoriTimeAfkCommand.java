@@ -2,6 +2,7 @@ package com.jannik_kuehn.common.command;
 
 import com.jannik_kuehn.common.LoriTimePlugin;
 import com.jannik_kuehn.common.api.common.CommonCommand;
+import com.jannik_kuehn.common.api.common.CommonPlayerSender;
 import com.jannik_kuehn.common.api.common.CommonSender;
 import com.jannik_kuehn.common.config.localization.Localization;
 import com.jannik_kuehn.common.player.TrackedLoriTimePlayer;
@@ -29,11 +30,11 @@ public class LoriTimeAfkCommand implements CommonCommand {
             printUtilityMessage(sender, "message.nopermission");
             return;
         }
-        if (sender.isConsole()) {
+        if (!(sender instanceof CommonPlayerSender playerSender)) {
             return;
         }
         plugin.getScheduler().runAsyncOnce(() -> {
-            final TrackedLoriTimePlayer player = plugin.getPlayerConverter().getOnlinePlayer(sender.getUniqueId());
+            final TrackedLoriTimePlayer player = plugin.getPlayerConverter().getOnlinePlayer(playerSender.getUniqueId());
             plugin.getAfkStatusProvider().switchPlayerAfk(player);
         });
     }
@@ -41,7 +42,7 @@ public class LoriTimeAfkCommand implements CommonCommand {
     @Override
     public List<String> handleTabComplete(final CommonSender source, final String... args) {
         final List<String> result = new ArrayList<>();
-        for (final CommonSender onlinePlayer : plugin.getServer().getOnlinePlayers()) {
+        for (final CommonPlayerSender onlinePlayer : plugin.getServer().getOnlinePlayers()) {
             result.add(onlinePlayer.getName());
         }
         if (args.length == 0) {

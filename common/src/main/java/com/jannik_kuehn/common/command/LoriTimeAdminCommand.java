@@ -4,6 +4,7 @@ import com.github.roleplaycauldron.spellbook.core.logger.WrappedLogger;
 import com.jannik_kuehn.common.LoriTimePlugin;
 import com.jannik_kuehn.common.api.LoriTimePlayer;
 import com.jannik_kuehn.common.api.common.CommonCommand;
+import com.jannik_kuehn.common.api.common.CommonPlayerSender;
 import com.jannik_kuehn.common.api.common.CommonSender;
 import com.jannik_kuehn.common.api.storage.ManualTimeAdjustment;
 import com.jannik_kuehn.common.api.storage.TimeEntryReason;
@@ -274,7 +275,7 @@ public class LoriTimeAdminCommand implements CommonCommand {
             return;
         }
 
-        final Optional<CommonSender> onlinePlayer = loriTimePlugin.getServer().getPlayer(optionalUUID.get());
+        final Optional<CommonPlayerSender> onlinePlayer = loriTimePlugin.getServer().getPlayer(optionalUUID.get());
         if (onlinePlayer.isPresent() && onlinePlayer.get().isOnline()) {
             printUtilityMessage(sender, "message.command.loritimeadmin.deleteUser.userOnline");
             return;
@@ -305,8 +306,8 @@ public class LoriTimeAdminCommand implements CommonCommand {
 
     public void modifyOnlineTime(final CommonSender sender, final UUID uuid, final long modifyBy) {
         try {
-            final UUID actorUuid = sender.isConsole() ? null : sender.getUniqueId();
-            final String actorName = sender.isConsole() ? "CONSOLE" : sender.getName();
+            final UUID actorUuid = sender instanceof CommonPlayerSender playerSender ? playerSender.getUniqueId() : null;
+            final String actorName = sender instanceof CommonPlayerSender ? sender.getName() : "CONSOLE";
             loriTimePlugin.getStorage().addTime(new ManualTimeAdjustment(uuid, modifyBy,
                     TimeEntryReason.MANUAL_ADJUSTMENT, actorUuid, actorName));
         } catch (final StorageException ex) {

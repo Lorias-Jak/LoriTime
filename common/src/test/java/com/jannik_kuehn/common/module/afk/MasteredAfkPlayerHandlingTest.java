@@ -2,7 +2,7 @@ package com.jannik_kuehn.common.module.afk;
 
 import com.github.roleplaycauldron.spellbook.core.logger.LoggerFactory;
 import com.jannik_kuehn.common.LoriTimePlugin;
-import com.jannik_kuehn.common.api.common.CommonSender;
+import com.jannik_kuehn.common.api.common.CommonPlayerSender;
 import com.jannik_kuehn.common.api.common.CommonServer;
 import com.jannik_kuehn.common.api.storage.SessionContextDefaults;
 import com.jannik_kuehn.common.api.storage.TimeAccumulator;
@@ -113,11 +113,11 @@ class MasteredAfkPlayerHandlingTest {
         verify(context.sender(), never()).sendMessage(any(TextComponent.class));
     }
 
-    private record TestContext(LoriTimePlugin plugin, CommonServer server, CommonSender sender,
+    private record TestContext(LoriTimePlugin plugin, CommonServer server, CommonPlayerSender sender,
                                TimeAccumulator accumulator) {
 
         private TestContext(final boolean removeTime, final boolean autoKick) {
-            this(mock(LoriTimePlugin.class), mock(CommonServer.class), mock(CommonSender.class),
+            this(mock(LoriTimePlugin.class), mock(CommonServer.class), mock(CommonPlayerSender.class),
                     mock(TimeAccumulator.class));
             final Configuration config = mock(Configuration.class);
             final Localization localization = mock(Localization.class);
@@ -127,7 +127,7 @@ class MasteredAfkPlayerHandlingTest {
             when(plugin().getAccumulator()).thenReturn(accumulator());
             when(plugin().getLocalization()).thenReturn(localization);
             when(server().getPlayer(PLAYER_ID)).thenReturn(Optional.of(sender()));
-            when(server().getOnlinePlayers()).thenReturn(new CommonSender[]{sender()});
+            when(server().getOnlinePlayers()).thenReturn(new CommonPlayerSender[]{sender()});
             when(sender().getName()).thenReturn("Lorias_");
             when(config.getBoolean("afk.enabled", false)).thenReturn(true);
             when(config.getBoolean("afk.removeTime", true)).thenReturn(removeTime);

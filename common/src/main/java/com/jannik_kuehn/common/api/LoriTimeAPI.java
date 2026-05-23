@@ -3,6 +3,8 @@ package com.jannik_kuehn.common.api;
 import com.jannik_kuehn.common.LoriTimePlugin;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
+import java.util.Optional;
+
 /**
  * API for the LoriTime plugin.
  */
@@ -36,12 +38,12 @@ public final class LoriTimeAPI {
     }
 
     /**
-     * Gets the core class of this plugin.
-     * This class is used to access the plugin's main features.
+     * Gets the stable public LoriTime service facade.
      *
-     * @return The {@link LoriTimePlugin} instance.
+     * @return the public service facade when LoriTime is initialized.
      */
-    public static LoriTimePlugin get() {
-        return loriTimePlugin;
+    public static Optional<LoriTimeService> service() {
+        final LoriTimePlugin plugin = loriTimePlugin;
+        return plugin == null ? Optional.empty() : Optional.of(new LoriTimeService(plugin));
     }
 }

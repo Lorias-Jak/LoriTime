@@ -1,12 +1,13 @@
 package com.jannik_kuehn.loritimebungee.util;
 
 import com.jannik_kuehn.common.api.LoriTimePlayer;
+import com.jannik_kuehn.common.api.common.CommonConsoleSender;
+import com.jannik_kuehn.common.api.common.CommonPlayerSender;
 import com.jannik_kuehn.common.api.common.CommonSender;
 import com.jannik_kuehn.common.api.common.CommonServer;
 import net.kyori.adventure.platform.bungeecord.BungeeAudiences;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.serializer.bungeecord.BungeeComponentSerializer;
-import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
@@ -15,7 +16,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @SuppressWarnings("PMD.CommentRequired")
-public class BungeeServer implements CommonServer, CommonSender {
+public class BungeeServer implements CommonServer {
 
     private final ProxyServer proxyServer;
 
@@ -32,7 +33,7 @@ public class BungeeServer implements CommonServer, CommonSender {
     }
 
     @Override
-    public Optional<CommonSender> getPlayer(final UUID uniqueId) {
+    public Optional<CommonPlayerSender> getPlayer(final UUID uniqueId) {
         final ProxiedPlayer player = proxyServer.getPlayer(uniqueId);
         if (player == null) {
             return Optional.empty();
@@ -41,28 +42,33 @@ public class BungeeServer implements CommonServer, CommonSender {
     }
 
     @Override
-    public Optional<CommonSender> getPlayer(final String name) {
-        return Optional.of(new BungeePlayer(proxyServer.getPlayer(name)));
+    public Optional<CommonPlayerSender> getPlayer(final String name) {
+        final ProxiedPlayer player = proxyServer.getPlayer(name);
+        if (player == null) {
+            return Optional.empty();
+        }
+        return Optional.of(new BungeePlayer(player));
     }
 
     @Override
-    public CommonSender[] getOnlinePlayers() {
+    public CommonPlayerSender[] getOnlinePlayers() {
         return proxyServer.getPlayers().stream()
                 .map(BungeePlayer::new)
-                .toList().toArray(new BungeePlayer[0]);
+                .toList().toArray(new CommonPlayerSender[0]);
     }
 
     @Override
     public boolean dispatchCommand(final CommonSender sender, final String command) {
         final CommandSender commandSource;
-        if (sender.isConsole()) {
+        if (sender instanceof CommonConsoleSender) {
             commandSource = proxyServer.getConsole();
+        } else if (sender instanceof CommonPlayerSender playerSender) {
+            commandSource = proxyServer.getPlayer(playerSender.getUniqueId());
         } else {
-            if (getPlayer(sender.getUniqueId()).isPresent()) {
-                commandSource = proxyServer.getPlayer(sender.getUniqueId());
-            } else {
-                return false;
-            }
+            return false;
+        }
+        if (commandSource == null) {
+            return false;
         }
         proxyServer.getPluginManager().dispatchCommand(commandSource, command);
         return true;
@@ -109,42 +115,8 @@ public class BungeeServer implements CommonServer, CommonSender {
     }
 
     @Override
-    public UUID getUniqueId() {
-        return null;
-    }
-
-    @Override
-    public String getName() {
-        return "CONSOLE";
-    }
-
-    @Override
-    public boolean hasPermission(final String permission) {
-        return true;
-    }
-
-    @Override
     public void sendMessageToConsole(final TextComponent message) {
         audiences.sender(proxyServer.getConsole()).sendMessage(message);
     }
 
-    @Override
-    public void sendMessage(final String message) {
-        audiences.sender(proxyServer.getConsole()).sendMessage(LegacyComponentSerializer.legacy('&').deserialize(message));
-    }
-
-    @Override
-    public void sendMessage(final TextComponent message) {
-        audiences.sender(proxyServer.getConsole()).sendMessage(message);
-    }
-
-    @Override
-    public boolean isConsole() {
-        return true;
-    }
-
-    @Override
-    public boolean isOnline() {
-        return true;
-    }
 }

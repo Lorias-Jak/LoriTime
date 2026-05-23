@@ -44,6 +44,7 @@ public class PlayerNameVelocityListener {
         final Player player = event.getPlayer();
         final UUID uuid = player.getUniqueId();
         final String name = player.getUsername();
+        loriTimePlugin.rememberPlayerName(uuid, name);
         loriTimePlugin.getScheduler().runAsyncOnce(() -> {
             try {
                 loriTimePlugin.getStorage().setPlayerName(uuid, name);

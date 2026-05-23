@@ -46,6 +46,7 @@ public class TimeAccumulatorVelocityListener {
         final String name = event.getPlayer().getUsername();
         final String server = event.getServer().getServerInfo().getName();
         final long now = System.currentTimeMillis();
+        loriTimePlugin.rememberPlayerName(uuid, name);
         loriTimePlugin.getScheduler().runAsyncOnce(() -> {
             try {
                 loriTimePlugin.getAccumulator().switchContext(uuid, name, server, SessionContextDefaults.WORLD, now);

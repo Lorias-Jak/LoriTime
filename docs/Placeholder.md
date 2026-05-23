@@ -22,5 +22,7 @@
 
 > **Note:** The total amount of time is rounded to two decimal places.
 
+Placeholder rendering is synchronous and does not query database-backed storage directly. Time placeholders are online-player-only: LoriTime returns the cached value for an online player, or `0` while requesting an asynchronous cache refresh when no value is cached yet. Offline or missing player requests return zero-time fallback values and do not trigger a refresh.
+
 <br>
 If you want more Placeholder, open a [new issue](https://github.com/Lorias-Jak/LoriTime/issues) and ask!

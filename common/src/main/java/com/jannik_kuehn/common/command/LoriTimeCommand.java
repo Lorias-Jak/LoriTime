@@ -4,21 +4,25 @@ import com.github.roleplaycauldron.spellbook.core.logger.WrappedLogger;
 import com.jannik_kuehn.common.LoriTimePlugin;
 import com.jannik_kuehn.common.api.LoriTimePlayer;
 import com.jannik_kuehn.common.api.common.CommonCommand;
+import com.jannik_kuehn.common.api.common.CommonPlayerSender;
 import com.jannik_kuehn.common.api.common.CommonSender;
 import com.jannik_kuehn.common.config.localization.Localization;
 import com.jannik_kuehn.common.exception.StorageException;
 import com.jannik_kuehn.common.utils.TimeUtil;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.OptionalLong;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
 @SuppressWarnings({"PMD.CommentRequired", "PMD.AvoidLiteralsInIfCondition", "PMD.CognitiveComplexity",
-        "PMD.AvoidThrowingRawExceptionTypes", "PMD.ConfusingTernary"})
+        "PMD.AvoidThrowingRawExceptionTypes"})
 public class LoriTimeCommand implements CommonCommand {
 
     private final LoriTimePlugin loriTimePlugin;
@@ -59,15 +63,15 @@ public class LoriTimeCommand implements CommonCommand {
                         return;
                     }
                 } else {
-                    if (!sender.isConsole()) {
-                        targetPlayer = loriTimePlugin.getPlayerConverter().getOnlinePlayer(sender.getUniqueId());
-                    } else {
+                    if (!(sender instanceof CommonPlayerSender playerSender)) {
                         sender.sendMessage(localization.formatTextComponent(localization.getRawMessage("message.command.loritime.consoleself")));
                         return;
                     }
+                    targetPlayer = loriTimePlugin.getPlayerConverter().getOnlinePlayer(playerSender.getUniqueId());
                 }
 
-                final boolean isTargetSender = targetPlayer.getUniqueId().equals(sender.getUniqueId());
+                final boolean isTargetSender = sender instanceof CommonPlayerSender playerSender
+                        && targetPlayer.getUniqueId().equals(playerSender.getUniqueId());
                 if (!isTargetSender && !sender.hasPermission("loritime.see.other")) {
                     printUtilityMessage(sender, "message.nopermission");
                     return;
@@ -116,12 +120,7 @@ public class LoriTimeCommand implements CommonCommand {
             return new ArrayList<>();
         }
 
-        final List<String> namesList = new ArrayList<>();
-        try {
-            namesList.addAll(loriTimePlugin.getStorage().getNameEntries().stream().toList());
-        } catch (final StorageException e) {
-            log.warn("could not load name entries on tab completion", e);
-        }
+        final List<String> namesList = cachedPlayerNames();
         if (args.length == 0) {
             return namesList;
         }
@@ -134,6 +133,14 @@ public class LoriTimeCommand implements CommonCommand {
     private List<String> filterCompletion(final List<String> list, final String currentValue) {
         list.removeIf(elem -> !elem.toLowerCase(Locale.ROOT).startsWith(currentValue.toLowerCase(Locale.ROOT)));
         return list;
+    }
+
+    private List<String> cachedPlayerNames() {
+        final Set<String> names = new LinkedHashSet<>(loriTimePlugin.getKnownPlayerNames());
+        Arrays.stream(loriTimePlugin.getServer().getOnlinePlayers())
+                .map(CommonPlayerSender::getName)
+                .forEach(names::add);
+        return new ArrayList<>(names);
     }
 
     @Override

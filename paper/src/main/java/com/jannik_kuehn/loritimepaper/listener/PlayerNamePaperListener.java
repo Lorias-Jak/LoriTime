@@ -45,6 +45,7 @@ public class PlayerNamePaperListener implements Listener {
         final Player player = event.getPlayer();
         final UUID uuid = player.getUniqueId();
         final String name = player.getName();
+        loriTimePlugin.rememberPlayerName(uuid, name);
         loriTimePlugin.getScheduler().runAsyncOnce(() -> {
             try {
                 loriTimePlugin.getStorage().setPlayerName(uuid, name);

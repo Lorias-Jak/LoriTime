@@ -1,6 +1,6 @@
 package com.jannik_kuehn.loritimepaper.util;
 
-import com.jannik_kuehn.common.api.common.CommonSender;
+import com.jannik_kuehn.common.api.common.CommonPlayerSender;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.entity.Player;
@@ -8,7 +8,7 @@ import org.bukkit.entity.Player;
 import java.util.UUID;
 
 @SuppressWarnings("PMD.CommentRequired")
-public class PaperPlayer implements CommonSender {
+public class PaperPlayer implements CommonPlayerSender {
 
     private final Player player;
 
@@ -42,11 +42,6 @@ public class PaperPlayer implements CommonSender {
     @Override
     public void sendMessage(final TextComponent message) {
         player.sendMessage(message);
-    }
-
-    @Override
-    public boolean isConsole() {
-        return false;
     }
 
     @Override

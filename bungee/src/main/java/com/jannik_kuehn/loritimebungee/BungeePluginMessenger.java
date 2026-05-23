@@ -1,7 +1,7 @@
 package com.jannik_kuehn.loritimebungee;
 
 import com.github.roleplaycauldron.spellbook.core.logger.WrappedLogger;
-import com.jannik_kuehn.common.api.common.CommonSender;
+import com.jannik_kuehn.common.api.common.CommonPlayerSender;
 import com.jannik_kuehn.common.module.messaging.PluginMessaging;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.connection.Server;
@@ -85,7 +85,7 @@ public class BungeePluginMessenger extends PluginMessaging implements Listener {
             return null;
         }
 
-        final Optional<CommonSender> optionalSender = loriTimePlugin.getServer().getPlayer((UUID) message[0]);
+        final Optional<CommonPlayerSender> optionalSender = loriTimePlugin.getServer().getPlayer((UUID) message[0]);
         if (optionalSender.isEmpty()) {
             return null;
         }

@@ -62,7 +62,7 @@ public class LoriTimeBungee extends Plugin {
         final PluginManager pluginManager = getProxy().getPluginManager();
         pluginManager.registerListener(this, new PlayerNameBungeeListener(loriTimePlugin));
         pluginManager.registerListener(this, new TimeAccumulatorBungeeListener(loriTimePlugin));
-        pluginManager.registerListener(this, new LoriTimeUpdateBungeeListener(loriTimePlugin, audiences));
+        pluginManager.registerListener(this, new LoriTimeUpdateBungeeListener(loriTimePlugin));
 
         new BungeeCommand(this, audiences, new LoriTimeAdminCommand(loriTimePlugin, loriTimePlugin.getLocalization(),
                 loriTimePlugin.getParser()));

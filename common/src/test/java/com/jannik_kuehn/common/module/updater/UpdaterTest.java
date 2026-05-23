@@ -2,6 +2,8 @@ package com.jannik_kuehn.common.module.updater;
 
 import com.github.roleplaycauldron.spellbook.core.logger.WrappedLogger;
 import com.jannik_kuehn.common.LoriTimePlugin;
+import com.jannik_kuehn.common.api.common.CommonConsoleSender;
+import com.jannik_kuehn.common.api.common.CommonPlayerSender;
 import com.jannik_kuehn.common.api.common.CommonSender;
 import com.jannik_kuehn.common.api.common.CommonServer;
 import com.jannik_kuehn.common.api.scheduler.PluginScheduler;
@@ -92,7 +94,7 @@ class UpdaterTest {
         final WrappedLogger logger = mock(WrappedLogger.class);
         final MutableInstantSource clock = new MutableInstantSource(Instant.parse("2024-01-01T00:00:00Z"));
 
-        final CommonServer server = mock(CommonServer.class, withSettings().extraInterfaces(CommonSender.class));
+        final CommonServer server = mock(CommonServer.class);
         when(server.getPluginVersion()).thenReturn("1.0.0");
         when(server.getPluginJarName()).thenReturn("LoriTime.jar");
 
@@ -124,7 +126,7 @@ class UpdaterTest {
         final WrappedLogger logger = mock(WrappedLogger.class);
         final MutableInstantSource clock = new MutableInstantSource(Instant.parse("2024-01-01T00:00:00Z"));
 
-        final CommonServer server = mock(CommonServer.class, withSettings().extraInterfaces(CommonSender.class));
+        final CommonServer server = mock(CommonServer.class);
         when(server.getPluginVersion()).thenReturn("1.0.0");
         when(server.getPluginJarName()).thenReturn("LoriTime.jar");
 
@@ -144,10 +146,9 @@ class UpdaterTest {
         assertTrue(updater.isUpdateAvailable(), "Update should be available");
 
         final AtomicInteger msgCount = new AtomicInteger();
-        final CommonSender player = mock(CommonSender.class);
+        final CommonPlayerSender player = mock(CommonPlayerSender.class);
         final UUID playerId = UUID.randomUUID();
         when(player.getUniqueId()).thenReturn(playerId);
-        when(player.isConsole()).thenReturn(false);
         when(player.isOnline()).thenReturn(true);
         doAnswer(inv -> {
             msgCount.incrementAndGet();
@@ -162,8 +163,7 @@ class UpdaterTest {
         updater.sendPlayerUpdateNotification(player);
         assertEquals(2, msgCount.get(), "After throttle window, it should notify again");
 
-        final CommonSender console = mock(CommonSender.class);
-        when(console.isConsole()).thenReturn(true);
+        final CommonConsoleSender console = mock(CommonConsoleSender.class);
         updater.sendPlayerUpdateNotification(console);
         assertEquals(2, msgCount.get(), "Expected 2 messages for console");
     }

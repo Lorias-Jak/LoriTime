@@ -1,7 +1,7 @@
 package com.jannik_kuehn.loritimepaper.listener;
 
 import com.jannik_kuehn.common.LoriTimePlugin;
-import com.jannik_kuehn.common.api.LoriTimePlayer;
+import com.jannik_kuehn.common.player.TrackedLoriTimePlayer;
 import io.papermc.paper.event.player.AsyncChatEvent;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -35,7 +35,7 @@ public class PaperPlayerAfkListener implements Listener {
      */
     @EventHandler(ignoreCancelled = true)
     public void onPlayerJoin(final PlayerJoinEvent event) {
-        final LoriTimePlayer player = loriTimePlugin.getPlayerConverter().getOnlinePlayer(event.getPlayer().getUniqueId());
+        final TrackedLoriTimePlayer player = loriTimePlugin.getPlayerConverter().getOnlinePlayer(event.getPlayer().getUniqueId());
         updateAfkStatus(player);
     }
 
@@ -50,7 +50,7 @@ public class PaperPlayerAfkListener implements Listener {
                 && event.getFrom().getBlockZ() == event.getTo().getBlockZ()) {
             return;
         }
-        final LoriTimePlayer player = loriTimePlugin.getPlayerConverter().getOnlinePlayer(event.getPlayer().getUniqueId());
+        final TrackedLoriTimePlayer player = loriTimePlugin.getPlayerConverter().getOnlinePlayer(event.getPlayer().getUniqueId());
         updateAfkStatus(player);
     }
 
@@ -61,7 +61,7 @@ public class PaperPlayerAfkListener implements Listener {
      */
     @EventHandler(ignoreCancelled = true)
     public void onPlayerChat(final AsyncChatEvent event) {
-        final LoriTimePlayer player = loriTimePlugin.getPlayerConverter().getOnlinePlayer(event.getPlayer().getUniqueId());
+        final TrackedLoriTimePlayer player = loriTimePlugin.getPlayerConverter().getOnlinePlayer(event.getPlayer().getUniqueId());
         updateAfkStatus(player);
     }
 
@@ -72,7 +72,7 @@ public class PaperPlayerAfkListener implements Listener {
      */
     @EventHandler(ignoreCancelled = true)
     public void onPlayerInteract(final PlayerInteractEvent event) {
-        final LoriTimePlayer player = loriTimePlugin.getPlayerConverter().getOnlinePlayer(event.getPlayer().getUniqueId());
+        final TrackedLoriTimePlayer player = loriTimePlugin.getPlayerConverter().getOnlinePlayer(event.getPlayer().getUniqueId());
         updateAfkStatus(player);
     }
 
@@ -87,11 +87,11 @@ public class PaperPlayerAfkListener implements Listener {
         if ("/afk".equalsIgnoreCase(event.getMessage())) {
             return;
         }
-        final LoriTimePlayer player = loriTimePlugin.getPlayerConverter().getOnlinePlayer(event.getPlayer().getUniqueId());
+        final TrackedLoriTimePlayer player = loriTimePlugin.getPlayerConverter().getOnlinePlayer(event.getPlayer().getUniqueId());
         updateAfkStatus(player);
     }
 
-    private void updateAfkStatus(final LoriTimePlayer player) {
+    private void updateAfkStatus(final TrackedLoriTimePlayer player) {
         loriTimePlugin.getScheduler().runAsyncOnce(() -> {
             loriTimePlugin.getAfkStatusProvider().resetTimer(player);
         });

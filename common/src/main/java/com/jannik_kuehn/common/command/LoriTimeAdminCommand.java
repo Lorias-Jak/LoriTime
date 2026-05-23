@@ -4,6 +4,7 @@ import com.github.roleplaycauldron.spellbook.core.logger.WrappedLogger;
 import com.jannik_kuehn.common.LoriTimePlugin;
 import com.jannik_kuehn.common.api.LoriTimePlayer;
 import com.jannik_kuehn.common.api.common.CommonCommand;
+import com.jannik_kuehn.common.api.common.CommonPlayerSender;
 import com.jannik_kuehn.common.api.common.CommonSender;
 import com.jannik_kuehn.common.api.storage.ManualTimeAdjustment;
 import com.jannik_kuehn.common.api.storage.TimeEntryReason;
@@ -14,10 +15,13 @@ import com.jannik_kuehn.common.utils.TimeUtil;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.OptionalLong;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -87,13 +91,7 @@ public class LoriTimeAdminCommand implements CommonCommand {
             return filterCompletion(completions, args[0]);
         }
         if (args.length == 2 && !args[0].equalsIgnoreCase("reload")) {
-            final List<String> completions = new ArrayList<>();
-            try {
-                completions.addAll(loriTimePlugin.getStorage().getNameEntries().stream().toList());
-            } catch (final StorageException e) {
-                log.error("Could not load player names for tab completion in LoriTimeAdminCommand!", e);
-            }
-            return filterCompletion(completions, args[1]);
+            return filterCompletion(cachedPlayerNames(), args[1]);
         }
         return new ArrayList<>();
     }
@@ -101,6 +99,14 @@ public class LoriTimeAdminCommand implements CommonCommand {
     private List<String> filterCompletion(final List<String> list, final String currentValue) {
         list.removeIf(elem -> !elem.toLowerCase(Locale.ROOT).startsWith(currentValue.toLowerCase(Locale.ROOT)));
         return list;
+    }
+
+    private List<String> cachedPlayerNames() {
+        final Set<String> names = new LinkedHashSet<>(loriTimePlugin.getKnownPlayerNames());
+        Arrays.stream(loriTimePlugin.getServer().getOnlinePlayers())
+                .map(CommonSender::getName)
+                .forEach(names::add);
+        return new ArrayList<>(names);
     }
 
     @Override
@@ -274,7 +280,7 @@ public class LoriTimeAdminCommand implements CommonCommand {
             return;
         }
 
-        final Optional<CommonSender> onlinePlayer = loriTimePlugin.getServer().getPlayer(optionalUUID.get());
+        final Optional<CommonPlayerSender> onlinePlayer = loriTimePlugin.getServer().getPlayer(optionalUUID.get());
         if (onlinePlayer.isPresent() && onlinePlayer.get().isOnline()) {
             printUtilityMessage(sender, "message.command.loritimeadmin.deleteUser.userOnline");
             return;
@@ -305,8 +311,8 @@ public class LoriTimeAdminCommand implements CommonCommand {
 
     public void modifyOnlineTime(final CommonSender sender, final UUID uuid, final long modifyBy) {
         try {
-            final UUID actorUuid = sender.isConsole() ? null : sender.getUniqueId();
-            final String actorName = sender.isConsole() ? "CONSOLE" : sender.getName();
+            final UUID actorUuid = sender instanceof CommonPlayerSender playerSender ? playerSender.getUniqueId() : null;
+            final String actorName = sender instanceof CommonPlayerSender ? sender.getName() : "CONSOLE";
             loriTimePlugin.getStorage().addTime(new ManualTimeAdjustment(uuid, modifyBy,
                     TimeEntryReason.MANUAL_ADJUSTMENT, actorUuid, actorName));
         } catch (final StorageException ex) {

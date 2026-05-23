@@ -1,11 +1,12 @@
 package com.jannik_kuehn.loritimepaper.util;
 
 import com.jannik_kuehn.common.api.LoriTimePlayer;
+import com.jannik_kuehn.common.api.common.CommonConsoleSender;
+import com.jannik_kuehn.common.api.common.CommonPlayerSender;
 import com.jannik_kuehn.common.api.common.CommonSender;
 import com.jannik_kuehn.common.api.common.CommonServer;
 import com.jannik_kuehn.loritimepaper.LoriTimePaper;
 import net.kyori.adventure.text.TextComponent;
-import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.Server;
 import org.bukkit.command.CommandSender;
@@ -15,7 +16,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @SuppressWarnings("PMD.CommentRequired")
-public class PaperServer implements CommonServer, CommonSender {
+public class PaperServer implements CommonServer {
     private final LoriTimePaper loriTimePaper;
 
     private final String version;
@@ -31,36 +32,33 @@ public class PaperServer implements CommonServer, CommonSender {
     }
 
     @Override
-    public Optional<CommonSender> getPlayer(final UUID uniqueId) {
+    public Optional<CommonPlayerSender> getPlayer(final UUID uniqueId) {
         final Optional<Player> player = Optional.ofNullable(server.getPlayer(uniqueId));
         return Optional.ofNullable(player.map(PaperPlayer::new).orElse(null));
     }
 
     @Override
-    public Optional<CommonSender> getPlayer(final String name) {
+    public Optional<CommonPlayerSender> getPlayer(final String name) {
         final Optional<Player> player = Optional.ofNullable(server.getPlayer(name));
         return Optional.ofNullable(player.map(PaperPlayer::new).orElse(null));
     }
 
     @Override
-    public CommonSender[] getOnlinePlayers() {
+    public CommonPlayerSender[] getOnlinePlayers() {
         return server.getOnlinePlayers().stream()
                 .map(PaperPlayer::new)
-                .toList().toArray(new PaperPlayer[0]);
+                .toList().toArray(new CommonPlayerSender[0]);
     }
 
     @Override
     public boolean dispatchCommand(final CommonSender consoleSender, final String command) {
         final CommandSender commandSource;
-        if (consoleSender.isConsole()) {
+        if (consoleSender instanceof CommonConsoleSender) {
             commandSource = server.getConsoleSender();
+        } else if (consoleSender instanceof CommonPlayerSender playerSender) {
+            commandSource = server.getPlayer(playerSender.getUniqueId());
         } else {
-            final Player player = server.getPlayer(consoleSender.getName());
-            if (server.getPlayer(consoleSender.getName()) != null) {
-                commandSource = player;
-            } else {
-                return false;
-            }
+            return false;
         }
         if (commandSource == null) {
             return false;
@@ -121,38 +119,4 @@ public class PaperServer implements CommonServer, CommonSender {
         player.kick(message);
     }
 
-    @Override
-    public UUID getUniqueId() {
-        return null;
-    }
-
-    @Override
-    public String getName() {
-        return "CONSOLE";
-    }
-
-    @Override
-    public boolean hasPermission(final String permission) {
-        return true;
-    }
-
-    @Override
-    public void sendMessage(final String message) {
-        server.getConsoleSender().sendMessage(LegacyComponentSerializer.legacy('&').deserialize(message));
-    }
-
-    @Override
-    public void sendMessage(final TextComponent message) {
-        server.getConsoleSender().sendMessage(message);
-    }
-
-    @Override
-    public boolean isConsole() {
-        return true;
-    }
-
-    @Override
-    public boolean isOnline() {
-        return true;
-    }
 }

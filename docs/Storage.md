@@ -47,6 +47,14 @@ multiSetup:
 
 Modes describe storage responsibility only. Platform modules decide what features they can provide in that mode.
 
+## Runtime Threading
+
+LoriTime storage contracts are internal synchronous contracts, but normal runtime database-backed reads and writes are scheduled away from platform main-thread request and tick paths. Commands, listeners, AFK handling, plugin messaging, and periodic cache flushing perform storage work through LoriTime's async scheduler paths.
+
+Synchronous request surfaces cannot wait on database calls. Command tab completion uses known runtime player names from cache and online players. Paper/Folia PlaceholderAPI rendering uses cached time values, returns `0` on cache miss, and requests an asynchronous refresh for later renders.
+
+Startup migration and storage initialization are lifecycle exceptions. They may run synchronously during plugin enable before normal runtime ticking is expected to use LoriTime storage.
+
 ## Platform Behavior
 
 | Platform | `standalone` | `master` | `slave` | Context source |

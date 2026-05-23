@@ -35,6 +35,11 @@ public class PaperPluginMessenger extends PluginMessaging {
 
     @Override
     public void sendPluginMessage(final String channelIdentifier, final Object... message) {
+        if (!paperPlugin.isEnabled()) {
+            log.debug("Skipping plugin message because the Paper plugin is disabled");
+            return;
+        }
+
         log.debug("Sending PluginMessage with channel: " + channelIdentifier);
         final UUID uuid = (UUID) message[0];
         final byte[] data = getDataAsByte(message);

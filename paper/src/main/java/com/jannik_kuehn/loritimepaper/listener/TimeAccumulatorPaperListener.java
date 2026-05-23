@@ -49,6 +49,7 @@ public class TimeAccumulatorPaperListener implements Listener {
         final String server = loriTimePlugin.getConfig().getString("server.name", SessionContextDefaults.SERVER);
         final String world = event.getPlayer().getWorld().getName();
         final long now = System.currentTimeMillis();
+        loriTimePlugin.rememberPlayerName(uuid, name);
         loriTimePlugin.getScheduler().runAsyncOnce(() -> {
             try {
                 loriTimePlugin.getAccumulator().startAccumulating(uuid, name, server, world, now);
@@ -91,6 +92,7 @@ public class TimeAccumulatorPaperListener implements Listener {
         final String server = loriTimePlugin.getConfig().getString("server.name", SessionContextDefaults.SERVER);
         final String world = event.getPlayer().getWorld().getName();
         final long now = System.currentTimeMillis();
+        loriTimePlugin.rememberPlayerName(uuid, name);
         loriTimePlugin.getScheduler().runAsyncOnce(() -> {
             try {
                 loriTimePlugin.getAccumulator().switchContext(uuid, name, server, world, now);

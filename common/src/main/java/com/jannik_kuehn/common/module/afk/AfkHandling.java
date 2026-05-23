@@ -3,7 +3,7 @@ package com.jannik_kuehn.common.module.afk;
 import com.github.roleplaycauldron.spellbook.core.logger.WrappedLogger;
 import com.jannik_kuehn.common.LoriTimePlugin;
 import com.jannik_kuehn.common.api.LoriTimePlayer;
-import com.jannik_kuehn.common.api.common.CommonSender;
+import com.jannik_kuehn.common.api.common.CommonPlayerSender;
 import com.jannik_kuehn.common.utils.TimeUtil;
 
 import java.util.Optional;
@@ -42,17 +42,17 @@ public abstract class AfkHandling {
 
     protected boolean hasPermission(final LoriTimePlayer loriTimePlayer, final String permission) {
         log.debug("Checking for players permission: " + permission + " for player: " + loriTimePlayer.getName());
-        final Optional<CommonSender> optionalPlayer = loriTimePlugin.getServer().getPlayer(loriTimePlayer.getUniqueId());
+        final Optional<CommonPlayerSender> optionalPlayer = loriTimePlugin.getServer().getPlayer(loriTimePlayer.getUniqueId());
         if (optionalPlayer.isEmpty()) {
             log.debug("Cant find a player with the UUID: " + loriTimePlayer.getUniqueId());
             return false;
         }
-        final CommonSender player = optionalPlayer.get();
+        final CommonPlayerSender player = optionalPlayer.get();
         return player.hasPermission(permission);
     }
 
     protected void sendKickAnnounce(final LoriTimePlayer player, final long timeToRemove, final String permission) {
-        for (final CommonSender onlinePlayer : loriTimePlugin.getServer().getOnlinePlayers()) {
+        for (final CommonPlayerSender onlinePlayer : loriTimePlugin.getServer().getOnlinePlayers()) {
             log.debug("Sending kick announce to player: " + onlinePlayer.getName());
             if (!onlinePlayer.hasPermission(permission)) {
                 log.debug("Skipping player: " + onlinePlayer.getName() + " because of missing permission: " + permission);
@@ -67,7 +67,7 @@ public abstract class AfkHandling {
     }
 
     protected void chatAnnounce(final LoriTimePlayer player, final String message, final String permission) {
-        for (final CommonSender onlinePlayer : loriTimePlugin.getServer().getOnlinePlayers()) {
+        for (final CommonPlayerSender onlinePlayer : loriTimePlugin.getServer().getOnlinePlayers()) {
             log.debug("Sending chat announce to player: " + onlinePlayer.getName());
             if (!onlinePlayer.hasPermission(permission)) {
                 log.debug("Skipping player: " + onlinePlayer.getName() + " because of missing permission: " + permission);
@@ -88,7 +88,7 @@ public abstract class AfkHandling {
 
     protected boolean isOnline(final UUID uuid) {
         log.debug("Checking if player with UUID: " + uuid + " is online");
-        final Optional<CommonSender> optionalPlayer = loriTimePlugin.getServer().getPlayer(uuid);
+        final Optional<CommonPlayerSender> optionalPlayer = loriTimePlugin.getServer().getPlayer(uuid);
         return optionalPlayer.isPresent();
     }
 }

@@ -2,9 +2,8 @@ package com.jannik_kuehn.common.module.messaging;
 
 import com.github.roleplaycauldron.spellbook.core.logger.LoggerFactory;
 import com.jannik_kuehn.common.LoriTimePlugin;
-import com.jannik_kuehn.common.api.LoriTimePlayer;
 import com.jannik_kuehn.common.api.LoriTimePlayerConverter;
-import com.jannik_kuehn.common.api.common.CommonSender;
+import com.jannik_kuehn.common.api.common.CommonPlayerSender;
 import com.jannik_kuehn.common.api.common.CommonServer;
 import com.jannik_kuehn.common.api.scheduler.PluginScheduler;
 import com.jannik_kuehn.common.api.scheduler.PluginTask;
@@ -14,6 +13,7 @@ import com.jannik_kuehn.common.api.storage.UnifiedStorage;
 import com.jannik_kuehn.common.exception.StorageException;
 import com.jannik_kuehn.common.module.afk.AfkStatusProvider;
 import com.jannik_kuehn.common.module.afk.AfkTransitionType;
+import com.jannik_kuehn.common.player.TrackedLoriTimePlayer;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -305,12 +305,12 @@ class PluginMessagingTest {
     }
 
     private record AfkMessagingContext(LoriTimePlugin plugin, AfkStatusProvider afkStatusProvider,
-                                       LoriTimePlayer player) {
+                                       TrackedLoriTimePlayer player) {
 
         private AfkMessagingContext() {
-            this(pluginWithAfkMessaging(), mock(AfkStatusProvider.class), new LoriTimePlayer(PLAYER, "Lorias_"));
+            this(pluginWithAfkMessaging(), mock(AfkStatusProvider.class), new TrackedLoriTimePlayer(PLAYER, "Lorias_"));
             final CommonServer server = mock(CommonServer.class);
-            final CommonSender sender = mock(CommonSender.class);
+            final CommonPlayerSender sender = mock(CommonPlayerSender.class);
             final LoriTimePlayerConverter converter = mock(LoriTimePlayerConverter.class);
             when(plugin().getServer()).thenReturn(server);
             when(plugin().getPlayerConverter()).thenReturn(converter);

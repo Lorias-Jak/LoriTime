@@ -10,10 +10,12 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Stable public facade for third-party LoriTime integrations.
  */
+@SuppressWarnings("PMD.TooManyMethods")
 public final class LoriTimeService {
 
     /**
@@ -39,55 +41,47 @@ public final class LoriTimeService {
      * Looks up a stored UUID by player name.
      *
      * @param playerName the player name.
-     * @return the UUID, if LoriTime knows the player.
+     * @return future for the UUID, if LoriTime knows the player.
      */
-    public Optional<UUID> findUuid(final String playerName) {
+    public CompletableFuture<Optional<UUID>> findUuid(final String playerName) {
         Objects.requireNonNull(playerName, "playerName");
-        try {
-            return plugin.getStorage().getUuid(playerName);
-        } catch (final StorageException ex) {
-            throw new LoriTimeApiException("Could not look up UUID for player name " + playerName, ex);
-        }
+        return supplyAsync("Could not look up UUID for player name " + playerName,
+                () -> plugin.getStorage().getUuid(playerName));
     }
 
     /**
      * Looks up the latest stored player name for a UUID.
      *
      * @param uniqueId the player UUID.
-     * @return the player name, if LoriTime knows the player.
+     * @return future for the player name, if LoriTime knows the player.
      */
-    public Optional<String> findName(final UUID uniqueId) {
+    public CompletableFuture<Optional<String>> findName(final UUID uniqueId) {
         Objects.requireNonNull(uniqueId, "uniqueId");
-        try {
-            return plugin.getStorage().getName(uniqueId);
-        } catch (final StorageException ex) {
-            throw new LoriTimeApiException("Could not look up player name for UUID " + uniqueId, ex);
-        }
+        return supplyAsync("Could not look up player name for UUID " + uniqueId,
+                () -> plugin.getStorage().getName(uniqueId));
     }
 
     /**
      * Returns the current total online time for a player.
      *
      * @param uniqueId the player UUID.
-     * @return the total online time, if LoriTime has stored time for the player.
+     * @return future for the total online time, if LoriTime has stored time for the player.
      */
-    public Optional<Duration> getOnlineTime(final UUID uniqueId) {
+    public CompletableFuture<Optional<Duration>> getOnlineTime(final UUID uniqueId) {
         Objects.requireNonNull(uniqueId, "uniqueId");
-        try {
+        return supplyAsync("Could not query online time for UUID " + uniqueId, () -> {
             final OptionalLong seconds = plugin.getStorage().getTime(uniqueId);
             return seconds.isPresent() ? Optional.of(Duration.ofSeconds(seconds.getAsLong())) : Optional.empty();
-        } catch (final StorageException ex) {
-            throw new LoriTimeApiException("Could not query online time for UUID " + uniqueId, ex);
-        }
+        });
     }
 
     /**
      * Returns the current total online time for a player.
      *
      * @param player the player identity.
-     * @return the total online time, if LoriTime has stored time for the player.
+     * @return future for the total online time, if LoriTime has stored time for the player.
      */
-    public Optional<Duration> getOnlineTime(final LoriTimePlayer player) {
+    public CompletableFuture<Optional<Duration>> getOnlineTime(final LoriTimePlayer player) {
         return getOnlineTime(validate(player, "player").getUniqueId());
     }
 
@@ -97,8 +91,8 @@ public final class LoriTimeService {
      * @param uniqueId the player UUID.
      * @param amount   the signed amount to add or remove.
      */
-    public void addTime(final UUID uniqueId, final Duration amount) {
-        addTime(uniqueId, amount, null, API_ACTOR);
+    public CompletableFuture<Void> addTime(final UUID uniqueId, final Duration amount) {
+        return addTime(uniqueId, amount, null, API_ACTOR);
     }
 
     /**
@@ -107,8 +101,8 @@ public final class LoriTimeService {
      * @param player the player identity.
      * @param amount the signed amount to add or remove.
      */
-    public void addTime(final LoriTimePlayer player, final Duration amount) {
-        addTime(validate(player, "player").getUniqueId(), amount);
+    public CompletableFuture<Void> addTime(final LoriTimePlayer player, final Duration amount) {
+        return addTime(validate(player, "player").getUniqueId(), amount);
     }
 
     /**
@@ -119,19 +113,17 @@ public final class LoriTimeService {
      * @param actorUuid the actor UUID, or null for system actors.
      * @param actorName the actor display name.
      */
-    public void addTime(final UUID uniqueId, final Duration amount, final UUID actorUuid, final String actorName) {
+    public CompletableFuture<Void> addTime(final UUID uniqueId, final Duration amount, final UUID actorUuid,
+                                           final String actorName) {
         Objects.requireNonNull(uniqueId, "uniqueId");
         Objects.requireNonNull(actorName, "actorName");
         if (actorName.isBlank()) {
             throw new IllegalArgumentException("actorName must not be blank");
         }
         final long seconds = seconds(amount);
-        try {
+        return runAsync("Could not add time adjustment for UUID " + uniqueId, () ->
             plugin.getStorage().addTime(new ManualTimeAdjustment(uniqueId, seconds,
-                    TimeEntryReason.MANUAL_ADJUSTMENT, actorUuid, actorName));
-        } catch (final StorageException ex) {
-            throw new LoriTimeApiException("Could not add time adjustment for UUID " + uniqueId, ex);
-        }
+                    TimeEntryReason.MANUAL_ADJUSTMENT, actorUuid, actorName)));
     }
 
     /**
@@ -141,10 +133,30 @@ public final class LoriTimeService {
      * @param amount the signed amount to add or remove.
      * @param actor  the actor player identity.
      */
-    public void addTime(final LoriTimePlayer player, final Duration amount, final LoriTimePlayer actor) {
+    public CompletableFuture<Void> addTime(final LoriTimePlayer player, final Duration amount,
+                                           final LoriTimePlayer actor) {
         final LoriTimePlayer validPlayer = validate(player, "player");
         final LoriTimePlayer validActor = validate(actor, "actor");
-        addTime(validPlayer.getUniqueId(), amount, validActor.getUniqueId(), validActor.getName());
+        return addTime(validPlayer.getUniqueId(), amount, validActor.getUniqueId(), validActor.getName());
+    }
+
+    private CompletableFuture<Void> runAsync(final String failureMessage, final StorageRunnable action) {
+        return supplyAsync(failureMessage, () -> {
+            action.run();
+            return null;
+        });
+    }
+
+    private <T> CompletableFuture<T> supplyAsync(final String failureMessage, final StorageSupplier<T> supplier) {
+        final CompletableFuture<T> future = new CompletableFuture<>();
+        plugin.getScheduler().runAsyncOnce(() -> {
+            try {
+                future.complete(supplier.get());
+            } catch (final StorageException ex) {
+                future.completeExceptionally(new LoriTimeApiException(failureMessage, ex));
+            }
+        });
+        return future;
     }
 
     private LoriTimePlayer validate(final LoriTimePlayer player, final String parameterName) {
@@ -163,5 +175,34 @@ public final class LoriTimeService {
             throw new IllegalArgumentException("amount must be precise to whole seconds");
         }
         return amount.getSeconds();
+    }
+
+    /**
+     * Storage value supplier that may fail.
+     *
+     * @param <T> result type
+     */
+    @FunctionalInterface
+    private interface StorageSupplier<T> {
+        /**
+         * Gets the value from storage.
+         *
+         * @return the storage result
+         * @throws StorageException if storage access fails
+         */
+        T get() throws StorageException;
+    }
+
+    /**
+     * Storage action that may fail.
+     */
+    @FunctionalInterface
+    private interface StorageRunnable {
+        /**
+         * Runs the storage action.
+         *
+         * @throws StorageException if storage access fails
+         */
+        void run() throws StorageException;
     }
 }

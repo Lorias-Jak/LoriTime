@@ -6,6 +6,7 @@ import com.jannik_kuehn.common.module.messaging.StorageMessageProtocol;
 import com.jannik_kuehn.common.module.messaging.StorageMessageType;
 import com.jannik_kuehn.common.utils.UuidUtil;
 import com.jannik_kuehn.loritimepaper.LoriTimePaper;
+import com.jannik_kuehn.loritimepaper.placeholder.PlaceholderTimeCache;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -26,7 +27,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Read cache for slave instances.
  */
-public class SlaveReadCache extends PluginMessaging implements PluginMessageListener, Listener {
+public class SlaveReadCache extends PluginMessaging implements PluginMessageListener, Listener, PlaceholderTimeCache {
     /**
      * The {@link PaperPluginMessenger} instance.
      */
@@ -63,6 +64,11 @@ public class SlaveReadCache extends PluginMessaging implements PluginMessageList
      * is cached for the given UUID.
      */
     public OptionalLong getTime(final UUID uuid) {
+        return getCachedTime(uuid);
+    }
+
+    @Override
+    public OptionalLong getCachedTime(final UUID uuid) {
         final Long value = cachedTimes.get(uuid);
         return value == null ? OptionalLong.empty() : OptionalLong.of(value);
     }
@@ -73,6 +79,7 @@ public class SlaveReadCache extends PluginMessaging implements PluginMessageList
      *
      * @param uuid The unique identifier of the entity for which the refresh request is being made.
      */
+    @Override
     public void requestRefresh(final UUID uuid) {
         pluginMessenger.sendPluginMessage(SLAVED_TIME_STORAGE, uuid, StorageMessageType.GET.wireValue());
     }

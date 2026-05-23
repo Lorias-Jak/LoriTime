@@ -81,29 +81,41 @@ LoriTime internals may use richer sender objects for permissions, messages, cons
 ### Resolve UUID by Name
 
 ```java
-Optional<UUID> uniqueId = loriTime.findUuid("Lorias_");
+loriTime.findUuid("Lorias_").thenAccept(optionalUniqueId -> {
+    optionalUniqueId.ifPresent(uniqueId -> {
+        // Use the UUID in your plugin.
+    });
+});
 ```
 
 ### Resolve Latest Name by UUID
 
 ```java
-Optional<String> name = loriTime.findName(uniqueId);
+loriTime.findName(uniqueId).thenAccept(optionalName -> {
+    optionalName.ifPresent(name -> {
+        // Use the latest known name in your plugin.
+    });
+});
 ```
 
 ### Read Online Time
 
 ```java
-Optional<Duration> onlineTime = loriTime.getOnlineTime(uniqueId);
-
-onlineTime.ifPresent(duration -> {
-    long seconds = duration.toSeconds();
+loriTime.getOnlineTime(uniqueId).thenAccept(optionalOnlineTime -> {
+    optionalOnlineTime.ifPresent(duration -> {
+        long seconds = duration.toSeconds();
+    });
 });
 ```
 
 If you already have a `LoriTimePlayer`, use the player overload:
 
 ```java
-Optional<Duration> onlineTime = loriTime.getOnlineTime(player);
+loriTime.getOnlineTime(player).thenAccept(optionalOnlineTime -> {
+    optionalOnlineTime.ifPresent(duration -> {
+        // Use the player's time.
+    });
+});
 ```
 
 An empty result means LoriTime does not currently have stored data for that player.
@@ -115,7 +127,9 @@ Use signed durations. Positive values add time, negative values remove time. Dur
 ### System/API Adjustment
 
 ```java
-loriTime.addTime(uniqueId, Duration.ofMinutes(10));
+loriTime.addTime(uniqueId, Duration.ofMinutes(10)).thenRun(() -> {
+    // The write was attempted successfully.
+});
 loriTime.addTime(uniqueId, Duration.ofMinutes(-5));
 ```
 
@@ -135,7 +149,9 @@ loriTime.addTime(
         Duration.ofMinutes(10),
         actorUniqueId,
         actorName
-);
+).thenRun(() -> {
+    // The actor-aware write completed.
+});
 ```
 
 Or pass public player identities for both target and actor:
@@ -152,19 +168,21 @@ Actor-aware adjustments preserve the actor UUID and actor name in LoriTime's adj
 
 ## Errors
 
-Facade methods validate null inputs and unsupported duration values before writing. Storage failures are wrapped in `LoriTimeApiException`, so integrations do not need to handle raw storage or SQL exceptions from the public facade.
+Facade methods validate null inputs and unsupported duration values before scheduling storage work. Storage failures complete the returned future exceptionally with `LoriTimeApiException`, so integrations do not need to handle raw storage or SQL exceptions from the public facade.
 
 ```java
-try {
-    loriTime.addTime(uniqueId, Duration.ofSeconds(30));
-} catch (LoriTimeApiException ex) {
-    getLogger().warning("Could not update LoriTime: " + ex.getMessage());
-}
+loriTime.addTime(uniqueId, Duration.ofSeconds(30)).exceptionally(ex -> {
+    Throwable cause = ex.getCause();
+    if (cause instanceof LoriTimeApiException apiException) {
+        getLogger().warning("Could not update LoriTime: " + apiException.getMessage());
+    }
+    return null;
+});
 ```
 
 ## Threading and Storage Modes
 
-The facade is synchronous. Reads and writes can touch database-backed storage or delegated storage/cache behavior depending on LoriTime's configured mode. Avoid running bulk calls on the main server thread; use your platform's async scheduler for repeated, slow, or many-player operations.
+The facade returns `CompletableFuture` values. LoriTime schedules the blocking storage work asynchronously, and future continuations run in that asynchronous completion context unless you reschedule them. If your continuation touches Bukkit, Folia, Velocity, Bungee, or other platform-thread-bound APIs, reschedule that work through your platform scheduler first.
 
 In slave mode, facade reads follow the same deterministic fallback behavior as LoriTime's local consumers. If the local instance only has cached data, an unknown player or cache miss may return an empty result until LoriTime receives data from the master.
 

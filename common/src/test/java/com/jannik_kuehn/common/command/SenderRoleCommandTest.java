@@ -5,6 +5,7 @@ import com.jannik_kuehn.common.LoriTimePlugin;
 import com.jannik_kuehn.common.api.LoriTimePlayerConverter;
 import com.jannik_kuehn.common.api.common.CommonConsoleSender;
 import com.jannik_kuehn.common.api.common.CommonPlayerSender;
+import com.jannik_kuehn.common.api.common.CommonServer;
 import com.jannik_kuehn.common.api.scheduler.PluginScheduler;
 import com.jannik_kuehn.common.api.scheduler.PluginTask;
 import com.jannik_kuehn.common.api.storage.ManualTimeAdjustment;
@@ -18,10 +19,13 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
 import java.util.OptionalLong;
+import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Logger;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doAnswer;
@@ -60,6 +64,55 @@ class SenderRoleCommandTest {
 
         verify(context.playerConverter(), never()).getOnlinePlayer(any(UUID.class));
         verify(sender).sendMessage(any(TextComponent.class));
+    }
+
+    @Test
+    @SuppressWarnings("PMD.CloseResource")
+    void loriTimeTabCompletionUsesCachedAndOnlineNamesWithoutStorageLookup() throws StorageException {
+        final LoriTimePlugin plugin = mock(LoriTimePlugin.class);
+        final UnifiedStorage storage = mock(UnifiedStorage.class);
+        final Localization localization = mock(Localization.class);
+        final CommonServer server = mock(CommonServer.class);
+        final CommonPlayerSender source = mock(CommonPlayerSender.class);
+        final CommonPlayerSender onlinePlayer = mock(CommonPlayerSender.class);
+        when(plugin.getLoggerFactory()).thenReturn(new LoggerFactory(Logger.getLogger("test")));
+        when(plugin.getStorage()).thenReturn(storage);
+        when(plugin.getLocalization()).thenReturn(localization);
+        when(plugin.getServer()).thenReturn(server);
+        when(plugin.getKnownPlayerNames()).thenReturn(Set.of("Lorias_"));
+        when(server.getOnlinePlayers()).thenReturn(new CommonPlayerSender[]{onlinePlayer});
+        when(onlinePlayer.getName()).thenReturn("OnlineUser");
+        when(source.hasPermission("loritime.see.other")).thenReturn(true);
+
+        final List<String> completions = new LoriTimeCommand(plugin, localization).handleTabComplete(source, "L");
+
+        assertEquals(List.of("Lorias_"), completions, "Expected tab completion to use cached player names");
+        verify(storage, never()).getNameEntries();
+    }
+
+    @Test
+    @SuppressWarnings("PMD.CloseResource")
+    void adminTabCompletionUsesCachedAndOnlineNamesWithoutStorageLookup() throws StorageException {
+        final LoriTimePlugin plugin = mock(LoriTimePlugin.class);
+        final UnifiedStorage storage = mock(UnifiedStorage.class);
+        final Localization localization = mock(Localization.class);
+        final CommonServer server = mock(CommonServer.class);
+        final CommonPlayerSender source = mock(CommonPlayerSender.class);
+        final CommonPlayerSender onlinePlayer = mock(CommonPlayerSender.class);
+        when(plugin.getLoggerFactory()).thenReturn(new LoggerFactory(Logger.getLogger("test")));
+        when(plugin.getStorage()).thenReturn(storage);
+        when(plugin.getLocalization()).thenReturn(localization);
+        when(plugin.getServer()).thenReturn(server);
+        when(plugin.getKnownPlayerNames()).thenReturn(Set.of("Lorias_"));
+        when(server.getOnlinePlayers()).thenReturn(new CommonPlayerSender[]{onlinePlayer});
+        when(onlinePlayer.getName()).thenReturn("OnlineUser");
+        when(source.hasPermission("loritime.admin")).thenReturn(true);
+
+        final List<String> completions = adminCommand(new CommandContext(plugin, storage, localization,
+                mock(LoriTimePlayerConverter.class))).handleTabComplete(source, "modify", "L");
+
+        assertEquals(List.of("Lorias_"), completions, "Expected admin tab completion to use cached player names");
+        verify(storage, never()).getNameEntries();
     }
 
     @Test

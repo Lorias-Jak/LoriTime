@@ -119,8 +119,10 @@ public class LoriTimePaper extends JavaPlugin {
         Bukkit.getPluginManager().registerEvents(slaveReadCache, this);
         Bukkit.getPluginManager().registerEvents(slaveSessionReporter, this);
         Bukkit.getServer().getMessenger().registerIncomingPluginChannel(this, "loritime:storage", slaveReadCache);
-        // TODO unify-storage-system: register PlaceholderAPI against the slave read cache.
-        // TODO unify-storage-system: define deterministic placeholder cache-miss behavior while requesting master refreshes.
+        if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null
+                && loriTimePlugin.getConfig().getBoolean("integrations.PlaceholderAPI", true)) {
+            new LoriTimePlaceholder(loriTimePlugin, slaveReadCache).register();
+        }
     }
 
     @SuppressWarnings("PMD.UseUnderscoresInNumericLiterals")

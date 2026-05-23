@@ -3,7 +3,6 @@ package com.jannik_kuehn.loritimepaper.placeholder;
 import com.github.roleplaycauldron.spellbook.core.logger.WrappedLogger;
 import com.jannik_kuehn.common.LoriTimePlugin;
 import com.jannik_kuehn.common.api.storage.UnifiedStorage;
-import com.jannik_kuehn.common.exception.StorageException;
 import com.jannik_kuehn.common.player.TrackedLoriTimePlayer;
 import com.jannik_kuehn.common.utils.TimeUtil;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
@@ -11,10 +10,7 @@ import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import org.bukkit.OfflinePlayer;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.OptionalLong;
-import java.util.UUID;
 
 @SuppressWarnings("PMD.CommentRequired")
 @SuppressFBWarnings("HE_INHERITS_EQUALS_USE_HASHCODE")
@@ -22,19 +18,20 @@ public class LoriTimePlaceholder extends PlaceholderExpansion {
 
     private final LoriTimePlugin loriTimePlugin;
 
-    private final UnifiedStorage storage;
+    private final PlaceholderTimeCache timeCache;
 
     private final WrappedLogger log;
 
-    private final Map<UUID, Long> offlinePlayerTime;
-
     public LoriTimePlaceholder(final LoriTimePlugin plugin, final UnifiedStorage storage) {
+        this(plugin, new StoragePlaceholderTimeCache(plugin, storage));
+    }
+
+    public LoriTimePlaceholder(final LoriTimePlugin plugin, final PlaceholderTimeCache timeCache) {
         super();
         this.loriTimePlugin = plugin;
-        this.storage = storage;
+        this.timeCache = timeCache;
 
         this.log = loriTimePlugin.getLoggerFactory().create(LoriTimePlaceholder.class);
-        this.offlinePlayerTime = new HashMap<>();
     }
 
     @SuppressWarnings("PMD.CyclomaticComplexity")
@@ -69,24 +66,16 @@ public class LoriTimePlaceholder extends PlaceholderExpansion {
     }
 
     private long getUnformattedOnlineTime(final OfflinePlayer player) {
-        if (!player.isOnline() && offlinePlayerTime.containsKey(player.getUniqueId())) {
-            return offlinePlayerTime.get(player.getUniqueId());
-        } else if (offlinePlayerTime.containsKey(player.getUniqueId()) && player.isOnline()) {
-            offlinePlayerTime.remove(player.getUniqueId());
+        if (player == null || !player.isOnline()) {
+            return 0L;
         }
-        long onlineTime = 0;
-        try {
-            final OptionalLong optionalLong = storage.getTime(player.getUniqueId());
-            if (optionalLong.isPresent()) {
-                onlineTime = optionalLong.getAsLong();
-            }
-        } catch (final StorageException e) {
-            log.error("Error while getting the online time placeholder of player " + player.getName(), e);
+        final OptionalLong cachedTime = timeCache.getCachedTime(player.getUniqueId());
+        timeCache.requestRefresh(player.getUniqueId());
+        if (cachedTime.isPresent()) {
+            return cachedTime.getAsLong();
         }
-        if (!player.isOnline()) {
-            offlinePlayerTime.put(player.getUniqueId(), onlineTime);
-        }
-        return onlineTime;
+        log.debug("Online time placeholder cache miss for player " + player.getUniqueId() + ". Returning 0 while refreshing.");
+        return 0L;
     }
 
     private String getFormattedOnlineTime(final OfflinePlayer player) {

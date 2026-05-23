@@ -11,10 +11,13 @@ import com.jannik_kuehn.common.exception.StorageException;
 import com.jannik_kuehn.common.utils.TimeUtil;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.OptionalLong;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -117,12 +120,7 @@ public class LoriTimeCommand implements CommonCommand {
             return new ArrayList<>();
         }
 
-        final List<String> namesList = new ArrayList<>();
-        try {
-            namesList.addAll(loriTimePlugin.getStorage().getNameEntries().stream().toList());
-        } catch (final StorageException e) {
-            log.warn("could not load name entries on tab completion", e);
-        }
+        final List<String> namesList = cachedPlayerNames();
         if (args.length == 0) {
             return namesList;
         }
@@ -135,6 +133,14 @@ public class LoriTimeCommand implements CommonCommand {
     private List<String> filterCompletion(final List<String> list, final String currentValue) {
         list.removeIf(elem -> !elem.toLowerCase(Locale.ROOT).startsWith(currentValue.toLowerCase(Locale.ROOT)));
         return list;
+    }
+
+    private List<String> cachedPlayerNames() {
+        final Set<String> names = new LinkedHashSet<>(loriTimePlugin.getKnownPlayerNames());
+        Arrays.stream(loriTimePlugin.getServer().getOnlinePlayers())
+                .map(CommonPlayerSender::getName)
+                .forEach(names::add);
+        return new ArrayList<>(names);
     }
 
     @Override

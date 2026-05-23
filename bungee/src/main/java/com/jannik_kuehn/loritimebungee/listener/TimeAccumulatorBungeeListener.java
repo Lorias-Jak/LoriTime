@@ -47,6 +47,7 @@ public class TimeAccumulatorBungeeListener implements Listener {
         final String name = event.getPlayer().getName();
         final String server = event.getServer().getInfo().getName();
         final long now = System.currentTimeMillis();
+        loriTimePlugin.rememberPlayerName(uuid, name);
         loriTimePlugin.getScheduler().runAsyncOnce(() -> {
             try {
                 loriTimePlugin.getAccumulator().switchContext(uuid, name, server, SessionContextDefaults.WORLD, now);

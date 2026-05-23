@@ -15,10 +15,13 @@ import com.jannik_kuehn.common.utils.TimeUtil;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.OptionalLong;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -88,13 +91,7 @@ public class LoriTimeAdminCommand implements CommonCommand {
             return filterCompletion(completions, args[0]);
         }
         if (args.length == 2 && !args[0].equalsIgnoreCase("reload")) {
-            final List<String> completions = new ArrayList<>();
-            try {
-                completions.addAll(loriTimePlugin.getStorage().getNameEntries().stream().toList());
-            } catch (final StorageException e) {
-                log.error("Could not load player names for tab completion in LoriTimeAdminCommand!", e);
-            }
-            return filterCompletion(completions, args[1]);
+            return filterCompletion(cachedPlayerNames(), args[1]);
         }
         return new ArrayList<>();
     }
@@ -102,6 +99,14 @@ public class LoriTimeAdminCommand implements CommonCommand {
     private List<String> filterCompletion(final List<String> list, final String currentValue) {
         list.removeIf(elem -> !elem.toLowerCase(Locale.ROOT).startsWith(currentValue.toLowerCase(Locale.ROOT)));
         return list;
+    }
+
+    private List<String> cachedPlayerNames() {
+        final Set<String> names = new LinkedHashSet<>(loriTimePlugin.getKnownPlayerNames());
+        Arrays.stream(loriTimePlugin.getServer().getOnlinePlayers())
+                .map(CommonSender::getName)
+                .forEach(names::add);
+        return new ArrayList<>(names);
     }
 
     @Override

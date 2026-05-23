@@ -59,7 +59,9 @@ public class LoriTimePlayerConverter {
             if (optionalPlayer.isEmpty()) {
                 return getOfflinePlayer(uuid);
             }
-            final TrackedLoriTimePlayer player = new TrackedLoriTimePlayer(uuid, optionalPlayer.get().getName());
+            final String name = optionalPlayer.get().getName();
+            loriTimePlugin.rememberPlayerName(uuid, name);
+            final TrackedLoriTimePlayer player = new TrackedLoriTimePlayer(uuid, name);
             log.debug("Created new LoriTimePlayer for UUID " + uuid);
             return player;
         });
@@ -75,6 +77,7 @@ public class LoriTimePlayerConverter {
     public TrackedLoriTimePlayer getOnlinePlayer(final LoriTimePlayer player) {
         return playerCache.computeIfAbsent(player.getUniqueId(), key -> {
             log.debug("Created new LoriTimePlayer for UUID " + player.getUniqueId());
+            loriTimePlugin.rememberPlayerName(player.getUniqueId(), player.getName());
             return new TrackedLoriTimePlayer(player.getUniqueId(), player.getName());
         });
     }
@@ -92,6 +95,7 @@ public class LoriTimePlayerConverter {
                 log.warn("Could not get name for UUID " + uuid);
                 return null;
             }
+            loriTimePlugin.rememberPlayerName(uuid, optionalName.get());
             return new TrackedLoriTimePlayer(uuid, optionalName.get());
         } catch (final StorageException ex) {
             log.error("Could not get name for UUID " + uuid, ex);

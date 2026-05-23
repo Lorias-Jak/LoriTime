@@ -43,6 +43,7 @@ public class PlayerNameBungeeListener implements Listener {
     public void onPostLogin(final PostLoginEvent event) {
         final UUID uuid = event.getPlayer().getUniqueId();
         final String name = event.getPlayer().getName();
+        loriTimePlugin.rememberPlayerName(uuid, name);
         loriTimePlugin.getScheduler().runAsyncOnce(() -> {
             try {
                 loriTimePlugin.getStorage().setPlayerName(uuid, name);

@@ -1,6 +1,8 @@
 package com.jannik_kuehn.common.api;
 
 import com.jannik_kuehn.common.LoriTimePlugin;
+import com.jannik_kuehn.common.api.scheduler.PluginScheduler;
+import com.jannik_kuehn.common.api.scheduler.PluginTask;
 import com.jannik_kuehn.common.api.storage.ManualTimeAdjustment;
 import com.jannik_kuehn.common.api.storage.TimeEntryReason;
 import com.jannik_kuehn.common.api.storage.UnifiedStorage;
@@ -15,6 +17,7 @@ import java.time.Duration;
 import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.UUID;
+import java.util.concurrent.CompletionException;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -38,7 +41,13 @@ class LoriTimeServiceTest {
         resetApi();
         plugin = mock(LoriTimePlugin.class);
         storage = mock(UnifiedStorage.class);
+        final PluginScheduler scheduler = mock(PluginScheduler.class);
         when(plugin.getStorage()).thenReturn(storage);
+        when(plugin.getScheduler()).thenReturn(scheduler);
+        doAnswer(invocation -> {
+            invocation.<Runnable>getArgument(0).run();
+            return mock(PluginTask.class);
+        }).when(scheduler).runAsyncOnce(any());
         service = new LoriTimeService(plugin);
     }
 
@@ -63,21 +72,23 @@ class LoriTimeServiceTest {
     void findsUuidByPlayerName() throws StorageException {
         when(storage.getUuid("Lorias_")).thenReturn(Optional.of(PLAYER_ID));
 
-        assertEquals(Optional.of(PLAYER_ID), service.findUuid("Lorias_"), "Expected facade to return stored UUID");
+        assertEquals(Optional.of(PLAYER_ID), service.findUuid("Lorias_").join(),
+                "Expected facade to return stored UUID");
     }
 
     @Test
     void findsLatestNameByUuid() throws StorageException {
         when(storage.getName(PLAYER_ID)).thenReturn(Optional.of("Lorias_"));
 
-        assertEquals(Optional.of("Lorias_"), service.findName(PLAYER_ID), "Expected facade to return stored name");
+        assertEquals(Optional.of("Lorias_"), service.findName(PLAYER_ID).join(),
+                "Expected facade to return stored name");
     }
 
     @Test
     void returnsOnlineTimeAsDuration() throws StorageException {
         when(storage.getTime(PLAYER_ID)).thenReturn(OptionalLong.of(3661));
 
-        assertEquals(Optional.of(Duration.ofSeconds(3661)), service.getOnlineTime(PLAYER_ID),
+        assertEquals(Optional.of(Duration.ofSeconds(3661)), service.getOnlineTime(PLAYER_ID).join(),
                 "Expected facade to expose time as Duration");
     }
 
@@ -85,7 +96,7 @@ class LoriTimeServiceTest {
     void returnsEmptyOnlineTimeForUnknownPlayer() throws StorageException {
         when(storage.getTime(PLAYER_ID)).thenReturn(OptionalLong.empty());
 
-        assertEquals(Optional.empty(), service.getOnlineTime(PLAYER_ID), "Unknown time should be empty");
+        assertEquals(Optional.empty(), service.getOnlineTime(PLAYER_ID).join(), "Unknown time should be empty");
     }
 
     @Test
@@ -93,13 +104,13 @@ class LoriTimeServiceTest {
         final LoriTimePlayer player = new LoriTimePlayerRef(PLAYER_ID, "Renamed");
         when(storage.getTime(PLAYER_ID)).thenReturn(OptionalLong.of(120));
 
-        assertEquals(Optional.of(Duration.ofSeconds(120)), service.getOnlineTime(player),
+        assertEquals(Optional.of(Duration.ofSeconds(120)), service.getOnlineTime(player).join(),
                 "Player overload should query by UUID");
     }
 
     @Test
     void addsSystemManualAdjustment() throws StorageException {
-        service.addTime(PLAYER_ID, Duration.ofSeconds(30));
+        service.addTime(PLAYER_ID, Duration.ofSeconds(30)).join();
 
         verify(storage).addTime(new ManualTimeAdjustment(PLAYER_ID, 30L,
                 TimeEntryReason.MANUAL_ADJUSTMENT, (UUID) null, LoriTimeService.API_ACTOR));
@@ -109,7 +120,7 @@ class LoriTimeServiceTest {
     void addsSystemManualAdjustmentByPlayerIdentity() throws StorageException {
         final LoriTimePlayer player = new LoriTimePlayerRef(PLAYER_ID, "Renamed");
 
-        service.addTime(player, Duration.ofSeconds(30));
+        service.addTime(player, Duration.ofSeconds(30)).join();
 
         verify(storage).addTime(new ManualTimeAdjustment(PLAYER_ID, 30L,
                 TimeEntryReason.MANUAL_ADJUSTMENT, (UUID) null, LoriTimeService.API_ACTOR));
@@ -117,7 +128,7 @@ class LoriTimeServiceTest {
 
     @Test
     void addsActorAwareManualAdjustment() throws StorageException {
-        service.addTime(PLAYER_ID, Duration.ofSeconds(-45), ACTOR_ID, "Admin");
+        service.addTime(PLAYER_ID, Duration.ofSeconds(-45), ACTOR_ID, "Admin").join();
 
         verify(storage).addTime(new ManualTimeAdjustment(PLAYER_ID, -45L,
                 TimeEntryReason.MANUAL_ADJUSTMENT, ACTOR_ID, "Admin"));
@@ -128,7 +139,7 @@ class LoriTimeServiceTest {
         final LoriTimePlayer player = new LoriTimePlayerRef(PLAYER_ID, "Renamed");
         final LoriTimePlayer actor = new LoriTimePlayerRef(ACTOR_ID, "Admin");
 
-        service.addTime(player, Duration.ofSeconds(-45), actor);
+        service.addTime(player, Duration.ofSeconds(-45), actor).join();
 
         verify(storage).addTime(new ManualTimeAdjustment(PLAYER_ID, -45L,
                 TimeEntryReason.MANUAL_ADJUSTMENT, ACTOR_ID, "Admin"));
@@ -180,7 +191,9 @@ class LoriTimeServiceTest {
     void wrapsStorageFailures() throws StorageException {
         when(storage.getName(PLAYER_ID)).thenThrow(new StorageException("failure"));
 
-        assertThrows(LoriTimeApiException.class, () -> service.findName(PLAYER_ID),
+        final CompletionException thrown = assertThrows(CompletionException.class, () -> service.findName(PLAYER_ID).join(),
+                "Storage failures should be wrapped in the public API exception");
+        assertInstanceOf(LoriTimeApiException.class, thrown.getCause(),
                 "Storage failures should be wrapped in the public API exception");
     }
 

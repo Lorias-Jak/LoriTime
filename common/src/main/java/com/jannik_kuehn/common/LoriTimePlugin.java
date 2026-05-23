@@ -39,7 +39,8 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * The {@link LoriTimePlugin} is the main class of the plugin.
  */
-@SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.CouplingBetweenObjects"})
+@SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.CouplingBetweenObjects", "PMD.GodClass",
+        "PMD.TooManyMethods"})
 public class LoriTimePlugin {
     /**
      * The {@link LoggerFactory} instance.
@@ -85,6 +86,11 @@ public class LoriTimePlugin {
      * Players whose next leave/disconnect should be persisted as AFK-caused.
      */
     private final Set<UUID> afkKickMarkers;
+
+    /**
+     * Known player names observed during runtime, used by synchronous suggestion paths.
+     */
+    private final Set<String> knownPlayerNames;
 
     /**
      * The {@link Configuration} instance.
@@ -137,6 +143,7 @@ public class LoriTimePlugin {
         this.dataStorageManager = new DataStorageManager(this, dataFolder);
         this.playerConverter = new LoriTimePlayerConverter(loggerFactory, this);
         this.afkKickMarkers = Collections.newSetFromMap(new ConcurrentHashMap<>());
+        this.knownPlayerNames = Collections.newSetFromMap(new ConcurrentHashMap<>());
     }
 
     /**
@@ -250,6 +257,27 @@ public class LoriTimePlugin {
      */
     public boolean consumeAfkKick(final UUID uniqueId) {
         return uniqueId != null && afkKickMarkers.remove(uniqueId);
+    }
+
+    /**
+     * Remembers a player name observed by a runtime event or cache lookup.
+     *
+     * @param uniqueId player UUID
+     * @param name player name
+     */
+    public void rememberPlayerName(final UUID uniqueId, final String name) {
+        if (uniqueId != null && name != null && !name.isBlank()) {
+            knownPlayerNames.add(name);
+        }
+    }
+
+    /**
+     * Gets known runtime player names for synchronous suggestion paths.
+     *
+     * @return immutable snapshot of known player names
+     */
+    public Set<String> getKnownPlayerNames() {
+        return Set.copyOf(knownPlayerNames);
     }
 
     /**

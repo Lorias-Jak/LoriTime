@@ -136,12 +136,12 @@ public class SlaveSessionReporter extends PluginMessaging implements Listener, A
     }
 
     /**
-     * Stops the periodic flush task and reports all active sessions.
+     * Stops the periodic flush task and clears local session context.
      */
     @Override
     public void close() {
         updateTask.cancel();
-        reportWorlds();
+        activeWorlds.clear();
     }
 
     private record ActiveRemoteWorld(UUID uuid, String world, long observedAtMs) {

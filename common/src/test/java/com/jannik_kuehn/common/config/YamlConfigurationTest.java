@@ -193,9 +193,11 @@ class YamlConfigurationTest {
                 fileManager.getOrCreateFile(commandFolder.toString(), "commands.yml", true));
 
         assertTrue(new File(commandFolder, "commands.yml").exists());
-        assertEquals("ltadmin", commands.getString("profiles.proxy.admin.name"));
-        assertEquals("ltadmin", commands.getString("profiles.backend.canonical.admin.name"));
-        assertEquals("ltserver", commands.getString("profiles.backend.slave.local.name"));
+        assertEquals("plta", commands.getString("profiles.proxy.admin.name"));
+        assertEquals("lta", commands.getString("profiles.backend.canonical.admin.name"));
+        assertEquals("lta", commands.getString("profiles.backend.slave.admin.name"));
+        assertFalse(commands.containsKey("profiles.backend.slave.modify.name"));
+        assertFalse(commands.containsKey("profiles.backend.slave.local.name"));
         assertFalse(commands.containsKey("profiles.paper.canonical.admin.name"));
     }
 
@@ -209,13 +211,13 @@ class YamlConfigurationTest {
 
         final CommandAlias proxyAdmin = aliasConfig.resolve(CommandAliasConfig.CommandProfile.PROXY,
                 CommandAliasConfig.CommandNode.ADMIN, "fallback", List.of());
-        final CommandAlias backendSlaveLocal = aliasConfig.resolve(CommandAliasConfig.CommandProfile.BACKEND_SLAVE,
-                CommandAliasConfig.CommandNode.LOCAL, "fallback", List.of());
+        final CommandAlias canonicalModify = aliasConfig.resolve(CommandAliasConfig.CommandProfile.BACKEND_CANONICAL,
+                CommandAliasConfig.CommandNode.MODIFY, "fallback", List.of());
 
-        assertEquals("ltadmin", proxyAdmin.name());
-        assertTrue(proxyAdmin.aliases().contains("ltap"));
-        assertEquals("ltserver", backendSlaveLocal.name());
-        assertTrue(backendSlaveLocal.aliases().contains("ltlocal"));
+        assertEquals("plta", proxyAdmin.name());
+        assertTrue(proxyAdmin.aliases().contains("loritimeproxyadmin"));
+        assertEquals("ltmodify", canonicalModify.name());
+        assertTrue(canonicalModify.aliases().contains("ltm"));
     }
 
     @Test

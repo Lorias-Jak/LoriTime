@@ -5,6 +5,7 @@ import com.jannik_kuehn.common.LoriTimePlugin;
 import com.jannik_kuehn.common.api.LoriTimePlayerConverter;
 import com.jannik_kuehn.common.api.common.CommonConsoleSender;
 import com.jannik_kuehn.common.api.common.CommonPlayerSender;
+import com.jannik_kuehn.common.api.common.CommonSender;
 import com.jannik_kuehn.common.api.common.CommonServer;
 import com.jannik_kuehn.common.api.scheduler.PluginScheduler;
 import com.jannik_kuehn.common.api.scheduler.PluginTask;
@@ -15,6 +16,7 @@ import com.jannik_kuehn.common.api.storage.UnifiedStorage;
 import com.jannik_kuehn.common.command.completion.RecentPlayerSuggestionCache;
 import com.jannik_kuehn.common.config.localization.Localization;
 import com.jannik_kuehn.common.exception.StorageException;
+import com.jannik_kuehn.common.module.updater.Updater;
 import com.jannik_kuehn.common.player.TrackedLoriTimePlayer;
 import com.jannik_kuehn.common.utils.TimeParser;
 import net.kyori.adventure.text.Component;
@@ -96,7 +98,7 @@ class SenderRoleCommandTest {
 
     @Test
     @SuppressWarnings("PMD.CloseResource")
-    void adminTabCompletionUsesCachedAndOnlineNamesWithoutStorageLookup() throws StorageException {
+    void modifyTabCompletionUsesCachedAndOnlineNamesWithoutStorageLookup() throws StorageException {
         final LoriTimePlugin plugin = mock(LoriTimePlugin.class);
         final UnifiedStorage storage = mock(UnifiedStorage.class);
         final Localization localization = mock(Localization.class);
@@ -112,10 +114,10 @@ class SenderRoleCommandTest {
         when(onlinePlayer.getName()).thenReturn("OnlineUser");
         when(source.hasPermission("loritime.admin")).thenReturn(true);
 
-        final List<String> completions = adminCommand(new CommandContext(plugin, storage, localization,
+        final List<String> completions = modifyCommand(new CommandContext(plugin, storage, localization,
                 mock(LoriTimePlayerConverter.class))).handleTabComplete(source, "modify", "L");
 
-        assertEquals(List.of("Lorias_"), completions, "Expected admin tab completion to use cached player names");
+        assertEquals(List.of("Lorias_"), completions, "Expected modify tab completion to use cached player names");
         verifyNoSuggestionStorageLookup(storage);
     }
 
@@ -155,7 +157,7 @@ class SenderRoleCommandTest {
         when(sender.getUniqueId()).thenReturn(PLAYER_ID);
         when(sender.getName()).thenReturn("Lorias_");
 
-        adminCommand(context).modifyOnlineTime(sender, PLAYER_ID, 12L);
+        modifyCommand(context).modifyOnlineTime(sender, PLAYER_ID, 12L);
 
         verify(context.storage()).addTime(new ManualTimeAdjustment(PLAYER_ID, 12L,
                 TimeEntryReason.MANUAL_ADJUSTMENT, PLAYER_ID, "Lorias_"));
@@ -166,14 +168,129 @@ class SenderRoleCommandTest {
         final CommandContext context = new CommandContext();
         final CommonConsoleSender sender = mock(CommonConsoleSender.class);
 
-        adminCommand(context).modifyOnlineTime(sender, PLAYER_ID, 12L);
+        modifyCommand(context).modifyOnlineTime(sender, PLAYER_ID, 12L);
 
         verify(context.storage()).addTime(new ManualTimeAdjustment(PLAYER_ID, 12L,
                 TimeEntryReason.MANUAL_ADJUSTMENT, (UUID) null, "CONSOLE"));
     }
 
-    private LoriTimeAdminCommand adminCommand(final CommandContext context) {
-        return new LoriTimeAdminCommand(context.plugin(), context.localization(), mock(TimeParser.class));
+    @Test
+    void adminCommandRoutesReload() {
+        final CommandContext context = new CommandContext();
+        final CommonConsoleSender sender = mock(CommonConsoleSender.class);
+        final LoriTimeAdminCommand command = prepareAdminCommand(context, sender);
+
+        command.execute(sender, "reload");
+        verify(context.plugin()).reload();
+    }
+
+    @Test
+    void adminCommandRoutesDebug() {
+        final CommandContext context = new CommandContext();
+        final CommonConsoleSender sender = mock(CommonConsoleSender.class);
+        final LoriTimeAdminCommand command = prepareAdminCommand(context, sender);
+
+        command.execute(sender, "debug");
+        verify(context.plugin().getConfig()).setTemporaryValue("general.debug", true);
+    }
+
+    @Test
+    void adminCommandRoutesInfo() {
+        final CommandContext context = new CommandContext();
+        final CommonConsoleSender sender = mock(CommonConsoleSender.class);
+        final CommonServer server = mock(CommonServer.class);
+        when(context.plugin().getServer()).thenReturn(server);
+        when(server.getServerVersion()).thenReturn("server");
+        when(server.getPluginVersion()).thenReturn("plugin");
+        final LoriTimeAdminCommand command = prepareAdminCommand(context, sender);
+
+        command.execute(sender, "info");
+        verify(server).getServerVersion();
+    }
+
+    @Test
+    void adminCommandRoutesUpdate() {
+        final CommandContext context = new CommandContext();
+        final CommonConsoleSender sender = mock(CommonConsoleSender.class);
+        final Updater updater = mock(Updater.class);
+        when(context.plugin().getUpdater()).thenReturn(updater);
+        when(updater.isUpdateAvailable()).thenReturn(false);
+        final LoriTimeAdminCommand command = prepareAdminCommand(context, sender);
+
+        command.execute(sender, "update");
+        verify(updater).isUpdateAvailable();
+    }
+
+    @Test
+    void modifyCommandRoutesAddMutation() throws StorageException {
+        final CommandContext context = new CommandContext();
+        final CommonConsoleSender sender = mock(CommonConsoleSender.class);
+        final TimeParser parser = mock(TimeParser.class);
+        prepareMutation(context, sender);
+        when(context.storage().getTime(PLAYER_ID)).thenReturn(OptionalLong.of(5L));
+        when(parser.parseToSeconds("12")).thenReturn(OptionalLong.of(12L));
+
+        new LoriTimeModifyCommand(context.plugin(), context.localization(), parser).execute(sender, "add", "Lorias_", "12");
+
+        verify(context.storage()).addTime(new ManualTimeAdjustment(PLAYER_ID, 12L,
+                TimeEntryReason.MANUAL_ADJUSTMENT, (UUID) null, "CONSOLE"));
+    }
+
+    @Test
+    void modifyCommandRoutesSetMutation() throws StorageException {
+        final CommandContext context = new CommandContext();
+        final CommonConsoleSender sender = mock(CommonConsoleSender.class);
+        final TimeParser parser = mock(TimeParser.class);
+        prepareMutation(context, sender);
+        when(context.storage().getTime(PLAYER_ID)).thenReturn(OptionalLong.of(5L));
+        when(parser.parseToSeconds("20")).thenReturn(OptionalLong.of(20L));
+
+        new LoriTimeModifyCommand(context.plugin(), context.localization(), parser).execute(sender, "set", "Lorias_", "20");
+
+        verify(context.storage()).addTime(new ManualTimeAdjustment(PLAYER_ID, 15L,
+                TimeEntryReason.MANUAL_ADJUSTMENT, (UUID) null, "CONSOLE"));
+    }
+
+    @Test
+    void modifyCommandRoutesResetMutation() throws StorageException {
+        final CommandContext context = new CommandContext();
+        final CommonConsoleSender sender = mock(CommonConsoleSender.class);
+        prepareMutation(context, sender);
+        when(context.storage().getTime(PLAYER_ID)).thenReturn(OptionalLong.of(5L));
+
+        modifyCommand(context).execute(sender, "reset", "Lorias_");
+
+        verify(context.storage()).addTime(new ManualTimeAdjustment(PLAYER_ID, -5L,
+                TimeEntryReason.MANUAL_ADJUSTMENT, (UUID) null, "CONSOLE"));
+    }
+
+    @Test
+    void modifyCommandRoutesDeleteUser() throws Exception {
+        final CommandContext context = new CommandContext();
+        final CommonConsoleSender sender = mock(CommonConsoleSender.class);
+        final CommonServer server = mock(CommonServer.class);
+        prepareMutation(context, sender);
+        when(context.plugin().getServer()).thenReturn(server);
+        when(server.getPlayer(PLAYER_ID)).thenReturn(Optional.empty());
+
+        modifyCommand(context).execute(sender, "deleteUser", "Lorias_", "confirm");
+
+        verify(context.storage()).deletePlayer(PLAYER_ID);
+    }
+
+    private void prepareMutation(final CommandContext context, final CommonSender sender) throws StorageException {
+        when(sender.hasPermission("loritime.admin")).thenReturn(true);
+        when(context.storage().getUuid("Lorias_")).thenReturn(Optional.of(PLAYER_ID));
+        when(context.playerConverter().getOnlinePlayer(PLAYER_ID)).thenReturn(new TrackedLoriTimePlayer(PLAYER_ID, "Lorias_"));
+    }
+
+    private LoriTimeModifyCommand modifyCommand(final CommandContext context) {
+        return new LoriTimeModifyCommand(context.plugin(), context.localization(), mock(TimeParser.class));
+    }
+
+    private LoriTimeAdminCommand prepareAdminCommand(final CommandContext context, final CommonSender sender) {
+        when(sender.hasPermission("loritime.admin")).thenReturn(true);
+        return new LoriTimeAdminCommand(context.plugin(), context.localization());
     }
 
     private record CommandContext(LoriTimePlugin plugin, UnifiedStorage storage, Localization localization,
@@ -188,6 +305,9 @@ class SenderRoleCommandTest {
             when(plugin().getLocalization()).thenReturn(localization());
             when(plugin().getPlayerConverter()).thenReturn(playerConverter());
             when(plugin().getScheduler()).thenReturn(scheduler);
+            when(plugin().getConfig()).thenReturn(mock(com.jannik_kuehn.common.config.Configuration.class));
+            when(plugin().getConfig().getBoolean(anyString())).thenReturn(false);
+            when(plugin().getConfig().getInt("general.debugAutoDisableTime", 30)).thenReturn(-1);
             when(localization().getRawMessage(anyString())).thenReturn("[time]");
             when(localization().formatTextComponent(anyString())).thenReturn(Component.text("message"));
             doAnswer(invocation -> {

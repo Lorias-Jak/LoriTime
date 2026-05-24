@@ -4,6 +4,7 @@ import com.jannik_kuehn.common.LoriTimePlugin;
 import com.jannik_kuehn.common.api.common.CommonCommand;
 import com.jannik_kuehn.common.api.common.CommonSender;
 import com.jannik_kuehn.common.api.storage.UnifiedStorage;
+import com.jannik_kuehn.common.command.core.CommandMessages;
 import com.jannik_kuehn.common.config.localization.Localization;
 import com.jannik_kuehn.common.exception.StorageException;
 import com.jannik_kuehn.common.utils.TimeUtil;
@@ -37,7 +38,7 @@ public class LoriTimeTopCommand implements CommonCommand {
     @Override
     public void execute(final CommonSender sender, final String... args) {
         if (!sender.hasPermission("loritime.top")) {
-            printUtilityMessage(sender, "message.nopermission");
+            CommandMessages.send(localization, sender, "message.nopermission");
             return;
         }
         if (args.length < 1) {
@@ -51,12 +52,12 @@ public class LoriTimeTopCommand implements CommonCommand {
                 try {
                     topOutput(sender, Integer.parseInt(args[0]));
                 } catch (final NumberFormatException e) {
-                    printUtilityMessage(sender, "message.command.top.nonumber");
+                    CommandMessages.send(localization, sender, "message.command.top.nonumber");
                 }
             });
             return;
         }
-        printUtilityMessage(sender, "message.command.top.usage");
+        CommandMessages.send(localization, sender, "message.command.top.usage");
     }
 
     private void topOutput(final CommonSender sender, final int site) {
@@ -87,7 +88,7 @@ public class LoriTimeTopCommand implements CommonCommand {
             ));
             return;
         }
-        printUtilityMessage(sender, "message.command.top.gatheringdata");
+        CommandMessages.send(localization, sender, "message.command.top.gatheringdata");
 
         final int minValue;
         final int maxValue;
@@ -155,9 +156,5 @@ public class LoriTimeTopCommand implements CommonCommand {
     @Override
     public String getCommandName() {
         return "loritimetop";
-    }
-
-    private void printUtilityMessage(final CommonSender sender, final String messageKey) {
-        sender.sendMessage(localization.formatTextComponent(localization.getRawMessage(messageKey)));
     }
 }

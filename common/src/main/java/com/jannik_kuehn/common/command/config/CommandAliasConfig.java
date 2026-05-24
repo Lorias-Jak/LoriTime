@@ -99,9 +99,9 @@ public class CommandAliasConfig {
         ADMIN,
 
         /**
-         * Local operational command.
+         * Canonical mutation command.
          */
-        LOCAL,
+        MODIFY,
 
         /**
          * Player time lookup command.
@@ -112,16 +112,6 @@ public class CommandAliasConfig {
          * Top time command.
          */
         TOP,
-
-        /**
-         * Instance information command.
-         */
-        INFO,
-
-        /**
-         * Local debug command.
-         */
-        DEBUG,
 
         /**
          * AFK command.

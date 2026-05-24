@@ -6,17 +6,16 @@ import com.jannik_kuehn.common.api.LoriTimePlayer;
 import com.jannik_kuehn.common.api.common.CommonCommand;
 import com.jannik_kuehn.common.api.common.CommonPlayerSender;
 import com.jannik_kuehn.common.api.common.CommonSender;
+import com.jannik_kuehn.common.command.core.CommandMessages;
+import com.jannik_kuehn.common.command.core.PlayerNameCompletions;
 import com.jannik_kuehn.common.config.localization.Localization;
 import com.jannik_kuehn.common.exception.StorageException;
 import com.jannik_kuehn.common.utils.TimeUtil;
 
 import java.util.ArrayList;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Locale;
 import java.util.Optional;
 import java.util.OptionalLong;
-import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -40,7 +39,7 @@ public class LoriTimeCommand implements CommonCommand {
     @SuppressWarnings("PMD.AvoidDeeplyNestedIfStmts")
     public void execute(final CommonSender sender, final String... args) {
         if (!sender.hasPermission("loritime.see")) {
-            printUtilityMessage(sender, "message.nopermission");
+            CommandMessages.send(localization, sender, "message.nopermission");
             return;
         }
         if (args.length <= 1) {
@@ -71,8 +70,8 @@ public class LoriTimeCommand implements CommonCommand {
 
                 final boolean isTargetSender = sender instanceof CommonPlayerSender playerSender
                         && targetPlayer.getUniqueId().equals(playerSender.getUniqueId());
-                if (!isTargetSender && !sender.hasPermission("loritime.see.other")) {
-                    printUtilityMessage(sender, "message.nopermission");
+                    if (!isTargetSender && !sender.hasPermission("loritime.see.other")) {
+                    CommandMessages.send(localization, sender, "message.nopermission");
                     return;
                 }
 
@@ -88,7 +87,7 @@ public class LoriTimeCommand implements CommonCommand {
                     }
                 } catch (final StorageException ex) {
                     log.warn("could not load online time", ex);
-                    printUtilityMessage(sender, "message.error");
+                    CommandMessages.send(localization, sender, "message.error");
                     return;
                 }
                 if (isTargetSender) {
@@ -105,12 +104,8 @@ public class LoriTimeCommand implements CommonCommand {
                 }
             });
         } else {
-            printUtilityMessage(sender, "message.command.loritime.usage");
+            CommandMessages.send(localization, sender, "message.command.loritime.usage");
         }
-    }
-
-    private void printUtilityMessage(final CommonSender sender, final String messageKey) {
-        sender.sendMessage(localization.formatTextComponent(localization.getRawMessage(messageKey)));
     }
 
     @Override
@@ -119,30 +114,13 @@ public class LoriTimeCommand implements CommonCommand {
             return new ArrayList<>();
         }
 
-        final List<String> namesList = cachedPlayerNames();
         if (args.length == 0) {
-            return namesList;
+            return PlayerNameCompletions.suggest(loriTimePlugin, "");
         }
         if (args.length == 1) {
-            return filterCompletion(namesList, args[0]);
+            return PlayerNameCompletions.suggest(loriTimePlugin, args[0]);
         }
         return new ArrayList<>();
-    }
-
-    private List<String> filterCompletion(final List<String> list, final String currentValue) {
-        list.removeIf(elem -> !elem.toLowerCase(Locale.ROOT).startsWith(currentValue.toLowerCase(Locale.ROOT)));
-        return list;
-    }
-
-    private List<String> cachedPlayerNames() {
-        if (loriTimePlugin.getRecentPlayerSuggestionCache() != null) {
-            return loriTimePlugin.getRecentPlayerSuggestionCache().suggest(loriTimePlugin.getServer(), "");
-        }
-        final Set<String> names = new LinkedHashSet<>(loriTimePlugin.getKnownPlayerNames());
-        java.util.Arrays.stream(loriTimePlugin.getServer().getOnlinePlayers())
-                .map(CommonPlayerSender::getName)
-                .forEach(names::add);
-        return new ArrayList<>(names);
     }
 
     @Override

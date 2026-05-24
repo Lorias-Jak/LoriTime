@@ -19,7 +19,8 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Overhauled the API
 - Updated the docs
 - Reworked command registration into proxy, backend canonical, and backend slave profiles.
-- Moved reload behavior to a local operational command so multi-setup instances reload individually.
+- Replaced the local command root with admin subcommands: proxy admin defaults to `/plta`, backend admin defaults to `/lta`, and reload/debug/info/update now live under admin.
+- Moved player time mutation and delete-user actions from admin into the dedicated modify command.
 ### Deprecated
 ### Removed
 - The storage type `yml`

@@ -81,7 +81,7 @@ class CommandArchitectureTest {
                 .map(CommonCommand::getCommandName)
                 .toList();
 
-        assertEquals(List.of("local", "info", "debug"), commandNames, "Expected backend slave local commands only");
+        assertEquals(List.of("admin"), commandNames, "Expected backend slave admin commands only");
     }
 
     @Test
@@ -92,7 +92,7 @@ class CommandArchitectureTest {
                 .map(CommonCommand::getCommandName)
                 .toList();
 
-        assertEquals(List.of("admin", "time", "top", "local", "info", "debug"), commandNames,
+        assertEquals(List.of("admin", "time", "top", "modify"), commandNames,
                 "Expected backend canonical commands");
     }
 
@@ -104,7 +104,7 @@ class CommandArchitectureTest {
                 .map(CommonCommand::getCommandName)
                 .toList();
 
-        assertEquals(List.of("admin", "time", "top", "local", "info", "debug"), commandNames, "Expected proxy commands");
+        assertEquals(List.of("admin", "time", "top", "modify"), commandNames, "Expected proxy commands");
     }
 
     @Test
@@ -115,7 +115,7 @@ class CommandArchitectureTest {
                 .map(CommonCommand::getCommandName)
                 .toList();
 
-        assertEquals(List.of("local", "info", "debug", "afk"), commandNames,
+        assertEquals(List.of("admin", "afk"), commandNames,
                 "Expected backend slave AFK command when enabled");
     }
 

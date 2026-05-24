@@ -5,9 +5,7 @@ import com.jannik_kuehn.common.api.common.CommonCommand;
 import com.jannik_kuehn.common.command.LoriTimeAdminCommand;
 import com.jannik_kuehn.common.command.LoriTimeAfkCommand;
 import com.jannik_kuehn.common.command.LoriTimeCommand;
-import com.jannik_kuehn.common.command.LoriTimeDebugCommand;
-import com.jannik_kuehn.common.command.LoriTimeInfoCommand;
-import com.jannik_kuehn.common.command.LoriTimeLocalCommand;
+import com.jannik_kuehn.common.command.LoriTimeModifyCommand;
 import com.jannik_kuehn.common.command.LoriTimeTopCommand;
 import com.jannik_kuehn.common.command.config.CommandAlias;
 import com.jannik_kuehn.common.command.config.CommandAliasConfig;
@@ -52,21 +50,16 @@ public class CommandProfileRegistry {
      */
     public List<CommonCommand> commands(final RuntimeCommandProfile profile) {
         final List<CommonCommand> commands = new ArrayList<>();
+        commands.add(configured(profile, CommandAliasConfig.CommandNode.ADMIN,
+                new LoriTimeAdminCommand(plugin, localization)));
         if (profile == RuntimeCommandProfile.PROXY || profile == RuntimeCommandProfile.BACKEND_CANONICAL) {
-            commands.add(configured(profile, CommandAliasConfig.CommandNode.ADMIN,
-                    new LoriTimeAdminCommand(plugin, localization, plugin.getParser())));
             commands.add(configured(profile, CommandAliasConfig.CommandNode.TIME,
                     new LoriTimeCommand(plugin, localization)));
             commands.add(configured(profile, CommandAliasConfig.CommandNode.TOP,
                     new LoriTimeTopCommand(plugin, localization)));
+            commands.add(configured(profile, CommandAliasConfig.CommandNode.MODIFY,
+                    new LoriTimeModifyCommand(plugin, localization, plugin.getParser())));
         }
-
-        commands.add(configured(profile, CommandAliasConfig.CommandNode.LOCAL,
-                new LoriTimeLocalCommand(plugin, localization)));
-        commands.add(configured(profile, CommandAliasConfig.CommandNode.INFO,
-                new LoriTimeInfoCommand(plugin, localization)));
-        commands.add(configured(profile, CommandAliasConfig.CommandNode.DEBUG,
-                new LoriTimeDebugCommand(plugin, localization)));
 
         if (profile != RuntimeCommandProfile.PROXY && plugin.isAfkEnabled()) {
             commands.add(configured(profile, CommandAliasConfig.CommandNode.AFK,
@@ -88,11 +81,9 @@ public class CommandProfileRegistry {
 
     private String permission(final CommandAliasConfig.CommandNode node) {
         return switch (node) {
-            case ADMIN, LOCAL -> "loritime.admin";
+            case ADMIN, MODIFY -> "loritime.admin";
             case TIME -> "loritime.see";
             case TOP -> "loritime.top";
-            case INFO -> "loritime.info";
-            case DEBUG -> "loritime.debug";
             case AFK -> "loritime.afk";
         };
     }

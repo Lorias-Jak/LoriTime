@@ -29,44 +29,40 @@ LoriTime provides a number of different commands that you can use. This page lis
     <td class="tg-9wq8">loritime.top</td>
   </tr>
   <tr>
-    <td class="tg-9wq8">/ltinfo</td>
-    <td class="tg-9wq8">lti, linfo, ltimeinfo</td>
+    <td class="tg-9wq8">/lta info or /plta info</td>
+    <td class="tg-9wq8" rowspan="4">backend: lta<br>proxy: plta</td>
     <td class="tg-9wq8">Get some basic plugin infos</td>
-    <td class="tg-9wq8">loritime.info</td>
+    <td class="tg-9wq8" rowspan="4">loritime.admin</td>
   </tr>
   <tr>
-    <td class="tg-9wq8">/ltadmin [set] [player] [TimeString*]</td>
-    <td class="tg-9wq8" rowspan="4">lta, loritimeadmin, loritimea</td>
+    <td class="tg-9wq8">/lta reload or /plta reload</td>
+    <td class="tg-9wq8">Reloads the local LoriTime instance and config</td>
+  </tr>
+  <tr>
+    <td class="tg-9wq8">/lta update or /plta update</td>
+    <td class="tg-9wq8">Updates the plugin if an update is available</td>
+  </tr>
+  <tr>
+      <td class="tg-9wq8">/lta debug or /plta debug</td>
+      <td class="tg-9wq8">Enable or disable the debugger.</td>
+  </tr>
+  <tr>
+    <td class="tg-9wq8">/ltmodify [set] [player] [TimeString*]</td>
+    <td class="tg-9wq8" rowspan="4">ltm, ltmod</td>
     <td class="tg-9wq8">Set the time to the given time string</td>
     <td class="tg-9wq8" rowspan="4">loritime.admin</td>
   </tr>
   <tr>
-    <td class="tg-9wq8">/ltadmin [modify] [player] [TimeString*]</td>
+    <td class="tg-9wq8">/ltmodify [modify] [player] [TimeString*]</td>
     <td class="tg-9wq8">Adds or removes the time given in the time string</td>
   </tr>
   <tr>
-    <td class="tg-9wq8">/ltadmin [reset] [player]</td>
+    <td class="tg-9wq8">/ltmodify [reset] [player]</td>
     <td class="tg-9wq8">Resets all the time stored on a player</td>
   </tr>
   <tr>
-    <td class="tg-9wq8">/ltadmin [deleteUser] [Playername] confirm</td>
+    <td class="tg-9wq8">/ltmodify [deleteUser] [Playername] confirm</td>
     <td class="tg-9wq8">Deletes the user entirely from LoriTime</td>
-  </tr>
-  <tr>
-    <td class="tg-9wq8">/ltserver reload</td>
-    <td class="tg-9wq8">Reloads the local LoriTime instance and config</td>
-    <td class="tg-9wq8">loritime.admin</td>
-  </tr>
-  <tr>
-    <td class="tg-9wq8">/ltadmin [update]</td>
-    <td class="tg-9wq8">Updates the plugin if an update is available</td>
-    <td class="tg-9wq8">loritime.admin</td>
-  </tr>
-  <tr>
-      <td class="tg-9wq8">/ltdebug</td>
-      <td class="tg-9wq8">loritimedebug</td>
-      <td class="tg-9wq8">Enable or disable the debugger.</td>
-      <td class="tg-9wq8">loritime.debug</td>
   </tr>
   <tr>
       <td class="tg-9wq8">/afk</td>
@@ -82,9 +78,9 @@ LoriTime provides a number of different commands that you can use. This page lis
 
 > **Note:** The debugger will be turned off automatically after the configured time. Be aware that you need to enable the debugger via the console if you use MultiSetup.<br>
 
-> **Note:** `reload`, `ltdebug`, and `ltinfo` are local operational commands. In a multi-setup, execute reload on each proxy/backend instance that should reload.
+> **Note:** `reload`, `debug`, `info`, and `update` are admin subcommands and operate only on the instance where they are executed. In a multi-setup, run them on each proxy/backend instance that should be affected.
 
-> **Note:** Canonical data commands such as time lookup, top list, and admin time edits are available on proxy storage owners and backend `standalone`/`master` instances. Backend `slave` instances only register local operational commands and AFK when enabled.
+> **Note:** Canonical data commands such as time lookup, top list, and modify actions are available on proxy storage owners and backend `standalone`/`master` instances. Backend `slave` instances register admin and AFK when enabled, but not modify.
 
 > **Note:** You can customize command names and aliases in `commands.yml`. Command availability is still decided by LoriTime's runtime profile so unsupported commands are not registered on the wrong instance type.
 <details>
@@ -94,20 +90,23 @@ LoriTime provides a number of different commands that you can use. This page lis
 profiles:
   proxy:
     admin:
-      name: 'ltadmin'
-      aliases: ['ltap', 'loritimeadmin', 'loritimeproxyadmin']
-    local:
-      name: 'ltserver'
-      aliases: ['lts', 'ltlocal']
+      name: 'plta'
+      aliases: ['loritimeadmin', 'loritimeproxyadmin']
+    modify:
+      name: 'ltmodify'
+      aliases: ['ltm', 'ltmod']
   backend:
     canonical:
       admin:
-        name: 'ltadmin'
-        aliases: ['lta', 'loritimeadmin', 'loritimea']
+        name: 'lta'
+        aliases: ['loritimeadmin', 'loritimea']
+      modify:
+        name: 'ltmodify'
+        aliases: ['ltm', 'ltmod']
     slave:
-      local:
-        name: 'ltserver'
-        aliases: ['lts', 'ltlocal']
+      admin:
+        name: 'lta'
+        aliases: ['loritimeadmin', 'loritimea']
 ```
 
 </details>

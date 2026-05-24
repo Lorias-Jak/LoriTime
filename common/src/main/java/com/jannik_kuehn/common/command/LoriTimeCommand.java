@@ -11,7 +11,6 @@ import com.jannik_kuehn.common.exception.StorageException;
 import com.jannik_kuehn.common.utils.TimeUtil;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
@@ -136,8 +135,11 @@ public class LoriTimeCommand implements CommonCommand {
     }
 
     private List<String> cachedPlayerNames() {
+        if (loriTimePlugin.getRecentPlayerSuggestionCache() != null) {
+            return loriTimePlugin.getRecentPlayerSuggestionCache().suggest(loriTimePlugin.getServer(), "");
+        }
         final Set<String> names = new LinkedHashSet<>(loriTimePlugin.getKnownPlayerNames());
-        Arrays.stream(loriTimePlugin.getServer().getOnlinePlayers())
+        java.util.Arrays.stream(loriTimePlugin.getServer().getOnlinePlayers())
                 .map(CommonPlayerSender::getName)
                 .forEach(names::add);
         return new ArrayList<>(names);

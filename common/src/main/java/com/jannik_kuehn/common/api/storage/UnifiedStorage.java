@@ -3,6 +3,7 @@ package com.jannik_kuehn.common.api.storage;
 import com.jannik_kuehn.common.exception.StorageException;
 
 import java.sql.SQLException;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalLong;
@@ -58,6 +59,15 @@ public interface UnifiedStorage extends TimeQueryStorage, TimeAdjustmentStorage,
      */
     Set<String> getNameEntries() throws StorageException;
 
+    /**
+     * Returns player identities observed inside a recent day window.
+     *
+     * @param recentDays recent day window
+     * @return recent player identities
+     * @throws StorageException if the lookup fails
+     */
+    List<RecentPlayerIdentity> getRecentPlayerIdentities(long recentDays) throws StorageException;
+
     @Override
     OptionalLong getTime(UUID uniqueId) throws StorageException;
 
@@ -71,7 +81,7 @@ public interface UnifiedStorage extends TimeQueryStorage, TimeAdjustmentStorage,
     void addTimes(Map<UUID, Long> additionalTimes, TimeEntryReason reason) throws StorageException;
 
     @Override
-    void addAdjustments(java.util.List<ManualTimeAdjustment> adjustments) throws StorageException;
+    void addAdjustments(List<ManualTimeAdjustment> adjustments) throws StorageException;
 
     /**
      * Creates a persisted active session row.

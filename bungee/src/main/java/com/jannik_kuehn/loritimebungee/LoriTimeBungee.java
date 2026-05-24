@@ -4,12 +4,10 @@ import com.github.roleplaycauldron.spellbook.core.logger.LoggerFactory;
 import com.github.roleplaycauldron.spellbook.core.logger.WrappedLogger;
 import com.jannik_kuehn.common.LoriTimePlugin;
 import com.jannik_kuehn.common.api.LoriTimeAPI;
+import com.jannik_kuehn.common.api.common.CommonCommand;
 import com.jannik_kuehn.common.api.storage.StorageMode;
-import com.jannik_kuehn.common.command.LoriTimeAdminCommand;
-import com.jannik_kuehn.common.command.LoriTimeCommand;
-import com.jannik_kuehn.common.command.LoriTimeDebugCommand;
-import com.jannik_kuehn.common.command.LoriTimeInfoCommand;
-import com.jannik_kuehn.common.command.LoriTimeTopCommand;
+import com.jannik_kuehn.common.command.profile.CommandProfileRegistry;
+import com.jannik_kuehn.common.command.profile.RuntimeCommandProfile;
 import com.jannik_kuehn.common.module.afk.MasteredAfkPlayerHandling;
 import com.jannik_kuehn.loritimebungee.command.BungeeCommand;
 import com.jannik_kuehn.loritimebungee.listener.LoriTimeUpdateBungeeListener;
@@ -64,12 +62,9 @@ public class LoriTimeBungee extends Plugin {
         pluginManager.registerListener(this, new TimeAccumulatorBungeeListener(loriTimePlugin));
         pluginManager.registerListener(this, new LoriTimeUpdateBungeeListener(loriTimePlugin));
 
-        new BungeeCommand(this, audiences, new LoriTimeAdminCommand(loriTimePlugin, loriTimePlugin.getLocalization(),
-                loriTimePlugin.getParser()));
-        new BungeeCommand(this, audiences, new LoriTimeCommand(loriTimePlugin, loriTimePlugin.getLocalization()));
-        new BungeeCommand(this, audiences, new LoriTimeInfoCommand(loriTimePlugin, loriTimePlugin.getLocalization()));
-        new BungeeCommand(this, audiences, new LoriTimeTopCommand(loriTimePlugin, loriTimePlugin.getLocalization()));
-        new BungeeCommand(this, audiences, new LoriTimeDebugCommand(loriTimePlugin, loriTimePlugin.getLocalization()));
+        for (final CommonCommand command : new CommandProfileRegistry(loriTimePlugin).commands(RuntimeCommandProfile.PROXY)) {
+            new BungeeCommand(this, audiences, command);
+        }
     }
 
     private void enableAsSlave() {

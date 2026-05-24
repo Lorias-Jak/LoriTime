@@ -15,7 +15,6 @@ import com.jannik_kuehn.common.utils.TimeUtil;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
@@ -26,7 +25,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @SuppressWarnings({"PMD.CommentRequired", "PMD.TooManyMethods", "PMD.AvoidLiteralsInIfCondition",
-        "PMD.AvoidDuplicateLiterals", "PMD.LiteralsFirstInComparisons"})
+        "PMD.AvoidDuplicateLiterals"})
 public class LoriTimeAdminCommand implements CommonCommand {
 
     private final LoriTimePlugin loriTimePlugin;
@@ -63,7 +62,6 @@ public class LoriTimeAdminCommand implements CommonCommand {
                     case "deleteuser" -> deleteUser(sender, subCommandArgs);
                     case "modify", "mod", "add" -> modify(sender, subCommandArgs);
                     case "reset" -> reset(sender, subCommandArgs);
-                    case "reload" -> reload(sender, subCommandArgs);
                     case "set" -> set(sender, subCommandArgs);
                     case "update" -> update(sender);
                     default -> printUtilityMessage(sender, "message.command.loritimeadmin.usage");
@@ -86,11 +84,10 @@ public class LoriTimeAdminCommand implements CommonCommand {
             completions.add("set");
             completions.add("reset");
             completions.add("deleteUser");
-            completions.add("reload");
             completions.add("update");
             return filterCompletion(completions, args[0]);
         }
-        if (args.length == 2 && !args[0].equalsIgnoreCase("reload")) {
+        if (args.length == 2) {
             return filterCompletion(cachedPlayerNames(), args[1]);
         }
         return new ArrayList<>();
@@ -102,8 +99,11 @@ public class LoriTimeAdminCommand implements CommonCommand {
     }
 
     private List<String> cachedPlayerNames() {
+        if (loriTimePlugin.getRecentPlayerSuggestionCache() != null) {
+            return loriTimePlugin.getRecentPlayerSuggestionCache().suggest(loriTimePlugin.getServer(), "");
+        }
         final Set<String> names = new LinkedHashSet<>(loriTimePlugin.getKnownPlayerNames());
-        Arrays.stream(loriTimePlugin.getServer().getOnlinePlayers())
+        java.util.Arrays.stream(loriTimePlugin.getServer().getOnlinePlayers())
                 .map(CommonSender::getName)
                 .forEach(names::add);
         return new ArrayList<>(names);
@@ -296,17 +296,6 @@ public class LoriTimeAdminCommand implements CommonCommand {
             printUtilityMessage(sender, "message.command.loritimeadmin.deleteUser.issue");
             log.error("An exception occurred while deleting the user from the Plugin!", e);
         }
-    }
-
-    private void reload(final CommonSender sender, final String... args) {
-        if (args.length > 1) {
-            printUtilityMessage(sender, "message.command.loritimeadmin.reload.usage");
-            return;
-        }
-        loriTimePlugin.getLocalization().reloadTranslation();
-
-        loriTimePlugin.reload();
-        printUtilityMessage(sender, "message.command.loritimeadmin.reload.success");
     }
 
     public void modifyOnlineTime(final CommonSender sender, final UUID uuid, final long modifyBy) {

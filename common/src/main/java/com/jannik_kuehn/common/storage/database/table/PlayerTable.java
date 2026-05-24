@@ -1,5 +1,6 @@
 package com.jannik_kuehn.common.storage.database.table;
 
+import com.jannik_kuehn.common.api.storage.RecentPlayerIdentity;
 import com.jannik_kuehn.common.utils.UuidUtil;
 
 import java.sql.Connection;
@@ -10,7 +11,10 @@ import java.sql.Statement;
 import java.sql.Timestamp;
 import java.sql.Types;
 import java.time.Instant;
+import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -151,6 +155,60 @@ public class PlayerTable {
             }
         }
         return names;
+    }
+
+    /**
+     * Retrieves player identities observed inside a recent window.
+     *
+     * @param connection the database connection
+     * @param recentConditionSql SQL condition for recent rows
+     * @return recent player identities
+     * @throws SQLException if a database access error occurs
+     */
+    public List<RecentPlayerIdentity> getRecentIdentities(final Connection connection, final String recentConditionSql) throws SQLException {
+        final List<RecentPlayerIdentity> identities = new ArrayList<>();
+        try (PreparedStatement select = connection.prepareStatement(
+                "SELECT `uuid`, `name`, `last_seen` FROM `" + tableName + "` "
+                        + "WHERE `name` IS NOT NULL AND `last_seen` IS NOT NULL AND " + recentConditionSql
+                        + " ORDER BY `last_seen` DESC")) {
+            try (ResultSet result = select.executeQuery()) {
+                while (result.next()) {
+                    identities.add(new RecentPlayerIdentity(UuidUtil.fromBytes(result.getBytes("uuid")),
+                            result.getString("name"),
+                            parseLastSeen(result.getObject("last_seen"))));
+                }
+            }
+        }
+        return identities;
+    }
+
+    private Optional<Instant> parseLastSeen(final Object value) {
+        if (value instanceof final Timestamp timestamp) {
+            return Optional.of(timestamp.toInstant());
+        }
+        if (value instanceof final Number number) {
+            return Optional.of(Instant.ofEpochMilli(number.longValue()));
+        }
+        if (value instanceof final String text && !text.isBlank()) {
+            try {
+                return Optional.of(Instant.parse(text));
+            } catch (final DateTimeParseException ignored) {
+                return parseSqlTimestamp(text);
+            }
+        }
+        return Optional.empty();
+    }
+
+    private Optional<Instant> parseSqlTimestamp(final String text) {
+        try {
+            return Optional.of(Timestamp.valueOf(text).toInstant());
+        } catch (final IllegalArgumentException ex) {
+            try {
+                return Optional.of(Instant.ofEpochMilli(Long.parseLong(text)));
+            } catch (final NumberFormatException ignored) {
+                return Optional.empty();
+            }
+        }
     }
 
     /**

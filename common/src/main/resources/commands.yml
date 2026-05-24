@@ -1,0 +1,97 @@
+profiles:
+  proxy:
+    admin:
+      name: 'ltadmin'
+      aliases:
+        - 'ltap'
+        - 'loritimeadmin'
+        - 'loritimeproxyadmin'
+    local:
+      name: 'ltserver'
+      aliases:
+        - 'lts'
+        - 'ltlocal'
+    time:
+      name: 'loritime'
+      aliases:
+        - 'lt'
+        - 'ot'
+        - 'lorit'
+    top:
+      name: 'loritimetop'
+      aliases:
+        - 'lttop'
+        - 'ltop'
+        - 'ttop'
+        - 'toptimes'
+    info:
+      name: 'ltinfo'
+      aliases:
+        - 'lti'
+        - 'linfo'
+        - 'ltimeinfo'
+    debug:
+      name: 'ltdebug'
+      aliases:
+        - 'loritimedebug'
+    afk:
+      name: 'afk'
+      aliases: [ ]
+  backend:
+    canonical:
+      admin:
+        name: 'ltadmin'
+        aliases:
+          - 'lta'
+          - 'loritimeadmin'
+          - 'loritimea'
+      local:
+        name: 'ltserver'
+        aliases:
+          - 'lts'
+          - 'ltlocal'
+      time:
+        name: 'loritime'
+        aliases:
+          - 'lt'
+          - 'ot'
+          - 'lorit'
+      top:
+        name: 'loritimetop'
+        aliases:
+          - 'lttop'
+          - 'ltop'
+          - 'ttop'
+          - 'toptimes'
+      info:
+        name: 'ltinfo'
+        aliases:
+          - 'lti'
+          - 'linfo'
+          - 'ltimeinfo'
+      debug:
+        name: 'ltdebug'
+        aliases:
+          - 'loritimedebug'
+      afk:
+        name: 'afk'
+        aliases: [ ]
+    slave:
+      local:
+        name: 'ltserver'
+        aliases:
+          - 'lts'
+          - 'ltlocal'
+      info:
+        name: 'ltinfo'
+        aliases:
+          - 'lti'
+          - 'linfo'
+          - 'ltimeinfo'
+      debug:
+        name: 'ltdebug'
+        aliases:
+          - 'loritimedebug'
+      afk:
+        name: 'afk'
+        aliases: [ ]

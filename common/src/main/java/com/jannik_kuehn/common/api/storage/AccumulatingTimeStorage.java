@@ -73,6 +73,11 @@ public class AccumulatingTimeStorage implements UnifiedStorage, TimeAccumulator 
     }
 
     @Override
+    public List<RecentPlayerIdentity> getRecentPlayerIdentities(final long recentDays) throws StorageException {
+        return storage.getRecentPlayerIdentities(recentDays);
+    }
+
+    @Override
     public OptionalLong getTime(final UUID uniqueId) throws StorageException {
         final PersistedPlayerSession activeSession = onlineSessions.get(uniqueId);
         final PlayerSessionContext context = activeSession == null ? null : activeSession.context();

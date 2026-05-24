@@ -4,6 +4,8 @@ import com.github.roleplaycauldron.spellbook.core.logger.LoggerFactory;
 import com.jannik_kuehn.common.LoriTimePlugin;
 import com.jannik_kuehn.common.api.common.CommonServer;
 import com.jannik_kuehn.common.api.scheduler.PluginScheduler;
+import com.jannik_kuehn.common.command.config.CommandAlias;
+import com.jannik_kuehn.common.command.config.CommandAliasConfig;
 import com.jannik_kuehn.common.exception.ConfigurationException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -180,6 +182,75 @@ class YamlConfigurationTest {
         assertEquals("custom no permission", migrated.getString("message.nopermission"));
         assertEquals("custom second", migrated.getString("unit.second.singular"));
         assertTrue(migrated.containsKey("message.command.loritime.usage"));
+    }
+
+    @Test
+    void fileManagerCreatesCommandsConfigWithBackendProfiles() throws ConfigurationException {
+        final File commandFolder = new File(dataFolder, "commands");
+        final FileManager fileManager = new FileManager(loggerFactory, commandFolder);
+
+        final Configuration commands = fileManager.getConfiguration(
+                fileManager.getOrCreateFile(commandFolder.toString(), "commands.yml", true));
+
+        assertTrue(new File(commandFolder, "commands.yml").exists());
+        assertEquals("ltadmin", commands.getString("profiles.proxy.admin.name"));
+        assertEquals("ltadmin", commands.getString("profiles.backend.canonical.admin.name"));
+        assertEquals("ltserver", commands.getString("profiles.backend.slave.local.name"));
+        assertFalse(commands.containsKey("profiles.paper.canonical.admin.name"));
+    }
+
+    @Test
+    void commandAliasConfigResolvesProfileSpecificValues() throws ConfigurationException {
+        final File commandFolder = new File(dataFolder, "alias-config");
+        final FileManager fileManager = new FileManager(loggerFactory, commandFolder);
+        final Configuration commands = fileManager.getConfiguration(
+                fileManager.getOrCreateFile(commandFolder.toString(), "commands.yml", true));
+        final CommandAliasConfig aliasConfig = new CommandAliasConfig(commands);
+
+        final CommandAlias proxyAdmin = aliasConfig.resolve(CommandAliasConfig.CommandProfile.PROXY,
+                CommandAliasConfig.CommandNode.ADMIN, "fallback", List.of());
+        final CommandAlias backendSlaveLocal = aliasConfig.resolve(CommandAliasConfig.CommandProfile.BACKEND_SLAVE,
+                CommandAliasConfig.CommandNode.LOCAL, "fallback", List.of());
+
+        assertEquals("ltadmin", proxyAdmin.name());
+        assertTrue(proxyAdmin.aliases().contains("ltap"));
+        assertEquals("ltserver", backendSlaveLocal.name());
+        assertTrue(backendSlaveLocal.aliases().contains("ltlocal"));
+    }
+
+    @Test
+    void commandAliasConfigReflectsReloadedCommandsFile() throws IOException, ConfigurationException {
+        final File commandFolder = new File(dataFolder, "reload-commands");
+        final FileManager fileManager = new FileManager(loggerFactory, commandFolder);
+        final File commandFile = fileManager.getOrCreateFile(commandFolder.toString(), "commands.yml", true);
+        final Configuration commands = fileManager.getConfiguration(commandFile);
+        final CommandAliasConfig aliasConfig = new CommandAliasConfig(commands);
+
+        Files.writeString(commandFile.toPath(), """
+                profiles:
+                  proxy:
+                    admin:
+                      name: 'changedadmin'
+                      aliases:
+                        - 'changedalias'
+                """);
+        commands.reload();
+
+        final CommandAlias alias = aliasConfig.resolve(CommandAliasConfig.CommandProfile.PROXY,
+                CommandAliasConfig.CommandNode.ADMIN, "fallback", List.of());
+
+        assertEquals("changedadmin", alias.name());
+        assertEquals(List.of("changedalias"), alias.aliases());
+    }
+
+    @Test
+    void configTemplateContainsDefaultRecentPlayerCompletionWindow() throws ConfigurationException {
+        final File configFolder = new File(dataFolder, "completion-config");
+        final FileManager fileManager = new FileManager(loggerFactory, configFolder);
+        final Configuration config = fileManager.getConfiguration(
+                fileManager.getOrCreateFile(configFolder.toString(), "config.yml", true));
+
+        assertEquals(30, config.getInt("command.completion.recentPlayersDays"));
     }
 
     private static final class SetFactory {

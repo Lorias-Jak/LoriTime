@@ -3,6 +3,7 @@ package com.jannik_kuehn.common.storage.database;
 import com.github.roleplaycauldron.spellbook.core.logger.LoggerFactory;
 import com.jannik_kuehn.common.api.storage.ManualTimeAdjustment;
 import com.jannik_kuehn.common.api.storage.PlayerSessionChunk;
+import com.jannik_kuehn.common.api.storage.RecentPlayerIdentity;
 import com.jannik_kuehn.common.api.storage.TimeEntryReason;
 import com.jannik_kuehn.common.config.Configuration;
 import com.jannik_kuehn.common.exception.StorageException;
@@ -21,6 +22,7 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.List;
 import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.UUID;
@@ -109,6 +111,35 @@ class UnifiedDatabaseStorageTest {
             assertEquals(0, storage.deleteInactiveHistory(365L), "Expected no rows to be deleted");
             assertEquals(1, countRows(TABLE_PREFIX + "_time"), "Expected one row to be present");
             assertFalse(storage.getUuid("Lorias_").isEmpty(), "Expected the player to still be present");
+        }
+    }
+
+    @Test
+    void recentPlayerIdentitiesIncludePlayersWithoutTimeHistory() throws Exception {
+        try (UnifiedDatabaseStorage storage = storage()) {
+
+            storage.setPlayerName(PLAYER, "Lorias_");
+
+            final List<RecentPlayerIdentity> identities = storage.getRecentPlayerIdentities(30L);
+
+            assertEquals(1, identities.size(), "Expected recent identity without time history");
+            assertEquals(PLAYER, identities.getFirst().uuid(), "Expected the player UUID");
+            assertEquals("Lorias_", identities.getFirst().name(), "Expected the player name");
+            assertTrue(identities.getFirst().lastSeen().isPresent(), "Expected last_seen metadata");
+        }
+    }
+
+    @Test
+    void recentPlayerIdentitiesSkipInactivePlayers() throws Exception {
+        try (UnifiedDatabaseStorage storage = storage()) {
+
+            storage.setPlayerName(PLAYER, "Lorias_");
+            try (Connection connection = openSqlite();
+                 Statement statement = connection.createStatement()) {
+                statement.executeUpdate("UPDATE `" + TABLE_PREFIX + "_player` SET `last_seen` = DATETIME('now', '-40 days')");
+            }
+
+            assertTrue(storage.getRecentPlayerIdentities(30L).isEmpty(), "Expected inactive player to be skipped");
         }
     }
 

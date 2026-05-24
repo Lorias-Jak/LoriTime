@@ -3,6 +3,7 @@ package com.jannik_kuehn.common.storage.database;
 import com.jannik_kuehn.common.api.storage.ManualTimeAdjustment;
 import com.jannik_kuehn.common.api.storage.PlayerSessionChunk;
 import com.jannik_kuehn.common.api.storage.PlayerSessionContext;
+import com.jannik_kuehn.common.api.storage.RecentPlayerIdentity;
 import com.jannik_kuehn.common.api.storage.TimeEntryReason;
 import com.jannik_kuehn.common.api.storage.UnifiedStorage;
 import com.jannik_kuehn.common.exception.StorageException;
@@ -75,6 +76,11 @@ public class UnifiedDatabaseStorage implements UnifiedStorage {
     private final ManualAdjustmentTable adjustmentTable;
 
     /**
+     * Recent player identity reader.
+     */
+    private final RecentPlayerIdentityReader recentPlayerIdentityReader;
+
+    /**
      * Lock protecting storage access while the provider is closing.
      */
     private final ReadWriteLock poolLock;
@@ -104,6 +110,7 @@ public class UnifiedDatabaseStorage implements UnifiedStorage {
         this.worldTable = worldTable;
         this.timeTable = timeTable;
         this.adjustmentTable = adjustmentTable;
+        this.recentPlayerIdentityReader = new RecentPlayerIdentityReader(provider, playerTable, dialect);
         this.poolLock = new ReentrantReadWriteLock();
     }
 
@@ -326,6 +333,17 @@ public class UnifiedDatabaseStorage implements UnifiedStorage {
             }
         } catch (final SQLException ex) {
             throw new StorageException(ex);
+        } finally {
+            poolLock.readLock().unlock();
+        }
+    }
+
+    @Override
+    public List<RecentPlayerIdentity> getRecentPlayerIdentities(final long recentDays) throws StorageException {
+        poolLock.readLock().lock();
+        try {
+            checkClosed();
+            return recentPlayerIdentityReader.read(recentDays);
         } finally {
             poolLock.readLock().unlock();
         }

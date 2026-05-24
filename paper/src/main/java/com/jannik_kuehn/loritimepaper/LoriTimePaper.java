@@ -4,13 +4,10 @@ import com.github.roleplaycauldron.spellbook.core.logger.LoggerFactory;
 import com.github.roleplaycauldron.spellbook.core.logger.WrappedLogger;
 import com.jannik_kuehn.common.LoriTimePlugin;
 import com.jannik_kuehn.common.api.LoriTimeAPI;
+import com.jannik_kuehn.common.api.common.CommonCommand;
 import com.jannik_kuehn.common.api.storage.StorageMode;
-import com.jannik_kuehn.common.command.LoriTimeAdminCommand;
-import com.jannik_kuehn.common.command.LoriTimeAfkCommand;
-import com.jannik_kuehn.common.command.LoriTimeCommand;
-import com.jannik_kuehn.common.command.LoriTimeDebugCommand;
-import com.jannik_kuehn.common.command.LoriTimeInfoCommand;
-import com.jannik_kuehn.common.command.LoriTimeTopCommand;
+import com.jannik_kuehn.common.command.profile.CommandProfileRegistry;
+import com.jannik_kuehn.common.command.profile.RuntimeCommandProfile;
 import com.jannik_kuehn.common.module.afk.MasteredAfkPlayerHandling;
 import com.jannik_kuehn.loritimepaper.afk.PaperSlavedAfkHandling;
 import com.jannik_kuehn.loritimepaper.command.PaperCommand;
@@ -95,11 +92,7 @@ public class LoriTimePaper extends JavaPlugin {
         if (loriTimePlugin.isAfkEnabled()) {
             loriTimePlugin.enableAfkFeature(new MasteredAfkPlayerHandling(loriTimePlugin));
         }
-        new PaperCommand(this, new LoriTimeAdminCommand(loriTimePlugin, loriTimePlugin.getLocalization(),
-                loriTimePlugin.getParser()));
-        new PaperCommand(this, new LoriTimeCommand(loriTimePlugin, loriTimePlugin.getLocalization()));
-        new PaperCommand(this, new LoriTimeInfoCommand(loriTimePlugin, loriTimePlugin.getLocalization()));
-        new PaperCommand(this, new LoriTimeTopCommand(loriTimePlugin, loriTimePlugin.getLocalization()));
+        registerProfileCommands(RuntimeCommandProfile.BACKEND_CANONICAL);
 
         if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null && loriTimePlugin.getConfig().getBoolean("integrations.PlaceholderAPI", true)) {
             new LoriTimePlaceholder(loriTimePlugin, loriTimePlugin.getStorage()).register();
@@ -123,6 +116,7 @@ public class LoriTimePaper extends JavaPlugin {
                 && loriTimePlugin.getConfig().getBoolean("integrations.PlaceholderAPI", true)) {
             new LoriTimePlaceholder(loriTimePlugin, slaveReadCache).register();
         }
+        registerProfileCommands(RuntimeCommandProfile.BACKEND_SLAVE);
     }
 
     @SuppressWarnings("PMD.UseUnderscoresInNumericLiterals")
@@ -131,10 +125,14 @@ public class LoriTimePaper extends JavaPlugin {
 
         if (loriTimePlugin.isAfkEnabled()) {
             Bukkit.getPluginManager().registerEvents(new PaperPlayerAfkListener(loriTimePlugin), this);
-            new PaperCommand(this, new LoriTimeAfkCommand(loriTimePlugin, loriTimePlugin.getLocalization()));
         }
-        new PaperCommand(this, new LoriTimeDebugCommand(loriTimePlugin, loriTimePlugin.getLocalization()));
         new PaperMetrics(this, new Metrics(this, 22500));
+    }
+
+    private void registerProfileCommands(final RuntimeCommandProfile profile) {
+        for (final CommonCommand command : new CommandProfileRegistry(loriTimePlugin).commands(profile)) {
+            new PaperCommand(this, command);
+        }
     }
 
     @Override

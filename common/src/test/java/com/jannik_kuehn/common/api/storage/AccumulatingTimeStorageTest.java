@@ -289,6 +289,11 @@ class AccumulatingTimeStorageTest {
         }
 
         @Override
+        public List<RecentPlayerIdentity> getRecentPlayerIdentities(final long recentDays) {
+            return List.of();
+        }
+
+        @Override
         public OptionalLong getTime(final UUID uniqueId) {
             return OptionalLong.of(adjustments.getOrDefault(uniqueId, 0L)
                     + sessions.stream().filter(session -> session.uuid().equals(uniqueId))

@@ -9,8 +9,10 @@ import com.jannik_kuehn.common.api.common.CommonServer;
 import com.jannik_kuehn.common.api.scheduler.PluginScheduler;
 import com.jannik_kuehn.common.api.scheduler.PluginTask;
 import com.jannik_kuehn.common.api.storage.ManualTimeAdjustment;
+import com.jannik_kuehn.common.api.storage.RecentPlayerIdentity;
 import com.jannik_kuehn.common.api.storage.TimeEntryReason;
 import com.jannik_kuehn.common.api.storage.UnifiedStorage;
+import com.jannik_kuehn.common.command.completion.RecentPlayerSuggestionCache;
 import com.jannik_kuehn.common.config.localization.Localization;
 import com.jannik_kuehn.common.exception.StorageException;
 import com.jannik_kuehn.common.player.TrackedLoriTimePlayer;
@@ -20,6 +22,7 @@ import net.kyori.adventure.text.TextComponent;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.Set;
 import java.util.UUID;
@@ -27,6 +30,7 @@ import java.util.logging.Logger;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
@@ -87,7 +91,7 @@ class SenderRoleCommandTest {
         final List<String> completions = new LoriTimeCommand(plugin, localization).handleTabComplete(source, "L");
 
         assertEquals(List.of("Lorias_"), completions, "Expected tab completion to use cached player names");
-        verify(storage, never()).getNameEntries();
+        verifyNoSuggestionStorageLookup(storage);
     }
 
     @Test
@@ -112,7 +116,36 @@ class SenderRoleCommandTest {
                 mock(LoriTimePlayerConverter.class))).handleTabComplete(source, "modify", "L");
 
         assertEquals(List.of("Lorias_"), completions, "Expected admin tab completion to use cached player names");
+        verifyNoSuggestionStorageLookup(storage);
+    }
+
+    @Test
+    @SuppressWarnings("PMD.CloseResource")
+    void loriTimeTabCompletionUsesRecentPlayerSuggestionCache() throws StorageException {
+        final LoriTimePlugin plugin = mock(LoriTimePlugin.class);
+        final UnifiedStorage storage = mock(UnifiedStorage.class);
+        final Localization localization = mock(Localization.class);
+        final CommonServer server = mock(CommonServer.class);
+        final CommonPlayerSender source = mock(CommonPlayerSender.class);
+        final RecentPlayerSuggestionCache cache = new RecentPlayerSuggestionCache();
+        cache.replaceRecentIdentities(List.of(new RecentPlayerIdentity(PLAYER_ID, "Lorias_", Optional.empty())));
+        when(plugin.getLoggerFactory()).thenReturn(new LoggerFactory(Logger.getLogger("test")));
+        when(plugin.getStorage()).thenReturn(storage);
+        when(plugin.getLocalization()).thenReturn(localization);
+        when(plugin.getServer()).thenReturn(server);
+        when(plugin.getRecentPlayerSuggestionCache()).thenReturn(cache);
+        when(server.getOnlinePlayers()).thenReturn(new CommonPlayerSender[0]);
+        when(source.hasPermission("loritime.see.other")).thenReturn(true);
+
+        final List<String> completions = new LoriTimeCommand(plugin, localization).handleTabComplete(source, "L");
+
+        assertEquals(List.of("Lorias_"), completions, "Expected tab completion to use the recent player cache");
+        verifyNoSuggestionStorageLookup(storage);
+    }
+
+    private void verifyNoSuggestionStorageLookup(final UnifiedStorage storage) throws StorageException {
         verify(storage, never()).getNameEntries();
+        verify(storage, never()).getRecentPlayerIdentities(anyLong());
     }
 
     @Test

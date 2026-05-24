@@ -1,22 +1,36 @@
 name: Setup version context
 description: |
-  Setup the version context with a bunch of environment variables based on maven.
+  Setup the version context with a bunch of environment variables based on Maven.
 
 inputs:
   ROOT_REPOSITORY:
     description: |
       The root repository name.
     required: true
+
   GITHUB_TOKEN:
     description: |
-      The GitHub token to use for creating the build-number tag.
+      The GitHub token to use for checking out the repository.
     required: true
+
+  JAVA_VERSION:
+    description: |
+      Java version used to run Maven.
+    required: false
+    default: '25'
+
+  JAVA_DISTRIBUTION:
+    description: |
+      Java distribution used to run Maven.
+    required: false
+    default: 'zulu'
 
 outputs:
   VERSION:
     description: |
       The version of the build.
     value: ${{ steps.determine_version.outputs.VERSION }}
+
   VERSION_TYPE:
     description: |
       The type of the build.
@@ -28,16 +42,26 @@ runs:
     - name: Checkout source code
       uses: actions/checkout@v6
       with:
+        repository: ${{ inputs.ROOT_REPOSITORY }}
+        token: ${{ inputs.GITHUB_TOKEN }}
         submodules: true
+        fetch-depth: 0
+
+    - name: Setup Java
+      uses: actions/setup-java@v5
+      with:
+        distribution: ${{ inputs.JAVA_DISTRIBUTION }}
+        java-version: ${{ inputs.JAVA_VERSION }}
+        cache: maven
 
     - name: Determine build version type
       id: determine_version
       shell: bash
       run: |
-        VERSION=$(mvn help:evaluate -Dexpression=revision -q -DforceStdout)
-        BUILD_NUMBER=${{ github.run_number }}
+        VERSION="$(mvn help:evaluate -Dexpression=revision -q -DforceStdout)"
+        BUILD_NUMBER="${{ github.run_number }}"
 
-        if [[ "${{ github.ref }}" == refs/tags/* ]]; then
+        if [[ "${{ github.ref_type }}" == "tag" ]]; then
           VERSION_TYPE="release"
         elif [[ "${{ github.event_name }}" == "pull_request" ]]; then
           VERSION_TYPE="artifact"
@@ -47,7 +71,12 @@ runs:
           VERSION="${VERSION}-DEV-${BUILD_NUMBER}"
         fi
 
-        echo "VERSION=${VERSION}" >> $GITHUB_ENV
-        echo "VERSION_TYPE=${VERSION_TYPE}" >> $GITHUB_ENV
-        echo "VERSION=${VERSION}" >> $GITHUB_OUTPUT
-        echo "VERSION_TYPE=${VERSION_TYPE}" >> $GITHUB_OUTPUT
+        {
+          echo "VERSION=${VERSION}"
+          echo "VERSION_TYPE=${VERSION_TYPE}"
+        } >> "$GITHUB_ENV"
+
+        {
+          echo "VERSION=${VERSION}"
+          echo "VERSION_TYPE=${VERSION_TYPE}"
+        } >> "$GITHUB_OUTPUT"

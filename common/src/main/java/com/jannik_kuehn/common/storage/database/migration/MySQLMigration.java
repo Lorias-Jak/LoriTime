@@ -38,11 +38,12 @@ public final class MySQLMigration {
         builder.version(1)
                 .addUnconditionalQuery(
                         "CREATE TABLE IF NOT EXISTS `" + tablePrefix + "` ("
-                                + "`id`   INT NOT NULL AUTO_INCREMENT PRIMARY KEY,"
+                                + "`id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY,"
                                 + "`uuid` BINARY(16) NOT NULL UNIQUE,"
                                 + "`name` CHAR(16) CHARACTER SET ascii UNIQUE,"
                                 + "`time` BIGINT UNSIGNED NOT NULL DEFAULT 0"
-                                + ") ENGINE InnoDB")
+                                + ") ENGINE InnoDB"
+                )
                 .finishVersion();
     }
 
@@ -92,15 +93,23 @@ public final class MySQLMigration {
                         "CREATE TABLE IF NOT EXISTS `" + tablePrefix + "_time_adjustment` ("
                                 + "`id` BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,"
                                 + "`player_id` BIGINT NOT NULL,"
+                                + "`scope_type` VARCHAR(16) NOT NULL DEFAULT 'GLOBAL',"
+                                + "`server_id` BIGINT NULL,"
+                                + "`world_id` BIGINT NULL,"
                                 + "`amount_seconds` BIGINT NOT NULL,"
                                 + "`reason` VARCHAR(32) NOT NULL DEFAULT 'MANUAL_ADJUSTMENT',"
                                 + "`actor_uuid` BINARY(16) NULL,"
                                 + "`actor_name` VARCHAR(64) CHARACTER SET utf8mb4 NOT NULL,"
                                 + "`created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),"
                                 + "INDEX `idx_adjustment_player` (`player_id`),"
+                                + "INDEX `idx_adjustment_scope` (`scope_type`, `server_id`, `world_id`),"
                                 + "INDEX `idx_adjustment_created` (`created_at`),"
                                 + "CONSTRAINT `fk_adjustment_player` FOREIGN KEY (`player_id`) "
-                                + "REFERENCES `" + tablePrefix + "_player`(`id`) ON DELETE CASCADE"
+                                + "REFERENCES `" + tablePrefix + "_player`(`id`) ON DELETE CASCADE,"
+                                + "CONSTRAINT `fk_adjustment_server` FOREIGN KEY (`server_id`) "
+                                + "REFERENCES `" + tablePrefix + "_server`(`id`) ON DELETE CASCADE,"
+                                + "CONSTRAINT `fk_adjustment_world` FOREIGN KEY (`world_id`) "
+                                + "REFERENCES `" + tablePrefix + "_world`(`id`) ON DELETE CASCADE"
                                 + ") ENGINE InnoDB"
                 )
                 .addFirstStartupQuery(
@@ -171,15 +180,23 @@ public final class MySQLMigration {
                         "CREATE TABLE IF NOT EXISTS `" + tablePrefix + "_time_adjustment` ("
                                 + "`id` BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,"
                                 + "`player_id` BIGINT NOT NULL,"
+                                + "`scope_type` VARCHAR(16) NOT NULL DEFAULT 'GLOBAL',"
+                                + "`server_id` BIGINT NULL,"
+                                + "`world_id` BIGINT NULL,"
                                 + "`amount_seconds` BIGINT NOT NULL,"
                                 + "`reason` VARCHAR(32) NOT NULL DEFAULT 'MANUAL_ADJUSTMENT',"
                                 + "`actor_uuid` BINARY(16) NULL,"
                                 + "`actor_name` VARCHAR(64) CHARACTER SET utf8mb4 NOT NULL,"
                                 + "`created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),"
                                 + "INDEX `idx_adjustment_player` (`player_id`),"
+                                + "INDEX `idx_adjustment_scope` (`scope_type`, `server_id`, `world_id`),"
                                 + "INDEX `idx_adjustment_created` (`created_at`),"
                                 + "CONSTRAINT `fk_adjustment_player` FOREIGN KEY (`player_id`) "
-                                + "REFERENCES `" + tablePrefix + "_player`(`id`) ON DELETE CASCADE"
+                                + "REFERENCES `" + tablePrefix + "_player`(`id`) ON DELETE CASCADE,"
+                                + "CONSTRAINT `fk_adjustment_server` FOREIGN KEY (`server_id`) "
+                                + "REFERENCES `" + tablePrefix + "_server`(`id`) ON DELETE CASCADE,"
+                                + "CONSTRAINT `fk_adjustment_world` FOREIGN KEY (`world_id`) "
+                                + "REFERENCES `" + tablePrefix + "_world`(`id`) ON DELETE CASCADE"
                                 + ") ENGINE InnoDB"
                 )
                 .addUnconditionalQuery(
@@ -220,14 +237,14 @@ public final class MySQLMigration {
                                 + "JOIN `" + tablePrefix + "_player` p ON p.`uuid` = old.`uuid` "
                                 + "JOIN `" + tablePrefix + "_server` s ON s.`server` = 'default' "
                                 + "JOIN `" + tablePrefix + "_world` w "
-                                + "  ON w.`server_id` = s.`id` AND w.`world` = 'global' "
+                                + "ON w.`server_id` = s.`id` AND w.`world` = 'global' "
                                 + "WHERE old.`time` > 0 "
                                 + "AND NOT EXISTS ("
-                                + "    SELECT 1 "
-                                + "    FROM `" + tablePrefix + "_time` t "
-                                + "    WHERE t.`player_id` = p.`id` "
-                                + "      AND t.`world_id` = w.`id` "
-                                + "      AND t.`reason` = 'LEGACY_IMPORT'"
+                                + "SELECT 1 "
+                                + "FROM `" + tablePrefix + "_time` t "
+                                + "WHERE t.`player_id` = p.`id` "
+                                + "AND t.`world_id` = w.`id` "
+                                + "AND t.`reason` = 'LEGACY_IMPORT'"
                                 + ")"
                 )
                 .addUnconditionalQuery(

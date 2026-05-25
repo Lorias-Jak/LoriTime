@@ -6,6 +6,7 @@ import com.jannik_kuehn.common.api.LoriTimePlayer;
 import com.jannik_kuehn.common.api.storage.ManualTimeAdjustment;
 import com.jannik_kuehn.common.api.storage.SessionContextDefaults;
 import com.jannik_kuehn.common.api.storage.TimeEntryReason;
+import com.jannik_kuehn.common.api.storage.TimeScope;
 import com.jannik_kuehn.common.exception.StorageException;
 import com.jannik_kuehn.common.utils.TimeUtil;
 
@@ -59,8 +60,11 @@ public class MasteredAfkPlayerHandling extends AfkHandling {
                 log.debug("Removing online time for player " + loriTimePlayer.getUniqueId()
                         + ". Time to remove: " + transition.timeToRemove());
                 loriTimePlugin.getAccumulator().flushOnlineTimeCache();
+                final TimeScope scope = loriTimePlugin.getAccumulator().getActiveSessionContext(loriTimePlayer.getUniqueId())
+                        .map(context -> TimeScope.world(context.server(), context.world()))
+                        .orElse(TimeScope.world(SessionContextDefaults.SERVER, SessionContextDefaults.WORLD));
                 loriTimePlugin.getStorage().addTime(new ManualTimeAdjustment(loriTimePlayer.getUniqueId(),
-                        -transition.timeToRemove(), TimeEntryReason.AFK_ADJUSTMENT, "SYSTEM"));
+                        -transition.timeToRemove(), TimeEntryReason.AFK_ADJUSTMENT, "SYSTEM", scope));
             } catch (final Exception e) {
                 log.warn("Error while removing online time while afk for player " + loriTimePlayer.getUniqueId(), e);
             }

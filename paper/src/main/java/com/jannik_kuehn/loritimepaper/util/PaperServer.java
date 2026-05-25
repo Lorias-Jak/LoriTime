@@ -5,13 +5,16 @@ import com.jannik_kuehn.common.api.common.CommonConsoleSender;
 import com.jannik_kuehn.common.api.common.CommonPlayerSender;
 import com.jannik_kuehn.common.api.common.CommonSender;
 import com.jannik_kuehn.common.api.common.CommonServer;
+import com.jannik_kuehn.common.api.storage.SessionContextDefaults;
 import com.jannik_kuehn.loritimepaper.LoriTimePaper;
 import net.kyori.adventure.text.TextComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.Server;
+import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -48,6 +51,34 @@ public class PaperServer implements CommonServer {
         return server.getOnlinePlayers().stream()
                 .map(PaperPlayer::new)
                 .toList().toArray(new CommonPlayerSender[0]);
+    }
+
+    @Override
+    public Optional<String> getCurrentServer(final UUID uniqueId) {
+        return getLocalServerName();
+    }
+
+    @Override
+    public Optional<String> getLocalServerName() {
+        return Optional.of(loriTimePaper.getPlugin().getConfig()
+                .getString("server.name", SessionContextDefaults.SERVER));
+    }
+
+    @Override
+    public List<String> getLiveServerNames() {
+        return getLocalServerName().stream().toList();
+    }
+
+    @Override
+    public List<String> getLiveWorldNames(final Optional<String> serverName, final Optional<UUID> uniqueId) {
+        if (serverName.isPresent() && getLocalServerName().filter(serverName.get()::equalsIgnoreCase).isEmpty()) {
+            return List.of();
+        }
+        return server.getWorlds().stream()
+                .map(World::getName)
+                .distinct()
+                .sorted(String.CASE_INSENSITIVE_ORDER)
+                .toList();
     }
 
     @Override

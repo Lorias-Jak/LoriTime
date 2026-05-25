@@ -68,8 +68,30 @@ public interface UnifiedStorage extends TimeQueryStorage, TimeAdjustmentStorage,
      */
     List<RecentPlayerIdentity> getRecentPlayerIdentities(long recentDays) throws StorageException;
 
+    /**
+     * Returns known server names for command completion cache refreshes.
+     *
+     * @return known server names
+     * @throws StorageException if lookup fails
+     */
+    Set<String> getKnownServerNames() throws StorageException;
+
+    /**
+     * Returns known world names for command completion cache refreshes.
+     *
+     * @return known world names
+     * @throws StorageException if lookup fails
+     */
+    Set<String> getKnownWorldNames() throws StorageException;
+
     @Override
     OptionalLong getTime(UUID uniqueId) throws StorageException;
+
+    @Override
+    OptionalLong getTime(UUID uniqueId, TimeScope scope) throws StorageException;
+
+    @Override
+    OptionalLong getTime(UUID uniqueId, TimeScope scope, TimeRange range) throws StorageException;
 
     @Override
     void addTime(UUID uuid, long additionalTime, TimeEntryReason reason) throws StorageException;

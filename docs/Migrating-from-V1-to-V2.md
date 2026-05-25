@@ -10,6 +10,8 @@ LoriTime 2 changes storage internals and tightens AFK behavior. Read this before
 
 LoriTime 2 uses normalized SQL storage for player identity, sessions, worlds, servers, and manual adjustments.
 
+Development builds with scoped server/world time support change the normalized manual adjustment schema. This is a breaking database baseline change: existing normalized LoriTime 2 development databases with unscoped adjustment rows are not migrated by this change.
+
 Legacy flat-file storage is no longer a regular storage mode. If LoriTime detects `data/names.yml` or `data/time.yml`, it backs up the files, imports their data into SQLite, and renames the source files with a `.migrated` suffix after a successful import.
 
 Existing LoriTime 1.x SQL databases are detected before normal storage startup. The updater routes them through the versioned migration path and imports legacy aggregate time into the new schema using the configured fallback server and world context.

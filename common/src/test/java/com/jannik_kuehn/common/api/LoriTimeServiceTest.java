@@ -5,6 +5,8 @@ import com.jannik_kuehn.common.api.scheduler.PluginScheduler;
 import com.jannik_kuehn.common.api.scheduler.PluginTask;
 import com.jannik_kuehn.common.api.storage.ManualTimeAdjustment;
 import com.jannik_kuehn.common.api.storage.TimeEntryReason;
+import com.jannik_kuehn.common.api.storage.TimeRange;
+import com.jannik_kuehn.common.api.storage.TimeScope;
 import com.jannik_kuehn.common.api.storage.UnifiedStorage;
 import com.jannik_kuehn.common.exception.StorageException;
 import org.junit.jupiter.api.AfterEach;
@@ -14,6 +16,7 @@ import org.junit.jupiter.api.parallel.ResourceLock;
 
 import java.lang.reflect.Field;
 import java.time.Duration;
+import java.time.Instant;
 import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.UUID;
@@ -86,7 +89,7 @@ class LoriTimeServiceTest {
 
     @Test
     void returnsOnlineTimeAsDuration() throws StorageException {
-        when(storage.getTime(PLAYER_ID)).thenReturn(OptionalLong.of(3661));
+        when(storage.getTime(PLAYER_ID, TimeScope.GLOBAL)).thenReturn(OptionalLong.of(3661));
 
         assertEquals(Optional.of(Duration.ofSeconds(3661)), service.getOnlineTime(PLAYER_ID).join(),
                 "Expected facade to expose time as Duration");
@@ -94,7 +97,7 @@ class LoriTimeServiceTest {
 
     @Test
     void returnsEmptyOnlineTimeForUnknownPlayer() throws StorageException {
-        when(storage.getTime(PLAYER_ID)).thenReturn(OptionalLong.empty());
+        when(storage.getTime(PLAYER_ID, TimeScope.GLOBAL)).thenReturn(OptionalLong.empty());
 
         assertEquals(Optional.empty(), service.getOnlineTime(PLAYER_ID).join(), "Unknown time should be empty");
     }
@@ -102,7 +105,7 @@ class LoriTimeServiceTest {
     @Test
     void returnsOnlineTimeByPlayerIdentity() throws StorageException {
         final LoriTimePlayer player = new LoriTimePlayerRef(PLAYER_ID, "Renamed");
-        when(storage.getTime(PLAYER_ID)).thenReturn(OptionalLong.of(120));
+        when(storage.getTime(PLAYER_ID, TimeScope.GLOBAL)).thenReturn(OptionalLong.of(120));
 
         assertEquals(Optional.of(Duration.ofSeconds(120)), service.getOnlineTime(player).join(),
                 "Player overload should query by UUID");
@@ -143,6 +146,33 @@ class LoriTimeServiceTest {
 
         verify(storage).addTime(new ManualTimeAdjustment(PLAYER_ID, -45L,
                 TimeEntryReason.MANUAL_ADJUSTMENT, ACTOR_ID, "Admin"));
+    }
+
+    @Test
+    void returnsScopedOnlineTime() throws StorageException {
+        when(storage.getTime(PLAYER_ID, TimeScope.world("survival", "world"))).thenReturn(OptionalLong.of(120));
+
+        assertEquals(Optional.of(Duration.ofSeconds(120)),
+                service.getOnlineTime(PLAYER_ID, TimeScope.world("survival", "world")).join(),
+                "Expected facade to expose scoped time");
+    }
+
+    @Test
+    void returnsRangedScopedOnlineTime() throws StorageException {
+        final TimeRange range = TimeRange.between(Instant.ofEpochSecond(1), Instant.ofEpochSecond(10));
+        when(storage.getTime(PLAYER_ID, TimeScope.world("survival", "world"), range)).thenReturn(OptionalLong.of(120));
+
+        assertEquals(Optional.of(Duration.ofSeconds(120)),
+                service.getOnlineTime(PLAYER_ID, TimeScope.world("survival", "world"), range).join(),
+                "Expected facade to expose ranged scoped time");
+    }
+
+    @Test
+    void addsScopedManualAdjustment() throws StorageException {
+        service.addTime(PLAYER_ID, Duration.ofSeconds(30), TimeScope.server("survival")).join();
+
+        verify(storage).addTime(new ManualTimeAdjustment(PLAYER_ID, 30L,
+                TimeEntryReason.MANUAL_ADJUSTMENT, (UUID) null, LoriTimeService.API_ACTOR, TimeScope.server("survival")));
     }
 
     @Test

@@ -94,6 +94,16 @@ public interface TimeAccumulator extends AutoCloseable {
     void flushOnlineTimeCache() throws StorageException;
 
     /**
+     * Returns the currently active session context for a player, if known.
+     *
+     * @param uuid the player UUID.
+     * @return active session context.
+     */
+    default Optional<PlayerSessionContext> getActiveSessionContext(final UUID uuid) {
+        return Optional.empty();
+    }
+
+    /**
      * Creates a session context from nullable player name input.
      *
      * @param uuid the player UUID.

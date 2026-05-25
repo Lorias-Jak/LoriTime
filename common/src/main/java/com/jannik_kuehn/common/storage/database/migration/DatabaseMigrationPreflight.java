@@ -16,6 +16,16 @@ import java.sql.SQLException;
 public class DatabaseMigrationPreflight {
 
     /**
+     * Shared table creation prefix.
+     */
+    private static final String CREATE_TABLE_IF_NOT_EXISTS = "CREATE TABLE IF NOT EXISTS `";
+
+    /**
+     * Shared table column list opener.
+     */
+    private static final String TABLE_COLUMNS_START = "` (";
+
+    /**
      * The database storage to inspect and update.
      */
     private final DatabaseStorage databaseStorage;
@@ -51,6 +61,10 @@ public class DatabaseMigrationPreflight {
             }
             if (tableExists(connection, versionTable)) {
                 log.info("Detected versioned LoriTime database. Running normal database updates.");
+                if (maxVersion(connection, versionTable) == 1 && !isLegacyAggregateTable(connection, tablePrefix)) {
+                    log.info("Version 1 marker exists without legacy aggregate rows. Preparing empty migration source.");
+                    createLegacyAggregateTable(connection, tablePrefix);
+                }
                 databaseStorage.applyUpdates();
                 return;
             }
@@ -108,12 +122,12 @@ public class DatabaseMigrationPreflight {
 
     private void createVersionTable(final Connection connection, final String versionTable) throws SQLException {
         final String sql = switch (databaseStorage.getDialect()) {
-            case MYSQL, MARIADB -> "CREATE TABLE IF NOT EXISTS `" + versionTable + "` ("
+            case MYSQL, MARIADB -> CREATE_TABLE_IF_NOT_EXISTS + versionTable + TABLE_COLUMNS_START
                     + "`version_no` INT NOT NULL,"
                     + "`applied_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,"
                     + "INDEX `idx_version_no` (`version_no`)"
                     + ") ENGINE=InnoDB";
-            case SQLITE -> "CREATE TABLE IF NOT EXISTS `" + versionTable + "` ("
+            case SQLITE -> CREATE_TABLE_IF_NOT_EXISTS + versionTable + TABLE_COLUMNS_START
                     + "`version_no` INTEGER NOT NULL,"
                     + "`applied_at` TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP"
                     + ")";
@@ -130,4 +144,36 @@ public class DatabaseMigrationPreflight {
             }
         }
     }
+
+    private int maxVersion(final Connection connection, final String versionTable) throws SQLException {
+        try (PreparedStatement statement = connection.prepareStatement(
+                "SELECT MAX(`version_no`) FROM `" + versionTable + "`");
+             ResultSet resultSet = statement.executeQuery()) {
+            if (resultSet.next()) {
+                return resultSet.getInt(1);
+            }
+            return 0;
+        }
+    }
+
+    private void createLegacyAggregateTable(final Connection connection, final String tableName) throws SQLException {
+        final String sql = switch (databaseStorage.getDialect()) {
+            case MYSQL, MARIADB -> CREATE_TABLE_IF_NOT_EXISTS + tableName + TABLE_COLUMNS_START
+                    + "`id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY,"
+                    + "`uuid` BINARY(16) NOT NULL UNIQUE,"
+                    + "`name` CHAR(16) CHARACTER SET ascii UNIQUE,"
+                    + "`time` BIGINT UNSIGNED NOT NULL DEFAULT 0"
+                    + ") ENGINE=InnoDB";
+            case SQLITE -> CREATE_TABLE_IF_NOT_EXISTS + tableName + TABLE_COLUMNS_START
+                    + "`id` INTEGER PRIMARY KEY AUTOINCREMENT,"
+                    + "`uuid` BLOB NOT NULL UNIQUE,"
+                    + "`name` TEXT UNIQUE,"
+                    + "`time` INTEGER NOT NULL DEFAULT 0"
+                    + ")";
+        };
+        try (PreparedStatement create = connection.prepareStatement(sql)) {
+            create.executeUpdate();
+        }
+    }
+
 }

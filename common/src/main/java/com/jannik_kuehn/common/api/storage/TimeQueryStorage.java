@@ -21,6 +21,27 @@ public interface TimeQueryStorage {
     OptionalLong getTime(UUID uniqueId) throws StorageException;
 
     /**
+     * Returns the stored time for a player in seconds for a specific scope.
+     *
+     * @param uniqueId the player UUID.
+     * @param scope the time scope.
+     * @return the scoped time, if the player has stored time in that scope.
+     * @throws StorageException if the lookup fails.
+     */
+    OptionalLong getTime(UUID uniqueId, TimeScope scope) throws StorageException;
+
+    /**
+     * Returns the stored time for a player in seconds for a specific scope and time range.
+     *
+     * @param uniqueId the player UUID.
+     * @param scope the time scope.
+     * @param range the time range.
+     * @return the scoped time, if the player has stored time in that scope and range.
+     * @throws StorageException if the lookup fails.
+     */
+    OptionalLong getTime(UUID uniqueId, TimeScope scope, TimeRange range) throws StorageException;
+
+    /**
      * Returns all player time totals keyed by UUID string.
      *
      * @return all stored time totals.

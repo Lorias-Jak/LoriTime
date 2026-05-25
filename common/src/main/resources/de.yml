@@ -51,12 +51,19 @@ message:
   nopermission: '<#FF3232>Dazu fehlen dir die Rechte.'
   command:
     loritime:
-      usage: '<#A4A4A4>Benutze <red>/onlinetime [Spieler] <#A4A4A4>um die Spielzeit anzuzeigen.'
+      usage: '<#A4A4A4>Benutze <red>/loritime [Spieler] [server:<Server>|s:<Server>] [world:<Welt>|w:<Welt>] [time:<Zeitraum>|t:<Zeitraum>] <#A4A4A4>um die Spielzeit anzuzeigen.'
       notfound: '<#A4A4A4>Der Spieler <#50CBAB>[player] <#A4A4A4>war noch nie auf dem Server.'
+      noscopedtime: '<#A4A4A4>Der Spieler <#50CBAB>[player] <#A4A4A4>hat keine gespeicherte Spielzeit [scope][range]<#A4A4A4>.'
       consoleself: '<#FF3232>Du bist die Konsole, deine eigene Online Zeit kannst du nicht anschauen!'
+      scope:
+        global: '<#A4A4A4>im Netzwerk'
+        server: '<#A4A4A4>auf dem Server <#50CBAB>[server]'
+        world: '<#A4A4A4>in der Welt <#50CBAB>[world]'
+        worldserver: '<#A4A4A4>in der Welt <#50CBAB>[world] <#A4A4A4>auf Server <#50CBAB>[server]'
+      range: ' <#A4A4A4>im Zeitraum <#50CBAB>[range]'
       timeseen:
-        self: '<#A4A4A4>Du hast <#50CBAB>[time] <#A4A4A4>auf dem Server gespielt.'
-        other: '<#A4A4A4>Der Spieler <#50CBAB>[player] <#A4A4A4>hat <#50CBAB>[time] <#A4A4A4>auf dem Server gespielt.'
+        self: '<#A4A4A4>Du hast <#50CBAB>[time] [scope][range] <#A4A4A4>gespielt.'
+        other: '<#A4A4A4>Der Spieler <#50CBAB>[player] <#A4A4A4>hat <#50CBAB>[time] [scope][range] <#A4A4A4>gespielt.'
     loritimeadmin:
       usage: '<#A4A4A4>Benutze <red>/onlinetimeadmin [set | mod | reset] [player] [time] <#A4A4A4>um die Spielzeit zu ändern..<newline>Weitere Commands: <red>/loritimeadmin [reload | update | deleteUser]'
       missinguuid: '<#A4A4A4>Der Spieler <#50CBAB>[player] <#A4A4A4>ist unbekannt.'

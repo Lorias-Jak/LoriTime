@@ -28,6 +28,11 @@ public final class ManualAdjustmentTable {
     private final PlayerTable playerTable;
 
     /**
+     * Aggregate query helper for manual adjustments.
+     */
+    private final ManualAdjustmentSumTable sumTable;
+
+    /**
      * Creates a manual adjustment table helper.
      *
      * @param tableName   adjustment table name
@@ -36,6 +41,7 @@ public final class ManualAdjustmentTable {
     public ManualAdjustmentTable(final String tableName, final PlayerTable playerTable) {
         this.tableName = tableName;
         this.playerTable = playerTable;
+        this.sumTable = new ManualAdjustmentSumTable(tableName);
     }
 
     /**
@@ -47,44 +53,58 @@ public final class ManualAdjustmentTable {
      * @throws SQLException if persistence fails
      */
     public void insert(final Connection connection, final long playerId, final ManualTimeAdjustment adjustment) throws SQLException {
+        insert(connection, playerId, OptionalLong.empty(), OptionalLong.empty(), adjustment);
+    }
+
+    /**
+     * Inserts an adjustment row with resolved scope references.
+     *
+     * @param connection database connection
+     * @param playerId adjusted player id
+     * @param serverId scoped server id
+     * @param worldId scoped world id
+     * @param adjustment adjustment data
+     * @throws SQLException if persistence fails
+     */
+    public void insert(final Connection connection, final long playerId,
+                       final OptionalLong serverId,
+                       final OptionalLong worldId,
+                       final ManualTimeAdjustment adjustment) throws SQLException {
         try (PreparedStatement insert = connection.prepareStatement(
-                "INSERT INTO `" + tableName + "` (`player_id`, `amount_seconds`, `reason`, `actor_uuid`, `actor_name`) "
-                        + "VALUES (?, ?, ?, ?, ?)")) {
+                "INSERT INTO `" + tableName + "` (`player_id`, `scope_type`, `server_id`, `world_id`, "
+                        + "`amount_seconds`, `reason`, `actor_uuid`, `actor_name`) "
+                        + "VALUES (?, ?, ?, ?, ?, ?, ?, ?)")) {
             insert.setLong(1, playerId);
-            insert.setLong(2, adjustment.amountSeconds());
-            insert.setString(3, adjustment.reason().name());
-            if (adjustment.actorUuid().isPresent()) {
-                insert.setBytes(4, UuidUtil.toBytes(adjustment.actorUuid().get()));
+            insert.setString(2, adjustment.scope().type().name());
+            if (serverId.isPresent()) {
+                insert.setLong(3, serverId.getAsLong());
             } else {
-                insert.setNull(4, Types.BINARY);
+                insert.setNull(3, Types.BIGINT);
             }
-            insert.setString(5, adjustment.actorName());
+            if (worldId.isPresent()) {
+                insert.setLong(4, worldId.getAsLong());
+            } else {
+                insert.setNull(4, Types.BIGINT);
+            }
+            insert.setLong(5, adjustment.amountSeconds());
+            insert.setString(6, adjustment.reason().name());
+            if (adjustment.actorUuid().isPresent()) {
+                insert.setBytes(7, UuidUtil.toBytes(adjustment.actorUuid().get()));
+            } else {
+                insert.setNull(7, Types.BINARY);
+            }
+            insert.setString(8, adjustment.actorName());
             insert.executeUpdate();
         }
     }
 
     /**
-     * Sums adjustment seconds for one player.
+     * Returns aggregate query helper for adjustment totals.
      *
-     * @param connection database connection
-     * @param playerId   player id
-     * @return optional sum
-     * @throws SQLException if the query fails
+     * @return adjustment sum helper
      */
-    public OptionalLong sumForPlayer(final Connection connection, final long playerId) throws SQLException {
-        try (PreparedStatement select = connection.prepareStatement(
-                "SELECT SUM(`amount_seconds`) AS total FROM `" + tableName + "` WHERE `player_id` = ?")) {
-            select.setLong(1, playerId);
-            try (ResultSet result = select.executeQuery()) {
-                if (result.next()) {
-                    final long value = result.getLong("total");
-                    if (!result.wasNull()) {
-                        return OptionalLong.of(value);
-                    }
-                }
-            }
-        }
-        return OptionalLong.empty();
+    public ManualAdjustmentSumTable sums() {
+        return sumTable;
     }
 
     /**
@@ -141,8 +161,4 @@ public final class ManualAdjustmentTable {
         }
     }
 
-    @Override
-    public String toString() {
-        return tableName;
-    }
 }

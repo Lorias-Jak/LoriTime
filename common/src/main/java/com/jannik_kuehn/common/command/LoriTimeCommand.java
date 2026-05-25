@@ -6,22 +6,31 @@ import com.jannik_kuehn.common.api.LoriTimePlayer;
 import com.jannik_kuehn.common.api.common.CommonCommand;
 import com.jannik_kuehn.common.api.common.CommonPlayerSender;
 import com.jannik_kuehn.common.api.common.CommonSender;
+import com.jannik_kuehn.common.api.common.CommonServer;
+import com.jannik_kuehn.common.api.storage.SessionContextDefaults;
+import com.jannik_kuehn.common.api.storage.TimeScope;
 import com.jannik_kuehn.common.command.core.CommandMessages;
-import com.jannik_kuehn.common.command.core.PlayerNameCompletions;
+import com.jannik_kuehn.common.command.core.CommandScopes;
+import com.jannik_kuehn.common.command.core.CommandScopes.LookupRequest;
+import com.jannik_kuehn.common.command.core.LoriTimeLookupCompletions;
 import com.jannik_kuehn.common.config.localization.Localization;
 import com.jannik_kuehn.common.exception.StorageException;
 import com.jannik_kuehn.common.utils.TimeUtil;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-@SuppressWarnings({"PMD.CommentRequired", "PMD.AvoidLiteralsInIfCondition", "PMD.CognitiveComplexity",
-        "PMD.AvoidThrowingRawExceptionTypes"})
+@SuppressWarnings({"PMD.CommentRequired", "PMD.CognitiveComplexity", "PMD.AvoidThrowingRawExceptionTypes"})
 public class LoriTimeCommand implements CommonCommand {
+
+    private static final String PLAYER_PLACEHOLDER = "[player]";
+
+    private static final String RANGE_PLACEHOLDER = "[range]";
+
+    private static final String SCOPE_PLACEHOLDER = "[scope]";
 
     private final LoriTimePlugin loriTimePlugin;
 
@@ -38,18 +47,15 @@ public class LoriTimeCommand implements CommonCommand {
     @Override
     @SuppressWarnings("PMD.AvoidDeeplyNestedIfStmts")
     public void execute(final CommonSender sender, final String... args) {
-        if (!sender.hasPermission("loritime.see")) {
-            CommandMessages.send(localization, sender, "message.nopermission");
-            return;
-        }
-        if (args.length <= 1) {
+        final LookupRequest request = CommandScopes.parseLookup(loriTimePlugin.getParser(), java.time.Clock.systemUTC(), args);
+        if (request != null) {
             loriTimePlugin.getScheduler().runAsyncOnce(() -> {
                 final LoriTimePlayer targetPlayer;
 
-                if (args.length == 1) {
+                if (request.playerName() != null) {
                     final Optional<UUID> optionalPlayer;
                     try {
-                        optionalPlayer = loriTimePlugin.getStorage().getUuid(args[0]);
+                        optionalPlayer = loriTimePlugin.getStorage().getUuid(request.playerName());
                     } catch (final StorageException e) {
                         throw new RuntimeException(e);
                     }
@@ -57,7 +63,7 @@ public class LoriTimeCommand implements CommonCommand {
                         targetPlayer = loriTimePlugin.getPlayerConverter().getOnlinePlayer(optionalPlayer.get());
                     } else {
                         sender.sendMessage(localization.formatTextComponent(localization.getRawMessage("message.command.loritime.notfound")
-                                .replace("[player]", args[0])));
+                                .replace(PLAYER_PLACEHOLDER, request.playerName())));
                         return;
                     }
                 } else {
@@ -68,21 +74,30 @@ public class LoriTimeCommand implements CommonCommand {
                     targetPlayer = loriTimePlugin.getPlayerConverter().getOnlinePlayer(playerSender.getUniqueId());
                 }
 
+                final Optional<TimeScope> resolvedScope = resolveScope(request, targetPlayer.getUniqueId());
+                if (resolvedScope.isEmpty()) {
+                    CommandMessages.send(localization, sender, "message.command.loritime.usage");
+                    return;
+                }
+                final TimeScope scope = resolvedScope.get();
                 final boolean isTargetSender = sender instanceof CommonPlayerSender playerSender
                         && targetPlayer.getUniqueId().equals(playerSender.getUniqueId());
-                    if (!isTargetSender && !sender.hasPermission("loritime.see.other")) {
+                if (!CommandScopes.hasPermission(sender, scope, isTargetSender)) {
                     CommandMessages.send(localization, sender, "message.nopermission");
                     return;
                 }
 
                 final long time;
                 try {
-                    final OptionalLong optionalTime = loriTimePlugin.getStorage().getTime(targetPlayer.getUniqueId());
+                    final OptionalLong optionalTime = request.hasTimeRange()
+                            ? loriTimePlugin.getStorage().getTime(targetPlayer.getUniqueId(), scope, request.timeRange())
+                            : loriTimePlugin.getStorage().getTime(targetPlayer.getUniqueId(), scope);
                     if (optionalTime.isPresent()) {
                         time = optionalTime.getAsLong();
                     } else {
-                        sender.sendMessage(localization.formatTextComponent(localization.getRawMessage("message.command.loritime.notfound")
-                                .replace("[player]", loriTimePlugin.getStorage().getName(targetPlayer.getUniqueId()).get())));
+                        final String targetName = loriTimePlugin.getStorage().getName(targetPlayer.getUniqueId())
+                                .orElse(targetPlayer.getName());
+                        sender.sendMessage(localization.formatTextComponent(noTimeMessage(targetName, scope, request)));
                         return;
                     }
                 } catch (final StorageException ex) {
@@ -91,13 +106,14 @@ public class LoriTimeCommand implements CommonCommand {
                     return;
                 }
                 if (isTargetSender) {
-                    sender.sendMessage(localization.formatTextComponent(localization.getRawMessage("message.command.loritime.timeseen.self")
-                            .replace("[time]", TimeUtil.formatTime(time, localization))));
+                    sender.sendMessage(localization.formatTextComponent(timeSeenMessage("message.command.loritime.timeseen.self",
+                            targetPlayer.getName(), time, scope, request)));
                 } else {
                     try {
-                        sender.sendMessage(localization.formatTextComponent(localization.getRawMessage("message.command.loritime.timeseen.other")
-                                .replace("[player]", loriTimePlugin.getStorage().getName(targetPlayer.getUniqueId()).get())
-                                .replace("[time]", TimeUtil.formatTime(time, localization))));
+                        final String targetName = loriTimePlugin.getStorage().getName(targetPlayer.getUniqueId())
+                                .orElse(targetPlayer.getName());
+                        sender.sendMessage(localization.formatTextComponent(timeSeenMessage("message.command.loritime.timeseen.other",
+                                targetName, time, scope, request)));
                     } catch (final StorageException e) {
                         throw new RuntimeException(e);
                     }
@@ -110,17 +126,84 @@ public class LoriTimeCommand implements CommonCommand {
 
     @Override
     public List<String> handleTabComplete(final CommonSender source, final String... args) {
-        if (!source.hasPermission("loritime.see.other")) {
-            return new ArrayList<>();
-        }
+        return new LoriTimeLookupCompletions(loriTimePlugin).suggest(source, args);
+    }
 
-        if (args.length == 0) {
-            return PlayerNameCompletions.suggest(loriTimePlugin, "");
+    private Optional<TimeScope> resolveScope(final LookupRequest request, final UUID targetUniqueId) {
+        if (!request.hasWorld()) {
+            return Optional.of(request.hasServer() ? TimeScope.server(request.serverName()) : TimeScope.GLOBAL);
         }
-        if (args.length == 1) {
-            return PlayerNameCompletions.suggest(loriTimePlugin, args[0]);
+        if (request.hasServer()) {
+            return Optional.of(TimeScope.world(request.serverName(), request.worldName()));
         }
-        return new ArrayList<>();
+        return resolveDefaultServer(targetUniqueId).map(serverName -> TimeScope.world(serverName, request.worldName()));
+    }
+
+    private Optional<String> resolveDefaultServer(final UUID targetUniqueId) {
+        final CommonServer server = loriTimePlugin.getServer();
+        if (server.isProxy()) {
+            return server.getCurrentServer(targetUniqueId);
+        }
+        return server.getLocalServerName().or(() -> Optional.of(SessionContextDefaults.SERVER));
+    }
+
+    private String noTimeMessage(final String targetName, final TimeScope scope, final LookupRequest request) {
+        if (scope.type() == TimeScope.Type.GLOBAL && !request.hasTimeRange()) {
+            return localization.getRawMessage("message.command.loritime.notfound")
+                    .replace(PLAYER_PLACEHOLDER, targetName);
+        }
+        return localization.getRawMessage("message.command.loritime.noscopedtime")
+                .replace(PLAYER_PLACEHOLDER, targetName)
+                .replace(SCOPE_PLACEHOLDER, scopeDescription(scope, request))
+                .replace(RANGE_PLACEHOLDER, rangeDescription(request));
+    }
+
+    private String timeSeenMessage(final String messageKey, final String targetName, final long time,
+                                   final TimeScope scope, final LookupRequest request) {
+        final String scopeText = scopeDescription(scope, request);
+        final String rangeText = rangeDescription(request);
+        final String rawMessage = localization.getRawMessage(messageKey);
+        final String message = rawMessage
+                .replace(PLAYER_PLACEHOLDER, targetName)
+                .replace("[time]", TimeUtil.formatTime(time, localization))
+                .replace(RANGE_PLACEHOLDER, rangeText);
+        final StringBuilder result = new StringBuilder(message);
+        if (rawMessage.contains(SCOPE_PLACEHOLDER)) {
+            final int scopeIndex = result.indexOf(SCOPE_PLACEHOLDER);
+            result.replace(scopeIndex, scopeIndex + SCOPE_PLACEHOLDER.length(), scopeText);
+        } else {
+            result.append(' ').append(scopeText);
+        }
+        if (!rawMessage.contains(RANGE_PLACEHOLDER)) {
+            result.append(rangeText);
+        }
+        return result.toString();
+    }
+
+    private String scopeDescription(final TimeScope scope, final LookupRequest request) {
+        return switch (scope.type()) {
+            case GLOBAL -> localization.getRawMessage("message.command.loritime.scope.global");
+            case SERVER -> localization.getRawMessage("message.command.loritime.scope.server")
+                    .replace("[server]", scope.server());
+            case WORLD -> worldScopeDescription(scope, request);
+        };
+    }
+
+    private String worldScopeDescription(final TimeScope scope, final LookupRequest request) {
+        final String key = request.hasServer()
+                ? "message.command.loritime.scope.worldserver"
+                : "message.command.loritime.scope.world";
+        return localization.getRawMessage(key)
+                .replace("[server]", scope.server())
+                .replace("[world]", scope.world());
+    }
+
+    private String rangeDescription(final LookupRequest request) {
+        if (!request.hasTimeRange()) {
+            return "";
+        }
+        return localization.getRawMessage("message.command.loritime.range")
+                .replace(RANGE_PLACEHOLDER, request.timeRangeInput());
     }
 
     @Override
@@ -135,4 +218,5 @@ public class LoriTimeCommand implements CommonCommand {
     public String getCommandName() {
         return "loritime";
     }
+
 }

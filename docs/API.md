@@ -120,6 +120,45 @@ loriTime.getOnlineTime(player).thenAccept(optionalOnlineTime -> {
 
 An empty result means LoriTime does not currently have stored data for that player.
 
+### Read Scoped Online Time
+
+Use `TimeScope` to query global, server, or world totals:
+
+```java
+import com.jannik_kuehn.common.api.storage.TimeScope;
+
+loriTime.getOnlineTime(uniqueId, TimeScope.server("survival")).thenAccept(optionalOnlineTime -> {
+    optionalOnlineTime.ifPresent(duration -> {
+        long seconds = duration.toSeconds();
+    });
+});
+
+loriTime.getOnlineTime(uniqueId, TimeScope.world("survival", "world"));
+```
+
+### Read Time In A Range
+
+Use `TimeRange` to query a bounded inclusive-start/exclusive-end history window. Ranged totals clip session rows to the requested window and include manual adjustments whose audit timestamp is inside the range.
+
+```java
+import com.jannik_kuehn.common.api.storage.TimeRange;
+import com.jannik_kuehn.common.api.storage.TimeScope;
+
+TimeRange lastSevenDays = TimeRange.between(
+        Instant.now().minus(Duration.ofDays(7)),
+        Instant.now()
+);
+
+loriTime.getOnlineTime(uniqueId, TimeScope.server("survival"), lastSevenDays)
+        .thenAccept(optionalOnlineTime -> {
+            optionalOnlineTime.ifPresent(duration -> {
+                long seconds = duration.toSeconds();
+            });
+        });
+```
+
+The ranged overload is part of the LoriTime 2 API surface. Storage implementations of `TimeQueryStorage` and `UnifiedStorage` must implement the ranged `getTime(UUID, TimeScope, TimeRange)` contract.
+
 ## Writing Manual Adjustments
 
 Use signed durations. Positive values add time, negative values remove time. Durations must be precise to whole seconds.
@@ -140,6 +179,13 @@ loriTime.addTime(player, Duration.ofMinutes(10));
 ```
 
 These adjustments are stored with LoriTime's stable API actor name.
+
+To write a scoped adjustment, pass a `TimeScope`:
+
+```java
+loriTime.addTime(uniqueId, Duration.ofMinutes(10), TimeScope.server("survival"));
+loriTime.addTime(uniqueId, Duration.ofMinutes(-5), TimeScope.world("survival", "world"));
+```
 
 ### Actor-Aware Adjustment
 
@@ -165,6 +211,12 @@ loriTime.addTime(
 ```
 
 Actor-aware adjustments preserve the actor UUID and actor name in LoriTime's adjustment history.
+
+Actor-aware adjustments can also be scoped:
+
+```java
+loriTime.addTime(uniqueId, Duration.ofMinutes(10), actorUniqueId, actorName, TimeScope.server("survival"));
+```
 
 ## Errors
 

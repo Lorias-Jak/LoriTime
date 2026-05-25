@@ -1,6 +1,7 @@
 package com.jannik_kuehn.common.storage.database.table;
 
 import com.jannik_kuehn.common.api.storage.TimeEntryReason;
+import com.jannik_kuehn.common.api.storage.TimeRange;
 import com.jannik_kuehn.common.storage.database.SqlDialect;
 import com.jannik_kuehn.common.utils.UuidUtil;
 
@@ -24,6 +25,71 @@ import java.util.UUID;
  */
 @SuppressWarnings("PMD.TooManyMethods")
 public final class TimeTable {
+    /**
+     * Suffix used by the normalized session table.
+     */
+    private static final String TIME_SUFFIX = "_time";
+
+    /**
+     * Suffix used by the normalized world table.
+     */
+    private static final String WORLD_SUFFIX = "_world";
+
+    /**
+     * Suffix used by the normalized server table.
+     */
+    private static final String SERVER_SUFFIX = "_server";
+
+    /**
+     * SQL alias for the session join timestamp.
+     */
+    private static final String JOIN_TIME = "t.join_time";
+
+    /**
+     * SQL alias for the session leave timestamp.
+     */
+    private static final String LEAVE_TIME = "t.leave_time";
+
+    /**
+     * Shared SQL join for world-scoped time queries.
+     */
+    private static final String WORLD_TIME_JOIN = "` w ON w.id = t.world_id ";
+
+    /**
+     * Shared SQL join for server-scoped time queries.
+     */
+    private static final String SERVER_TIME_JOIN = "` s ON s.id = w.server_id ";
+
+    /**
+     * Minimum overlap required for a ranged row to count as data.
+     */
+    private static final long MINIMUM_OVERLAP_SECONDS = 0L;
+
+    /**
+     * Shared SQL total alias fragment.
+     */
+    private static final String TOTAL_ALIAS = ") AS total ";
+
+    /**
+     * Shared SQL FROM fragment for the session table.
+     */
+    private static final String FROM_TIME = "FROM `";
+
+    /**
+     * Shared SQL session table alias fragment.
+     */
+    private static final String TIME_TABLE_ALIAS = "` t ";
+
+    /**
+     * Shared SQL JOIN fragment.
+     */
+    private static final String JOIN_TABLE = "JOIN `";
+
+    /**
+     * Shared SQL player join fragment.
+     */
+    private static final String PLAYER_JOIN = "` p ON p.id = t.player_id ";
+
     /**
      * The table name.
      */
@@ -193,10 +259,10 @@ public final class TimeTable {
      * @throws SQLException if an SQL error occurs during the query execution
      */
     public OptionalLong sumForPlayer(final Connection connection, final UUID uuid) throws SQLException {
-        final String durationExpression = dialect.durationSecondsExpression("t.join_time", "t.leave_time");
-        final String sql = "SELECT SUM(" + durationExpression + ") AS total "
-                + "FROM `" + tableName + "` t "
-                + "JOIN `" + playerTable + "` p ON p.id = t.player_id "
+        final String durationExpression = dialect.durationSecondsExpression(JOIN_TIME, LEAVE_TIME);
+        final String sql = "SELECT SUM(" + durationExpression + TOTAL_ALIAS
+                + FROM_TIME + tableName + TIME_TABLE_ALIAS
+                + JOIN_TABLE + playerTable + PLAYER_JOIN
                 + "WHERE p.uuid = ?";
         try (PreparedStatement select = connection.prepareStatement(sql)) {
             select.setBytes(1, UuidUtil.toBytes(uuid));
@@ -213,6 +279,132 @@ public final class TimeTable {
     }
 
     /**
+     * Calculates the ranged total session duration for a player.
+     *
+     * @param connection database connection
+     * @param uuid player UUID
+     * @param range time range
+     * @return optional duration sum
+     * @throws SQLException if lookup fails
+     */
+    public OptionalLong sumForPlayer(final Connection connection, final UUID uuid, final TimeRange range)
+            throws SQLException {
+        final String sql = "SELECT t.`join_time`, t.`leave_time` "
+                + FROM_TIME + tableName + TIME_TABLE_ALIAS
+                + JOIN_TABLE + playerTable + PLAYER_JOIN
+                + "WHERE p.uuid = ?";
+        try (PreparedStatement select = connection.prepareStatement(sql)) {
+            select.setBytes(1, UuidUtil.toBytes(uuid));
+            return optionalRangedTotal(select, range);
+        }
+    }
+
+    /**
+     * Calculates the total session duration for a player on one server.
+     *
+     * @param connection database connection
+     * @param uuid player UUID
+     * @param server server name
+     * @return optional duration sum
+     * @throws SQLException if lookup fails
+     */
+    public OptionalLong sumForPlayerAndServer(final Connection connection, final UUID uuid, final String server)
+            throws SQLException {
+        final String durationExpression = dialect.durationSecondsExpression(JOIN_TIME, LEAVE_TIME);
+        final String sql = "SELECT SUM(" + durationExpression + TOTAL_ALIAS
+                + FROM_TIME + tableName + TIME_TABLE_ALIAS
+                + JOIN_TABLE + playerTable + PLAYER_JOIN
+                + JOIN_TABLE + worldTableName() + WORLD_TIME_JOIN
+                + JOIN_TABLE + serverTableName() + SERVER_TIME_JOIN
+                + "WHERE p.uuid = ? AND s.server = ?";
+        try (PreparedStatement select = connection.prepareStatement(sql)) {
+            select.setBytes(1, UuidUtil.toBytes(uuid));
+            select.setString(2, server);
+            return optionalTotal(select);
+        }
+    }
+
+    /**
+     * Calculates the ranged total session duration for a player on one server.
+     *
+     * @param connection database connection
+     * @param uuid player UUID
+     * @param server server name
+     * @param range time range
+     * @return optional duration sum
+     * @throws SQLException if lookup fails
+     */
+    public OptionalLong sumForPlayerAndServer(final Connection connection, final UUID uuid,
+                                              final String server, final TimeRange range) throws SQLException {
+        final String sql = "SELECT t.`join_time`, t.`leave_time` "
+                + FROM_TIME + tableName + TIME_TABLE_ALIAS
+                + JOIN_TABLE + playerTable + PLAYER_JOIN
+                + JOIN_TABLE + worldTableName() + WORLD_TIME_JOIN
+                + JOIN_TABLE + serverTableName() + SERVER_TIME_JOIN
+                + "WHERE p.uuid = ? AND s.server = ?";
+        try (PreparedStatement select = connection.prepareStatement(sql)) {
+            select.setBytes(1, UuidUtil.toBytes(uuid));
+            select.setString(2, server);
+            return optionalRangedTotal(select, range);
+        }
+    }
+
+    /**
+     * Calculates the total session duration for a player in one world.
+     *
+     * @param connection database connection
+     * @param uuid player UUID
+     * @param server server name
+     * @param world world name
+     * @return optional duration sum
+     * @throws SQLException if lookup fails
+     */
+    public OptionalLong sumForPlayerAndWorld(final Connection connection, final UUID uuid,
+                                             final String server, final String world) throws SQLException {
+        final String durationExpression = dialect.durationSecondsExpression(JOIN_TIME, LEAVE_TIME);
+        final String sql = "SELECT SUM(" + durationExpression + TOTAL_ALIAS
+                + FROM_TIME + tableName + TIME_TABLE_ALIAS
+                + JOIN_TABLE + playerTable + PLAYER_JOIN
+                + JOIN_TABLE + worldTableName() + WORLD_TIME_JOIN
+                + JOIN_TABLE + serverTableName() + SERVER_TIME_JOIN
+                + "WHERE p.uuid = ? AND s.server = ? AND w.world = ?";
+        try (PreparedStatement select = connection.prepareStatement(sql)) {
+            select.setBytes(1, UuidUtil.toBytes(uuid));
+            select.setString(2, server);
+            select.setString(3, world);
+            return optionalTotal(select);
+        }
+    }
+
+    /**
+     * Calculates the ranged total session duration for a player in one world.
+     *
+     * @param connection database connection
+     * @param uuid player UUID
+     * @param server server name
+     * @param world world name
+     * @param range time range
+     * @return optional duration sum
+     * @throws SQLException if lookup fails
+     */
+    public OptionalLong sumForPlayerAndWorld(final Connection connection, final UUID uuid,
+                                             final String server, final String world,
+                                             final TimeRange range) throws SQLException {
+        final String sql = "SELECT t.`join_time`, t.`leave_time` "
+                + FROM_TIME + tableName + TIME_TABLE_ALIAS
+                + JOIN_TABLE + playerTable + PLAYER_JOIN
+                + JOIN_TABLE + worldTableName() + WORLD_TIME_JOIN
+                + JOIN_TABLE + serverTableName() + SERVER_TIME_JOIN
+                + "WHERE p.uuid = ? AND s.server = ? AND w.world = ?";
+        try (PreparedStatement select = connection.prepareStatement(sql)) {
+            select.setBytes(1, UuidUtil.toBytes(uuid));
+            select.setString(2, server);
+            select.setString(3, world);
+            return optionalRangedTotal(select, range);
+        }
+    }
+
+    /**
      * Retrieves the total session duration for all players from the database.
      * The session duration is calculated by summing up the differences between
      * join and leave timestamps for each player.
@@ -224,10 +416,10 @@ public final class TimeTable {
      */
     public Map<String, Long> getAllTotals(final Connection connection) throws SQLException {
         final Map<String, Long> totals = new HashMap<>();
-        final String durationExpression = dialect.durationSecondsExpression("t.join_time", "t.leave_time");
-        final String sql = "SELECT p.uuid AS uuid, SUM(" + durationExpression + ") AS total "
-                + "FROM `" + tableName + "` t "
-                + "JOIN `" + playerTable + "` p ON p.id = t.player_id "
+        final String durationExpression = dialect.durationSecondsExpression(JOIN_TIME, LEAVE_TIME);
+        final String sql = "SELECT p.uuid AS uuid, SUM(" + durationExpression + TOTAL_ALIAS
+                + FROM_TIME + tableName + TIME_TABLE_ALIAS
+                + JOIN_TABLE + playerTable + PLAYER_JOIN
                 + "GROUP BY p.uuid";
         try (PreparedStatement select = connection.prepareStatement(sql)) {
             try (ResultSet result = select.executeQuery()) {
@@ -321,5 +513,42 @@ public final class TimeTable {
             }
         }
         return null;
+    }
+
+    private OptionalLong optionalTotal(final PreparedStatement select) throws SQLException {
+        try (ResultSet result = select.executeQuery()) {
+            if (result.next()) {
+                final long value = result.getLong("total");
+                if (!result.wasNull()) {
+                    return OptionalLong.of(value);
+                }
+            }
+        }
+        return OptionalLong.empty();
+    }
+
+    private OptionalLong optionalRangedTotal(final PreparedStatement select, final TimeRange range) throws SQLException {
+        long total = 0L;
+        boolean matched = false;
+        try (ResultSet result = select.executeQuery()) {
+            while (result.next()) {
+                final long overlap = range.overlapSeconds(
+                        DatabaseInstantReader.readInstant(result, "join_time").toEpochMilli(),
+                        DatabaseInstantReader.readInstant(result, "leave_time").toEpochMilli());
+                if (overlap > MINIMUM_OVERLAP_SECONDS) {
+                    total += overlap;
+                    matched = true;
+                }
+            }
+        }
+        return matched ? OptionalLong.of(total) : OptionalLong.empty();
+    }
+
+    private String worldTableName() {
+        return tableName.replace(TIME_SUFFIX, WORLD_SUFFIX);
+    }
+
+    private String serverTableName() {
+        return tableName.replace(TIME_SUFFIX, SERVER_SUFFIX);
     }
 }

@@ -8,7 +8,11 @@ import com.jannik_kuehn.common.api.common.CommonPlayerSender;
 import com.jannik_kuehn.common.api.common.CommonSender;
 import com.jannik_kuehn.common.api.storage.ManualTimeAdjustment;
 import com.jannik_kuehn.common.api.storage.TimeEntryReason;
+import com.jannik_kuehn.common.api.storage.TimeScope;
 import com.jannik_kuehn.common.command.core.CommandMessages;
+import com.jannik_kuehn.common.command.core.CommandScopes;
+import com.jannik_kuehn.common.command.core.CommandScopes.ParsedScope;
+import com.jannik_kuehn.common.command.core.CommandScopes.ParsedTimedScope;
 import com.jannik_kuehn.common.command.core.PlayerNameCompletions;
 import com.jannik_kuehn.common.command.core.SubcommandRouter;
 import com.jannik_kuehn.common.config.localization.Localization;
@@ -91,6 +95,9 @@ public class LoriTimeModifyCommand implements CommonCommand {
         if (args.length == 2) {
             return PlayerNameCompletions.suggest(plugin, args[1]);
         }
+        if (args.length > 2 && args[args.length - 1].isBlank()) {
+            return List.of(CommandScopes.SERVER, CommandScopes.WORLD);
+        }
         return List.of();
     }
 
@@ -105,7 +112,12 @@ public class LoriTimeModifyCommand implements CommonCommand {
             return;
         }
 
-        final String[] timeArgs = Arrays.copyOfRange(args, 1, args.length);
+        final ParsedTimedScope timedScope = CommandScopes.parseTimedScope(args);
+        if (timedScope == null) {
+            CommandMessages.send(localization, sender, "message.command.loritimeadmin.set.usage");
+            return;
+        }
+        final String[] timeArgs = timedScope.timeArgs();
         final OptionalLong optionalTime = parser.parseToSeconds(String.join(" ", timeArgs));
         if (optionalTime.isEmpty()) {
             printNotTimeMessage(sender, timeArgs);
@@ -121,7 +133,7 @@ public class LoriTimeModifyCommand implements CommonCommand {
             return;
         }
 
-        final OptionalLong optionalCurrentTime = plugin.getStorage().getTime(player.getUniqueId());
+        final OptionalLong optionalCurrentTime = plugin.getStorage().getTime(player.getUniqueId(), timedScope.scope());
         if (optionalCurrentTime.isEmpty()) {
             sender.sendMessage(localization.formatTextComponent(localization.getRawMessage("message.command.loritime.notfound")
                     .replace("[player]", player.getName())));
@@ -130,7 +142,7 @@ public class LoriTimeModifyCommand implements CommonCommand {
 
         final long currentTime = optionalCurrentTime.getAsLong();
         if (currentTime != time) {
-            modifyOnlineTime(sender, player.getUniqueId(), time - currentTime);
+            modifyOnlineTime(sender, player.getUniqueId(), time - currentTime, timedScope.scope());
         }
         sender.sendMessage(localization.formatTextComponent(localization.getRawMessage("message.command.loritimeadmin.set.success")
                 .replace("[player]", player.getName())
@@ -149,7 +161,12 @@ public class LoriTimeModifyCommand implements CommonCommand {
             return;
         }
 
-        final String[] timeArgs = Arrays.copyOfRange(args, 1, args.length);
+        final ParsedTimedScope timedScope = CommandScopes.parseTimedScope(args);
+        if (timedScope == null) {
+            CommandMessages.send(localization, sender, "message.command.loritimeadmin.modify.usage");
+            return;
+        }
+        final String[] timeArgs = timedScope.timeArgs();
         final OptionalLong optionalTime = parser.parseToSeconds(String.join(" ", timeArgs));
         if (optionalTime.isEmpty()) {
             printNotTimeMessage(sender, timeArgs);
@@ -157,7 +174,7 @@ public class LoriTimeModifyCommand implements CommonCommand {
         }
 
         final LoriTimePlayer player = plugin.getPlayerConverter().getOnlinePlayer(optionalUUID.get());
-        final OptionalLong optionalCurrentTime = plugin.getStorage().getTime(player.getUniqueId());
+        final OptionalLong optionalCurrentTime = plugin.getStorage().getTime(player.getUniqueId(), timedScope.scope());
         if (optionalCurrentTime.isEmpty()) {
             sender.sendMessage(localization.formatTextComponent(localization.getRawMessage("message.command.loritime.notfound")
                     .replace("[player]", player.getName())));
@@ -171,7 +188,7 @@ public class LoriTimeModifyCommand implements CommonCommand {
             return;
         }
         if (time != 0) {
-            modifyOnlineTime(sender, player.getUniqueId(), time);
+            modifyOnlineTime(sender, player.getUniqueId(), time, timedScope.scope());
         }
         sender.sendMessage(localization.formatTextComponent(localization.getRawMessage("message.command.loritimeadmin.modify.success")
                 .replace("[player]", player.getName())
@@ -179,19 +196,20 @@ public class LoriTimeModifyCommand implements CommonCommand {
     }
 
     private void reset(final CommonSender sender, final String... args) throws StorageException {
-        if (args.length != 1) {
+        final ParsedScope parsedScope = CommandScopes.parseResetScope(args);
+        if (parsedScope == null) {
             CommandMessages.send(localization, sender, "message.command.loritimeadmin.reset.usage");
             return;
         }
 
-        final Optional<UUID> optionalUUID = plugin.getStorage().getUuid(args[0]);
+        final Optional<UUID> optionalUUID = plugin.getStorage().getUuid(parsedScope.playerName());
         if (optionalUUID.isEmpty()) {
-            printMissingUuidMessage(sender, args[0]);
+            printMissingUuidMessage(sender, parsedScope.playerName());
             return;
         }
         final LoriTimePlayer player = plugin.getPlayerConverter().getOnlinePlayer(optionalUUID.get());
 
-        final OptionalLong optionalCurrentTime = plugin.getStorage().getTime(player.getUniqueId());
+        final OptionalLong optionalCurrentTime = plugin.getStorage().getTime(player.getUniqueId(), parsedScope.scope());
         if (optionalCurrentTime.isEmpty()) {
             sender.sendMessage(localization.formatTextComponent(localization.getRawMessage("message.command.loritime.notfound")
                     .replace("[player]", player.getName())));
@@ -199,7 +217,7 @@ public class LoriTimeModifyCommand implements CommonCommand {
         }
         final long currentTime = optionalCurrentTime.getAsLong();
         if (currentTime != 0) {
-            modifyOnlineTime(sender, player.getUniqueId(), -currentTime);
+            modifyOnlineTime(sender, player.getUniqueId(), -currentTime, parsedScope.scope());
         }
         sender.sendMessage(localization.formatTextComponent(localization.getRawMessage("message.command.loritimeadmin.reset.success")
                 .replace("[player]", player.getName())));
@@ -236,11 +254,15 @@ public class LoriTimeModifyCommand implements CommonCommand {
     }
 
     public void modifyOnlineTime(final CommonSender sender, final UUID uuid, final long modifyBy) {
+        modifyOnlineTime(sender, uuid, modifyBy, TimeScope.GLOBAL);
+    }
+
+    public void modifyOnlineTime(final CommonSender sender, final UUID uuid, final long modifyBy, final TimeScope scope) {
         try {
             final UUID actorUuid = sender instanceof CommonPlayerSender playerSender ? playerSender.getUniqueId() : null;
             final String actorName = sender instanceof CommonPlayerSender ? sender.getName() : "CONSOLE";
             plugin.getStorage().addTime(new ManualTimeAdjustment(uuid, modifyBy,
-                    TimeEntryReason.MANUAL_ADJUSTMENT, actorUuid, actorName));
+                    TimeEntryReason.MANUAL_ADJUSTMENT, actorUuid, actorName, scope));
         } catch (final StorageException ex) {
             log.error("could not modify online time of " + uuid.toString(), ex);
         }

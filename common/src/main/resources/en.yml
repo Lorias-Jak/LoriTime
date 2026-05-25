@@ -45,26 +45,33 @@ message:
   nopermission: '<#FF3232>You don''t have the required permissions to do that.'
   command:
     loritime:
-      usage: '<#A4A4A4>Use <red>/loritime [player] <#A4A4A4>to see a players online time.'
+      usage: '<#A4A4A4>Use <red>/loritime [player] [server:<server>|s:<server>] [world:<world>|w:<world>] [time:<range>|t:<range>] <#A4A4A4>to see a players online time.'
       notfound: '<#A4A4A4>The player <#50CBAB>[player] <#A4A4A4>has not played on the server yet.'
+      noscopedtime: '<#A4A4A4>The player <#50CBAB>[player] <#A4A4A4>has no stored online time [scope][range].'
       consoleself: '<#FF3232>You''re the console. You can not lookup your online time!'
+      scope:
+        global: '<#A4A4A4>on the network'
+        server: '<#A4A4A4>on the server <#50CBAB>[server]'
+        world: '<#A4A4A4>on the world <#50CBAB>[world]'
+        worldserver: '<#A4A4A4>on the world <#50CBAB>[world] <#A4A4A4>on server <#50CBAB>[server]'
+      range: ' <#A4A4A4>during <#50CBAB>[range]'
       timeseen:
-        self: '<#A4A4A4>You have played for <#50CBAB>[time] <#A4A4A4>on the server.'
-        other: '<#A4A4A4>The player <#50CBAB>[player] <#A4A4A4>has already played for <#50CBAB>[time] <#A4A4A4>on the server.'
+        self: '<#A4A4A4>You have played for <#50CBAB>[time] [scope][range]<#A4A4A4>.'
+        other: '<#A4A4A4>The player <#50CBAB>[player] <#A4A4A4>has already played for <#50CBAB>[time] [scope][range]<#A4A4A4>.'
     loritimeadmin:
-      usage: '<#A4A4A4>Use <red>/loritimeadmin [set | mod | reset] [player] [time] <#A4A4A4>to edit a players online time.<newline>Other commands: <red>/loritimeadmin [reload | update | deleteUser]'
+      usage: '<#A4A4A4>Use <red>/ltmodify [add | set | reset] [player] [time] [server [server] | world [server] [world]] <#A4A4A4>to edit a players online time.<newline>Other commands: <red>/loritimeadmin [reload | update | deleteUser]'
       missinguuid: '<#A4A4A4>The player <#50CBAB>[player] <#A4A4A4>is unknown.'
       nottime: '<#A4A4A4>The given time argument <red>[argument] <#FF3232>is not valid.'
       set:
-        usage: '<#A4A4A4>Use <red>/loritimeadmin set [player] [time] <#A4A4A4>to set a players online time.'
+        usage: '<#A4A4A4>Use <red>/ltmodify set [player] [time] [server [server] | world [server] [world]] <#A4A4A4>to set a players online time.'
         success: '<#A4A4A4>The online time of player <#50CBAB>[player] <#A4A4A4>got successfully set to <#50CBAB>[time].'
         negativetime: '<red>The given time <#50CBAB>[time] <red>is negative, but must at least be zero.'
       modify:
-        usage: '<#A4A4A4>Use <red>/onlinetimeadmin mod [player] [time] <#A4A4A4>to modify a players online time.'
+        usage: '<#A4A4A4>Use <red>/ltmodify add [player] [time] [server [server] | world [server] [world]] <#A4A4A4>to modify a players online time.'
         success: '<#A4A4A4>The online time of player <#50CBAB>[player] <#A4A4A4>got successfully modified by <#50CBAB>[time].'
         negativetimesum: '<red>The given time <#50CBAB>[time] <red>would cause a negative online time, but must at least be zero.'
       reset:
-        usage: '<#A4A4A4>Use <red>/onlinetimeadmin reset [player] <#A4A4A4>to reset a players online time.'
+        usage: '<#A4A4A4>Use <red>/ltmodify reset [player] [server [server] | world [server] [world]] <#A4A4A4>to reset a players online time.'
         success: '<#A4A4A4>The online time of player <#50CBAB>[player] <#A4A4A4>got successfully reset.'
       deleteUser:
         usage: '<#A4A4A4>Use <red>/onlinetimeadmin delete [player] confirm <#A4A4A4>to delete a user entirely from the plugin.'

@@ -5,7 +5,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.LinkedHashSet;
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * Table helper for world entries.
@@ -64,6 +66,21 @@ public final class WorldTable {
         throw new SQLException("Unable to create world entry");
     }
 
+    /**
+     * Finds an existing world id.
+     *
+     * @param connection database connection
+     * @param server server name
+     * @param world world name
+     * @return world id if present
+     * @throws SQLException if lookup fails
+     */
+    public Optional<Long> findId(final Connection connection, final String server, final String world)
+            throws SQLException {
+        final Optional<Long> serverId = serverTable.findId(connection, server);
+        return serverId.isEmpty() ? Optional.empty() : findId(connection, serverId.get(), world);
+    }
+
     private Optional<Long> findId(final Connection connection, final long serverId, final String world)
             throws SQLException {
         try (PreparedStatement select = connection.prepareStatement(
@@ -77,5 +94,24 @@ public final class WorldTable {
             }
         }
         return Optional.empty();
+    }
+
+    /**
+     * Reads all known world names.
+     *
+     * @param connection database connection
+     * @return known world names
+     * @throws SQLException if lookup fails
+     */
+    public Set<String> getAllWorlds(final Connection connection) throws SQLException {
+        final Set<String> worlds = new LinkedHashSet<>();
+        try (PreparedStatement select = connection.prepareStatement(
+                "SELECT DISTINCT `world` FROM `" + tableName + "` ORDER BY `world`");
+             ResultSet result = select.executeQuery()) {
+            while (result.next()) {
+                worlds.add(result.getString("world"));
+            }
+        }
+        return worlds;
     }
 }

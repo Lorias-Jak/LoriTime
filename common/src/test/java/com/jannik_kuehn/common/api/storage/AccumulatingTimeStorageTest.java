@@ -5,6 +5,7 @@ import com.jannik_kuehn.common.exception.StorageException;
 import org.junit.jupiter.api.Test;
 
 import java.sql.SQLException;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -249,6 +250,51 @@ class AccumulatingTimeStorageTest {
         assertTrue(storage.sessions.isEmpty(), "Expected no standalone session row to be created");
     }
 
+    @Test
+    void scopedTotalIncludesActiveSessionOnlyWhenScopeMatches() throws StorageException {
+        final FakeUnifiedStorage storage = new FakeUnifiedStorage();
+        final AccumulatingTimeStorage accumulator = accumulator(storage);
+
+        accumulator.startAccumulating(PLAYER, "Lorias_", "survival", "world", System.currentTimeMillis() - 5_000L);
+
+        assertTrue(accumulator.getTime(PLAYER, TimeScope.server("survival")).orElseThrow() >= 5L,
+                "Expected active time for matching server");
+        assertEquals(OptionalLong.of(0L), accumulator.getTime(PLAYER, TimeScope.server("lobby")),
+                "Expected no active time for non-matching server");
+        assertTrue(accumulator.getTime(PLAYER, TimeScope.world("survival", "world")).orElseThrow() >= 5L,
+                "Expected active time for matching world");
+        assertEquals(OptionalLong.of(0L), accumulator.getTime(PLAYER, TimeScope.world("survival", "nether")),
+                "Expected no active time for non-matching world");
+    }
+
+    @Test
+    void rangedTotalIncludesOnlyOverlappingActiveSession() throws StorageException {
+        final FakeUnifiedStorage storage = new FakeUnifiedStorage();
+        final AccumulatingTimeStorage accumulator = accumulator(storage);
+        final long start = System.currentTimeMillis() - 10_000L;
+
+        accumulator.startAccumulating(PLAYER, "Lorias_", "survival", "world", start);
+
+        final TimeRange range = TimeRange.between(Instant.ofEpochMilli(start + 5_000L),
+                Instant.ofEpochMilli(System.currentTimeMillis() + 1_000L));
+        assertTrue(accumulator.getTime(PLAYER, TimeScope.world("survival", "world"), range).orElseThrow() >= 5L,
+                "Expected overlapping active time to contribute to ranged total");
+    }
+
+    @Test
+    void rangedTotalExcludesNonOverlappingActiveSession() throws StorageException {
+        final FakeUnifiedStorage storage = new FakeUnifiedStorage();
+        final AccumulatingTimeStorage accumulator = accumulator(storage);
+        final long start = System.currentTimeMillis() - 10_000L;
+
+        accumulator.startAccumulating(PLAYER, "Lorias_", "survival", "world", start);
+
+        final TimeRange range = TimeRange.between(Instant.ofEpochMilli(start - 20_000L),
+                Instant.ofEpochMilli(start - 10_000L));
+        assertEquals(OptionalLong.empty(), accumulator.getTime(PLAYER, TimeScope.world("survival", "world"), range),
+                "Expected non-overlapping active time to be excluded");
+    }
+
     private AccumulatingTimeStorage accumulator(final FakeUnifiedStorage storage) {
         return new AccumulatingTimeStorage(mock(WrappedLogger.class), storage);
     }
@@ -294,10 +340,38 @@ class AccumulatingTimeStorageTest {
         }
 
         @Override
+        public Set<String> getKnownServerNames() {
+            return Set.of();
+        }
+
+        @Override
+        public Set<String> getKnownWorldNames() {
+            return Set.of();
+        }
+
+        @Override
         public OptionalLong getTime(final UUID uniqueId) {
+            return getTime(uniqueId, TimeScope.GLOBAL);
+        }
+
+        @Override
+        public OptionalLong getTime(final UUID uniqueId, final TimeScope scope) {
             return OptionalLong.of(adjustments.getOrDefault(uniqueId, 0L)
                     + sessions.stream().filter(session -> session.uuid().equals(uniqueId))
+                    .filter(session -> scope.matches(new PlayerSessionContext(session.uuid(), session.name(),
+                            session.server(), session.world(), session.startedAtMs())))
                     .mapToLong(PlayerSessionChunk::durationSeconds).sum());
+        }
+
+        @Override
+        public OptionalLong getTime(final UUID uniqueId, final TimeScope scope, final TimeRange range) {
+            final long total = adjustments.getOrDefault(uniqueId, 0L)
+                    + sessions.stream().filter(session -> session.uuid().equals(uniqueId))
+                    .filter(session -> scope.matches(new PlayerSessionContext(session.uuid(), session.name(),
+                            session.server(), session.world(), session.startedAtMs())))
+                    .mapToLong(session -> range.overlapSeconds(session.startedAtMs(), session.stoppedAtMs()))
+                    .sum();
+            return total == 0L ? OptionalLong.empty() : OptionalLong.of(total);
         }
 
         @Override

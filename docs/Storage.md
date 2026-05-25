@@ -87,6 +87,20 @@ Velocity and Bungee session context changes when the player connects to a differ
 
 Flush and stop operations update the active session row so a crash preserves time up to the latest flush without splitting a continuous session into many rows.
 
+## Scoped Time
+
+LoriTime can query and adjust time globally, for a server, or for one world on one server.
+
+- Global totals include all session rows and all manual adjustments for the player.
+- Server totals include sessions on that server, server-scoped adjustments, and world-scoped adjustments for worlds on that server. Global adjustments are not distributed into server totals.
+- World totals include sessions and world-scoped adjustments for the exact server/world pair. Global and server-scoped adjustments are not distributed into world totals.
+
+AFK time removal writes an adjustment for the player's current world when the runtime knows the current server/world context. If no specific context is available, LoriTime uses the shared fallback server/world context.
+
+Time-ranged lookups use the same scope rules. Persisted sessions are clipped to the requested inclusive-start/exclusive-end window, and manual adjustments count when their `created_at` audit timestamp is inside the window. A ranged lookup with no overlapping rows returns no stored time instead of a zero-valued hit.
+
+This storage layout is a breaking database baseline change for LoriTime 2 development builds. Existing normalized databases with unscoped adjustment rows are not migrated by this change.
+
 ## Storage Cleanup
 
 Storage cleanup is disabled by default. When enabled, LoriTime deletes old time history for inactive players but keeps the player identity row.

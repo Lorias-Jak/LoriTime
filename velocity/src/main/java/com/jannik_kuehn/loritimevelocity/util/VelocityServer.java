@@ -10,6 +10,7 @@ import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
 import net.kyori.adventure.text.TextComponent;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -48,6 +49,21 @@ public class VelocityServer implements CommonServer {
         return server.getAllPlayers().stream()
                 .map(VelocityPlayer::new)
                 .toList().toArray(new CommonPlayerSender[0]);
+    }
+
+    @Override
+    public Optional<String> getCurrentServer(final UUID uniqueId) {
+        return server.getPlayer(uniqueId)
+                .flatMap(Player::getCurrentServer)
+                .map(connection -> connection.getServerInfo().getName());
+    }
+
+    @Override
+    public List<String> getLiveServerNames() {
+        return server.getAllServers().stream()
+                .map(registeredServer -> registeredServer.getServerInfo().getName())
+                .sorted(String.CASE_INSENSITIVE_ORDER)
+                .toList();
     }
 
     @Override

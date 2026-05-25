@@ -3,14 +3,12 @@ package com.jannik_kuehn.common.api.storage;
 import com.github.roleplaycauldron.spellbook.core.logger.WrappedLogger;
 import com.jannik_kuehn.common.exception.StorageException;
 
-import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.OptionalLong;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -18,7 +16,7 @@ import java.util.concurrent.ConcurrentMap;
 /**
  * Unified storage decorator that keeps active sessions in memory while persisting session rows.
  */
-@SuppressWarnings("PMD.TooManyMethods")
+@SuppressWarnings({"PMD.TooManyMethods", "PMD.CouplingBetweenObjects"})
 public class AccumulatingTimeStorage implements UnifiedStorage, TimeAccumulator {
 
     /**
@@ -68,8 +66,8 @@ public class AccumulatingTimeStorage implements UnifiedStorage, TimeAccumulator 
     }
 
     @Override
-    public HashSet<String> getNameEntries() throws StorageException {
-        return new HashSet<>(storage.getNameEntries());
+    public Set<String> getNameEntries() throws StorageException {
+        return storage.getNameEntries();
     }
 
     @Override
@@ -78,16 +76,48 @@ public class AccumulatingTimeStorage implements UnifiedStorage, TimeAccumulator 
     }
 
     @Override
+    public Set<String> getKnownServerNames() throws StorageException {
+        return storage.getKnownServerNames();
+    }
+
+    @Override
+    public Set<String> getKnownWorldNames() throws StorageException {
+        return storage.getKnownWorldNames();
+    }
+
+    @Override
     public OptionalLong getTime(final UUID uniqueId) throws StorageException {
+        return getTime(uniqueId, TimeScope.GLOBAL);
+    }
+
+    @Override
+    public OptionalLong getTime(final UUID uniqueId, final TimeScope scope) throws StorageException {
+        Objects.requireNonNull(scope, "scope");
         final PersistedPlayerSession activeSession = onlineSessions.get(uniqueId);
         final PlayerSessionContext context = activeSession == null ? null : activeSession.context();
-        if (context != null) {
+        if (context != null && scope.matches(context)) {
             final long accumulatedTime = (System.currentTimeMillis() - context.startedAtMs()) / 1000L;
-            final long storedTime = storage.getTime(uniqueId).orElse(0);
+            final long storedTime = storage.getTime(uniqueId, scope).orElse(0);
             return OptionalLong.of(accumulatedTime + storedTime);
         } else {
-            return storage.getTime(uniqueId);
+            return storage.getTime(uniqueId, scope);
         }
+    }
+
+    @Override
+    public OptionalLong getTime(final UUID uniqueId, final TimeScope scope, final TimeRange range) throws StorageException {
+        Objects.requireNonNull(scope, "scope");
+        Objects.requireNonNull(range, "range");
+        final OptionalLong storedTime = storage.getTime(uniqueId, scope, range);
+        final PersistedPlayerSession activeSession = onlineSessions.get(uniqueId);
+        final PlayerSessionContext context = activeSession == null ? null : activeSession.context();
+        if (context != null && scope.matches(context)) {
+            final long accumulatedTime = range.overlapSeconds(context.startedAtMs(), System.currentTimeMillis());
+            if (accumulatedTime > 0L || storedTime.isPresent()) {
+                return OptionalLong.of(accumulatedTime + storedTime.orElse(0L));
+            }
+        }
+        return storedTime;
     }
 
     @Override
@@ -102,7 +132,7 @@ public class AccumulatingTimeStorage implements UnifiedStorage, TimeAccumulator 
 
     @Override
     public void addTimes(final Map<UUID, Long> additionalTimes, final TimeEntryReason reason) throws StorageException {
-        storage.addTimes(new HashMap<>(additionalTimes), reason);
+        storage.addTimes(additionalTimes, reason);
     }
 
     @Override
@@ -131,9 +161,13 @@ public class AccumulatingTimeStorage implements UnifiedStorage, TimeAccumulator 
     }
 
     @Override
-    public void deletePlayer(final UUID uniqueId) throws StorageException, SQLException {
+    public void deletePlayer(final UUID uniqueId) throws StorageException {
         onlineSessions.remove(uniqueId);
-        storage.deletePlayer(uniqueId);
+        try {
+            storage.deletePlayer(uniqueId);
+        } catch (final java.sql.SQLException ex) {
+            throw new StorageException(ex);
+        }
     }
 
     @Override
@@ -229,12 +263,18 @@ public class AccumulatingTimeStorage implements UnifiedStorage, TimeAccumulator 
     }
 
     @Override
+    public Optional<PlayerSessionContext> getActiveSessionContext(final UUID uuid) {
+        final PersistedPlayerSession session = onlineSessions.get(uuid);
+        return session == null ? Optional.empty() : Optional.of(session.context());
+    }
+
+    @Override
     @SuppressWarnings("PMD.UseTryWithResources")
     public void close() throws StorageException {
         try {
             if (!onlineSessions.isEmpty()) {
                 final long now = System.currentTimeMillis();
-                for (final UUID uuid : new HashSet<>(onlineSessions.keySet())) {
+                for (final UUID uuid : List.copyOf(onlineSessions.keySet())) {
                     final PersistedPlayerSession session = onlineSessions.remove(uuid);
                     if (session != null) {
                         storage.updateSession(session.sessionId(), now, TimeEntryReason.SHUTDOWN_FLUSH);

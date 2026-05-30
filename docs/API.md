@@ -6,10 +6,9 @@ The LoriTime API lets other plugins read stored player online time, resolve know
 
 | Platform | LoriTime version | Supported |
 |----------|------------------|-----------|
-| Paper    | 2.0.0 - current  | ✅       |
-| Folia    | 2.0.0 - current  | ✅       |
-| Velocity | 2.0.0 - current  | ✅       |
-| Bungee   | 2.0.0 - current  | ✅       |
+| Paper    | 2.0.0 - current  | ✅         |
+| Folia    | 2.0.0 - current  | ✅         |
+| Velocity | 2.0.0 - current  | ✅         |
 
 ## Dependency Setup
 
@@ -28,17 +27,6 @@ softdepend:
 ```
 
 Use `depend` instead of `softdepend` if your plugin cannot run without LoriTime.
-
-### Bungee
-
-```yml
-name: MyPlugin
-version: 1.0
-main: myplugin.MyPlugin
-author: MaxMustermann
-softDepends:
-  - LoriTime
-```
 
 ### Velocity
 
@@ -234,7 +222,7 @@ loriTime.addTime(uniqueId, Duration.ofSeconds(30)).exceptionally(ex -> {
 
 ## Threading and Storage Modes
 
-The facade returns `CompletableFuture` values. LoriTime schedules the blocking storage work asynchronously, and future continuations run in that asynchronous completion context unless you reschedule them. If your continuation touches Bukkit, Folia, Velocity, Bungee, or other platform-thread-bound APIs, reschedule that work through your platform scheduler first.
+The facade returns `CompletableFuture` values. LoriTime schedules the blocking storage work asynchronously, and future continuations run in that asynchronous completion context unless you reschedule them. If your continuation touches Paper, Folia, Velocity or other platform-thread-bound APIs, reschedule that work through your platform scheduler first.
 
 In slave mode, facade reads follow the same deterministic fallback behavior as LoriTime's local consumers. If the local instance only has cached data, an unknown player or cache miss may return an empty result until LoriTime receives data from the master.
 

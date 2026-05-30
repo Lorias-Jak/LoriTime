@@ -4,9 +4,6 @@
 [submodule "paper"]
 	path = paper
 	url = ../paper
-[submodule "bungee"]
-	path = bungee
-	url = ../bungee
 [submodule "velocity"]
 	path = velocity
 	url = ../velocity

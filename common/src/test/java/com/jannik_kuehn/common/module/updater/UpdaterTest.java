@@ -12,6 +12,7 @@ import com.jannik_kuehn.common.config.Configuration;
 import com.jannik_kuehn.common.config.localization.Localization;
 import com.jannik_kuehn.common.module.updater.download.Downloader;
 import com.jannik_kuehn.common.module.updater.version.Version;
+import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.Test;
@@ -71,8 +72,8 @@ class UpdaterTest {
     private Localization mockLocalization() {
         final Localization loc = mock(Localization.class);
         when(loc.getRawMessage(anyString())).thenReturn("msg");
-        when(loc.formatTextComponent(anyString())).thenReturn(mock(TextComponent.class));
-        when(loc.formatTextComponentWithoutPrefix(anyString())).thenReturn(mock(TextComponent.class));
+        when(loc.formatTextComponent(anyString())).thenReturn(Component.text("msg"));
+        when(loc.formatTextComponentWithoutPrefix(anyString())).thenReturn(Component.text("msg"));
         return loc;
     }
 

@@ -320,7 +320,7 @@
             <configuration>
               <rules>
                 <requireMavenVersion>
-                  <version>3.9.11</version>
+                  <version>3.9.6</version>
                 </requireMavenVersion>
               </rules>
             </configuration>
@@ -562,6 +562,19 @@
           </execution>
         </executions>
       </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jxr-plugin</artifactId>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>jxr</goal>
+              <goal>test-jxr</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
     </plugins>
     <pluginManagement>
       <plugins>
@@ -596,12 +609,12 @@
             <dependency>
               <groupId>net.sourceforge.pmd</groupId>
               <artifactId>pmd-core</artifactId>
-              <version>7.24.0</version>
+              <version>7.25.0</version>
             </dependency>
             <dependency>
               <groupId>net.sourceforge.pmd</groupId>
               <artifactId>pmd-java</artifactId>
-              <version>7.24.0</version>
+              <version>7.25.0</version>
             </dependency>
             <dependency>
               <groupId>com.jannik_kuehn</groupId>

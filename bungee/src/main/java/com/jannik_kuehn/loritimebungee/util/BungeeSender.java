@@ -6,7 +6,7 @@ import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.md_5.bungee.api.CommandSender;
 
-@SuppressWarnings("PMD.CommentRequired")
+@SuppressWarnings({"PMD.CommentRequired", "PMD.TestClassWithoutTestCases"})
 public class BungeeSender implements CommonConsoleSender {
 
     private final BungeeAudiences audiences;

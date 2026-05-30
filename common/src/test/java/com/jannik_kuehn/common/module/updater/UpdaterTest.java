@@ -91,7 +91,7 @@ class UpdaterTest {
     }
 
     @Test
-    void search_withAutoUpdate_triggersDownloader_and_clearsLatestAfterExecute() throws Exception {
+    void searchWithAutoUpdateTriggersDownloaderAndClearsLatestAfterExecute() throws Exception {
         final WrappedLogger logger = mock(WrappedLogger.class);
         final MutableInstantSource clock = new MutableInstantSource(Instant.parse("2024-01-01T00:00:00Z"));
 
@@ -123,7 +123,7 @@ class UpdaterTest {
 
     @Test
     @SuppressWarnings("PMD.UnitTestContainsTooManyAsserts")
-    void sendPlayerUpdateNotification_throttles_per_player_and_respects_console() throws Exception {
+    void sendPlayerUpdateNotificationThrottlesPerPlayerAndRespectsConsole() throws Exception {
         final WrappedLogger logger = mock(WrappedLogger.class);
         final MutableInstantSource clock = new MutableInstantSource(Instant.parse("2024-01-01T00:00:00Z"));
 

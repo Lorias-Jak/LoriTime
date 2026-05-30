@@ -245,6 +245,8 @@ public abstract class PluginMessaging {
         final String world = input.readUTF();
         final long observedAtMs = input.readLong();
         loriTimePlugin.getAccumulator().updateWorldContext(playerUUID, world, observedAtMs);
+        loriTimePlugin.getAccumulator().getActiveSessionContext(playerUUID)
+                .ifPresent(context -> loriTimePlugin.rememberScope(context.server(), world));
     }
 
     private void switchRemoteWorldContext(final UUID playerUUID, final DataInputStream input) throws IOException, StorageException {
@@ -254,6 +256,8 @@ public abstract class PluginMessaging {
         final String world = input.readUTF();
         final long observedAtMs = input.readLong();
         loriTimePlugin.getAccumulator().switchWorldContext(playerUUID, world, observedAtMs);
+        loriTimePlugin.getAccumulator().getActiveSessionContext(playerUUID)
+                .ifPresent(context -> loriTimePlugin.rememberScope(context.server(), world));
     }
 
     private boolean isSupportedStorageVersion(final StorageMessageType messageType, final int protocolVersion, final UUID playerUUID) {

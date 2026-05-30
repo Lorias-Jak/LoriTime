@@ -10,12 +10,17 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   - `mysql`
   - `mariadb`
   - `sqlite`
+- `commands.yml` for custom command names and aliases with separate proxy and backend profile sections.
+- Recent-player command completion cache with a configurable default window of 30 days.
 ### Changed
 - The way the plugin stores its internal data in the storages for more flexibility.
 - Bumped minimum java version from `21` to `25`
 - Updated the migrator of configs
 - Overhauled the API
 - Updated the docs
+- Reworked command registration into proxy, backend canonical, and backend slave profiles.
+- Replaced the local command root with admin subcommands: proxy admin defaults to `/plta`, backend admin defaults to `/lta`, and reload/debug/info/update now live under admin.
+- Moved player time mutation and delete-user actions from admin into the dedicated modify command.
 ### Deprecated
 ### Removed
 - The storage type `yml`

@@ -4,12 +4,10 @@ import com.github.roleplaycauldron.spellbook.core.logger.LoggerFactory;
 import com.github.roleplaycauldron.spellbook.core.logger.WrappedLogger;
 import com.jannik_kuehn.common.LoriTimePlugin;
 import com.jannik_kuehn.common.api.LoriTimeAPI;
+import com.jannik_kuehn.common.api.common.CommonCommand;
 import com.jannik_kuehn.common.api.storage.StorageMode;
-import com.jannik_kuehn.common.command.LoriTimeAdminCommand;
-import com.jannik_kuehn.common.command.LoriTimeCommand;
-import com.jannik_kuehn.common.command.LoriTimeDebugCommand;
-import com.jannik_kuehn.common.command.LoriTimeInfoCommand;
-import com.jannik_kuehn.common.command.LoriTimeTopCommand;
+import com.jannik_kuehn.common.command.profile.CommandProfileRegistry;
+import com.jannik_kuehn.common.command.profile.RuntimeCommandProfile;
 import com.jannik_kuehn.common.module.afk.MasteredAfkPlayerHandling;
 import com.jannik_kuehn.loritimevelocity.command.VelocityCommand;
 import com.jannik_kuehn.loritimevelocity.listener.LoriTimeUpdateVelocityListener;
@@ -98,12 +96,9 @@ public class LoriTimeVelocity {
         eventManager.register(this, new TimeAccumulatorVelocityListener(loriTimePlugin));
         eventManager.register(this, new LoriTimeUpdateVelocityListener(loriTimePlugin));
 
-        commands.add(new VelocityCommand(this, new LoriTimeAdminCommand(loriTimePlugin, loriTimePlugin.getLocalization(),
-                loriTimePlugin.getParser())));
-        commands.add(new VelocityCommand(this, new LoriTimeCommand(loriTimePlugin, loriTimePlugin.getLocalization())));
-        commands.add(new VelocityCommand(this, new LoriTimeInfoCommand(loriTimePlugin, loriTimePlugin.getLocalization())));
-        commands.add(new VelocityCommand(this, new LoriTimeTopCommand(loriTimePlugin, loriTimePlugin.getLocalization())));
-        commands.add(new VelocityCommand(this, new LoriTimeDebugCommand(loriTimePlugin, loriTimePlugin.getLocalization())));
+        for (final CommonCommand command : new CommandProfileRegistry(loriTimePlugin).commands(RuntimeCommandProfile.PROXY)) {
+            commands.add(new VelocityCommand(this, command));
+        }
     }
 
     private void enableAsSlave() {

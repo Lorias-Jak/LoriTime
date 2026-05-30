@@ -26,6 +26,8 @@ class DatabaseMigrationPreflightTest {
 
     private static final String TABLE_PREFIX = "loritime";
 
+    private static final UUID PLAYER_UUID = UUID.fromString("44174cf6-e76c-4994-899c-3387284ecd62");
+
     @TempDir
     private File dataFolder;
 
@@ -34,21 +36,30 @@ class DatabaseMigrationPreflightTest {
         try (Connection connection = openSqlite()) {
             try (Statement statement = connection.createStatement()) {
                 statement.executeUpdate("CREATE TABLE `" + TABLE_PREFIX + "_version` (`version_no` INTEGER NOT NULL)");
-                statement.executeUpdate("INSERT INTO `" + TABLE_PREFIX + "_version` (`version_no`) VALUES (2)");
+                statement.executeUpdate("INSERT INTO `" + TABLE_PREFIX + "_version` (`version_no`) VALUES (1)");
             }
         }
 
         migrate();
 
         try (Connection connection = openSqlite()) {
-            final DatabaseSnapshot expected = new DatabaseSnapshot(2, false, false, false, false, false, false, 0, 0, null, null);
+            final DatabaseSnapshot expected = new DatabaseSnapshot(2, false, true, true, true, true, true, 0, 0, null, "global");
             assertEquals(expected, snapshot(connection), "versioned databases should use the update path");
         }
     }
 
     @Test
-    void seedsLegacySqlDatabaseAsVersionOneAndMigratesToVersionTwo() throws Exception {
-        final UUID uuid = UUID.fromString("4e361d46-37a8-4632-80cb-867fded5430b");
+    void initializesFreshDatabaseWithFirstStartupSchema() throws Exception {
+        migrate();
+
+        try (Connection connection = openSqlite()) {
+            final DatabaseSnapshot expected = new DatabaseSnapshot(2, false, true, true, true, true, true, 0, 0, null, "global");
+            assertEquals(expected, snapshot(connection), "fresh databases should run first startup schema creation");
+        }
+    }
+
+    @Test
+    void migratesLegacyAggregateTableToScopedVersionTwoSchema() throws Exception {
         try (Connection connection = openSqlite()) {
             try (Statement statement = connection.createStatement()) {
                 statement.executeUpdate("CREATE TABLE `" + TABLE_PREFIX + "` ("
@@ -60,9 +71,9 @@ class DatabaseMigrationPreflightTest {
             }
             try (PreparedStatement insert = connection.prepareStatement(
                     "INSERT INTO `" + TABLE_PREFIX + "` (`uuid`, `name`, `time`) VALUES (?, ?, ?)")) {
-                insert.setBytes(1, UuidUtil.toBytes(uuid));
-                insert.setString(2, "Jannik");
-                insert.setLong(3, 120);
+                insert.setBytes(1, UuidUtil.toBytes(PLAYER_UUID));
+                insert.setString(2, "Lorias_");
+                insert.setLong(3, 123L);
                 insert.executeUpdate();
             }
         }
@@ -70,18 +81,9 @@ class DatabaseMigrationPreflightTest {
         migrate();
 
         try (Connection connection = openSqlite()) {
-            final DatabaseSnapshot expected = new DatabaseSnapshot(2, false, true, true, true, true, true, 1, 1, "LEGACY_IMPORT", "global");
-            assertEquals(expected, snapshot(connection), "legacy SQL storage should migrate to the version 2 schema");
-        }
-    }
-
-    @Test
-    void initializesFreshDatabaseWithFirstStartupSchema() throws Exception {
-        migrate();
-
-        try (Connection connection = openSqlite()) {
-            final DatabaseSnapshot expected = new DatabaseSnapshot(2, false, true, true, true, true, true, 0, 0, null, "global");
-            assertEquals(expected, snapshot(connection), "fresh databases should run first startup schema creation");
+            final DatabaseSnapshot expected = new DatabaseSnapshot(2, false, true, true, true, true, true,
+                    1, 1, "LEGACY_IMPORT", "global");
+            assertEquals(expected, snapshot(connection), "legacy v1 aggregate data should be imported into scoped storage");
         }
     }
 

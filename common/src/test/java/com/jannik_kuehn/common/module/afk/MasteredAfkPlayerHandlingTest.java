@@ -4,9 +4,13 @@ import com.github.roleplaycauldron.spellbook.core.logger.LoggerFactory;
 import com.jannik_kuehn.common.LoriTimePlugin;
 import com.jannik_kuehn.common.api.common.CommonPlayerSender;
 import com.jannik_kuehn.common.api.common.CommonServer;
+import com.jannik_kuehn.common.api.storage.ManualTimeAdjustment;
+import com.jannik_kuehn.common.api.storage.PlayerSessionContext;
 import com.jannik_kuehn.common.api.storage.SessionContextDefaults;
 import com.jannik_kuehn.common.api.storage.TimeAccumulator;
 import com.jannik_kuehn.common.api.storage.TimeEntryReason;
+import com.jannik_kuehn.common.api.storage.TimeScope;
+import com.jannik_kuehn.common.api.storage.UnifiedStorage;
 import com.jannik_kuehn.common.config.Configuration;
 import com.jannik_kuehn.common.config.localization.Localization;
 import com.jannik_kuehn.common.player.TrackedLoriTimePlayer;
@@ -113,18 +117,32 @@ class MasteredAfkPlayerHandlingTest {
         verify(context.sender(), never()).sendMessage(any(TextComponent.class));
     }
 
+    @Test
+    void afkTimeRemovalUsesCurrentWorldScope() throws Exception {
+        final TestContext context = new TestContext(true, false);
+        when(context.accumulator().getActiveSessionContext(PLAYER_ID))
+                .thenReturn(Optional.of(new PlayerSessionContext(PLAYER_ID, "Lorias_", "survival", "world", 1_000L)));
+        final MasteredAfkPlayerHandling handling = new MasteredAfkPlayerHandling(context.plugin());
+
+        handling.executePlayerAfk(new TrackedLoriTimePlayer(PLAYER_ID, "Lorias_"), 15L);
+
+        verify(context.storage()).addTime(new ManualTimeAdjustment(PLAYER_ID, -15L, TimeEntryReason.AFK_ADJUSTMENT,
+                "SYSTEM", TimeScope.world("survival", "world")));
+    }
+
     private record TestContext(LoriTimePlugin plugin, CommonServer server, CommonPlayerSender sender,
-                               TimeAccumulator accumulator) {
+                               TimeAccumulator accumulator, UnifiedStorage storage) {
 
         private TestContext(final boolean removeTime, final boolean autoKick) {
             this(mock(LoriTimePlugin.class), mock(CommonServer.class), mock(CommonPlayerSender.class),
-                    mock(TimeAccumulator.class));
+                    mock(TimeAccumulator.class), mock(UnifiedStorage.class));
             final Configuration config = mock(Configuration.class);
             final Localization localization = mock(Localization.class);
             when(plugin().getLoggerFactory()).thenReturn(new LoggerFactory(Logger.getLogger("test")));
             when(plugin().getConfig()).thenReturn(config);
             when(plugin().getServer()).thenReturn(server());
             when(plugin().getAccumulator()).thenReturn(accumulator());
+            when(plugin().getStorage()).thenReturn(storage());
             when(plugin().getLocalization()).thenReturn(localization);
             when(server().getPlayer(PLAYER_ID)).thenReturn(Optional.of(sender()));
             when(server().getOnlinePlayers()).thenReturn(new CommonPlayerSender[]{sender()});

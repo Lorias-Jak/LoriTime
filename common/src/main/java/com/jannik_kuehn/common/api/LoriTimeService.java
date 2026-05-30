@@ -3,6 +3,8 @@ package com.jannik_kuehn.common.api;
 import com.jannik_kuehn.common.LoriTimePlugin;
 import com.jannik_kuehn.common.api.storage.ManualTimeAdjustment;
 import com.jannik_kuehn.common.api.storage.TimeEntryReason;
+import com.jannik_kuehn.common.api.storage.TimeRange;
+import com.jannik_kuehn.common.api.storage.TimeScope;
 import com.jannik_kuehn.common.exception.StorageException;
 
 import java.time.Duration;
@@ -17,6 +19,15 @@ import java.util.concurrent.CompletableFuture;
  */
 @SuppressWarnings("PMD.TooManyMethods")
 public final class LoriTimeService {
+    /**
+     * Parameter name used for player identity validation.
+     */
+    private static final String PLAYER_PARAMETER = "player";
+
+    /**
+     * Parameter name used for UUID validation.
+     */
+    private static final String UNIQUE_ID_PARAMETER = "uniqueId";
 
     /**
      * Actor name used for API adjustments without an explicit actor.
@@ -56,7 +67,7 @@ public final class LoriTimeService {
      * @return future for the player name, if LoriTime knows the player.
      */
     public CompletableFuture<Optional<String>> findName(final UUID uniqueId) {
-        Objects.requireNonNull(uniqueId, "uniqueId");
+        Objects.requireNonNull(uniqueId, UNIQUE_ID_PARAMETER);
         return supplyAsync("Could not look up player name for UUID " + uniqueId,
                 () -> plugin.getStorage().getName(uniqueId));
     }
@@ -68,9 +79,41 @@ public final class LoriTimeService {
      * @return future for the total online time, if LoriTime has stored time for the player.
      */
     public CompletableFuture<Optional<Duration>> getOnlineTime(final UUID uniqueId) {
-        Objects.requireNonNull(uniqueId, "uniqueId");
+        return getOnlineTime(uniqueId, TimeScope.GLOBAL);
+    }
+
+    /**
+     * Returns the current scoped online time for a player.
+     *
+     * @param uniqueId the player UUID.
+     * @param scope the requested time scope.
+     * @return future for the total online time, if LoriTime has stored time for the player in that scope.
+     */
+    public CompletableFuture<Optional<Duration>> getOnlineTime(final UUID uniqueId, final TimeScope scope) {
+        Objects.requireNonNull(uniqueId, UNIQUE_ID_PARAMETER);
+        Objects.requireNonNull(scope, "scope");
         return supplyAsync("Could not query online time for UUID " + uniqueId, () -> {
-            final OptionalLong seconds = plugin.getStorage().getTime(uniqueId);
+            final OptionalLong seconds = plugin.getStorage().getTime(uniqueId, scope);
+            return seconds.isPresent() ? Optional.of(Duration.ofSeconds(seconds.getAsLong())) : Optional.empty();
+        });
+    }
+
+    /**
+     * Returns the current scoped online time for a player inside a time range.
+     *
+     * @param uniqueId the player UUID.
+     * @param scope the requested time scope.
+     * @param range the requested time range.
+     * @return future for the ranged online time, if LoriTime has matching stored time.
+     */
+    public CompletableFuture<Optional<Duration>> getOnlineTime(final UUID uniqueId,
+                                                               final TimeScope scope,
+                                                               final TimeRange range) {
+        Objects.requireNonNull(uniqueId, UNIQUE_ID_PARAMETER);
+        Objects.requireNonNull(scope, "scope");
+        Objects.requireNonNull(range, "range");
+        return supplyAsync("Could not query online time for UUID " + uniqueId, () -> {
+            final OptionalLong seconds = plugin.getStorage().getTime(uniqueId, scope, range);
             return seconds.isPresent() ? Optional.of(Duration.ofSeconds(seconds.getAsLong())) : Optional.empty();
         });
     }
@@ -82,7 +125,32 @@ public final class LoriTimeService {
      * @return future for the total online time, if LoriTime has stored time for the player.
      */
     public CompletableFuture<Optional<Duration>> getOnlineTime(final LoriTimePlayer player) {
-        return getOnlineTime(validate(player, "player").getUniqueId());
+        return getOnlineTime(validate(player, PLAYER_PARAMETER).getUniqueId());
+    }
+
+    /**
+     * Returns the current scoped online time for a player.
+     *
+     * @param player the player identity.
+     * @param scope the requested time scope.
+     * @return future for the total online time, if LoriTime has stored time for the player in that scope.
+     */
+    public CompletableFuture<Optional<Duration>> getOnlineTime(final LoriTimePlayer player, final TimeScope scope) {
+        return getOnlineTime(validate(player, PLAYER_PARAMETER).getUniqueId(), scope);
+    }
+
+    /**
+     * Returns the current scoped online time for a player inside a time range.
+     *
+     * @param player the player identity.
+     * @param scope the requested time scope.
+     * @param range the requested time range.
+     * @return future for the ranged online time, if LoriTime has matching stored time.
+     */
+    public CompletableFuture<Optional<Duration>> getOnlineTime(final LoriTimePlayer player,
+                                                               final TimeScope scope,
+                                                               final TimeRange range) {
+        return getOnlineTime(validate(player, PLAYER_PARAMETER).getUniqueId(), scope, range);
     }
 
     /**
@@ -96,13 +164,35 @@ public final class LoriTimeService {
     }
 
     /**
+     * Adds a signed manual time adjustment using the stable API actor for a scope.
+     *
+     * @param uniqueId the player UUID.
+     * @param amount   the signed amount to add or remove.
+     * @param scope    the adjustment scope.
+     */
+    public CompletableFuture<Void> addTime(final UUID uniqueId, final Duration amount, final TimeScope scope) {
+        return addTime(uniqueId, amount, null, API_ACTOR, scope);
+    }
+
+    /**
      * Adds a signed manual time adjustment using the stable API actor.
      *
      * @param player the player identity.
      * @param amount the signed amount to add or remove.
      */
     public CompletableFuture<Void> addTime(final LoriTimePlayer player, final Duration amount) {
-        return addTime(validate(player, "player").getUniqueId(), amount);
+        return addTime(validate(player, PLAYER_PARAMETER).getUniqueId(), amount);
+    }
+
+    /**
+     * Adds a signed manual time adjustment using the stable API actor for a scope.
+     *
+     * @param player the player identity.
+     * @param amount the signed amount to add or remove.
+     * @param scope  the adjustment scope.
+     */
+    public CompletableFuture<Void> addTime(final LoriTimePlayer player, final Duration amount, final TimeScope scope) {
+        return addTime(validate(player, PLAYER_PARAMETER).getUniqueId(), amount, scope);
     }
 
     /**
@@ -115,15 +205,30 @@ public final class LoriTimeService {
      */
     public CompletableFuture<Void> addTime(final UUID uniqueId, final Duration amount, final UUID actorUuid,
                                            final String actorName) {
-        Objects.requireNonNull(uniqueId, "uniqueId");
+        return addTime(uniqueId, amount, actorUuid, actorName, TimeScope.GLOBAL);
+    }
+
+    /**
+     * Adds a signed manual time adjustment with actor metadata and scope.
+     *
+     * @param uniqueId  the player UUID.
+     * @param amount    the signed amount to add or remove.
+     * @param actorUuid the actor UUID, or null for system actors.
+     * @param actorName the actor display name.
+     * @param scope     the adjustment scope.
+     */
+    public CompletableFuture<Void> addTime(final UUID uniqueId, final Duration amount, final UUID actorUuid,
+                                           final String actorName, final TimeScope scope) {
+        Objects.requireNonNull(uniqueId, UNIQUE_ID_PARAMETER);
         Objects.requireNonNull(actorName, "actorName");
+        Objects.requireNonNull(scope, "scope");
         if (actorName.isBlank()) {
             throw new IllegalArgumentException("actorName must not be blank");
         }
         final long seconds = seconds(amount);
         return runAsync("Could not add time adjustment for UUID " + uniqueId, () ->
             plugin.getStorage().addTime(new ManualTimeAdjustment(uniqueId, seconds,
-                    TimeEntryReason.MANUAL_ADJUSTMENT, actorUuid, actorName)));
+                    TimeEntryReason.MANUAL_ADJUSTMENT, actorUuid, actorName, scope)));
     }
 
     /**
@@ -135,9 +240,24 @@ public final class LoriTimeService {
      */
     public CompletableFuture<Void> addTime(final LoriTimePlayer player, final Duration amount,
                                            final LoriTimePlayer actor) {
-        final LoriTimePlayer validPlayer = validate(player, "player");
+        final LoriTimePlayer validPlayer = validate(player, PLAYER_PARAMETER);
         final LoriTimePlayer validActor = validate(actor, "actor");
         return addTime(validPlayer.getUniqueId(), amount, validActor.getUniqueId(), validActor.getName());
+    }
+
+    /**
+     * Adds a signed manual time adjustment with actor player metadata and scope.
+     *
+     * @param player the target player identity.
+     * @param amount the signed amount to add or remove.
+     * @param actor  the actor player identity.
+     * @param scope  the adjustment scope.
+     */
+    public CompletableFuture<Void> addTime(final LoriTimePlayer player, final Duration amount,
+                                           final LoriTimePlayer actor, final TimeScope scope) {
+        final LoriTimePlayer validPlayer = validate(player, PLAYER_PARAMETER);
+        final LoriTimePlayer validActor = validate(actor, "actor");
+        return addTime(validPlayer.getUniqueId(), amount, validActor.getUniqueId(), validActor.getName(), scope);
     }
 
     private CompletableFuture<Void> runAsync(final String failureMessage, final StorageRunnable action) {

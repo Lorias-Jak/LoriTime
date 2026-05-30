@@ -199,25 +199,11 @@ afk:
 # In case you want to add some aliases to the commands, you can do it here.
 # There are some given aliases, but you can add or remove them.
 command:
-  LoriTimeAdmin:
-    alias:
-      - 'lta'
-      - 'ltadmin'
-      - 'loritimea'
-  LoriTime:
-    alias:
-      - 'ot'
-      - 'lt'
-      - 'loritime'
-      - 'lorit'
-  LoriTimeTop:
-    alias:
-      - "ttop"
-      - "lttop"
-      - "ltop"
-      - "toptimes"
-  Afk:
-    alias: [ ]
+  completion:
+
+    # Player names seen within this many days are cached asynchronously for tab completion.
+    # Set this to 0 to only suggest players observed during the current runtime.
+    recentPlayersDays: 30
 
 ################
 # Integrations #

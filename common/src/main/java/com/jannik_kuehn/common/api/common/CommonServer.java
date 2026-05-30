@@ -3,6 +3,7 @@ package com.jannik_kuehn.common.api.common;
 import com.jannik_kuehn.common.api.LoriTimePlayer;
 import net.kyori.adventure.text.TextComponent;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -14,6 +15,22 @@ public interface CommonServer {
     Optional<CommonPlayerSender> getPlayer(String name);
 
     CommonPlayerSender[] getOnlinePlayers();
+
+    default Optional<String> getCurrentServer(final UUID uniqueId) {
+        return Optional.empty();
+    }
+
+    default Optional<String> getLocalServerName() {
+        return Optional.empty();
+    }
+
+    default List<String> getLiveServerNames() {
+        return List.of();
+    }
+
+    default List<String> getLiveWorldNames(final Optional<String> serverName, final Optional<UUID> uniqueId) {
+        return List.of();
+    }
 
     String getPluginVersion();
 

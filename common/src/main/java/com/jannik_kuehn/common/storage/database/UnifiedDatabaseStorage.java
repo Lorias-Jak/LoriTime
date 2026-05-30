@@ -3,7 +3,10 @@ package com.jannik_kuehn.common.storage.database;
 import com.jannik_kuehn.common.api.storage.ManualTimeAdjustment;
 import com.jannik_kuehn.common.api.storage.PlayerSessionChunk;
 import com.jannik_kuehn.common.api.storage.PlayerSessionContext;
+import com.jannik_kuehn.common.api.storage.RecentPlayerIdentity;
 import com.jannik_kuehn.common.api.storage.TimeEntryReason;
+import com.jannik_kuehn.common.api.storage.TimeRange;
+import com.jannik_kuehn.common.api.storage.TimeScope;
 import com.jannik_kuehn.common.api.storage.UnifiedStorage;
 import com.jannik_kuehn.common.exception.StorageException;
 import com.jannik_kuehn.common.storage.database.provider.LoriTimeConnectionProvider;
@@ -31,7 +34,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 /**
  * Database-backed unified storage implementation for player identity, sessions, and adjustments.
  */
-@SuppressWarnings({"PMD.UnusedPrivateField", "PMD.TooManyMethods", "PMD.CouplingBetweenObjects"})
+@SuppressWarnings({"PMD.TooManyMethods", "PMD.CouplingBetweenObjects", "PMD.CyclomaticComplexity"})
 public class UnifiedDatabaseStorage implements UnifiedStorage {
 
     /**
@@ -75,6 +78,11 @@ public class UnifiedDatabaseStorage implements UnifiedStorage {
     private final ManualAdjustmentTable adjustmentTable;
 
     /**
+     * Recent player identity reader.
+     */
+    private final RecentPlayerIdentityReader recentPlayerIdentityReader;
+
+    /**
      * Lock protecting storage access while the provider is closing.
      */
     private final ReadWriteLock poolLock;
@@ -104,6 +112,7 @@ public class UnifiedDatabaseStorage implements UnifiedStorage {
         this.worldTable = worldTable;
         this.timeTable = timeTable;
         this.adjustmentTable = adjustmentTable;
+        this.recentPlayerIdentityReader = new RecentPlayerIdentityReader(provider, playerTable, dialect);
         this.poolLock = new ReentrantReadWriteLock();
     }
 
@@ -141,7 +150,13 @@ public class UnifiedDatabaseStorage implements UnifiedStorage {
 
     @Override
     public OptionalLong getTime(final UUID uniqueId) throws StorageException {
+        return getTime(uniqueId, TimeScope.GLOBAL);
+    }
+
+    @Override
+    public OptionalLong getTime(final UUID uniqueId, final TimeScope scope) throws StorageException {
         Objects.requireNonNull(uniqueId);
+        Objects.requireNonNull(scope);
         poolLock.readLock().lock();
         try {
             checkClosed();
@@ -150,8 +165,8 @@ public class UnifiedDatabaseStorage implements UnifiedStorage {
                 if (playerId.isEmpty()) {
                     return OptionalLong.empty();
                 }
-                final OptionalLong sessionSum = timeTable.sumForPlayer(connection, uniqueId);
-                final OptionalLong adjustmentSum = adjustmentTable.sumForPlayer(connection, playerId.get());
+                final OptionalLong sessionSum = sumSessions(connection, uniqueId, scope);
+                final OptionalLong adjustmentSum = sumAdjustments(connection, playerId.get(), scope);
                 if (sessionSum.isEmpty() && adjustmentSum.isEmpty()) {
                     return OptionalLong.empty();
                 }
@@ -183,7 +198,8 @@ public class UnifiedDatabaseStorage implements UnifiedStorage {
             checkClosed();
             try (Connection connection = provider.getConnection()) {
                 final long playerId = playerTable.ensurePlayer(connection, adjustment.playerUuid(), Optional.empty());
-                adjustmentTable.insert(connection, playerId, adjustment);
+                final ScopeReferences references = resolveScopeReferences(connection, adjustment.scope(), true);
+                adjustmentTable.insert(connection, playerId, references.serverId(), references.worldId(), adjustment);
             }
         } catch (final SQLException ex) {
             throw new StorageException(ex);
@@ -213,7 +229,8 @@ public class UnifiedDatabaseStorage implements UnifiedStorage {
             try (Connection connection = provider.getConnection()) {
                 for (final ManualTimeAdjustment adjustment : adjustments) {
                     final long playerId = playerTable.ensurePlayer(connection, adjustment.playerUuid(), Optional.empty());
-                    adjustmentTable.insert(connection, playerId, adjustment);
+                    final ScopeReferences references = resolveScopeReferences(connection, adjustment.scope(), true);
+                    adjustmentTable.insert(connection, playerId, references.serverId(), references.worldId(), adjustment);
                 }
             }
         } catch (final SQLException ex) {
@@ -332,6 +349,76 @@ public class UnifiedDatabaseStorage implements UnifiedStorage {
     }
 
     @Override
+    public OptionalLong getTime(final UUID uniqueId, final TimeScope scope, final TimeRange range) throws StorageException {
+        Objects.requireNonNull(uniqueId);
+        Objects.requireNonNull(scope);
+        Objects.requireNonNull(range);
+        poolLock.readLock().lock();
+        try {
+            checkClosed();
+            try (Connection connection = provider.getConnection()) {
+                final Optional<Long> playerId = playerTable.findIdByUuid(connection, uniqueId);
+                if (playerId.isEmpty()) {
+                    return OptionalLong.empty();
+                }
+                final OptionalLong sessionSum = sumSessions(connection, uniqueId, scope, range);
+                final OptionalLong adjustmentSum = sumAdjustments(connection, playerId.get(), scope, range);
+                if (sessionSum.isEmpty() && adjustmentSum.isEmpty()) {
+                    return OptionalLong.empty();
+                }
+                final long sessions = sessionSum.orElse(0L);
+                final long adjustments = adjustmentSum.orElse(0L);
+                return OptionalLong.of(sessions + adjustments);
+            }
+        } catch (final SQLException ex) {
+            throw new StorageException(ex);
+        } finally {
+            poolLock.readLock().unlock();
+        }
+    }
+
+    @Override
+    public List<RecentPlayerIdentity> getRecentPlayerIdentities(final long recentDays) throws StorageException {
+        poolLock.readLock().lock();
+        try {
+            checkClosed();
+            return recentPlayerIdentityReader.read(recentDays);
+        } finally {
+            poolLock.readLock().unlock();
+        }
+    }
+
+    @Override
+    public Set<String> getKnownServerNames() throws StorageException {
+        poolLock.readLock().lock();
+        try {
+            checkClosed();
+            try (Connection connection = provider.getConnection()) {
+                return serverTable.getAllServers(connection);
+            }
+        } catch (final SQLException ex) {
+            throw new StorageException(ex);
+        } finally {
+            poolLock.readLock().unlock();
+        }
+    }
+
+    @Override
+    public Set<String> getKnownWorldNames() throws StorageException {
+        poolLock.readLock().lock();
+        try {
+            checkClosed();
+            try (Connection connection = provider.getConnection()) {
+                return worldTable.getAllWorlds(connection);
+            }
+        } catch (final SQLException ex) {
+            throw new StorageException(ex);
+        } finally {
+            poolLock.readLock().unlock();
+        }
+    }
+
+    @Override
     public Map<String, ?> getAllTimeEntries() throws StorageException {
         poolLock.readLock().lock();
         try {
@@ -418,6 +505,86 @@ public class UnifiedDatabaseStorage implements UnifiedStorage {
         } finally {
             poolLock.readLock().unlock();
         }
+    }
+
+    private OptionalLong sumSessions(final Connection connection, final UUID uniqueId, final TimeScope scope)
+            throws SQLException {
+        return switch (scope.type()) {
+            case GLOBAL -> timeTable.sumForPlayer(connection, uniqueId);
+            case SERVER -> timeTable.sumForPlayerAndServer(connection, uniqueId, scope.server());
+            case WORLD -> timeTable.sumForPlayerAndWorld(connection, uniqueId, scope.server(), scope.world());
+        };
+    }
+
+    private OptionalLong sumSessions(final Connection connection, final UUID uniqueId,
+                                     final TimeScope scope, final TimeRange range) throws SQLException {
+        return switch (scope.type()) {
+            case GLOBAL -> timeTable.sumForPlayer(connection, uniqueId, range);
+            case SERVER -> timeTable.sumForPlayerAndServer(connection, uniqueId, scope.server(), range);
+            case WORLD -> timeTable.sumForPlayerAndWorld(connection, uniqueId, scope.server(), scope.world(), range);
+        };
+    }
+
+    private OptionalLong sumAdjustments(final Connection connection, final long playerId, final TimeScope scope)
+            throws SQLException {
+        return switch (scope.type()) {
+            case GLOBAL -> adjustmentTable.sums().sumForPlayer(connection, playerId);
+            case SERVER -> {
+                final Optional<Long> serverId = serverTable.findId(connection, scope.server());
+                yield serverId.isEmpty() ? OptionalLong.empty()
+                        : adjustmentTable.sums().sumForPlayerAndServer(connection, playerId, serverId.get());
+            }
+            case WORLD -> {
+                final Optional<Long> worldId = worldTable.findId(connection, scope.server(), scope.world());
+                yield worldId.isEmpty() ? OptionalLong.empty()
+                        : adjustmentTable.sums().sumForPlayerAndWorld(connection, playerId, worldId.get());
+            }
+        };
+    }
+
+    private OptionalLong sumAdjustments(final Connection connection, final long playerId,
+                                        final TimeScope scope, final TimeRange range) throws SQLException {
+        return switch (scope.type()) {
+            case GLOBAL -> adjustmentTable.sums().sumForPlayer(connection, playerId, range);
+            case SERVER -> {
+                final Optional<Long> serverId = serverTable.findId(connection, scope.server());
+                yield serverId.isEmpty() ? OptionalLong.empty()
+                        : adjustmentTable.sums().sumForPlayerAndServer(connection, playerId, serverId.get(), range);
+            }
+            case WORLD -> {
+                final Optional<Long> worldId = worldTable.findId(connection, scope.server(), scope.world());
+                yield worldId.isEmpty() ? OptionalLong.empty()
+                        : adjustmentTable.sums().sumForPlayerAndWorld(connection, playerId, worldId.get(), range);
+            }
+        };
+    }
+
+    private ScopeReferences resolveScopeReferences(final Connection connection, final TimeScope scope,
+                                                   final boolean createMissing) throws SQLException {
+        return switch (scope.type()) {
+            case GLOBAL -> new ScopeReferences(OptionalLong.empty(), OptionalLong.empty());
+            case SERVER -> new ScopeReferences(resolveServerId(connection, scope, createMissing), OptionalLong.empty());
+            case WORLD -> new ScopeReferences(OptionalLong.empty(), resolveWorldId(connection, scope, createMissing));
+        };
+    }
+
+    private OptionalLong resolveServerId(final Connection connection, final TimeScope scope, final boolean createMissing)
+            throws SQLException {
+        if (createMissing) {
+            return OptionalLong.of(serverTable.ensureServer(connection, scope.server()));
+        }
+        return serverTable.findId(connection, scope.server()).map(OptionalLong::of).orElseGet(OptionalLong::empty);
+    }
+
+    private OptionalLong resolveWorldId(final Connection connection, final TimeScope scope, final boolean createMissing)
+            throws SQLException {
+        if (createMissing) {
+            return OptionalLong.of(worldTable.ensureWorld(connection, scope.server(), scope.world()));
+        }
+        return worldTable.findId(connection, scope.server(), scope.world()).map(OptionalLong::of).orElseGet(OptionalLong::empty);
+    }
+
+    private record ScopeReferences(OptionalLong serverId, OptionalLong worldId) {
     }
 
     @Override

@@ -4,12 +4,12 @@ import com.jannik_kuehn.common.LoriTimePlugin;
 import com.jannik_kuehn.common.api.common.CommonCommand;
 import com.jannik_kuehn.common.api.common.CommonPlayerSender;
 import com.jannik_kuehn.common.api.common.CommonSender;
+import com.jannik_kuehn.common.command.core.CommandMessages;
+import com.jannik_kuehn.common.command.core.PlayerNameCompletions;
 import com.jannik_kuehn.common.config.localization.Localization;
 import com.jannik_kuehn.common.player.TrackedLoriTimePlayer;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.stream.Collectors;
 
 @SuppressWarnings({"PMD.CommentRequired", "PMD.AvoidLiteralsInIfCondition"})
@@ -27,7 +27,7 @@ public class LoriTimeAfkCommand implements CommonCommand {
     @Override
     public void execute(final CommonSender sender, final String... arguments) {
         if (!sender.hasPermission("loritime.afk")) {
-            printUtilityMessage(sender, "message.nopermission");
+            CommandMessages.send(localization, sender, "message.nopermission");
             return;
         }
         if (!(sender instanceof CommonPlayerSender playerSender)) {
@@ -41,22 +41,13 @@ public class LoriTimeAfkCommand implements CommonCommand {
 
     @Override
     public List<String> handleTabComplete(final CommonSender source, final String... args) {
-        final List<String> result = new ArrayList<>();
-        for (final CommonPlayerSender onlinePlayer : plugin.getServer().getOnlinePlayers()) {
-            result.add(onlinePlayer.getName());
-        }
         if (args.length == 0) {
-            return result;
+            return PlayerNameCompletions.online(plugin, "");
         }
         if (args.length == 1) {
-            return filterCompletion(result, args[0]);
+            return PlayerNameCompletions.online(plugin, args[0]);
         }
-        return result;
-    }
-
-    private List<String> filterCompletion(final List<String> list, final String currentValue) {
-        list.removeIf(elem -> !elem.toLowerCase(Locale.ROOT).startsWith(currentValue.toLowerCase(Locale.ROOT)));
-        return list;
+        return List.of();
     }
 
     @Override
@@ -72,7 +63,4 @@ public class LoriTimeAfkCommand implements CommonCommand {
         return "afk";
     }
 
-    private void printUtilityMessage(final CommonSender sender, final String messageKey) {
-        sender.sendMessage(localization.formatTextComponent(localization.getRawMessage(messageKey)));
-    }
 }

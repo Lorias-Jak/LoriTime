@@ -91,12 +91,17 @@ public final class SQLiteMigration {
                         "CREATE TABLE IF NOT EXISTS `" + tablePrefix + "_time_adjustment` ("
                                 + "`id` INTEGER PRIMARY KEY AUTOINCREMENT,"
                                 + "`player_id` INTEGER NOT NULL,"
+                                + "`scope_type` TEXT NOT NULL DEFAULT 'GLOBAL',"
+                                + "`server_id` INTEGER NULL,"
+                                + "`world_id` INTEGER NULL,"
                                 + "`amount_seconds` INTEGER NOT NULL,"
                                 + "`reason` TEXT NOT NULL DEFAULT 'MANUAL_ADJUSTMENT',"
                                 + "`actor_uuid` BLOB NULL,"
                                 + "`actor_name` TEXT NOT NULL,"
                                 + "`created_at` TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,"
-                                + "FOREIGN KEY (`player_id`) REFERENCES `" + tablePrefix + "_player`(`id`) ON DELETE CASCADE"
+                                + "FOREIGN KEY (`player_id`) REFERENCES `" + tablePrefix + "_player`(`id`) ON DELETE CASCADE,"
+                                + "FOREIGN KEY (`server_id`) REFERENCES `" + tablePrefix + "_server`(`id`) ON DELETE CASCADE,"
+                                + "FOREIGN KEY (`world_id`) REFERENCES `" + tablePrefix + "_world`(`id`) ON DELETE CASCADE"
                                 + ")"
                 )
                 .addFirstStartupQuery(
@@ -116,6 +121,10 @@ public final class SQLiteMigration {
                 .addFirstStartupQuery(
                         "CREATE INDEX IF NOT EXISTS `idx_" + tablePrefix + "_adjustment_player` "
                                 + "ON `" + tablePrefix + "_time_adjustment` (`player_id`)"
+                )
+                .addFirstStartupQuery(
+                        "CREATE INDEX IF NOT EXISTS `idx_" + tablePrefix + "_adjustment_scope` "
+                                + "ON `" + tablePrefix + "_time_adjustment` (`scope_type`, `server_id`, `world_id`)"
                 )
                 .addFirstStartupQuery(
                         "CREATE INDEX IF NOT EXISTS `idx_" + tablePrefix + "_adjustment_created` "
@@ -175,12 +184,17 @@ public final class SQLiteMigration {
                         "CREATE TABLE IF NOT EXISTS `" + tablePrefix + "_time_adjustment` ("
                                 + "`id` INTEGER PRIMARY KEY AUTOINCREMENT,"
                                 + "`player_id` INTEGER NOT NULL,"
+                                + "`scope_type` TEXT NOT NULL DEFAULT 'GLOBAL',"
+                                + "`server_id` INTEGER NULL,"
+                                + "`world_id` INTEGER NULL,"
                                 + "`amount_seconds` INTEGER NOT NULL,"
                                 + "`reason` TEXT NOT NULL DEFAULT 'MANUAL_ADJUSTMENT',"
                                 + "`actor_uuid` BLOB NULL,"
                                 + "`actor_name` TEXT NOT NULL,"
                                 + "`created_at` TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,"
-                                + "FOREIGN KEY (`player_id`) REFERENCES `" + tablePrefix + "_player`(`id`) ON DELETE CASCADE"
+                                + "FOREIGN KEY (`player_id`) REFERENCES `" + tablePrefix + "_player`(`id`) ON DELETE CASCADE,"
+                                + "FOREIGN KEY (`server_id`) REFERENCES `" + tablePrefix + "_server`(`id`) ON DELETE CASCADE,"
+                                + "FOREIGN KEY (`world_id`) REFERENCES `" + tablePrefix + "_world`(`id`) ON DELETE CASCADE"
                                 + ")"
                 )
                 .addUnconditionalQuery(
@@ -200,6 +214,10 @@ public final class SQLiteMigration {
                 .addUnconditionalQuery(
                         "CREATE INDEX IF NOT EXISTS `idx_" + tablePrefix + "_adjustment_player` "
                                 + "ON `" + tablePrefix + "_time_adjustment` (`player_id`)"
+                )
+                .addUnconditionalQuery(
+                        "CREATE INDEX IF NOT EXISTS `idx_" + tablePrefix + "_adjustment_scope` "
+                                + "ON `" + tablePrefix + "_time_adjustment` (`scope_type`, `server_id`, `world_id`)"
                 )
                 .addUnconditionalQuery(
                         "CREATE INDEX IF NOT EXISTS `idx_" + tablePrefix + "_adjustment_created` "
@@ -237,14 +255,14 @@ public final class SQLiteMigration {
                                 + "JOIN `" + tablePrefix + "_player` p ON p.`uuid` = old.`uuid` "
                                 + "JOIN `" + tablePrefix + "_server` s ON s.`server` = 'default' "
                                 + "JOIN `" + tablePrefix + "_world` w "
-                                + "  ON w.`server_id` = s.`id` AND w.`world` = 'global' "
+                                + "ON w.`server_id` = s.`id` AND w.`world` = 'global' "
                                 + "WHERE old.`time` > 0 "
                                 + "AND NOT EXISTS ("
-                                + "    SELECT 1 "
-                                + "    FROM `" + tablePrefix + "_time` t "
-                                + "    WHERE t.`player_id` = p.`id` "
-                                + "      AND t.`world_id` = w.`id` "
-                                + "      AND t.`reason` = 'LEGACY_IMPORT'"
+                                + "SELECT 1 "
+                                + "FROM `" + tablePrefix + "_time` t "
+                                + "WHERE t.`player_id` = p.`id` "
+                                + "AND t.`world_id` = w.`id` "
+                                + "AND t.`reason` = 'LEGACY_IMPORT'"
                                 + ")"
                 )
                 .addUnconditionalQuery(

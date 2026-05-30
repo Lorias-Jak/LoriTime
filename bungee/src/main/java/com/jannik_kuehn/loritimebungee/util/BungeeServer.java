@@ -12,6 +12,7 @@ import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -55,6 +56,22 @@ public class BungeeServer implements CommonServer {
         return proxyServer.getPlayers().stream()
                 .map(BungeePlayer::new)
                 .toList().toArray(new CommonPlayerSender[0]);
+    }
+
+    @Override
+    public Optional<String> getCurrentServer(final UUID uniqueId) {
+        final ProxiedPlayer player = proxyServer.getPlayer(uniqueId);
+        if (player == null || player.getServer() == null) {
+            return Optional.empty();
+        }
+        return Optional.of(player.getServer().getInfo().getName());
+    }
+
+    @Override
+    public List<String> getLiveServerNames() {
+        return proxyServer.getServers().keySet().stream()
+                .sorted(String.CASE_INSENSITIVE_ORDER)
+                .toList();
     }
 
     @Override

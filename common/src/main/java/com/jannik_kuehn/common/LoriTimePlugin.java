@@ -8,6 +8,9 @@ import com.jannik_kuehn.common.api.scheduler.PluginScheduler;
 import com.jannik_kuehn.common.api.storage.StorageMode;
 import com.jannik_kuehn.common.api.storage.TimeAccumulator;
 import com.jannik_kuehn.common.api.storage.UnifiedStorage;
+import com.jannik_kuehn.common.command.completion.RecentPlayerSuggestionCache;
+import com.jannik_kuehn.common.command.completion.ScopeSuggestionCache;
+import com.jannik_kuehn.common.command.config.CommandAliasConfig;
 import com.jannik_kuehn.common.config.Configuration;
 import com.jannik_kuehn.common.config.FileManager;
 import com.jannik_kuehn.common.config.localization.Localization;
@@ -93,9 +96,29 @@ public class LoriTimePlugin {
     private final Set<String> knownPlayerNames;
 
     /**
+     * Recent player suggestions used by synchronous command completion.
+     */
+    private final RecentPlayerSuggestionCache recentPlayerSuggestionCache;
+
+    /**
+     * Server/world suggestions used by synchronous command completion.
+     */
+    private final ScopeSuggestionCache scopeSuggestionCache;
+
+    /**
      * The {@link Configuration} instance.
      */
     private Configuration config;
+
+    /**
+     * The command configuration instance.
+     */
+    private Configuration commandConfig;
+
+    /**
+     * The command alias/profile configuration reader.
+     */
+    private CommandAliasConfig commandAliasConfig;
 
     /**
      * The {@link Localization} instance.
@@ -144,6 +167,8 @@ public class LoriTimePlugin {
         this.playerConverter = new LoriTimePlayerConverter(loggerFactory, this);
         this.afkKickMarkers = Collections.newSetFromMap(new ConcurrentHashMap<>());
         this.knownPlayerNames = Collections.newSetFromMap(new ConcurrentHashMap<>());
+        this.recentPlayerSuggestionCache = new RecentPlayerSuggestionCache();
+        this.scopeSuggestionCache = new ScopeSuggestionCache();
     }
 
     /**
@@ -185,6 +210,8 @@ public class LoriTimePlugin {
         }
 
         dataStorageManager.startCache();
+        refreshRecentPlayerSuggestions();
+        refreshScopeSuggestions();
     }
 
     private void setupUpdater() {
@@ -263,12 +290,23 @@ public class LoriTimePlugin {
      * Remembers a player name observed by a runtime event or cache lookup.
      *
      * @param uniqueId player UUID
-     * @param name player name
+     * @param name     player name
      */
     public void rememberPlayerName(final UUID uniqueId, final String name) {
         if (uniqueId != null && name != null && !name.isBlank()) {
             knownPlayerNames.add(name);
+            recentPlayerSuggestionCache.remember(uniqueId, name);
         }
+    }
+
+    /**
+     * Remembers a runtime-observed scope.
+     *
+     * @param serverName server name
+     * @param worldName world name
+     */
+    public void rememberScope(final String serverName, final String worldName) {
+        scopeSuggestionCache.remember(serverName, worldName);
     }
 
     /**
@@ -277,7 +315,27 @@ public class LoriTimePlugin {
      * @return immutable snapshot of known player names
      */
     public Set<String> getKnownPlayerNames() {
-        return Set.copyOf(knownPlayerNames);
+        final Set<String> names = new HashSet<>(knownPlayerNames);
+        names.addAll(recentPlayerSuggestionCache.names());
+        return Set.copyOf(names);
+    }
+
+    /**
+     * Gets the recent player suggestion cache.
+     *
+     * @return recent player suggestion cache
+     */
+    public RecentPlayerSuggestionCache getRecentPlayerSuggestionCache() {
+        return recentPlayerSuggestionCache;
+    }
+
+    /**
+     * Gets the scope suggestion cache.
+     *
+     * @return scope suggestion cache
+     */
+    public ScopeSuggestionCache getScopeSuggestionCache() {
+        return scopeSuggestionCache;
     }
 
     /**
@@ -293,6 +351,7 @@ public class LoriTimePlugin {
      */
     public void reload() {
         config.reload();
+        commandConfig.reload();
         localization.reloadTranslation();
         if (afkStatusProvider != null) {
             afkStatusProvider.reloadConfigValues();
@@ -300,6 +359,35 @@ public class LoriTimePlugin {
         }
 
         reloadMasteredFunctions();
+        refreshRecentPlayerSuggestions();
+        refreshScopeSuggestions();
+    }
+
+    private void refreshRecentPlayerSuggestions() {
+        if (StorageMode.SLAVE.configValue().equalsIgnoreCase(server.getServerMode())) {
+            return;
+        }
+        final long recentDays = config.getLong("command.completion.recentPlayersDays", 30L);
+        scheduler.runAsyncOnce(() -> {
+            try {
+                recentPlayerSuggestionCache.replaceRecentIdentities(getStorage().getRecentPlayerIdentities(recentDays));
+            } catch (final StorageException ex) {
+                log.warn("Could not refresh recent player suggestions.", ex);
+            }
+        });
+    }
+
+    private void refreshScopeSuggestions() {
+        if (StorageMode.SLAVE.configValue().equalsIgnoreCase(server.getServerMode())) {
+            return;
+        }
+        scheduler.runAsyncOnce(() -> {
+            try {
+                scopeSuggestionCache.replaceStoredNames(getStorage().getKnownServerNames(), getStorage().getKnownWorldNames());
+            } catch (final StorageException ex) {
+                log.warn("Could not refresh scope suggestions.", ex);
+            }
+        });
     }
 
     private void reloadMasteredFunctions() {
@@ -320,6 +408,8 @@ public class LoriTimePlugin {
         final Configuration localizationFile;
         try {
             this.config = fileManager.getConfiguration(fileManager.getOrCreateFile(dataFolder.toString(), "config.yml", true));
+            this.commandConfig = fileManager.getConfiguration(fileManager.getOrCreateFile(dataFolder.toString(), "commands.yml", true));
+            this.commandAliasConfig = new CommandAliasConfig(commandConfig);
             localizationFile = fileManager.getConfiguration(fileManager.getOrCreateFile(dataFolder.toString(), config.getString("general.language", "en") + ".yml", true));
             new StorageMigrationService(this, dataFolder).addLegacyFilesToStartupBackup();
             fileManager.startBackup();
@@ -403,6 +493,24 @@ public class LoriTimePlugin {
      */
     public Configuration getConfig() {
         return config;
+    }
+
+    /**
+     * Getter of the command configuration.
+     *
+     * @return the command configuration.
+     */
+    public Configuration getCommandConfig() {
+        return commandConfig;
+    }
+
+    /**
+     * Getter of the command alias configuration.
+     *
+     * @return command alias configuration.
+     */
+    public CommandAliasConfig getCommandAliasConfig() {
+        return commandAliasConfig;
     }
 
     /**

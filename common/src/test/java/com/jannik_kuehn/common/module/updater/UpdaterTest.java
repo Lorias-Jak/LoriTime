@@ -12,6 +12,7 @@ import com.jannik_kuehn.common.config.Configuration;
 import com.jannik_kuehn.common.config.localization.Localization;
 import com.jannik_kuehn.common.module.updater.download.Downloader;
 import com.jannik_kuehn.common.module.updater.version.Version;
+import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.Test;
@@ -71,8 +72,8 @@ class UpdaterTest {
     private Localization mockLocalization() {
         final Localization loc = mock(Localization.class);
         when(loc.getRawMessage(anyString())).thenReturn("msg");
-        when(loc.formatTextComponent(anyString())).thenReturn(mock(TextComponent.class));
-        when(loc.formatTextComponentWithoutPrefix(anyString())).thenReturn(mock(TextComponent.class));
+        when(loc.formatTextComponent(anyString())).thenReturn(Component.text("msg"));
+        when(loc.formatTextComponentWithoutPrefix(anyString())).thenReturn(Component.text("msg"));
         return loc;
     }
 
@@ -90,7 +91,7 @@ class UpdaterTest {
     }
 
     @Test
-    void search_withAutoUpdate_triggersDownloader_and_clearsLatestAfterExecute() throws Exception {
+    void searchWithAutoUpdateTriggersDownloaderAndClearsLatestAfterExecute() throws Exception {
         final WrappedLogger logger = mock(WrappedLogger.class);
         final MutableInstantSource clock = new MutableInstantSource(Instant.parse("2024-01-01T00:00:00Z"));
 
@@ -122,7 +123,7 @@ class UpdaterTest {
 
     @Test
     @SuppressWarnings("PMD.UnitTestContainsTooManyAsserts")
-    void sendPlayerUpdateNotification_throttles_per_player_and_respects_console() throws Exception {
+    void sendPlayerUpdateNotificationThrottlesPerPlayerAndRespectsConsole() throws Exception {
         final WrappedLogger logger = mock(WrappedLogger.class);
         final MutableInstantSource clock = new MutableInstantSource(Instant.parse("2024-01-01T00:00:00Z"));
 

@@ -5,7 +5,7 @@ import org.bstats.charts.SimplePie;
 import org.bstats.velocity.Metrics;
 
 /**
- * The metrics for the BungeeCord plugin.
+ * The metrics for the Velocity plattform.
  */
 public class VelocityMetrics {
     /**

@@ -21,9 +21,11 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Reworked command registration into proxy, backend canonical, and backend slave profiles.
 - Replaced the local command root with admin subcommands: proxy admin defaults to `/plta`, backend admin defaults to `/lta`, and reload/debug/info/update now live under admin.
 - Moved player time mutation and delete-user actions from admin into the dedicated modify command.
+- Removed the modifying actions from the admin command to the new `/ltmodify` command. The player data deletion is there too.
 ### Deprecated
 ### Removed
 - The storage type `yml`
+- BungeeCord support
 ### Fixed
 ### Security
 

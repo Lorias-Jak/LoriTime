@@ -9,12 +9,12 @@ LoriTime has got the ability to update itself and download these updates from Mo
 | PATCH | The third digit of the version  |
 
 * A version is normally built like this: `MAJOR.MINOR.PATCH`. For example: `1.2.5`.
-* You have the posibility to update the plugin automatically. You can enable this by setting `autoUpdate` to `true` in the `config.yml`. It will respect the Update Strategy
+* You have the possibility to update the plugin automatically. You can enable this by setting `autoUpdate` to `true` in the `config.yml`. It will respect the Update Strategy
 * There is currently not the option to get development updates. This is planned for the future.
 
-> ⚠️ **Note:** At the moment the automatic file replacement is only available on Paper. On Bungee and Velocity an update folder will be created within the plugin directory, you have to move the files yourself.
+> ⚠️ **Note:** At the moment the automatic file replacement is only available on Paper. On Velocity an update folder will be created within the plugin directory, you have to move the files yourself.
 
-> ⚠️ **Note:** Velocity is currently working on the update folder feature. BungeeCord doesn't want to introduce it so the auto update is kind of limited there.
+> ⚠️ **Note:** Velocity is currently working on the update folder feature.
 
 ## Configuration of the Updater
 <details>

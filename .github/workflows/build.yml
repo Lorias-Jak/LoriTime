@@ -127,7 +127,6 @@ jobs:
         with:
           args: |
             **/target/LoriTimePaper.jar
-            **/target/LoriTimeBungee.jar
             **/target/LoriTimeVelocity.jar
 
   update-wiki:

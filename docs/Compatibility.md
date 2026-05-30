@@ -35,7 +35,7 @@
   </tr>
   <tr>
     <th class="tg-0pky"><a href="https://ci.md-5.net/job/BungeeCord/">BungeeCord</a></th>
-    <th class="tg-0pky">✅ lts</th>
+    <th class="tg-0pky">❌</th>
   </tr>
 </tbody>
 </table>

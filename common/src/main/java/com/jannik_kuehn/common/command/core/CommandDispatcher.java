@@ -44,7 +44,7 @@ public class CommandDispatcher implements CommonCommand {
     public void execute(final CommonSender sender, final String... arguments) {
         if (definition.permission() != null && !definition.permission().isBlank()
                 && !sender.hasPermission(definition.permission())) {
-            sender.sendMessage(localization.formatTextComponent(localization.getRawMessage("message.nopermission")));
+            sender.sendMessage(localization.formatTextComponent(localization.getRawMessage("message.noPermission")));
             return;
         }
         final CommandContext context = new CommandContext(plugin, sender, arguments);

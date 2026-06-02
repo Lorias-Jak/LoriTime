@@ -551,4 +551,9 @@ public final class TimeTable {
     private String serverTableName() {
         return tableName.replace(TIME_SUFFIX, SERVER_SUFFIX);
     }
+
+    @Override
+    public String toString() {
+        return tableName;
+    }
 }

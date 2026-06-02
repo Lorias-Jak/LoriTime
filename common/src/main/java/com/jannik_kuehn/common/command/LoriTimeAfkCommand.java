@@ -27,7 +27,7 @@ public class LoriTimeAfkCommand implements CommonCommand {
     @Override
     public void execute(final CommonSender sender, final String... arguments) {
         if (!sender.hasPermission("loritime.afk")) {
-            CommandMessages.send(localization, sender, "message.nopermission");
+            CommandMessages.send(localization, sender, "message.noPermission");
             return;
         }
         if (!(sender instanceof CommonPlayerSender playerSender)) {

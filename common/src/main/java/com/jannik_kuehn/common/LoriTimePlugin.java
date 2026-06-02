@@ -5,6 +5,7 @@ import com.github.roleplaycauldron.spellbook.core.logger.WrappedLogger;
 import com.jannik_kuehn.common.api.LoriTimePlayerConverter;
 import com.jannik_kuehn.common.api.common.CommonServer;
 import com.jannik_kuehn.common.api.scheduler.PluginScheduler;
+import com.jannik_kuehn.common.api.storage.AdminStorageMaintenance;
 import com.jannik_kuehn.common.api.storage.StorageMode;
 import com.jannik_kuehn.common.api.storage.TimeAccumulator;
 import com.jannik_kuehn.common.api.storage.UnifiedStorage;
@@ -35,6 +36,7 @@ import java.time.InstantSource;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -410,7 +412,7 @@ public class LoriTimePlugin {
             this.config = fileManager.getConfiguration(fileManager.getOrCreateFile(dataFolder.toString(), "config.yml", true));
             this.commandConfig = fileManager.getConfiguration(fileManager.getOrCreateFile(dataFolder.toString(), "commands.yml", true));
             this.commandAliasConfig = new CommandAliasConfig(commandConfig);
-            localizationFile = fileManager.getConfiguration(fileManager.getOrCreateFile(dataFolder.toString(), config.getString("general.language", "en") + ".yml", true));
+            localizationFile = fileManager.getConfiguration(fileManager.getOrCreateLanguageFile(config.getString("general.language", "en")));
             new StorageMigrationService(this, dataFolder).addLegacyFilesToStartupBackup();
             fileManager.startBackup();
         } catch (final ConfigurationException e) {
@@ -547,6 +549,24 @@ public class LoriTimePlugin {
      */
     public TimeAccumulator getAccumulator() {
         return dataStorageManager.getAccumulator();
+    }
+
+    /**
+     * Returns optional admin storage maintenance support for future admin commands.
+     *
+     * @return maintenance contract when this runtime owns supported canonical storage
+     */
+    public Optional<AdminStorageMaintenance> getAdminStorageMaintenance() {
+        return dataStorageManager.getAdminStorageMaintenance();
+    }
+
+    /**
+     * Returns whether this runtime owns canonical storage.
+     *
+     * @return true when canonical storage operations may run locally
+     */
+    public boolean ownsCanonicalStorage() {
+        return dataStorageManager.ownsCanonicalStorage();
     }
 
     /**

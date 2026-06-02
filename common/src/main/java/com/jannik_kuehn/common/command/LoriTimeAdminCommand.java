@@ -38,7 +38,7 @@ public class LoriTimeAdminCommand implements CommonCommand {
     @Override
     public void execute(final CommonSender sender, final String... args) {
         if (!sender.hasPermission("loritime.admin")) {
-            CommandMessages.send(localization, sender, "message.nopermission");
+            CommandMessages.send(localization, sender, "message.noPermission");
             return;
         }
         if (args.length < 1) {

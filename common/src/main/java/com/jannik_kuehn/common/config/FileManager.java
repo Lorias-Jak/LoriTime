@@ -34,14 +34,24 @@ public class FileManager {
     private static final String CONFIG_FILE_NAME = "config.yml";
 
     /**
+     * Folder for localization files.
+     */
+    private static final String LANGUAGE_FOLDER = "language";
+
+    /**
      * English localization resource.
      */
-    private static final String ENGLISH_LOCALIZATION_FILE_NAME = "en.yml";
+    private static final String ENGLISH_LOCALIZATION_FILE_NAME = LANGUAGE_FOLDER + "/en-us.yml";
 
     /**
      * German localization resource.
      */
-    private static final String GERMAN_LOCALIZATION_FILE_NAME = "de.yml";
+    private static final String GERMAN_LOCALIZATION_FILE_NAME = LANGUAGE_FOLDER + "/de-de.yml";
+
+    /**
+     * Chinese localization resource.
+     */
+    private static final String CHINESE_LOCALIZATION_FILE_NAME = LANGUAGE_FOLDER + "/zh-cn.yml";
 
     /**
      * The {@link WrappedLogger} instance.
@@ -116,14 +126,48 @@ public class FileManager {
      * @throws ConfigurationException if the file could not be created, copied or updated.
      */
     public File getOrCreateFile(final String folder, final String fileName, final boolean needCopy) throws ConfigurationException {
+        return getOrCreateFile(folder, fileName, resourceNameFor(fileName), needCopy);
+    }
+
+    /**
+     * Returns a language file from the canonical language folder.
+     *
+     * @param language language id
+     * @return language file
+     * @throws ConfigurationException if the file cannot be created or updated
+     */
+    public File getOrCreateLanguageFile(final String language) throws ConfigurationException {
+        final String fileName = language + ".yml";
+        final File languageFolder = new File(dataFolder, LANGUAGE_FOLDER);
+        if (!languageFolder.exists() && !languageFolder.mkdirs()) {
+            throw new ConfigurationException("Could not create language folder.");
+        }
+
+        final File canonical = new File(languageFolder, fileName);
+        final File legacy = new File(dataFolder, fileName);
+        if (!canonical.exists() && legacy.exists()) {
+            addToBackup(legacy);
+            try {
+                Files.move(legacy.toPath(), canonical.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            } catch (final IOException ex) {
+                throw new ConfigurationException("Could not migrate language file '" + fileName + "' to language folder.", ex);
+            }
+        }
+        return getOrCreateFile(languageFolder.toString(), fileName, LANGUAGE_FOLDER + "/" + fileName, true);
+    }
+
+    private File getOrCreateFile(final String folder,
+                                 final String fileName,
+                                 final String resourceFileName,
+                                 final boolean needCopy) throws ConfigurationException {
         final File file = new File(folder, fileName);
         if (doesFileNotExist(file) && needCopy) {
             createFile(file);
-            createFromResources(file.toPath(), fileName);
+            createFromResources(file.toPath(), resourceFileName);
         } else if (doesFileNotExist(file)) {
             createFile(file);
         } else if (needCopy) {
-            updateHumanConfigFromResourceIfNeeded(file, fileName);
+            updateHumanConfigFromResourceIfNeeded(file, resourceFileName);
         }
         return file;
     }
@@ -134,6 +178,10 @@ public class FileManager {
 
     private void createFile(final File file) throws ConfigurationException {
         try {
+            final File parent = file.getParentFile();
+            if (parent != null && !parent.exists() && !parent.mkdirs()) {
+                throw new ConfigurationException("Could not create folder '" + parent.getName() + "'.");
+            }
             if (file.createNewFile()) {
                 log.info("Created file '" + file.getName() + "'.");
             }
@@ -221,8 +269,17 @@ public class FileManager {
     private ConfigSchema schemaForResource(final String resourceFileName) {
         return switch (resourceFileName) {
             case CONFIG_FILE_NAME -> ConfigSchema.loriTimeConfig();
-            case ENGLISH_LOCALIZATION_FILE_NAME, GERMAN_LOCALIZATION_FILE_NAME -> ConfigSchema.localization();
+            case ENGLISH_LOCALIZATION_FILE_NAME, GERMAN_LOCALIZATION_FILE_NAME, CHINESE_LOCALIZATION_FILE_NAME -> ConfigSchema.localization();
             default -> null;
+        };
+    }
+
+    private String resourceNameFor(final String fileName) {
+        return switch (fileName) {
+            case "en-us.yml" -> ENGLISH_LOCALIZATION_FILE_NAME;
+            case "de-de.yml" -> GERMAN_LOCALIZATION_FILE_NAME;
+            case "zh-cn.yml" -> CHINESE_LOCALIZATION_FILE_NAME;
+            default -> fileName;
         };
     }
 

@@ -22,7 +22,7 @@ import java.util.Set;
 import java.util.logging.Logger;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.*;
 
 @SuppressWarnings({"PMD.UnitTestContainsTooManyAsserts", "PMD.UnitTestAssertionsShouldIncludeMessage"})
 class YamlConfigurationTest {
@@ -162,8 +162,8 @@ class YamlConfigurationTest {
     void fileManagerMigratesLocalizationFilesAndPreservesCustomizedMessages() throws IOException, ConfigurationException {
         final File localizationFolder = new File(dataFolder, "localization");
         Files.createDirectories(localizationFolder.toPath());
-        Files.writeString(new File(localizationFolder, "config.yml").toPath(), "backup:\n  enabled: true\n  maxBackups: 5\n");
-        Files.writeString(new File(localizationFolder, "en.yml").toPath(), """
+        Files.writeString(new File(dataFolder, "config.yml").toPath(), "backup:\n  enabled: true\n  maxBackups: 5\n");
+        Files.writeString(new File(localizationFolder, "en-us.yml").toPath(), """
                 unit:
                   second:
                     singular: 'custom second'
@@ -176,10 +176,11 @@ class YamlConfigurationTest {
 
         final FileManager fileManager = new FileManager(loggerFactory, localizationFolder);
         final Configuration migrated = fileManager.getConfiguration(
-                fileManager.getOrCreateFile(localizationFolder.toString(), "en.yml", true));
+                fileManager.getOrCreateFile(localizationFolder.toString(), "en-us.yml", true));
 
-        assertEquals(1, migrated.getInt("configSchemaVersion"));
-        assertEquals("custom no permission", migrated.getString("message.nopermission"));
+        assertEquals(2, migrated.getInt("configSchemaVersion"));
+        assertEquals("custom no permission", migrated.getString("message.noPermission"));
+        assertFalse(migrated.containsKey("message.nopermission"));
         assertEquals("custom second", migrated.getString("unit.second.singular"));
         assertTrue(migrated.containsKey("message.command.loritime.usage"));
     }

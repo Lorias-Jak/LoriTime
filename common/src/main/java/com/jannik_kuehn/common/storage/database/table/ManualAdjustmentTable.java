@@ -161,4 +161,9 @@ public final class ManualAdjustmentTable {
         }
     }
 
+    @Override
+    public String toString() {
+        return tableName;
+    }
+
 }

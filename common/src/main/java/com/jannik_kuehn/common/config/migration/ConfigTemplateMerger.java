@@ -29,7 +29,17 @@ public final class ConfigTemplateMerger {
         if (schemaVersion != null) {
             result.set(ConfigSchema.VERSION_PATH, schemaVersion);
         }
+        preserveUnknownUserPaths(result, user);
         return result;
+    }
+
+    private void preserveUnknownUserPaths(final StructuredConfigurationDocument target,
+                                          final StructuredConfigurationDocument user) {
+        for (final Map.Entry<String, Object> entry : user.flatten().entrySet()) {
+            if (!target.contains(entry.getKey())) {
+                target.set(entry.getKey(), entry.getValue());
+            }
+        }
     }
 
     private void overlayTemplatePaths(final String prefix, final StructuredConfigurationDocument target,

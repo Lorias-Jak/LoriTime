@@ -97,4 +97,9 @@ public class ServerTable {
         }
         return servers;
     }
+
+    @Override
+    public String toString() {
+        return tableName;
+    }
 }

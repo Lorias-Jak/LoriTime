@@ -59,7 +59,7 @@ public class LoriTimeModifyCommand implements CommonCommand {
     @Override
     public void execute(final CommonSender sender, final String... args) {
         if (!sender.hasPermission("loritime.admin")) {
-            CommandMessages.send(localization, sender, "message.nopermission");
+            CommandMessages.send(localization, sender, "message.noPermission");
             return;
         }
         if (args.length < 1) {
@@ -127,7 +127,7 @@ public class LoriTimeModifyCommand implements CommonCommand {
 
         final LoriTimePlayer player = plugin.getPlayerConverter().getOnlinePlayer(optionalUUID.get());
         if (time < 0) {
-            sender.sendMessage(localization.formatTextComponent(localization.getRawMessage("message.command.loritimeadmin.set.negativetime")
+            sender.sendMessage(localization.formatTextComponent(localization.getRawMessage("message.command.loritimeadmin.set.negativeTime")
                     .replace("[player]", player.getName())
                     .replace("[time]", TimeUtil.formatTime(time, localization))));
             return;
@@ -135,7 +135,7 @@ public class LoriTimeModifyCommand implements CommonCommand {
 
         final OptionalLong optionalCurrentTime = plugin.getStorage().getTime(player.getUniqueId(), timedScope.scope());
         if (optionalCurrentTime.isEmpty()) {
-            sender.sendMessage(localization.formatTextComponent(localization.getRawMessage("message.command.loritime.notfound")
+            sender.sendMessage(localization.formatTextComponent(localization.getRawMessage("message.command.loritime.notFound")
                     .replace("[player]", player.getName())));
             return;
         }
@@ -176,13 +176,13 @@ public class LoriTimeModifyCommand implements CommonCommand {
         final LoriTimePlayer player = plugin.getPlayerConverter().getOnlinePlayer(optionalUUID.get());
         final OptionalLong optionalCurrentTime = plugin.getStorage().getTime(player.getUniqueId(), timedScope.scope());
         if (optionalCurrentTime.isEmpty()) {
-            sender.sendMessage(localization.formatTextComponent(localization.getRawMessage("message.command.loritime.notfound")
+            sender.sendMessage(localization.formatTextComponent(localization.getRawMessage("message.command.loritime.notFound")
                     .replace("[player]", player.getName())));
             return;
         }
         final long time = optionalTime.getAsLong();
         if (optionalCurrentTime.getAsLong() + time < 0) {
-            sender.sendMessage(localization.formatTextComponent(localization.getRawMessage("message.command.loritimeadmin.modify.negativetimesum")
+            sender.sendMessage(localization.formatTextComponent(localization.getRawMessage("message.command.loritimeadmin.modify.negativeTimeSum")
                     .replace("[player]", player.getName())
                     .replace("[time]", TimeUtil.formatTime(time, localization))));
             return;
@@ -211,7 +211,7 @@ public class LoriTimeModifyCommand implements CommonCommand {
 
         final OptionalLong optionalCurrentTime = plugin.getStorage().getTime(player.getUniqueId(), parsedScope.scope());
         if (optionalCurrentTime.isEmpty()) {
-            sender.sendMessage(localization.formatTextComponent(localization.getRawMessage("message.command.loritime.notfound")
+            sender.sendMessage(localization.formatTextComponent(localization.getRawMessage("message.command.loritime.notFound")
                     .replace("[player]", player.getName())));
             return;
         }
@@ -279,12 +279,12 @@ public class LoriTimeModifyCommand implements CommonCommand {
     }
 
     private void printMissingUuidMessage(final CommonSender sender, final String playerName) {
-        sender.sendMessage(localization.formatTextComponent(localization.getRawMessage("message.command.loritimeadmin.missinguuid")
+        sender.sendMessage(localization.formatTextComponent(localization.getRawMessage("message.command.loritimeadmin.missingUuid")
                 .replace("[player]", playerName)));
     }
 
     private void printNotTimeMessage(final CommonSender sender, final String... notTime) {
-        sender.sendMessage(localization.formatTextComponent(localization.getRawMessage("message.command.loritimeadmin.nottime")
+        sender.sendMessage(localization.formatTextComponent(localization.getRawMessage("message.command.loritimeadmin.notTime")
                 .replace("[argument]", String.join(" ", notTime))));
     }
 

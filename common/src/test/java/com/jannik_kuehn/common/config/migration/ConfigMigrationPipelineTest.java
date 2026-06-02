@@ -45,7 +45,7 @@ class ConfigMigrationPipelineTest {
     }
 
     @Test
-    void templateMergePreservesKnownUserValuesAddsDefaultsAndDropsUnknownKeys() {
+    void templateMergePreservesKnownUserValuesAddsDefaultsAndUnknownKeys() {
         final StructuredConfigurationDocument template = new StructuredConfigurationDocument(Map.of(
                 "configSchemaVersion", 2,
                 "general", Map.of("language", "en", "saveInterval", 30),
@@ -60,7 +60,42 @@ class ConfigMigrationPipelineTest {
         assertEquals("de", merged.get("general.language"));
         assertEquals(30, merged.get("general.saveInterval"));
         assertEquals(true, merged.get("obsoleteReplacement"));
-        assertNull(merged.get("customUnknown"));
+        assertEquals("drop", merged.get("customUnknown"));
+        assertEquals(2, merged.get(ConfigSchema.VERSION_PATH));
+    }
+
+    @Test
+    void localizationMigrationRenamesLegacyKeysToCamelCaseAndPreservesCustomKeys() {
+        final StructuredConfigurationDocument document = new StructuredConfigurationDocument(Map.of(
+                ConfigSchema.VERSION_PATH, 1,
+                "message", Map.of(
+                        "nopermission", "legacy permission",
+                        "command", Map.of(
+                                "loritime", Map.of(
+                                        "notfound", "legacy not found",
+                                        "timeseen", Map.of("self", "legacy self")),
+                                "loritimeadmin", Map.of("missinguuid", "legacy missing uuid")),
+                        "customPlugin", Map.of("custom_key", "custom value"))));
+        final StructuredConfigurationDocument template = new StructuredConfigurationDocument(Map.of(
+                ConfigSchema.VERSION_PATH, 2,
+                "message", Map.of(
+                        "noPermission", "default permission",
+                        "command", Map.of(
+                                "loritime", Map.of(
+                                        "notFound", "default not found",
+                                        "timeSeen", Map.of("self", "default self")),
+                                "loritimeadmin", Map.of("missingUuid", "default missing uuid")))));
+
+        final ConfigMigrationResult result = new ConfigMigrationPipeline(ConfigSchema.localization()).migrate(document);
+        final StructuredConfigurationDocument merged = new ConfigTemplateMerger().merge(template, result.document());
+
+        assertTrue(result.changed());
+        assertEquals("legacy permission", merged.get("message.noPermission"));
+        assertEquals("legacy not found", merged.get("message.command.loritime.notFound"));
+        assertEquals("legacy self", merged.get("message.command.loritime.timeSeen.self"));
+        assertEquals("legacy missing uuid", merged.get("message.command.loritimeadmin.missingUuid"));
+        assertEquals("custom value", merged.get("message.customPlugin.custom_key"));
+        assertNull(merged.get("message.nopermission"));
         assertEquals(2, merged.get(ConfigSchema.VERSION_PATH));
     }
 

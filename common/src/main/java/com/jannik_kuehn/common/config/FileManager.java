@@ -20,6 +20,7 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 
@@ -34,14 +35,9 @@ public class FileManager {
     private static final String CONFIG_FILE_NAME = "config.yml";
 
     /**
-     * English localization resource.
+     * Folder for localization files.
      */
-    private static final String ENGLISH_LOCALIZATION_FILE_NAME = "en.yml";
-
-    /**
-     * German localization resource.
-     */
-    private static final String GERMAN_LOCALIZATION_FILE_NAME = "de.yml";
+    private static final String LANGUAGE_FOLDER = "language";
 
     /**
      * The {@link WrappedLogger} instance.
@@ -116,14 +112,68 @@ public class FileManager {
      * @throws ConfigurationException if the file could not be created, copied or updated.
      */
     public File getOrCreateFile(final String folder, final String fileName, final boolean needCopy) throws ConfigurationException {
+        return getOrCreateFile(folder, fileName, fileName, needCopy);
+    }
+
+    /**
+     * Returns a language file from the canonical language folder.
+     *
+     * @param language language id
+     * @return language file
+     * @throws ConfigurationException if the file cannot be created or updated
+     */
+    @SuppressWarnings("PMD.CyclomaticComplexity")
+    public File getOrCreateLanguageFile(final String language) throws ConfigurationException {
+        final String languageId = language == null || language.isBlank()
+                ? "en-us"
+                : language.trim().toLowerCase(Locale.ROOT);
+        final String fileName = languageId + ".yml";
+        final File languageFolder = new File(dataFolder, LANGUAGE_FOLDER);
+        if (!languageFolder.exists() && !languageFolder.mkdirs()) {
+            throw new ConfigurationException("Could not create language folder.");
+        }
+
+        final File canonical = new File(languageFolder, fileName);
+        final File legacy = new File(dataFolder, fileName);
+        if (!canonical.exists() && legacy.exists()) {
+            addToBackup(legacy);
+            try {
+                Files.move(legacy.toPath(), canonical.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            } catch (final IOException ex) {
+                throw new ConfigurationException("Could not migrate language file '" + fileName + "' to language folder.", ex);
+            }
+        }
+        final String resourceFileName = LANGUAGE_FOLDER + "/" + fileName;
+        if (resourceExists(resourceFileName)) {
+            return getOrCreateFile(languageFolder.toString(), fileName, resourceFileName, true);
+        }
+        if (!canonical.exists()) {
+            log.warn("Custom language file '" + fileName + "' does not exist in the language folder.");
+        }
+        return canonical;
+    }
+
+    /**
+     * Ensures the bundled hard fallback language exists.
+     *
+     * @throws ConfigurationException if the bundled language file cannot be created
+     */
+    public void ensureBundledFallbackLanguage() throws ConfigurationException {
+        getOrCreateLanguageFile("en-us");
+    }
+
+    private File getOrCreateFile(final String folder,
+                                 final String fileName,
+                                 final String resourceFileName,
+                                 final boolean needCopy) throws ConfigurationException {
         final File file = new File(folder, fileName);
         if (doesFileNotExist(file) && needCopy) {
             createFile(file);
-            createFromResources(file.toPath(), fileName);
+            createFromResources(file.toPath(), resourceFileName);
         } else if (doesFileNotExist(file)) {
             createFile(file);
         } else if (needCopy) {
-            updateHumanConfigFromResourceIfNeeded(file, fileName);
+            updateHumanConfigFromResourceIfNeeded(file, resourceFileName);
         }
         return file;
     }
@@ -134,6 +184,10 @@ public class FileManager {
 
     private void createFile(final File file) throws ConfigurationException {
         try {
+            final File parent = file.getParentFile();
+            if (parent != null && !parent.exists() && !parent.mkdirs()) {
+                throw new ConfigurationException("Could not create folder '" + parent.getName() + "'.");
+            }
             if (file.createNewFile()) {
                 log.info("Created file '" + file.getName() + "'.");
             }
@@ -219,11 +273,10 @@ public class FileManager {
     }
 
     private ConfigSchema schemaForResource(final String resourceFileName) {
-        return switch (resourceFileName) {
-            case CONFIG_FILE_NAME -> ConfigSchema.loriTimeConfig();
-            case ENGLISH_LOCALIZATION_FILE_NAME, GERMAN_LOCALIZATION_FILE_NAME -> ConfigSchema.localization();
-            default -> null;
-        };
+        if (CONFIG_FILE_NAME.equals(resourceFileName)) {
+            return ConfigSchema.loriTimeConfig();
+        }
+        return null;
     }
 
     private StructuredConfigurationDocument loadResourceDocument(final String resourceFileName) throws ConfigurationException {
@@ -232,6 +285,13 @@ public class FileManager {
         } catch (final IOException e) {
             throw new ConfigurationException("An exception occurred while loading the resource file '" + resourceFileName + "'.", e);
         }
+    }
+
+    @SuppressWarnings("PMD.UseProperClassLoader")
+    private boolean resourceExists(final String resourceFileName) {
+        final ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
+        return contextClassLoader != null && contextClassLoader.getResource(resourceFileName) != null
+                || FileManager.class.getClassLoader().getResource(resourceFileName) != null;
     }
 
     @SuppressWarnings("PMD.UseProperClassLoader")

@@ -1,7 +1,7 @@
 package com.jannik_kuehn.loritimepaper.util;
 
 import com.jannik_kuehn.common.api.common.CommonPlayerSender;
-import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.entity.Player;
 
@@ -40,7 +40,7 @@ public class PaperPlayer implements CommonPlayerSender {
     }
 
     @Override
-    public void sendMessage(final TextComponent message) {
+    public void sendMessage(final Component message) {
         player.sendMessage(message);
     }
 

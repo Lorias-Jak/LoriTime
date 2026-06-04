@@ -5,6 +5,7 @@ import com.github.roleplaycauldron.spellbook.core.logger.WrappedLogger;
 import com.jannik_kuehn.common.api.LoriTimePlayerConverter;
 import com.jannik_kuehn.common.api.common.CommonServer;
 import com.jannik_kuehn.common.api.scheduler.PluginScheduler;
+import com.jannik_kuehn.common.api.storage.AdminStorageMaintenance;
 import com.jannik_kuehn.common.api.storage.StorageMode;
 import com.jannik_kuehn.common.api.storage.TimeAccumulator;
 import com.jannik_kuehn.common.api.storage.UnifiedStorage;
@@ -13,6 +14,8 @@ import com.jannik_kuehn.common.command.completion.ScopeSuggestionCache;
 import com.jannik_kuehn.common.command.config.CommandAliasConfig;
 import com.jannik_kuehn.common.config.Configuration;
 import com.jannik_kuehn.common.config.FileManager;
+import com.jannik_kuehn.common.config.localization.ConfiguredDefaultLanguageSelector;
+import com.jannik_kuehn.common.config.localization.LanguageSelector;
 import com.jannik_kuehn.common.config.localization.Localization;
 import com.jannik_kuehn.common.exception.ConfigurationException;
 import com.jannik_kuehn.common.exception.StorageException;
@@ -35,6 +38,7 @@ import java.time.InstantSource;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -124,6 +128,11 @@ public class LoriTimePlugin {
      * The {@link Localization} instance.
      */
     private Localization localization;
+
+    /**
+     * Selects the language used for sender-facing messages.
+     */
+    private LanguageSelector languageSelector;
 
     /**
      * The {@link TimeParser} instance.
@@ -352,7 +361,16 @@ public class LoriTimePlugin {
     public void reload() {
         config.reload();
         commandConfig.reload();
-        localization.reloadTranslation();
+        final String configuredLanguage = config.getString("general.language", "en-us");
+        try {
+            fileManager.getOrCreateLanguageFile(configuredLanguage);
+        } catch (final ConfigurationException ex) {
+            log.error("An error occurred while loading the configured language file.", ex);
+            errorDisable = true;
+        }
+        languageSelector = new ConfiguredDefaultLanguageSelector(configuredLanguage);
+        localization.reload(configuredLanguage);
+        rebuildTimeParser();
         if (afkStatusProvider != null) {
             afkStatusProvider.reloadConfigValues();
             afkStatusProvider.restartAfkCheck();
@@ -405,12 +423,12 @@ public class LoriTimePlugin {
             }
         }
 
-        final Configuration localizationFile;
         try {
             this.config = fileManager.getConfiguration(fileManager.getOrCreateFile(dataFolder.toString(), "config.yml", true));
             this.commandConfig = fileManager.getConfiguration(fileManager.getOrCreateFile(dataFolder.toString(), "commands.yml", true));
             this.commandAliasConfig = new CommandAliasConfig(commandConfig);
-            localizationFile = fileManager.getConfiguration(fileManager.getOrCreateFile(dataFolder.toString(), config.getString("general.language", "en") + ".yml", true));
+            fileManager.ensureBundledFallbackLanguage();
+            fileManager.getOrCreateLanguageFile(config.getString("general.language", "en-us"));
             new StorageMigrationService(this, dataFolder).addLegacyFilesToStartupBackup();
             fileManager.startBackup();
         } catch (final ConfigurationException e) {
@@ -419,13 +437,19 @@ public class LoriTimePlugin {
             return;
         }
 
-        this.localization = new Localization(localizationFile);
+        this.localization = new Localization(loggerFactory.create(Localization.class), dataFolder,
+                config.getString("general.language", "en-us"));
+        this.languageSelector = new ConfiguredDefaultLanguageSelector(config.getString("general.language", "en-us"));
 
-        if (!config.isLoaded() || !localization.getLangFile().isLoaded()) {
+        if (!config.isLoaded() || localization.healthState() == Localization.HealthState.FAILED) {
             log.error("The plugins localization and config didn't load correctly. Pls delete the files and try again! Stop starting plugin..");
             errorDisable = true;
             return;
         }
+        rebuildTimeParser();
+    }
+
+    private void rebuildTimeParser() {
         try {
             parser = new TimeParser.Builder()
                     .addUnit(1, getUnits(localization, "second"))
@@ -444,18 +468,11 @@ public class LoriTimePlugin {
     private String[] getUnits(final Localization langConfig, final String unit) {
         final String singular = langConfig.getRawMessage("unit." + unit + ".singular");
         final String plural = langConfig.getRawMessage("unit." + unit + ".plural");
-        final List<?> identifier = langConfig.getLangArray("unit." + unit + ".identifier");
+        final List<String> identifier = langConfig.getStringList("unit." + unit + ".identifier");
         final Set<String> units = new HashSet<>();
         units.add(singular);
         units.add(plural);
-        for (final Object content : identifier) {
-            if (content instanceof String) {
-                units.add((String) content);
-            } else {
-                log.warn("dangerous identifier definition in language file. Path: " + "unit." + unit + "identifier: " + content.toString());
-                units.add(content.toString());
-            }
-        }
+        units.addAll(identifier);
         return units.toArray(new String[0]);
     }
 
@@ -523,6 +540,15 @@ public class LoriTimePlugin {
     }
 
     /**
+     * Getter of the sender language selector.
+     *
+     * @return language selector
+     */
+    public LanguageSelector getLanguageSelector() {
+        return languageSelector;
+    }
+
+    /**
      * Getter of the {@link TimeParser}.
      *
      * @return the {@link TimeParser}.
@@ -547,6 +573,24 @@ public class LoriTimePlugin {
      */
     public TimeAccumulator getAccumulator() {
         return dataStorageManager.getAccumulator();
+    }
+
+    /**
+     * Returns optional admin storage maintenance support for future admin commands.
+     *
+     * @return maintenance contract when this runtime owns supported canonical storage
+     */
+    public Optional<AdminStorageMaintenance> getAdminStorageMaintenance() {
+        return dataStorageManager.getAdminStorageMaintenance();
+    }
+
+    /**
+     * Returns whether this runtime owns canonical storage.
+     *
+     * @return true when canonical storage operations may run locally
+     */
+    public boolean ownsCanonicalStorage() {
+        return dataStorageManager.ownsCanonicalStorage();
     }
 
     /**

@@ -5,6 +5,7 @@ import com.github.roleplaycauldron.spellbook.core.logger.WrappedLogger;
 import com.jannik_kuehn.common.LoriTimePlugin;
 import com.jannik_kuehn.common.api.scheduler.PluginTask;
 import com.jannik_kuehn.common.api.storage.AccumulatingTimeStorage;
+import com.jannik_kuehn.common.api.storage.AdminStorageMaintenance;
 import com.jannik_kuehn.common.api.storage.StorageMode;
 import com.jannik_kuehn.common.api.storage.TimeAccumulator;
 import com.jannik_kuehn.common.api.storage.UnifiedStorage;
@@ -19,6 +20,7 @@ import com.jannik_kuehn.common.storage.database.table.WorldTable;
 
 import java.io.File;
 import java.util.Locale;
+import java.util.Optional;
 
 /**
  * The {@link DataStorageManager} is responsible for holding the
@@ -27,6 +29,7 @@ import java.util.Locale;
  * You're able to inject custom storages by calling {@link #injectCustomStorage(UnifiedStorage, TimeAccumulator)}.
  * The {@link DataStorageManager} also handles the cache flushing for the time storage.
  */
+@SuppressWarnings("PMD.TooManyMethods")
 public class DataStorageManager {
     /**
      * The {@link LoriTimePlugin} instance.
@@ -266,6 +269,27 @@ public class DataStorageManager {
      */
     public TimeAccumulator getAccumulator() {
         return accumulator;
+    }
+
+    /**
+     * Returns optional admin storage maintenance support.
+     *
+     * @return maintenance contract when the active canonical storage supports it
+     */
+    public Optional<AdminStorageMaintenance> getAdminStorageMaintenance() {
+        if (!ownsCanonicalStorage() || !(storage instanceof AdminStorageMaintenance maintenance)) {
+            return Optional.empty();
+        }
+        return Optional.of(maintenance);
+    }
+
+    /**
+     * Returns whether this runtime owns canonical storage.
+     *
+     * @return true when storage maintenance may be attempted locally
+     */
+    public boolean ownsCanonicalStorage() {
+        return storageMode != StorageMode.SLAVE && storage != null;
     }
 
     /**

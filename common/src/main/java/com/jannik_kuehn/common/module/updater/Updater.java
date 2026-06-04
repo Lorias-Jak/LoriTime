@@ -11,7 +11,6 @@ import com.jannik_kuehn.common.module.updater.download.Downloader;
 import com.jannik_kuehn.common.module.updater.version.Strategy;
 import com.jannik_kuehn.common.module.updater.version.Version;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextComponent;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.io.File;
@@ -261,7 +260,7 @@ public class Updater {
             }
 
             @Override
-            public void sendMessage(final TextComponent message) {
+            public void sendMessage(final Component message) {
                 loriTime.getServer().sendMessageToConsole(message);
             }
         };

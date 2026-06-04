@@ -51,7 +51,7 @@ class LoriTimeServiceTest {
             invocation.<Runnable>getArgument(0).run();
             return mock(PluginTask.class);
         }).when(scheduler).runAsyncOnce(any());
-        service = new LoriTimeService(plugin);
+        service = new DefaultLoriTimeService(plugin);
     }
 
     @AfterEach

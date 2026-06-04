@@ -45,7 +45,7 @@ class ConfigMigrationPipelineTest {
     }
 
     @Test
-    void templateMergePreservesKnownUserValuesAddsDefaultsAndDropsUnknownKeys() {
+    void templateMergePreservesKnownUserValuesAddsDefaultsAndUnknownKeys() {
         final StructuredConfigurationDocument template = new StructuredConfigurationDocument(Map.of(
                 "configSchemaVersion", 2,
                 "general", Map.of("language", "en", "saveInterval", 30),
@@ -60,8 +60,48 @@ class ConfigMigrationPipelineTest {
         assertEquals("de", merged.get("general.language"));
         assertEquals(30, merged.get("general.saveInterval"));
         assertEquals(true, merged.get("obsoleteReplacement"));
-        assertNull(merged.get("customUnknown"));
+        assertEquals("drop", merged.get("customUnknown"));
         assertEquals(2, merged.get(ConfigSchema.VERSION_PATH));
+    }
+
+    @Test
+    void templateMergeTreatsNestedAndLiteralDottedPathsAsEquivalent() {
+        final StructuredConfigurationDocument template = new StructuredConfigurationDocument(Map.of(
+                "messages", Map.of(
+                        "message", Map.of("noPermission", "default permission"),
+                        "unit", Map.of("second", Map.of("singular", "second")))));
+        final StructuredConfigurationDocument user = new StructuredConfigurationDocument(Map.of(
+                "messages", Map.of(
+                        "message.noPermission", "custom permission",
+                        "unit.second.singular", "custom second")));
+
+        final StructuredConfigurationDocument merged = new ConfigTemplateMerger().merge(template, user);
+
+        assertEquals("custom permission", merged.get("messages.message.noPermission"));
+        assertEquals("custom second", merged.get("messages.unit.second.singular"));
+    }
+
+    @Test
+    void localizationSchemaDoesNotMigrateLegacyLanguageKeys() {
+        final StructuredConfigurationDocument document = new StructuredConfigurationDocument(Map.of(
+                "schema_version", 1,
+                "messages", Map.of(
+                        "message.nopermission", "legacy permission",
+                        "message.customPlugin.custom_key", "custom value")));
+        final StructuredConfigurationDocument template = new StructuredConfigurationDocument(Map.of(
+                "schema_version", 1,
+                "messages", Map.of(
+                        "message.noPermission", "default permission")));
+
+        final ConfigMigrationResult result = new ConfigMigrationPipeline(ConfigSchema.localization()).migrate(document);
+        final StructuredConfigurationDocument merged = new ConfigTemplateMerger().merge(template, result.document());
+        final Map<?, ?> resultMessages = assertInstanceOf(Map.class, result.document().get("messages"));
+        final Map<?, ?> mergedMessages = assertInstanceOf(Map.class, merged.get("messages"));
+
+        assertEquals("legacy permission", resultMessages.get("message.nopermission"));
+        assertEquals("custom value", resultMessages.get("message.customPlugin.custom_key"));
+        assertEquals("default permission", mergedMessages.get("message.noPermission"));
+        assertEquals(1, merged.get("schema_version"));
     }
 
     @Test

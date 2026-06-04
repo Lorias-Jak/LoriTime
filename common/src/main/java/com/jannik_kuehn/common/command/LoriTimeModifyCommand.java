@@ -59,7 +59,7 @@ public class LoriTimeModifyCommand implements CommonCommand {
     @Override
     public void execute(final CommonSender sender, final String... args) {
         if (!sender.hasPermission("loritime.admin")) {
-            CommandMessages.send(localization, sender, "message.nopermission");
+            CommandMessages.send(localization, plugin.getLanguageSelector(), sender, "message.noPermission");
             return;
         }
         if (args.length < 1) {
@@ -103,7 +103,7 @@ public class LoriTimeModifyCommand implements CommonCommand {
 
     private void set(final CommonSender sender, final String... args) throws StorageException {
         if (args.length < 2) {
-            CommandMessages.send(localization, sender, "message.command.loritimeadmin.set.usage");
+            CommandMessages.send(localization, plugin.getLanguageSelector(), sender, "message.command.loritimeadmin.set.usage");
             return;
         }
         final Optional<UUID> optionalUUID = plugin.getStorage().getUuid(args[0]);
@@ -114,7 +114,7 @@ public class LoriTimeModifyCommand implements CommonCommand {
 
         final ParsedTimedScope timedScope = CommandScopes.parseTimedScope(args);
         if (timedScope == null) {
-            CommandMessages.send(localization, sender, "message.command.loritimeadmin.set.usage");
+            CommandMessages.send(localization, plugin.getLanguageSelector(), sender, "message.command.loritimeadmin.set.usage");
             return;
         }
         final String[] timeArgs = timedScope.timeArgs();
@@ -127,7 +127,7 @@ public class LoriTimeModifyCommand implements CommonCommand {
 
         final LoriTimePlayer player = plugin.getPlayerConverter().getOnlinePlayer(optionalUUID.get());
         if (time < 0) {
-            sender.sendMessage(localization.formatTextComponent(localization.getRawMessage("message.command.loritimeadmin.set.negativetime")
+            sender.sendMessage(localization.formatTextComponent(localization.getRawMessage("message.command.loritimeadmin.set.negativeTime")
                     .replace("[player]", player.getName())
                     .replace("[time]", TimeUtil.formatTime(time, localization))));
             return;
@@ -135,7 +135,7 @@ public class LoriTimeModifyCommand implements CommonCommand {
 
         final OptionalLong optionalCurrentTime = plugin.getStorage().getTime(player.getUniqueId(), timedScope.scope());
         if (optionalCurrentTime.isEmpty()) {
-            sender.sendMessage(localization.formatTextComponent(localization.getRawMessage("message.command.loritime.notfound")
+            sender.sendMessage(localization.formatTextComponent(localization.getRawMessage("message.command.loritime.notFound")
                     .replace("[player]", player.getName())));
             return;
         }
@@ -151,7 +151,8 @@ public class LoriTimeModifyCommand implements CommonCommand {
 
     private void modify(final CommonSender sender, final String... args) throws StorageException {
         if (args.length < 2) {
-            CommandMessages.send(localization, sender, "message.command.loritimeadmin.modify.usage");
+            CommandMessages.send(localization, plugin.getLanguageSelector(), sender,
+                    "message.command.loritimeadmin.modify.usage");
             return;
         }
 
@@ -163,7 +164,8 @@ public class LoriTimeModifyCommand implements CommonCommand {
 
         final ParsedTimedScope timedScope = CommandScopes.parseTimedScope(args);
         if (timedScope == null) {
-            CommandMessages.send(localization, sender, "message.command.loritimeadmin.modify.usage");
+            CommandMessages.send(localization, plugin.getLanguageSelector(), sender,
+                    "message.command.loritimeadmin.modify.usage");
             return;
         }
         final String[] timeArgs = timedScope.timeArgs();
@@ -176,13 +178,13 @@ public class LoriTimeModifyCommand implements CommonCommand {
         final LoriTimePlayer player = plugin.getPlayerConverter().getOnlinePlayer(optionalUUID.get());
         final OptionalLong optionalCurrentTime = plugin.getStorage().getTime(player.getUniqueId(), timedScope.scope());
         if (optionalCurrentTime.isEmpty()) {
-            sender.sendMessage(localization.formatTextComponent(localization.getRawMessage("message.command.loritime.notfound")
+            sender.sendMessage(localization.formatTextComponent(localization.getRawMessage("message.command.loritime.notFound")
                     .replace("[player]", player.getName())));
             return;
         }
         final long time = optionalTime.getAsLong();
         if (optionalCurrentTime.getAsLong() + time < 0) {
-            sender.sendMessage(localization.formatTextComponent(localization.getRawMessage("message.command.loritimeadmin.modify.negativetimesum")
+            sender.sendMessage(localization.formatTextComponent(localization.getRawMessage("message.command.loritimeadmin.modify.negativeTimeSum")
                     .replace("[player]", player.getName())
                     .replace("[time]", TimeUtil.formatTime(time, localization))));
             return;
@@ -198,7 +200,8 @@ public class LoriTimeModifyCommand implements CommonCommand {
     private void reset(final CommonSender sender, final String... args) throws StorageException {
         final ParsedScope parsedScope = CommandScopes.parseResetScope(args);
         if (parsedScope == null) {
-            CommandMessages.send(localization, sender, "message.command.loritimeadmin.reset.usage");
+            CommandMessages.send(localization, plugin.getLanguageSelector(), sender,
+                    "message.command.loritimeadmin.reset.usage");
             return;
         }
 
@@ -211,7 +214,7 @@ public class LoriTimeModifyCommand implements CommonCommand {
 
         final OptionalLong optionalCurrentTime = plugin.getStorage().getTime(player.getUniqueId(), parsedScope.scope());
         if (optionalCurrentTime.isEmpty()) {
-            sender.sendMessage(localization.formatTextComponent(localization.getRawMessage("message.command.loritime.notfound")
+            sender.sendMessage(localization.formatTextComponent(localization.getRawMessage("message.command.loritime.notFound")
                     .replace("[player]", player.getName())));
             return;
         }
@@ -225,7 +228,8 @@ public class LoriTimeModifyCommand implements CommonCommand {
 
     private void deleteUser(final CommonSender sender, final String... args) throws StorageException {
         if (args.length < 2) {
-            CommandMessages.send(localization, sender, "message.command.loritimeadmin.deleteUser.usage");
+            CommandMessages.send(localization, plugin.getLanguageSelector(), sender,
+                    "message.command.loritimeadmin.deleteUser.usage");
             return;
         }
 
@@ -237,7 +241,8 @@ public class LoriTimeModifyCommand implements CommonCommand {
 
         final Optional<CommonPlayerSender> onlinePlayer = plugin.getServer().getPlayer(optionalUUID.get());
         if (onlinePlayer.isPresent() && onlinePlayer.get().isOnline()) {
-            CommandMessages.send(localization, sender, "message.command.loritimeadmin.deleteUser.userOnline");
+            CommandMessages.send(localization, plugin.getLanguageSelector(), sender,
+                    "message.command.loritimeadmin.deleteUser.userOnline");
             return;
         }
 
@@ -248,7 +253,8 @@ public class LoriTimeModifyCommand implements CommonCommand {
                     .getRawMessage("message.command.loritimeadmin.deleteUser.success")
                     .replace("[player]", player.getName())));
         } catch (StorageException | SQLException e) {
-            CommandMessages.send(localization, sender, "message.command.loritimeadmin.deleteUser.issue");
+            CommandMessages.send(localization, plugin.getLanguageSelector(), sender,
+                    "message.command.loritimeadmin.deleteUser.issue");
             log.error("An exception occurred while deleting the user from the Plugin!", e);
         }
     }
@@ -279,17 +285,17 @@ public class LoriTimeModifyCommand implements CommonCommand {
     }
 
     private void printMissingUuidMessage(final CommonSender sender, final String playerName) {
-        sender.sendMessage(localization.formatTextComponent(localization.getRawMessage("message.command.loritimeadmin.missinguuid")
+        sender.sendMessage(localization.formatTextComponent(localization.getRawMessage("message.command.loritimeadmin.missingUuid")
                 .replace("[player]", playerName)));
     }
 
     private void printNotTimeMessage(final CommonSender sender, final String... notTime) {
-        sender.sendMessage(localization.formatTextComponent(localization.getRawMessage("message.command.loritimeadmin.nottime")
+        sender.sendMessage(localization.formatTextComponent(localization.getRawMessage("message.command.loritimeadmin.notTime")
                 .replace("[argument]", String.join(" ", notTime))));
     }
 
     private void usage(final CommonSender sender) {
-        CommandMessages.send(localization, sender, "message.command.loritimeadmin.usage");
+        CommandMessages.send(localization, plugin.getLanguageSelector(), sender, "message.command.loritimeadmin.usage");
     }
 
     private enum ModifyAction {

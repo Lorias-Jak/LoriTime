@@ -4,6 +4,12 @@ import com.github.roleplaycauldron.spellbook.core.logger.LoggerFactory;
 import com.jannik_kuehn.common.api.storage.ManualTimeAdjustment;
 import com.jannik_kuehn.common.api.storage.PlayerSessionChunk;
 import com.jannik_kuehn.common.api.storage.RecentPlayerIdentity;
+import com.jannik_kuehn.common.api.storage.StorageDeleteRequest;
+import com.jannik_kuehn.common.api.storage.StorageMaintenanceConfirmation;
+import com.jannik_kuehn.common.api.storage.StorageMaintenancePreview;
+import com.jannik_kuehn.common.api.storage.StorageMaintenanceScope;
+import com.jannik_kuehn.common.api.storage.StorageTransferMapping;
+import com.jannik_kuehn.common.api.storage.StorageTransferRequest;
 import com.jannik_kuehn.common.api.storage.TimeEntryReason;
 import com.jannik_kuehn.common.api.storage.TimeRange;
 import com.jannik_kuehn.common.api.storage.TimeScope;
@@ -36,7 +42,7 @@ import java.util.logging.Logger;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-@SuppressWarnings({"PMD.UnitTestContainsTooManyAsserts"})
+@SuppressWarnings({"PMD.CouplingBetweenObjects", "PMD.UnitTestContainsTooManyAsserts"})
 class UnifiedDatabaseStorageTest {
 
     private static final String TABLE_PREFIX = "loritime";
@@ -45,6 +51,9 @@ class UnifiedDatabaseStorageTest {
 
     @TempDir
     private File dataFolder;
+
+    @TempDir
+    private File targetDataFolder;
 
     @Test
     void totalsIncludeSessionAndManualAdjustmentWithConsoleActor() throws Exception {
@@ -307,9 +316,195 @@ class UnifiedDatabaseStorageTest {
         }
     }
 
+    @Test
+    void maintenancePreviewReportsServerImpactAndCollisions() throws Exception {
+        try (UnifiedDatabaseStorage storage = storage()) {
+
+            storage.setPlayerName(PLAYER, "Lorias_");
+            storage.persistSession(new PlayerSessionChunk(PLAYER, Optional.of("Lorias_"), "survival", "world",
+                    1_000L, 11_000L, TimeEntryReason.PLAYER_LEAVE));
+            storage.addTime(new ManualTimeAdjustment(PLAYER, 5L, TimeEntryReason.MANUAL_ADJUSTMENT, "CONSOLE",
+                    TimeScope.server("survival")));
+            storage.persistSession(new PlayerSessionChunk(UUID.randomUUID(), Optional.of("Other"), "target", "world",
+                    1_000L, 2_000L, TimeEntryReason.PLAYER_LEAVE));
+
+            final StorageMaintenancePreview preview = storage.previewTransfer(StorageTransferRequest.serverTransfer(List.of(
+                    new StorageTransferMapping(StorageMaintenanceScope.server("survival"),
+                            StorageMaintenanceScope.server("target")))));
+
+            assertEquals(1L, preview.affectedSessions(), "Expected one source session");
+            assertEquals(1L, preview.affectedAdjustments(), "Expected one source adjustment");
+            assertEquals(1L, preview.affectedPlayers(), "Expected one affected player");
+            assertTrue(preview.targetDataExists(), "Expected target data to be detected");
+            assertTrue(preview.confirmationRequired(), "Expected merge confirmation");
+            assertEquals(List.of("target/world"), preview.targetCollisions(), "Expected world collision");
+        }
+    }
+
+    @Test
+    void maintenanceServerTransferMovesSessionsAndAdjustments() throws Exception {
+        try (UnifiedDatabaseStorage storage = storage()) {
+
+            storage.setPlayerName(PLAYER, "Lorias_");
+            storage.persistSession(new PlayerSessionChunk(PLAYER, Optional.of("Lorias_"), "survival", "world",
+                    1_000L, 11_000L, TimeEntryReason.PLAYER_LEAVE));
+            storage.addTime(new ManualTimeAdjustment(PLAYER, 5L, TimeEntryReason.MANUAL_ADJUSTMENT, "CONSOLE",
+                    TimeScope.server("survival")));
+            final StorageTransferRequest request = StorageTransferRequest.serverTransfer(List.of(
+                    new StorageTransferMapping(StorageMaintenanceScope.server("survival"),
+                            StorageMaintenanceScope.server("target"))));
+
+            final StorageMaintenancePreview preview = storage.previewTransfer(request);
+            storage.applyTransfer(request, preview.confirmation());
+
+            assertTrue(storage.getTime(PLAYER, TimeScope.server("survival")).isEmpty(),
+                    "Expected source server to have no remaining time");
+            assertEquals(OptionalLong.of(15L), storage.getTime(PLAYER, TimeScope.server("target")),
+                    "Expected target server to include moved data");
+            assertEquals(OptionalLong.of(15L), storage.getTime(PLAYER), "Expected global total to remain unchanged");
+        }
+    }
+
+    @Test
+    void maintenanceWorldTransferMovesExactWorldData() throws Exception {
+        try (UnifiedDatabaseStorage storage = storage()) {
+
+            storage.setPlayerName(PLAYER, "Lorias_");
+            storage.persistSession(new PlayerSessionChunk(PLAYER, Optional.of("Lorias_"), "survival", "world",
+                    1_000L, 11_000L, TimeEntryReason.PLAYER_LEAVE));
+            storage.addTime(new ManualTimeAdjustment(PLAYER, 5L, TimeEntryReason.MANUAL_ADJUSTMENT, "CONSOLE",
+                    TimeScope.world("survival", "world")));
+            final StorageTransferRequest request = StorageTransferRequest.worldTransfer(List.of(
+                    new StorageTransferMapping(StorageMaintenanceScope.world("survival", "world"),
+                            StorageMaintenanceScope.world("target", "spawn"))));
+
+            final StorageMaintenancePreview preview = storage.previewTransfer(request);
+            storage.applyTransfer(request, preview.confirmation());
+
+            assertTrue(storage.getTime(PLAYER, TimeScope.world("survival", "world")).isEmpty(),
+                    "Expected source world to have no remaining time");
+            assertEquals(OptionalLong.of(15L), storage.getTime(PLAYER, TimeScope.world("target", "spawn")),
+                    "Expected target world to include moved data");
+            assertEquals(OptionalLong.of(15L), storage.getTime(PLAYER), "Expected global total to remain unchanged");
+        }
+    }
+
+    @Test
+    void maintenanceDeleteServerRemovesServerAndWorldData() throws Exception {
+        try (UnifiedDatabaseStorage storage = storage()) {
+
+            storage.setPlayerName(PLAYER, "Lorias_");
+            storage.persistSession(new PlayerSessionChunk(PLAYER, Optional.of("Lorias_"), "survival", "world",
+                    1_000L, 11_000L, TimeEntryReason.PLAYER_LEAVE));
+            storage.addTime(new ManualTimeAdjustment(PLAYER, 5L, TimeEntryReason.MANUAL_ADJUSTMENT, "CONSOLE",
+                    TimeScope.server("survival")));
+            storage.persistSession(new PlayerSessionChunk(PLAYER, Optional.of("Lorias_"), "lobby", "spawn",
+                    1_000L, 3_000L, TimeEntryReason.PLAYER_LEAVE));
+            final StorageDeleteRequest request = new StorageDeleteRequest(StorageMaintenanceScope.server("survival"));
+
+            final StorageMaintenancePreview preview = storage.previewDelete(request);
+            storage.applyDelete(request, preview.confirmation());
+
+            assertTrue(storage.getTime(PLAYER, TimeScope.server("survival")).isEmpty(),
+                    "Expected deleted server data to be gone");
+            assertEquals(OptionalLong.of(2L), storage.getTime(PLAYER, TimeScope.server("lobby")),
+                    "Expected unrelated server data to remain");
+        }
+    }
+
+    @Test
+    void maintenanceDeleteWorldKeepsServerAdjustments() throws Exception {
+        try (UnifiedDatabaseStorage storage = storage()) {
+
+            storage.setPlayerName(PLAYER, "Lorias_");
+            storage.persistSession(new PlayerSessionChunk(PLAYER, Optional.of("Lorias_"), "survival", "world",
+                    1_000L, 11_000L, TimeEntryReason.PLAYER_LEAVE));
+            storage.addTime(new ManualTimeAdjustment(PLAYER, 5L, TimeEntryReason.MANUAL_ADJUSTMENT, "CONSOLE",
+                    TimeScope.server("survival")));
+            storage.addTime(new ManualTimeAdjustment(PLAYER, 3L, TimeEntryReason.MANUAL_ADJUSTMENT, "CONSOLE",
+                    TimeScope.world("survival", "world")));
+            final StorageDeleteRequest request = new StorageDeleteRequest(StorageMaintenanceScope.world("survival", "world"));
+
+            final StorageMaintenancePreview preview = storage.previewDelete(request);
+            storage.applyDelete(request, preview.confirmation());
+
+            assertEquals(OptionalLong.of(5L), storage.getTime(PLAYER, TimeScope.server("survival")),
+                    "Expected server adjustment to remain");
+            assertTrue(storage.getTime(PLAYER, TimeScope.world("survival", "world")).isEmpty(),
+                    "Expected exact world data to be deleted");
+        }
+    }
+
+    @Test
+    void maintenanceConfirmationMismatchRejectsWithoutChangingData() throws Exception {
+        try (UnifiedDatabaseStorage storage = storage()) {
+
+            storage.setPlayerName(PLAYER, "Lorias_");
+            storage.persistSession(new PlayerSessionChunk(PLAYER, Optional.of("Lorias_"), "survival", "world",
+                    1_000L, 11_000L, TimeEntryReason.PLAYER_LEAVE));
+            final StorageTransferRequest request = StorageTransferRequest.worldTransfer(List.of(
+                    new StorageTransferMapping(StorageMaintenanceScope.world("survival", "world"),
+                            StorageMaintenanceScope.world("target", "spawn"))));
+
+            assertThrows(StorageException.class, () -> storage.applyTransfer(request,
+                    new StorageMaintenanceConfirmation("different")), "Expected mismatched confirmation to fail");
+            assertEquals(OptionalLong.of(10L), storage.getTime(PLAYER, TimeScope.world("survival", "world")),
+                    "Expected source data to remain after rejection");
+        }
+    }
+
+    @Test
+    void maintenanceStorageTypeTransferCopiesFullHistoryToEmptyTarget() throws Exception {
+        try (UnifiedDatabaseStorage source = storage();
+             UnifiedDatabaseStorage target = storage(targetDataFolder)) {
+
+            source.setPlayerName(PLAYER, "Lorias_");
+            source.persistSession(new PlayerSessionChunk(PLAYER, Optional.of("Lorias_"), "survival", "world",
+                    1_000L, 11_000L, TimeEntryReason.PLAYER_LEAVE));
+            source.addTime(new ManualTimeAdjustment(PLAYER, 5L, TimeEntryReason.MANUAL_ADJUSTMENT, "CONSOLE",
+                    TimeScope.server("survival")));
+            source.addTime(new ManualTimeAdjustment(PLAYER, 3L, TimeEntryReason.MANUAL_ADJUSTMENT, "CONSOLE",
+                    TimeScope.world("survival", "world")));
+
+            final StorageMaintenancePreview preview = source.previewStorageTransferTo(target);
+            source.applyStorageTransferTo(target, preview.confirmation());
+
+            assertEquals(Optional.of(PLAYER), target.getUuid("Lorias_"), "Expected copied player identity");
+            assertEquals(OptionalLong.of(18L), target.getTime(PLAYER), "Expected copied global total");
+            assertEquals(OptionalLong.of(18L), target.getTime(PLAYER, TimeScope.server("survival")),
+                    "Expected copied server total");
+            assertEquals(OptionalLong.of(13L), target.getTime(PLAYER, TimeScope.world("survival", "world")),
+                    "Expected copied world total");
+            assertEquals(OptionalLong.of(18L), source.getTime(PLAYER), "Expected source data to remain");
+        }
+    }
+
+    @Test
+    void maintenanceStorageTypeTransferRejectsNonEmptyTarget() throws Exception {
+        try (UnifiedDatabaseStorage source = storage();
+             UnifiedDatabaseStorage target = storage(targetDataFolder)) {
+
+            source.setPlayerName(PLAYER, "Lorias_");
+            source.persistSession(new PlayerSessionChunk(PLAYER, Optional.of("Lorias_"), "survival", "world",
+                    1_000L, 11_000L, TimeEntryReason.PLAYER_LEAVE));
+            target.setPlayerName(UUID.randomUUID(), "Existing");
+
+            final StorageMaintenancePreview preview = source.previewStorageTransferTo(target);
+
+            assertTrue(preview.targetDataExists(), "Expected non-empty target to be detected");
+            assertThrows(StorageException.class, () -> source.applyStorageTransferTo(target, preview.confirmation()),
+                    "Expected non-empty target to be rejected");
+            assertTrue(target.getUuid("Lorias_").isEmpty(), "Expected source data not to be copied");
+        }
+    }
+
     private UnifiedDatabaseStorage storage() throws StorageException {
+        return storage(dataFolder);
+    }
+
+    private UnifiedDatabaseStorage storage(final File folder) throws StorageException {
         final LoggerFactory loggerFactory = new LoggerFactory(Logger.getLogger("test"));
-        final DatabaseStorage databaseStorage = new DatabaseStorage(loggerFactory, config(), dataFolder);
+        final DatabaseStorage databaseStorage = new DatabaseStorage(loggerFactory, config(), folder);
         new DatabaseMigrationPreflight(databaseStorage, loggerFactory.create(DatabaseMigrationPreflight.class)).migrateIfNecessary();
         final PlayerTable playerTable = new PlayerTable(TABLE_PREFIX + "_player");
         final ServerTable serverTable = new ServerTable(TABLE_PREFIX + "_server");

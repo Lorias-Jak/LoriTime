@@ -114,4 +114,9 @@ public final class WorldTable {
         }
         return worlds;
     }
+
+    @Override
+    public String toString() {
+        return tableName;
+    }
 }

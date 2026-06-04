@@ -7,7 +7,7 @@ import com.jannik_kuehn.common.api.common.CommonSender;
 import com.jannik_kuehn.common.api.common.CommonServer;
 import com.jannik_kuehn.common.api.storage.SessionContextDefaults;
 import com.jannik_kuehn.loritimepaper.LoriTimePaper;
-import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.Server;
 import org.bukkit.World;
@@ -119,7 +119,7 @@ public class PaperServer implements CommonServer {
     }
 
     @Override
-    public void kickPlayer(final LoriTimePlayer loriTimePlayer, final TextComponent message) {
+    public void kickPlayer(final LoriTimePlayer loriTimePlayer, final Component message) {
         final Optional<UUID> optionalUUID = Optional.ofNullable(loriTimePlayer.getUniqueId());
         if (optionalUUID.isEmpty()) {
             return;
@@ -132,7 +132,7 @@ public class PaperServer implements CommonServer {
     }
 
     @Override
-    public void sendMessageToConsole(final TextComponent message) {
+    public void sendMessageToConsole(final Component message) {
         server.sendMessage(message);
     }
 
@@ -146,7 +146,7 @@ public class PaperServer implements CommonServer {
         return "LoriTimePaper.jar";
     }
 
-    private void kickPlayer(final Player player, final TextComponent message) {
+    private void kickPlayer(final Player player, final Component message) {
         player.kick(message);
     }
 

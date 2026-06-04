@@ -38,7 +38,7 @@ public class LoriTimeTopCommand implements CommonCommand {
     @Override
     public void execute(final CommonSender sender, final String... args) {
         if (!sender.hasPermission("loritime.top")) {
-            CommandMessages.send(localization, sender, "message.nopermission");
+            CommandMessages.send(localization, plugin.getLanguageSelector(), sender, "message.noPermission");
             return;
         }
         if (args.length < 1) {
@@ -52,12 +52,12 @@ public class LoriTimeTopCommand implements CommonCommand {
                 try {
                     topOutput(sender, Integer.parseInt(args[0]));
                 } catch (final NumberFormatException e) {
-                    CommandMessages.send(localization, sender, "message.command.top.nonumber");
+                    CommandMessages.send(localization, plugin.getLanguageSelector(), sender, "message.command.top.nonumber");
                 }
             });
             return;
         }
-        CommandMessages.send(localization, sender, "message.command.top.usage");
+        CommandMessages.send(localization, plugin.getLanguageSelector(), sender, "message.command.top.usage");
     }
 
     private void topOutput(final CommonSender sender, final int site) {
@@ -83,12 +83,12 @@ public class LoriTimeTopCommand implements CommonCommand {
 
         final int amountOfMaxPages = (int) Math.ceil(amountOfPlayers / PLAYER_AMOUNT_PER_PAGE);
         if (site < 1 || site > amountOfMaxPages) {
-            sender.sendMessage(localization.formatTextComponent(localization.getRawMessage("message.command.top.wrongpage")
+            sender.sendMessage(localization.formatTextComponent(localization.getRawMessage("message.command.top.wrongPage")
                     .replace("[pages]", 1 + " and " + amountOfMaxPages)
             ));
             return;
         }
-        CommandMessages.send(localization, sender, "message.command.top.gatheringdata");
+        CommandMessages.send(localization, plugin.getLanguageSelector(), sender, "message.command.top.gatheringData");
 
         final int minValue;
         final int maxValue;

@@ -62,13 +62,13 @@ public class LoriTimeCommand implements CommonCommand {
                     if (optionalPlayer.isPresent()) {
                         targetPlayer = loriTimePlugin.getPlayerConverter().getOnlinePlayer(optionalPlayer.get());
                     } else {
-                        sender.sendMessage(localization.formatTextComponent(localization.getRawMessage("message.command.loritime.notfound")
+                        sender.sendMessage(localization.formatTextComponent(localization.getRawMessage("message.command.loritime.notFound")
                                 .replace(PLAYER_PLACEHOLDER, request.playerName())));
                         return;
                     }
                 } else {
                     if (!(sender instanceof CommonPlayerSender playerSender)) {
-                        sender.sendMessage(localization.formatTextComponent(localization.getRawMessage("message.command.loritime.consoleself")));
+                        sender.sendMessage(localization.formatTextComponent(localization.getRawMessage("message.command.loritime.consoleSelf")));
                         return;
                     }
                     targetPlayer = loriTimePlugin.getPlayerConverter().getOnlinePlayer(playerSender.getUniqueId());
@@ -76,14 +76,15 @@ public class LoriTimeCommand implements CommonCommand {
 
                 final Optional<TimeScope> resolvedScope = resolveScope(request, targetPlayer.getUniqueId());
                 if (resolvedScope.isEmpty()) {
-                    CommandMessages.send(localization, sender, "message.command.loritime.usage");
+                    CommandMessages.send(localization, loriTimePlugin.getLanguageSelector(), sender,
+                            "message.command.loritime.usage");
                     return;
                 }
                 final TimeScope scope = resolvedScope.get();
                 final boolean isTargetSender = sender instanceof CommonPlayerSender playerSender
                         && targetPlayer.getUniqueId().equals(playerSender.getUniqueId());
                 if (!CommandScopes.hasPermission(sender, scope, isTargetSender)) {
-                    CommandMessages.send(localization, sender, "message.nopermission");
+                    CommandMessages.send(localization, loriTimePlugin.getLanguageSelector(), sender, "message.noPermission");
                     return;
                 }
 
@@ -102,17 +103,17 @@ public class LoriTimeCommand implements CommonCommand {
                     }
                 } catch (final StorageException ex) {
                     log.warn("could not load online time", ex);
-                    CommandMessages.send(localization, sender, "message.error");
+                    CommandMessages.send(localization, loriTimePlugin.getLanguageSelector(), sender, "message.error");
                     return;
                 }
                 if (isTargetSender) {
-                    sender.sendMessage(localization.formatTextComponent(timeSeenMessage("message.command.loritime.timeseen.self",
+                    sender.sendMessage(localization.formatTextComponent(timeSeenMessage("message.command.loritime.timeSeen.self",
                             targetPlayer.getName(), time, scope, request)));
                 } else {
                     try {
                         final String targetName = loriTimePlugin.getStorage().getName(targetPlayer.getUniqueId())
                                 .orElse(targetPlayer.getName());
-                        sender.sendMessage(localization.formatTextComponent(timeSeenMessage("message.command.loritime.timeseen.other",
+                        sender.sendMessage(localization.formatTextComponent(timeSeenMessage("message.command.loritime.timeSeen.other",
                                 targetName, time, scope, request)));
                     } catch (final StorageException e) {
                         throw new RuntimeException(e);
@@ -120,7 +121,8 @@ public class LoriTimeCommand implements CommonCommand {
                 }
             });
         } else {
-            CommandMessages.send(localization, sender, "message.command.loritime.usage");
+            CommandMessages.send(localization, loriTimePlugin.getLanguageSelector(), sender,
+                    "message.command.loritime.usage");
         }
     }
 
@@ -149,10 +151,10 @@ public class LoriTimeCommand implements CommonCommand {
 
     private String noTimeMessage(final String targetName, final TimeScope scope, final LookupRequest request) {
         if (scope.type() == TimeScope.Type.GLOBAL && !request.hasTimeRange()) {
-            return localization.getRawMessage("message.command.loritime.notfound")
+            return localization.getRawMessage("message.command.loritime.notFound")
                     .replace(PLAYER_PLACEHOLDER, targetName);
         }
-        return localization.getRawMessage("message.command.loritime.noscopedtime")
+        return localization.getRawMessage("message.command.loritime.noScopedTime")
                 .replace(PLAYER_PLACEHOLDER, targetName)
                 .replace(SCOPE_PLACEHOLDER, scopeDescription(scope, request))
                 .replace(RANGE_PLACEHOLDER, rangeDescription(request));
@@ -191,7 +193,7 @@ public class LoriTimeCommand implements CommonCommand {
 
     private String worldScopeDescription(final TimeScope scope, final LookupRequest request) {
         final String key = request.hasServer()
-                ? "message.command.loritime.scope.worldserver"
+                ? "message.command.loritime.scope.worldServer"
                 : "message.command.loritime.scope.world";
         return localization.getRawMessage(key)
                 .replace("[server]", scope.server())

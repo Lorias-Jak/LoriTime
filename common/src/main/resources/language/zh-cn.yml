@@ -1,0 +1,107 @@
+schema_version: 1
+locale: 'zh-cn'
+prefix: '<#A4A4A4>[<#50CBAB>LoriTime<#A4A4A4>] '
+messages:
+  unit:
+    second:
+      singular: '秒'
+      plural: '秒'
+      identifier: ['s', 'sec']
+    minute:
+      singular: '分'
+      plural: '分'
+      identifier: ['min', 'm']
+    hour:
+      singular: '时'
+      plural: '时'
+      identifier: ['h']
+    day:
+      singular: '天'
+      plural: '天'
+      identifier: ['d']
+    week:
+      singular: '周'
+      plural: '周'
+      identifier: ['w']
+    month:
+      singular: '月'
+      plural: '月'
+      identifier: ['mo']
+    year:
+      singular: '年'
+      plural: '年'
+      identifier: ['y', 'yhr']
+  message:
+    noPermission: '<#FF3232>您没有执行这个操作所需的权限。'
+    error: '<#FF3232>发生了一个错误。'
+    command:
+      loritime:
+        usage: '<#A4A4A4>使用 <red>/loritime [玩家] [server:<服务器>|s:<服务器>] [world:<世界>|w:<世界>] [time:<范围>|t:<范围>] <#A4A4A4>来查看一个玩家的在线时间。'
+        notFound: '<#A4A4A4>玩家 <#50CBAB>[player] <#A4A4A4>还没有在这个服务器上游玩过。'
+        noScopedTime: '<#A4A4A4>玩家 <#50CBAB>[player] <#A4A4A4>没有已保存的在线时间 [scope][range]。'
+        consoleSelf: '<#FF3232>在控制台中，您无法查看自己的游戏时间！'
+        scope:
+          global: '<#A4A4A4>在整个网络'
+          server: '<#A4A4A4>在服务器 <#50CBAB>[server]'
+          world: '<#A4A4A4>在世界 <#50CBAB>[world]'
+          worldServer: '<#A4A4A4>在世界 <#50CBAB>[world] <#A4A4A4>和服务器 <#50CBAB>[server]'
+        range: ' <#A4A4A4>在时间范围 <#50CBAB>[range]'
+        timeSeen:
+          self: '<#A4A4A4>您已经游玩了 <#50CBAB>[time] [scope][range]<#A4A4A4>。'
+          other: '<#A4A4A4>玩家 <#50CBAB>[player] <#A4A4A4>已经游玩了 <#50CBAB>[time] [scope][range]<#A4A4A4>。'
+      loritimeadmin:
+        usage: '<#A4A4A4>使用 <red>/ltmodify [add | set | reset] [玩家] [时间] [server [服务器] | world [服务器] [世界]] <#A4A4A4>来编辑一个玩家的在线时间。<newline>其它命令：<red>/loritimeadmin [reload | update | deleteUser]'
+        missingUuid: '<#A4A4A4>玩家 <#50CBAB>[player] <#A4A4A4>是未知的。'
+        notTime: '<#A4A4A4>给出的参数 <red>[argument] <#FF3232>不是有效的。'
+        set:
+          usage: '<#A4A4A4>使用 <red>/ltmodify set [玩家] [时间] [server [服务器] | world [服务器] [世界]] <#A4A4A4>来设置一个玩家的游戏时间。'
+          success: '<#A4A4A4>玩家 <#50CBAB>[player] <#A4A4A4>的在线时间成功设置为 <#50CBAB>[time]<#A4A4A4>。'
+          negativeTime: '<red>给出的时间 <#50CBAB>[time] <red>是负数，但必须至少为零。'
+        modify:
+          usage: '<#A4A4A4>使用 <red>/ltmodify add [玩家] [时间] [server [服务器] | world [服务器] [世界]] <#A4A4A4>来修改一个玩家的在线时间。'
+          success: '<#A4A4A4>玩家 <#50CBAB>[player] <#A4A4A4>的在线时间已成功修改 <#50CBAB>[time]<#A4A4A4>。'
+          negativeTimeSum: '<red>给出的时间 <#50CBAB>[time] <red>会导致在线时间为负数，但必须至少为零。'
+        reset:
+          usage: '<#A4A4A4>使用 <red>/ltmodify reset [玩家] [server [服务器] | world [服务器] [世界]] <#A4A4A4>来重置一个玩家的在线时间。'
+          success: '<#A4A4A4>玩家 <#50CBAB>[player] <#A4A4A4>的在线时间已重置。'
+        deleteUser:
+          usage: '<#A4A4A4>使用 <red>/onlinetimeadmin delete [player] confirm <#A4A4A4>来从插件中完全删除一个用户。'
+          success: '<#A4A4A4>玩家 <#50CBAB>[player] <#A4A4A4>已<#50CBAB>成功<#A4A4A4>删除。'
+          issue: '<#FF3232>删除时发生了一个错误。'
+          userOnline: '<#FF3232>您不能删除在线用户。'
+        reload:
+          usage: '<#A4A4A4>使用 <red>/onlinetimeadmin reload <#A4A4A4>来重新加载这个插件。'
+          success: '<#A4A4A4>您已 <#1AFA29>成功 <#A4A4A4>重新加载了这个插件。'
+          issue: '<#FF3232>在插件重新加载时发生了一个错误，插件将停止运行！'
+      top:
+        usage: '<#A4A4A4>使用 <red>/onlinetimetop [页数] <#A4A4A4>来查看在线时间排行榜。'
+        gatheringData: '<#A4A4A4>收集数据并开始计算……'
+        headline: '<#A4A4A4><newline>在线时间排行榜 <#50CBAB>[dateAndTime] <newline><#A4A4A4>---- 在线时间排行榜 -- 第 <#50CBAB>[pages] 页<#A4A4A4>----<newline>服务器总计游玩时间：<#50CBAB>[totalTime]'
+        user: '<#A4A4A4>[place]: [player] <#50CBAB>[time]'
+        wrongPage: '<#A4A4A4>请在 <#FF3232>[pages] 中选择一个正确的页数。'
+        nonumber: '<#FF3232>指定页数不是一个数字。'
+      debug:
+        enabled: '<#A4A4A4>Debugging <#1AFA29>started.'
+        disabled: '<#A4A4A4>Debugging <#FF3232>stopped.'
+    afk:
+      kick: '<#50CBAB>您因为挂机了 <#FF3232>[time] 被踢出游戏。'
+      kickAnnounce: '<#50CBAB>[player] <#A4A4A4>因为挂机了 <#50CBAB>[time] 被踢出游戏。'
+      afkAnnounce: '<#50CBAB>[player] <#A4A4A4>正在挂机。'
+      resumeAnnounce: '<#50CBAB>[player] <#A4A4A4>退出挂机。'
+      afkSelf: '<#A4A4A4>您现在正在挂机。'
+      afkResume: '<#A4A4A4>您现在退出了挂机。'
+    updater:
+      startUpdate: '<#A4A4A4>Started update process. Searching for a newer version than currently found.'
+      available: '<#A4A4A4>一个该插件的更新可用！<newline>当前版本：<#50CBAB>[currentVersion]<#A4A4A4> | 最新版本：<#50CBAB>[newVersion]'
+      disabled: '<#FF3232>The update check is disabled. Please enable it to check for updates.'
+      newerVersionFound: '<#FF3232>Aborted...<newline><#A4A4A4>A newer version is available. New version <#50CBAB>[newVersion]<#A4A4A4>.'
+      alreadyDownloaded: '<#FF3232>The update has already been downloaded. Please restart the server to apply the update.'
+      notFound: '<#FF3232>No update was found.'
+      updateSuccess: '<#1AFA29>Updated successfully to version: <#50CBAB>[newVersion]<#1AFA29>. <#A4A4A4>Restart the server to apply the update.'
+    storageMaintenance:
+      unsupported: '<#FF3232>当前存储不支持存储维护。'
+      preview: '<#A4A4A4>维护预览：<#50CBAB>[sessions] <#A4A4A4>个会话，<#50CBAB>[adjustments] <#A4A4A4>个调整，<#50CBAB>[players] <#A4A4A4>个玩家。'
+      confirmationRequired: '<#FF3232>此操作会更改现有数据。请使用令牌 <#50CBAB>[token]<#FF3232> 确认。'
+      confirmationMismatch: '<#FF3232>确认与当前操作预览不再匹配。'
+      success: '<#1AFA29>存储维护已成功完成。'
+      failure: '<#FF3232>存储维护失败。'

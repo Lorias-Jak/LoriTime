@@ -34,7 +34,7 @@ Add LoriTime as a dependency in your Velocity plugin annotation or plugin metada
 
 ## Recommended Facade
 
-Use `LoriTimeAPI.service()` for new integrations. It returns an `Optional<LoriTimeService>` because LoriTime may not be installed or initialized yet.
+Use `LoriTimeAPI.service()` for new integrations. It returns an `Optional<LoriTimeService>` because LoriTime may not be installed or initialized yet. `LoriTimeService` is the stable interface; do not depend on LoriTime's internal service implementation classes.
 
 ```java
 import com.jannik_kuehn.common.api.LoriTimeAPI;
@@ -228,6 +228,6 @@ In slave mode, facade reads follow the same deterministic fallback behavior as L
 
 ## API Surface
 
-`LoriTimeAPI.service()`, `LoriTimeService`, `LoriTimePlayer`, and immutable public player references are the stable public integration surface for normal third-party plugins.
+`LoriTimeAPI.service()`, the `LoriTimeService` interface, `LoriTimePlayer`, and immutable public player references are the stable public integration surface for normal third-party plugins.
 
 Internal classes such as `LoriTimePlugin`, storage lifecycle managers, accumulators, configuration, localization, and updater state are not part of the public integration API. Storage contracts such as `UnifiedStorage` and `TimeAccumulator` remain internal runtime contracts unless a future change introduces a dedicated advanced extension API.

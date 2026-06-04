@@ -1,4 +1,4 @@
-###########
+﻿###########
 # General #
 ###########
 general:
@@ -15,8 +15,8 @@ general:
   debugAutoDisableTime: 30
 
   # Default Language of the unit-modifier and the command responses for the player.
-  # To see all available options: https://github.com/Lorias-Jak/LoriTime/tree/main/src/main/resources/localization
-  language: 'en'
+  # To see all available options: https://github.com/Lorias-Jak/LoriTime/tree/main/common/src/main/resources/language
+  language: 'en-us'
 
   # The save interval specifies how often the player's online time is saved.
   # The unit is seconds.
@@ -215,3 +215,4 @@ integrations:
 # DO NOT TOUCH #
 ################
 configSchemaVersion: 2
+

@@ -38,7 +38,7 @@ public class LoriTimeAdminCommand implements CommonCommand {
     @Override
     public void execute(final CommonSender sender, final String... args) {
         if (!sender.hasPermission("loritime.admin")) {
-            CommandMessages.send(localization, sender, "message.noPermission");
+            CommandMessages.send(localization, plugin.getLanguageSelector(), sender, "message.noPermission");
             return;
         }
         if (args.length < 1) {
@@ -81,7 +81,7 @@ public class LoriTimeAdminCommand implements CommonCommand {
     }
 
     private void usage(final CommonSender sender) {
-        CommandMessages.send(localization, sender, "message.command.loritimeadmin.usage");
+        CommandMessages.send(localization, plugin.getLanguageSelector(), sender, "message.command.loritimeadmin.usage");
     }
 
     private enum AdminAction {

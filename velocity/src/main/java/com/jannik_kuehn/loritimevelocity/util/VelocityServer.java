@@ -8,7 +8,7 @@ import com.jannik_kuehn.common.api.common.CommonServer;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
-import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.Component;
 
 import java.util.List;
 import java.util.Optional;
@@ -105,7 +105,7 @@ public class VelocityServer implements CommonServer {
     }
 
     @Override
-    public void kickPlayer(final LoriTimePlayer loriTimePlayer, final TextComponent message) {
+    public void kickPlayer(final LoriTimePlayer loriTimePlayer, final Component message) {
         final Optional<UUID> optionalUUID = Optional.ofNullable(loriTimePlayer.getUniqueId());
         if (optionalUUID.isEmpty()) {
             return;
@@ -118,7 +118,7 @@ public class VelocityServer implements CommonServer {
     }
 
     @Override
-    public void sendMessageToConsole(final TextComponent message) {
+    public void sendMessageToConsole(final Component message) {
         server.getConsoleCommandSource().sendMessage(message);
     }
 

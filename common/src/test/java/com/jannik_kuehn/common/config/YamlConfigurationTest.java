@@ -159,30 +159,30 @@ class YamlConfigurationTest {
     }
 
     @Test
-    void fileManagerMigratesLocalizationFilesAndPreservesCustomizedMessages() throws IOException, ConfigurationException {
+    void fileManagerLoadsCurrentSchemaLocalizationFiles() throws IOException, ConfigurationException {
         final File localizationFolder = new File(dataFolder, "localization");
         Files.createDirectories(localizationFolder.toPath());
         Files.writeString(new File(dataFolder, "config.yml").toPath(), "backup:\n  enabled: true\n  maxBackups: 5\n");
         Files.writeString(new File(localizationFolder, "en-us.yml").toPath(), """
-                unit:
-                  second:
-                    singular: 'custom second'
-                    plural: 'custom seconds'
-                    identifier:
-                      - 'cs'
-                message:
-                  nopermission: 'custom no permission'
+                schema_version: 1
+                locale: 'en-us'
+                prefix: '<gray>LoriTime '
+                messages:
+                  unit.second.singular: 'custom second'
+                  unit.second.plural: 'custom seconds'
+                  unit.second.identifier:
+                    - 'cs'
+                  message.noPermission: 'custom no permission'
                 """);
 
         final FileManager fileManager = new FileManager(loggerFactory, localizationFolder);
         final Configuration migrated = fileManager.getConfiguration(
-                fileManager.getOrCreateFile(localizationFolder.toString(), "en-us.yml", true));
+                fileManager.getOrCreateLanguageFile("en-us"));
 
-        assertEquals(2, migrated.getInt("configSchemaVersion"));
-        assertEquals("custom no permission", migrated.getString("message.noPermission"));
-        assertFalse(migrated.containsKey("message.nopermission"));
-        assertEquals("custom second", migrated.getString("unit.second.singular"));
-        assertTrue(migrated.containsKey("message.command.loritime.usage"));
+        assertEquals(1, migrated.getInt("schema_version"));
+        assertEquals("custom no permission", migrated.getString("messages.message.noPermission"));
+        assertEquals("custom second", migrated.getString("messages.unit.second.singular"));
+        assertTrue(migrated.containsKey("messages.message.command.loritime.usage"));
     }
 
     @Test

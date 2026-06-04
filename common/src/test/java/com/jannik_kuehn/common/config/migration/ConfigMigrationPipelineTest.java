@@ -65,38 +65,43 @@ class ConfigMigrationPipelineTest {
     }
 
     @Test
-    void localizationMigrationRenamesLegacyKeysToCamelCaseAndPreservesCustomKeys() {
-        final StructuredConfigurationDocument document = new StructuredConfigurationDocument(Map.of(
-                ConfigSchema.VERSION_PATH, 1,
-                "message", Map.of(
-                        "nopermission", "legacy permission",
-                        "command", Map.of(
-                                "loritime", Map.of(
-                                        "notfound", "legacy not found",
-                                        "timeseen", Map.of("self", "legacy self")),
-                                "loritimeadmin", Map.of("missinguuid", "legacy missing uuid")),
-                        "customPlugin", Map.of("custom_key", "custom value"))));
+    void templateMergeTreatsNestedAndLiteralDottedPathsAsEquivalent() {
         final StructuredConfigurationDocument template = new StructuredConfigurationDocument(Map.of(
-                ConfigSchema.VERSION_PATH, 2,
-                "message", Map.of(
-                        "noPermission", "default permission",
-                        "command", Map.of(
-                                "loritime", Map.of(
-                                        "notFound", "default not found",
-                                        "timeSeen", Map.of("self", "default self")),
-                                "loritimeadmin", Map.of("missingUuid", "default missing uuid")))));
+                "messages", Map.of(
+                        "message", Map.of("noPermission", "default permission"),
+                        "unit", Map.of("second", Map.of("singular", "second")))));
+        final StructuredConfigurationDocument user = new StructuredConfigurationDocument(Map.of(
+                "messages", Map.of(
+                        "message.noPermission", "custom permission",
+                        "unit.second.singular", "custom second")));
+
+        final StructuredConfigurationDocument merged = new ConfigTemplateMerger().merge(template, user);
+
+        assertEquals("custom permission", merged.get("messages.message.noPermission"));
+        assertEquals("custom second", merged.get("messages.unit.second.singular"));
+    }
+
+    @Test
+    void localizationSchemaDoesNotMigrateLegacyLanguageKeys() {
+        final StructuredConfigurationDocument document = new StructuredConfigurationDocument(Map.of(
+                "schema_version", 1,
+                "messages", Map.of(
+                        "message.nopermission", "legacy permission",
+                        "message.customPlugin.custom_key", "custom value")));
+        final StructuredConfigurationDocument template = new StructuredConfigurationDocument(Map.of(
+                "schema_version", 1,
+                "messages", Map.of(
+                        "message.noPermission", "default permission")));
 
         final ConfigMigrationResult result = new ConfigMigrationPipeline(ConfigSchema.localization()).migrate(document);
         final StructuredConfigurationDocument merged = new ConfigTemplateMerger().merge(template, result.document());
+        final Map<?, ?> resultMessages = assertInstanceOf(Map.class, result.document().get("messages"));
+        final Map<?, ?> mergedMessages = assertInstanceOf(Map.class, merged.get("messages"));
 
-        assertTrue(result.changed());
-        assertEquals("legacy permission", merged.get("message.noPermission"));
-        assertEquals("legacy not found", merged.get("message.command.loritime.notFound"));
-        assertEquals("legacy self", merged.get("message.command.loritime.timeSeen.self"));
-        assertEquals("legacy missing uuid", merged.get("message.command.loritimeadmin.missingUuid"));
-        assertEquals("custom value", merged.get("message.customPlugin.custom_key"));
-        assertNull(merged.get("message.nopermission"));
-        assertEquals(2, merged.get(ConfigSchema.VERSION_PATH));
+        assertEquals("legacy permission", resultMessages.get("message.nopermission"));
+        assertEquals("custom value", resultMessages.get("message.customPlugin.custom_key"));
+        assertEquals("default permission", mergedMessages.get("message.noPermission"));
+        assertEquals(1, merged.get("schema_version"));
     }
 
     @Test

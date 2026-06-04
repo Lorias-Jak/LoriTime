@@ -1,7 +1,7 @@
 package com.jannik_kuehn.common.api.common;
 
 import com.jannik_kuehn.common.api.LoriTimePlayer;
-import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.Component;
 
 import java.util.List;
 import java.util.Optional;
@@ -46,7 +46,7 @@ public interface CommonServer {
 
     boolean dispatchCommand(CommonSender consoleSender, String command);
 
-    void kickPlayer(LoriTimePlayer player, TextComponent message);
+    void kickPlayer(LoriTimePlayer player, Component message);
 
-    void sendMessageToConsole(TextComponent message);
+    void sendMessageToConsole(Component message);
 }

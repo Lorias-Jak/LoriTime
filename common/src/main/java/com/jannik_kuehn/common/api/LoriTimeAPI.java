@@ -44,6 +44,6 @@ public final class LoriTimeAPI {
      */
     public static Optional<LoriTimeService> service() {
         final LoriTimePlugin plugin = loriTimePlugin;
-        return plugin == null ? Optional.empty() : Optional.of(new LoriTimeService(plugin));
+        return plugin == null ? Optional.empty() : Optional.of(new DefaultLoriTimeService(plugin));
     }
 }

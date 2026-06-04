@@ -20,6 +20,7 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 
@@ -37,21 +38,6 @@ public class FileManager {
      * Folder for localization files.
      */
     private static final String LANGUAGE_FOLDER = "language";
-
-    /**
-     * English localization resource.
-     */
-    private static final String ENGLISH_LOCALIZATION_FILE_NAME = LANGUAGE_FOLDER + "/en-us.yml";
-
-    /**
-     * German localization resource.
-     */
-    private static final String GERMAN_LOCALIZATION_FILE_NAME = LANGUAGE_FOLDER + "/de-de.yml";
-
-    /**
-     * Chinese localization resource.
-     */
-    private static final String CHINESE_LOCALIZATION_FILE_NAME = LANGUAGE_FOLDER + "/zh-cn.yml";
 
     /**
      * The {@link WrappedLogger} instance.
@@ -126,7 +112,7 @@ public class FileManager {
      * @throws ConfigurationException if the file could not be created, copied or updated.
      */
     public File getOrCreateFile(final String folder, final String fileName, final boolean needCopy) throws ConfigurationException {
-        return getOrCreateFile(folder, fileName, resourceNameFor(fileName), needCopy);
+        return getOrCreateFile(folder, fileName, fileName, needCopy);
     }
 
     /**
@@ -136,8 +122,12 @@ public class FileManager {
      * @return language file
      * @throws ConfigurationException if the file cannot be created or updated
      */
+    @SuppressWarnings("PMD.CyclomaticComplexity")
     public File getOrCreateLanguageFile(final String language) throws ConfigurationException {
-        final String fileName = language + ".yml";
+        final String languageId = language == null || language.isBlank()
+                ? "en-us"
+                : language.trim().toLowerCase(Locale.ROOT);
+        final String fileName = languageId + ".yml";
         final File languageFolder = new File(dataFolder, LANGUAGE_FOLDER);
         if (!languageFolder.exists() && !languageFolder.mkdirs()) {
             throw new ConfigurationException("Could not create language folder.");
@@ -153,7 +143,23 @@ public class FileManager {
                 throw new ConfigurationException("Could not migrate language file '" + fileName + "' to language folder.", ex);
             }
         }
-        return getOrCreateFile(languageFolder.toString(), fileName, LANGUAGE_FOLDER + "/" + fileName, true);
+        final String resourceFileName = LANGUAGE_FOLDER + "/" + fileName;
+        if (resourceExists(resourceFileName)) {
+            return getOrCreateFile(languageFolder.toString(), fileName, resourceFileName, true);
+        }
+        if (!canonical.exists()) {
+            log.warn("Custom language file '" + fileName + "' does not exist in the language folder.");
+        }
+        return canonical;
+    }
+
+    /**
+     * Ensures the bundled hard fallback language exists.
+     *
+     * @throws ConfigurationException if the bundled language file cannot be created
+     */
+    public void ensureBundledFallbackLanguage() throws ConfigurationException {
+        getOrCreateLanguageFile("en-us");
     }
 
     private File getOrCreateFile(final String folder,
@@ -267,20 +273,10 @@ public class FileManager {
     }
 
     private ConfigSchema schemaForResource(final String resourceFileName) {
-        return switch (resourceFileName) {
-            case CONFIG_FILE_NAME -> ConfigSchema.loriTimeConfig();
-            case ENGLISH_LOCALIZATION_FILE_NAME, GERMAN_LOCALIZATION_FILE_NAME, CHINESE_LOCALIZATION_FILE_NAME -> ConfigSchema.localization();
-            default -> null;
-        };
-    }
-
-    private String resourceNameFor(final String fileName) {
-        return switch (fileName) {
-            case "en-us.yml" -> ENGLISH_LOCALIZATION_FILE_NAME;
-            case "de-de.yml" -> GERMAN_LOCALIZATION_FILE_NAME;
-            case "zh-cn.yml" -> CHINESE_LOCALIZATION_FILE_NAME;
-            default -> fileName;
-        };
+        if (CONFIG_FILE_NAME.equals(resourceFileName)) {
+            return ConfigSchema.loriTimeConfig();
+        }
+        return null;
     }
 
     private StructuredConfigurationDocument loadResourceDocument(final String resourceFileName) throws ConfigurationException {
@@ -289,6 +285,13 @@ public class FileManager {
         } catch (final IOException e) {
             throw new ConfigurationException("An exception occurred while loading the resource file '" + resourceFileName + "'.", e);
         }
+    }
+
+    @SuppressWarnings("PMD.UseProperClassLoader")
+    private boolean resourceExists(final String resourceFileName) {
+        final ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
+        return contextClassLoader != null && contextClassLoader.getResource(resourceFileName) != null
+                || FileManager.class.getClassLoader().getResource(resourceFileName) != null;
     }
 
     @SuppressWarnings("PMD.UseProperClassLoader")

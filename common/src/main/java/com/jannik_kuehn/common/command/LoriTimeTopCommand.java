@@ -38,7 +38,7 @@ public class LoriTimeTopCommand implements CommonCommand {
     @Override
     public void execute(final CommonSender sender, final String... args) {
         if (!sender.hasPermission("loritime.top")) {
-            CommandMessages.send(localization, sender, "message.noPermission");
+            CommandMessages.send(localization, plugin.getLanguageSelector(), sender, "message.noPermission");
             return;
         }
         if (args.length < 1) {
@@ -52,12 +52,12 @@ public class LoriTimeTopCommand implements CommonCommand {
                 try {
                     topOutput(sender, Integer.parseInt(args[0]));
                 } catch (final NumberFormatException e) {
-                    CommandMessages.send(localization, sender, "message.command.top.nonumber");
+                    CommandMessages.send(localization, plugin.getLanguageSelector(), sender, "message.command.top.nonumber");
                 }
             });
             return;
         }
-        CommandMessages.send(localization, sender, "message.command.top.usage");
+        CommandMessages.send(localization, plugin.getLanguageSelector(), sender, "message.command.top.usage");
     }
 
     private void topOutput(final CommonSender sender, final int site) {
@@ -88,7 +88,7 @@ public class LoriTimeTopCommand implements CommonCommand {
             ));
             return;
         }
-        CommandMessages.send(localization, sender, "message.command.top.gatheringData");
+        CommandMessages.send(localization, plugin.getLanguageSelector(), sender, "message.command.top.gatheringData");
 
         final int minValue;
         final int maxValue;

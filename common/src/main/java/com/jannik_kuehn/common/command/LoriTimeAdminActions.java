@@ -6,7 +6,6 @@ import com.jannik_kuehn.common.api.common.CommonSender;
 import com.jannik_kuehn.common.api.scheduler.PluginTask;
 import com.jannik_kuehn.common.command.core.CommandMessages;
 import com.jannik_kuehn.common.config.localization.Localization;
-import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 
 import java.util.function.Consumer;
@@ -46,7 +45,7 @@ final class LoriTimeAdminActions {
             return;
         }
         plugin.reload();
-        CommandMessages.send(localization, sender, "message.command.loritimeadmin.reload.success");
+        CommandMessages.send(localization, plugin.getLanguageSelector(), sender, "message.command.loritimeadmin.reload.success");
     }
 
     /* default */ void debug(final CommonSender sender, final String... args) {
@@ -67,8 +66,8 @@ final class LoriTimeAdminActions {
 
         sender.sendMessage(localization.formatTextComponent("Version Information"));
         sender.sendMessage("");
-        sender.sendMessage((TextComponent) miniMessage.deserialize(serverVersion));
-        sender.sendMessage((TextComponent) miniMessage.deserialize(pluginVersion));
+        sender.sendMessage(miniMessage.deserialize(serverVersion));
+        sender.sendMessage(miniMessage.deserialize(pluginVersion));
     }
 
     /* default */ void update(final CommonSender sender, final String... args) {
@@ -97,10 +96,10 @@ final class LoriTimeAdminActions {
                 autoDisableTask.cancel();
             }
             stopDebugging();
-            CommandMessages.send(localization, sender, "message.command.debug.disabled");
+            CommandMessages.send(localization, plugin.getLanguageSelector(), sender, "message.command.debug.disabled");
         } else {
             startDebugging();
-            CommandMessages.send(localization, sender, "message.command.debug.enabled");
+            CommandMessages.send(localization, plugin.getLanguageSelector(), sender, "message.command.debug.enabled");
         }
     }
 

@@ -2,7 +2,7 @@ package com.jannik_kuehn.loritimevelocity.util;
 
 import com.jannik_kuehn.common.api.common.CommonPlayerSender;
 import com.velocitypowered.api.proxy.Player;
-import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 
 import java.util.UUID;
@@ -39,7 +39,7 @@ public class VelocityPlayer implements CommonPlayerSender {
     }
 
     @Override
-    public void sendMessage(final TextComponent message) {
+    public void sendMessage(final Component message) {
         player.sendMessage(message);
     }
 

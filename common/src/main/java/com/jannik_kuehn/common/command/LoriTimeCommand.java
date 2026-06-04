@@ -76,14 +76,15 @@ public class LoriTimeCommand implements CommonCommand {
 
                 final Optional<TimeScope> resolvedScope = resolveScope(request, targetPlayer.getUniqueId());
                 if (resolvedScope.isEmpty()) {
-                    CommandMessages.send(localization, sender, "message.command.loritime.usage");
+                    CommandMessages.send(localization, loriTimePlugin.getLanguageSelector(), sender,
+                            "message.command.loritime.usage");
                     return;
                 }
                 final TimeScope scope = resolvedScope.get();
                 final boolean isTargetSender = sender instanceof CommonPlayerSender playerSender
                         && targetPlayer.getUniqueId().equals(playerSender.getUniqueId());
                 if (!CommandScopes.hasPermission(sender, scope, isTargetSender)) {
-                    CommandMessages.send(localization, sender, "message.noPermission");
+                    CommandMessages.send(localization, loriTimePlugin.getLanguageSelector(), sender, "message.noPermission");
                     return;
                 }
 
@@ -102,7 +103,7 @@ public class LoriTimeCommand implements CommonCommand {
                     }
                 } catch (final StorageException ex) {
                     log.warn("could not load online time", ex);
-                    CommandMessages.send(localization, sender, "message.error");
+                    CommandMessages.send(localization, loriTimePlugin.getLanguageSelector(), sender, "message.error");
                     return;
                 }
                 if (isTargetSender) {
@@ -120,7 +121,8 @@ public class LoriTimeCommand implements CommonCommand {
                 }
             });
         } else {
-            CommandMessages.send(localization, sender, "message.command.loritime.usage");
+            CommandMessages.send(localization, loriTimePlugin.getLanguageSelector(), sender,
+                    "message.command.loritime.usage");
         }
     }
 

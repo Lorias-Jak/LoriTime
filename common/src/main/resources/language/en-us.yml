@@ -1,130 +1,107 @@
-﻿# See https://docs.advntr.dev/minimessage/format.html
-# You can add a new language by duplicating the Lang-File (eg. en-us) and then modifying the values. Change the Key in the config too!
-# If you translate the messages to your language, feel free to create a pull request to add them by default.
-unit:
-  second:
-    singular: 'second'
-    plural: 'seconds'
-    identifier:
-      - 's'
-      - 'sec'
-  minute:
-    singular: 'minute'
-    plural: 'minutes'
-    identifier:
-      - 'min'
-      - 'm'
-  hour:
-    singular: 'hour'
-    plural: 'hours'
-    identifier:
-      - 'h'
-  day:
-    singular: 'day'
-    plural: 'days'
-    identifier:
-      - 'd'
-  week:
-    singular: 'week'
-    plural: 'weeks'
-    identifier:
-      - 'w'
-  month:
-    singular: 'month'
-    plural: 'months'
-    identifier:
-      - 'mo'
-  year:
-    singular: 'year'
-    plural: 'years'
-    identifier:
-      - 'y'
-      - 'yhr'
-
-message:
-  noPermission: '<#FF3232>You don''t have the required permissions to do that.'
-  command:
-    loritime:
-      usage: '<#A4A4A4>Use <red>/loritime [player] [server:<server>|s:<server>] [world:<world>|w:<world>] [time:<range>|t:<range>] <#A4A4A4>to see a players online time.'
-      notFound: '<#A4A4A4>The player <#50CBAB>[player] <#A4A4A4>has not played on the server yet.'
-      noScopedTime: '<#A4A4A4>The player <#50CBAB>[player] <#A4A4A4>has no stored online time [scope][range].'
-      consoleSelf: '<#FF3232>You''re the console. You can not lookup your online time!'
-      scope:
-        global: '<#A4A4A4>on the network'
-        server: '<#A4A4A4>on the server <#50CBAB>[server]'
-        world: '<#A4A4A4>on the world <#50CBAB>[world]'
-        worldServer: '<#A4A4A4>on the world <#50CBAB>[world] <#A4A4A4>on server <#50CBAB>[server]'
-      range: ' <#A4A4A4>during <#50CBAB>[range]'
-      timeSeen:
-        self: '<#A4A4A4>You have played for <#50CBAB>[time] [scope][range]<#A4A4A4>.'
-        other: '<#A4A4A4>The player <#50CBAB>[player] <#A4A4A4>has already played for <#50CBAB>[time] [scope][range]<#A4A4A4>.'
-    loritimeadmin:
-      usage: '<#A4A4A4>Use <red>/ltmodify [add | set | reset] [player] [time] [server [server] | world [server] [world]] <#A4A4A4>to edit a players online time.<newline>Other commands: <red>/loritimeadmin [reload | update | deleteUser]'
-      missingUuid: '<#A4A4A4>The player <#50CBAB>[player] <#A4A4A4>is unknown.'
-      notTime: '<#A4A4A4>The given time argument <red>[argument] <#FF3232>is not valid.'
-      set:
-        usage: '<#A4A4A4>Use <red>/ltmodify set [player] [time] [server [server] | world [server] [world]] <#A4A4A4>to set a players online time.'
-        success: '<#A4A4A4>The online time of player <#50CBAB>[player] <#A4A4A4>got successfully set to <#50CBAB>[time].'
-        negativeTime: '<red>The given time <#50CBAB>[time] <red>is negative, but must at least be zero.'
-      modify:
-        usage: '<#A4A4A4>Use <red>/ltmodify add [player] [time] [server [server] | world [server] [world]] <#A4A4A4>to modify a players online time.'
-        success: '<#A4A4A4>The online time of player <#50CBAB>[player] <#A4A4A4>got successfully modified by <#50CBAB>[time].'
-        negativeTimeSum: '<red>The given time <#50CBAB>[time] <red>would cause a negative online time, but must at least be zero.'
-      reset:
-        usage: '<#A4A4A4>Use <red>/ltmodify reset [player] [server [server] | world [server] [world]] <#A4A4A4>to reset a players online time.'
-        success: '<#A4A4A4>The online time of player <#50CBAB>[player] <#A4A4A4>got successfully reset.'
-      deleteUser:
-        usage: '<#A4A4A4>Use <red>/onlinetimeadmin delete [player] confirm <#A4A4A4>to delete a user entirely from the plugin.'
-        success: '<#A4A4A4>The player <#50CBAB>[player] <#A4A4A4>was <#50CBAB>successfully <#A4A4A4>deleted.'
-        issue: '<#FF3232>An issue occurred during the deletion.'
-        userOnline: '<#FF3232>You can not delete a user that is online.'
-      reload:
-        usage: '<#A4A4A4> Use <red>/onlinetimeadmin reload <#A4A4A4>to reload the plugin.'
-        success: '<#A4A4A4>You have <#1AFA29>successfully <#A4A4A4>reloaded the plugin.'
-        issue: '<#FF3232>An issue occurred during plugin reload, the plugin will stop counting!'
-    top:
-      usage: '<#A4A4A4>Use <red>/onlinetimetop [page] <#A4A4A4>to see the top online time of the players.'
-      gatheringData: '<#A4A4A4>Gather data and start calculate...'
-      headline: '<#A4A4A4><newline>Top online times <#50CBAB>[dateAndTime] <newline><#A4A4A4>---- Top times -- Page <#50CBAB>[pages] <#A4A4A4>----<newline>Server total: <#50CBAB>[totalTime]'
-      user: '<#A4A4A4>[place]: [player] <#50CBAB>[time]'
-      wrongPage: '<#A4A4A4>Please choose a page between <#FF3232>[pages].'
-      nonumber: '<#FF3232>The specified value was not a number.'
-    debug:
-      enabled: '<#A4A4A4>Debugging <#1AFA29>started.'
-      disabled: '<#A4A4A4>Debugging <#FF3232>stopped.'
-  afk:
-    kick: '<#50CBAB>You were kicked for being AFK for <#FF3232>[time].'
-    kickAnnounce: '<#50CBAB>[player] <#A4A4A4>was kicked for being AFK for <#50CBAB>[time].'
-    afkAnnounce: '<#50CBAB>[player] <#A4A4A4>is now AFK.'
-    resumeAnnounce: '<#50CBAB>[player] <#A4A4A4>is no longer AFK.'
-    afkSelf: '<#A4A4A4>You are now AFK.'
-    afkResume: '<#A4A4A4>You are no longer AFK.'
-  updater:
-    startUpdate: '<#A4A4A4>Started update process. Searching for a newer version than currently found.'
-    available: |
-      <#A4A4A4>An update is available for the plugin.
-      Current version: <#50CBAB>[currentVersion]<#A4A4A4> | new Version: <#50CBAB>[newVersion]
-    disabled: '<#FF3232>The update check is disabled. Please enable it to check for updates.'
-    newerVersionFound: |
-      <#FF3232>Aborted...
-      <#A4A4A4>A newer version is available. New version <#50CBAB>[newVersion]<#A4A4A4>.
-    alreadyDownloaded: '<#FF3232>The update has already been downloaded. Please restart the server to apply the update.'
-    notFound: '<#FF3232>No update was found.'
-    updateSuccess: '<#1AFA29>Updated successfully to version: <#50CBAB>[newVersion]<#1AFA29>. <#A4A4A4>Restart the server to apply the update.'
-
-  storageMaintenance:
-    unsupported: '<#FF3232>Storage maintenance is not supported by the active storage.'
-    preview: '<#A4A4A4>Maintenance preview: <#50CBAB>[sessions] <#A4A4A4>sessions, <#50CBAB>[adjustments] <#A4A4A4>adjustments, <#50CBAB>[players] <#A4A4A4>players.'
-    confirmationRequired: '<#FF3232>This operation changes existing data. Confirm with token <#50CBAB>[token]<#FF3232>.'
-    confirmationMismatch: '<#FF3232>The confirmation no longer matches the current operation preview.'
-    success: '<#1AFA29>Storage maintenance completed successfully.'
-    failure: '<#FF3232>Storage maintenance failed.'
-
-################
-# DO NOT TOUCH #
-################
-configSchemaVersion: 1
-
-
-
-
+schema_version: 1
+locale: 'en-us'
+prefix: '<#A4A4A4>[<#50CBAB>LoriTime<#A4A4A4>] '
+messages:
+  unit:
+    second:
+      singular: 'second'
+      plural: 'seconds'
+      identifier: ['s', 'sec']
+    minute:
+      singular: 'minute'
+      plural: 'minutes'
+      identifier: ['min', 'm']
+    hour:
+      singular: 'hour'
+      plural: 'hours'
+      identifier: ['h']
+    day:
+      singular: 'day'
+      plural: 'days'
+      identifier: ['d']
+    week:
+      singular: 'week'
+      plural: 'weeks'
+      identifier: ['w']
+    month:
+      singular: 'month'
+      plural: 'months'
+      identifier: ['mo']
+    year:
+      singular: 'year'
+      plural: 'years'
+      identifier: ['y', 'yhr']
+  message:
+    noPermission: '<#FF3232>You don''t have the required permissions to do that.'
+    error: '<#FF3232>An error occurred.'
+    command:
+      loritime:
+        usage: '<#A4A4A4>Use <red>/loritime [player] [server:<server>|s:<server>] [world:<world>|w:<world>] [time:<range>|t:<range>] <#A4A4A4>to see a player''s online time.'
+        notFound: '<#A4A4A4>The player <#50CBAB>[player] <#A4A4A4>has not played on the server yet.'
+        noScopedTime: '<#A4A4A4>The player <#50CBAB>[player] <#A4A4A4>has no stored online time [scope][range].'
+        consoleSelf: '<#FF3232>You''re the console. You can not lookup your online time!'
+        scope:
+          global: '<#A4A4A4>on the network'
+          server: '<#A4A4A4>on the server <#50CBAB>[server]'
+          world: '<#A4A4A4>on the world <#50CBAB>[world]'
+          worldServer: '<#A4A4A4>on the world <#50CBAB>[world] <#A4A4A4>on server <#50CBAB>[server]'
+        range: ' <#A4A4A4>during <#50CBAB>[range]'
+        timeSeen:
+          self: '<#A4A4A4>You have played for <#50CBAB>[time] [scope][range]<#A4A4A4>.'
+          other: '<#A4A4A4>The player <#50CBAB>[player] <#A4A4A4>has already played for <#50CBAB>[time] [scope][range]<#A4A4A4>.'
+      loritimeadmin:
+        usage: '<#A4A4A4>Use <red>/ltmodify [add | set | reset] [player] [time] [server [server] | world [server] [world]] <#A4A4A4>to edit a player''s online time.<newline>Other commands: <red>/loritimeadmin [reload | update | deleteUser]'
+        missingUuid: '<#A4A4A4>The player <#50CBAB>[player] <#A4A4A4>is unknown.'
+        notTime: '<#A4A4A4>The given time argument <red>[argument] <#FF3232>is not valid.'
+        set:
+          usage: '<#A4A4A4>Use <red>/ltmodify set [player] [time] [server [server] | world [server] [world]] <#A4A4A4>to set a player''s online time.'
+          success: '<#A4A4A4>The online time of player <#50CBAB>[player] <#A4A4A4>got successfully set to <#50CBAB>[time].'
+          negativeTime: '<red>The given time <#50CBAB>[time] <red>is negative, but must at least be zero.'
+        modify:
+          usage: '<#A4A4A4>Use <red>/ltmodify add [player] [time] [server [server] | world [server] [world]] <#A4A4A4>to modify a player''s online time.'
+          success: '<#A4A4A4>The online time of player <#50CBAB>[player] <#A4A4A4>got successfully modified by <#50CBAB>[time].'
+          negativeTimeSum: '<red>The given time <#50CBAB>[time] <red>would cause a negative online time, but must at least be zero.'
+        reset:
+          usage: '<#A4A4A4>Use <red>/ltmodify reset [player] [server [server] | world [server] [world]] <#A4A4A4>to reset a player''s online time.'
+          success: '<#A4A4A4>The online time of player <#50CBAB>[player] <#A4A4A4>got successfully reset.'
+        deleteUser:
+          usage: '<#A4A4A4>Use <red>/onlinetimeadmin delete [player] confirm <#A4A4A4>to delete a user entirely from the plugin.'
+          success: '<#A4A4A4>The player <#50CBAB>[player] <#A4A4A4>was <#50CBAB>successfully <#A4A4A4>deleted.'
+          issue: '<#FF3232>An issue occurred during the deletion.'
+          userOnline: '<#FF3232>You can not delete a user that is online.'
+        reload:
+          usage: '<#A4A4A4> Use <red>/onlinetimeadmin reload <#A4A4A4>to reload the plugin.'
+          success: '<#A4A4A4>You have <#1AFA29>successfully <#A4A4A4>reloaded the plugin.'
+          issue: '<#FF3232>An issue occurred during plugin reload, the plugin will stop counting!'
+      top:
+        usage: '<#A4A4A4>Use <red>/onlinetimetop [page] <#A4A4A4>to see the top online time of the players.'
+        gatheringData: '<#A4A4A4>Gather data and start calculate...'
+        headline: '<#A4A4A4><newline>Top online times <#50CBAB>[dateAndTime] <newline><#A4A4A4>---- Top times -- Page <#50CBAB>[pages] <#A4A4A4>----<newline>Server total: <#50CBAB>[totalTime]'
+        user: '<#A4A4A4>[place]: [player] <#50CBAB>[time]'
+        wrongPage: '<#A4A4A4>Please choose a page between <#FF3232>[pages].'
+        nonumber: '<#FF3232>The specified value was not a number.'
+      debug:
+        enabled: '<#A4A4A4>Debugging <#1AFA29>started.'
+        disabled: '<#A4A4A4>Debugging <#FF3232>stopped.'
+    afk:
+      kick: '<#50CBAB>You were kicked for being AFK for <#FF3232>[time].'
+      kickAnnounce: '<#50CBAB>[player] <#A4A4A4>was kicked for being AFK for <#50CBAB>[time].'
+      afkAnnounce: '<#50CBAB>[player] <#A4A4A4>is now AFK.'
+      resumeAnnounce: '<#50CBAB>[player] <#A4A4A4>is no longer AFK.'
+      afkSelf: '<#A4A4A4>You are now AFK.'
+      afkResume: '<#A4A4A4>You are no longer AFK.'
+    updater:
+      startUpdate: '<#A4A4A4>Started update process. Searching for a newer version than currently found.'
+      available: '<#A4A4A4>An update is available for the plugin.<newline>Current version: <#50CBAB>[currentVersion]<#A4A4A4> | new Version: <#50CBAB>[newVersion]'
+      disabled: '<#FF3232>The update check is disabled. Please enable it to check for updates.'
+      newerVersionFound: '<#FF3232>Aborted...<newline><#A4A4A4>A newer version is available. New version <#50CBAB>[newVersion]<#A4A4A4>.'
+      alreadyDownloaded: '<#FF3232>The update has already been downloaded. Please restart the server to apply the update.'
+      notFound: '<#FF3232>No update was found.'
+      updateSuccess: '<#1AFA29>Updated successfully to version: <#50CBAB>[newVersion]<#1AFA29>. <#A4A4A4>Restart the server to apply the update.'
+    storageMaintenance:
+      unsupported: '<#FF3232>Storage maintenance is not supported by the active storage.'
+      preview: '<#A4A4A4>Maintenance preview: <#50CBAB>[sessions] <#A4A4A4>sessions, <#50CBAB>[adjustments] <#A4A4A4>adjustments, <#50CBAB>[players] <#A4A4A4>players.'
+      confirmationRequired: '<#FF3232>This operation changes existing data. Confirm with token <#50CBAB>[token]<#FF3232>.'
+      confirmationMismatch: '<#FF3232>The confirmation no longer matches the current operation preview.'
+      success: '<#1AFA29>Storage maintenance completed successfully.'
+      failure: '<#FF3232>Storage maintenance failed.'

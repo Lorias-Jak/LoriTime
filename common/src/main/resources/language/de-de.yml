@@ -1,136 +1,107 @@
-﻿# See https://docs.advntr.dev/minimessage/format.html
-# You can add a new language by duplicating the Lang-File (eg. de-de) and then modifying the values. Change the Key in the config too!
-# If you translate the messages to your language, feel free to create a pull request to add them by default.
-unit:
-  second:
-    singular: 'Sekunde'
-    plural: 'Sekunden'
-    identifier:
-      - 's'
-      - 'sec'
-      - 'sek'
-  minute:
-    singular: 'Minute'
-    plural: 'Minuten'
-    identifier:
-      - 'm'
-      - 'min'
-  hour:
-    singular: 'Stunde'
-    plural: 'Stunden'
-    identifier:
-      - 'h'
-      - 'std'
-  day:
-    singular: 'Tag'
-    plural: 'Tage'
-    identifier:
-      - 't'
-      - 'd'
-  week:
-    singular: 'Woche'
-    plural: 'Wochen'
-    identifier:
-      - 'w'
-      - 'wo'
-  month:
-    singular: 'Monat'
-    plural: 'Monate'
-    identifier:
-      - 'mo'
-  year:
-    singular: 'Jahr'
-    plural: 'Jahre'
-    identifier:
-      - 'j'
-      - 'y'
-      - 'yhr'
-
-
-message:
-  noPermission: '<#FF3232>Dazu fehlen dir die Rechte.'
-  command:
-    loritime:
-      usage: '<#A4A4A4>Benutze <red>/loritime [Spieler] [server:<Server>|s:<Server>] [world:<Welt>|w:<Welt>] [time:<Zeitraum>|t:<Zeitraum>] <#A4A4A4>um die Spielzeit anzuzeigen.'
-      notFound: '<#A4A4A4>Der Spieler <#50CBAB>[player] <#A4A4A4>war noch nie auf dem Server.'
-      noScopedTime: '<#A4A4A4>Der Spieler <#50CBAB>[player] <#A4A4A4>hat keine gespeicherte Spielzeit [scope][range]<#A4A4A4>.'
-      consoleSelf: '<#FF3232>Du bist die Konsole, deine eigene Online Zeit kannst du nicht anschauen!'
-      scope:
-        global: '<#A4A4A4>im Netzwerk'
-        server: '<#A4A4A4>auf dem Server <#50CBAB>[server]'
-        world: '<#A4A4A4>in der Welt <#50CBAB>[world]'
-        worldServer: '<#A4A4A4>in der Welt <#50CBAB>[world] <#A4A4A4>auf Server <#50CBAB>[server]'
-      range: ' <#A4A4A4>im Zeitraum <#50CBAB>[range]'
-      timeSeen:
-        self: '<#A4A4A4>Du hast <#50CBAB>[time] [scope][range] <#A4A4A4>gespielt.'
-        other: '<#A4A4A4>Der Spieler <#50CBAB>[player] <#A4A4A4>hat <#50CBAB>[time] [scope][range] <#A4A4A4>gespielt.'
-    loritimeadmin:
-      usage: '<#A4A4A4>Benutze <red>/onlinetimeadmin [set | mod | reset] [player] [time] <#A4A4A4>um die Spielzeit zu ändern..<newline>Weitere Commands: <red>/loritimeadmin [reload | update | deleteUser]'
-      missingUuid: '<#A4A4A4>Der Spieler <#50CBAB>[player] <#A4A4A4>ist unbekannt.'
-      notTime: '<#A4A4A4>Das gegebene Zeitargument <#50CBAB>[argument] <#FF3232>hat ein ungültiges Format.'
-      set:
-        usage: '<#A4A4A4>Benutze <red>/onlinetimeadmin set [player] [time] <#A4A4A4>um die Spielzeit zu setzen.'
-        success: '<#A4A4A4>Die Spielzeit von <#50CBAB>[player] <#A4A4A4>wurde auf <#50CBAB>[time] <#A4A4A4>gesetzt.'
-        negativeTime: '<#A4A4A4>Die gegebene Zeit <#50CBAB>[time] <#A4A4A4>ist negativ, muss aber mindestens Null sein.'
-      modify:
-        usage: '<#A4A4A4>Benutze <red>/onlinetimeadmin mod [player] <#50CBAB>[time] <#A4A4A4>um die Spielzeit zu modifizieren.'
-        success: '<#A4A4A4>Die Spielzeit von <#50CBAB>[player] <#A4A4A4>wurde um <#50CBAB>[time] geändert.'
-        negativeTimeSum: '<#A4A4A4>Die gegebene Zeit <#50CBAB>[time] <#A4A4A4>würde in negativer Spielzeit resultieren, diese muss aber mindestens Null sein.'
-      reset:
-        usage: '<#A4A4A4>Benutze <red>/onlinetimeadmin reset [player] [time] <#A4A4A4>um die Spielzeit zu zurückzusetzen.'
-        success: '<#A4A4A4>Die Spielzeit von <#50CBAB>[player] wurde zurückgesetzt.'
-      deleteUser:
-        usage: '<#A4A4A4>Nutze <red>/onlinetimeadmin delete [player] confirm <#A4A4A4>um einen Spieler komplett zu löschen.'
-        success: '<#A4A4A4>Der Spieler <#50CBAB>[player] <#A4A4A4>wurde <#50CBAB>erfolgreich <#A4A4A4>gelöscht.'
-        issue: '<#FF3232>Es ist ein Fehler beim Löschen der Daten aufgetreten.'
-        userOnline: '<#FF3232>Du kannst den User nicht löschen, so lange dieser online ist.'
-      reload:
-        usage: '<#A4A4A4> Benutze <red>/onlinetimeadmin reload <#A4A4A4>um das Plugin neu zu laden.'
-        success: '<#A4A4A4>Du hast <#1AFA29>erfolgreich <#A4A4A4>das Plugin neu geladen.'
-        issue: '<#FF3232>Es ist ein Fehler beim neuladen des Plugins aufgetreten. Die Zeit wird nicht weiter gezählt!'
-    top:
-      usage: '<#A4A4A4>Benutze <red>/onlinetimetop [page] <#A4A4A4>um dir die Top Onlinezeit der Spieler anzeigen zu lassen.'
-      gatheringData: '<#A4A4A4>Sammle daten zusammen und berechne...'
-      headline: '<#A4A4A4><newline>Top online times <#50CBAB>[dateAndTime] <newline><#A4A4A4>---- Top Times -- Seite <#50CBAB>[pages] <#A4A4A4>----<newline>Server Total: <#50CBAB>[totalTime]'
-      user: '<#A4A4A4>[place]: [player] <#50CBAB>[time]'
-      wrongPage: '<#A4A4A4>Bitte wähle eine Seite zwischen <#FF3232>[pages].'
-      nonumber: '<#FF3232>Der angegebene Wert war keine Zahl.'
-    debug:
-      enabled: '<#A4A4A4>Debugging <#1AFA29>aktiviert.'
-      disabled: '<#A4A4A4>Debugging <#FF3232>deaktiviert.'
-  afk:
-    kick: '<#50CBAB>Du wurdest gekickt, weil du <#FF3232>[time] <#50CBAB>AFK warst.'
-    kickAnnounce: '<#50CBAB>[player] <#A4A4A4>wurde gekickt, weil er <#50CBAB>[time] <#A4A4A4>AFK war.'
-    afkAnnounce: '<#50CBAB>[player] <#A4A4A4>ist jetzt AFK.'
-    resumeAnnounce: '<#50CBAB>[player] <#A4A4A4>ist nicht mehr AFK.'
-    afkSelf: '<#A4A4A4>Du bist jetzt AFK.'
-    afkResume: '<#A4A4A4>Du bist nicht mehr AFK.'
-  updater:
-    startUpdate: '<#A4A4A4>Update Process gestartet. Die Suche nach einer aktuelleren Version wurde gestartet.'
-    available: |
-      <#A4A4A4>Ein neues Update ist verfügbar.
-      Derzeitige Version: <#50CBAB>[currentVersion]<#A4A4A4> | Neue Version: <#50CBAB>[newVersion]
-    disabled: '<#FF3232>Der Update-Check ist deaktiviert. Es darf nicht nach Updates gesucht werden'
-    newerVersionFound: |
-      <#FF3232>Update Abgebrochen...
-      <#A4A4A4>Eine neuere Version ist verfügbar. Neue Version: <#50CBAB>[newVersion]<#A4A4A4>.
-    alreadyDownloaded: '<#FF3232>Das Update wurde bereits heruntergeladen. Bitte starte den Server neu um das Update final durchzuführen.'
-    notFound: '<#FF3232>Es wurde kein Update gefunden.'
-    updateSuccess: '<#1AFA29>Das Update <#50CBAB>[newVersion] <#1AFA29>wurde erfolgreich heruntergeladen. <#A4A4A4>Bitte starte den Server neu um das Update final durchzuführen.'
-
-  storageMaintenance:
-    unsupported: '<#FF3232>Storage maintenance is not supported by the active storage.'
-    preview: '<#A4A4A4>Maintenance preview: <#50CBAB>[sessions] <#A4A4A4>sessions, <#50CBAB>[adjustments] <#A4A4A4>adjustments, <#50CBAB>[players] <#A4A4A4>players.'
-    confirmationRequired: '<#FF3232>This operation changes existing data. Confirm with token <#50CBAB>[token]<#FF3232>.'
-    confirmationMismatch: '<#FF3232>The confirmation no longer matches the current operation preview.'
-    success: '<#1AFA29>Storage maintenance completed successfully.'
-    failure: '<#FF3232>Storage maintenance failed.'
-
-################
-# DO NOT TOUCH #
-################
-configSchemaVersion: 1
-
-
-
-
+schema_version: 1
+locale: 'de-de'
+prefix: '<#A4A4A4>[<#50CBAB>LoriTime<#A4A4A4>] '
+messages:
+  unit:
+    second:
+      singular: 'Sekunde'
+      plural: 'Sekunden'
+      identifier: ['s', 'sec', 'sek']
+    minute:
+      singular: 'Minute'
+      plural: 'Minuten'
+      identifier: ['m', 'min']
+    hour:
+      singular: 'Stunde'
+      plural: 'Stunden'
+      identifier: ['h', 'std']
+    day:
+      singular: 'Tag'
+      plural: 'Tage'
+      identifier: ['t', 'd']
+    week:
+      singular: 'Woche'
+      plural: 'Wochen'
+      identifier: ['w', 'wo']
+    month:
+      singular: 'Monat'
+      plural: 'Monate'
+      identifier: ['mo']
+    year:
+      singular: 'Jahr'
+      plural: 'Jahre'
+      identifier: ['j', 'y', 'yhr']
+  message:
+    noPermission: '<#FF3232>Dazu fehlen dir die Rechte.'
+    error: '<#FF3232>Es ist ein Fehler aufgetreten.'
+    command:
+      loritime:
+        usage: '<#A4A4A4>Benutze <red>/loritime [Spieler] [server:<Server>|s:<Server>] [world:<Welt>|w:<Welt>] [time:<Zeitraum>|t:<Zeitraum>] <#A4A4A4>um die Spielzeit anzuzeigen.'
+        notFound: '<#A4A4A4>Der Spieler <#50CBAB>[player] <#A4A4A4>war noch nie auf dem Server.'
+        noScopedTime: '<#A4A4A4>Der Spieler <#50CBAB>[player] <#A4A4A4>hat keine gespeicherte Spielzeit [scope][range]<#A4A4A4>.'
+        consoleSelf: '<#FF3232>Du bist die Konsole, deine eigene Online Zeit kannst du nicht anschauen!'
+        scope:
+          global: '<#A4A4A4>im Netzwerk'
+          server: '<#A4A4A4>auf dem Server <#50CBAB>[server]'
+          world: '<#A4A4A4>in der Welt <#50CBAB>[world]'
+          worldServer: '<#A4A4A4>in der Welt <#50CBAB>[world] <#A4A4A4>auf Server <#50CBAB>[server]'
+        range: ' <#A4A4A4>im Zeitraum <#50CBAB>[range]'
+        timeSeen:
+          self: '<#A4A4A4>Du hast <#50CBAB>[time] [scope][range] <#A4A4A4>gespielt.'
+          other: '<#A4A4A4>Der Spieler <#50CBAB>[player] <#A4A4A4>hat <#50CBAB>[time] [scope][range] <#A4A4A4>gespielt.'
+      loritimeadmin:
+        usage: '<#A4A4A4>Benutze <red>/ltmodify [add | set | reset] [player] [time] [server [server] | world [server] [world]] <#A4A4A4>um die Spielzeit zu ändern.<newline>Weitere Commands: <red>/loritimeadmin [reload | update | deleteUser]'
+        missingUuid: '<#A4A4A4>Der Spieler <#50CBAB>[player] <#A4A4A4>ist unbekannt.'
+        notTime: '<#A4A4A4>Das gegebene Zeitargument <#50CBAB>[argument] <#FF3232>hat ein ungültiges Format.'
+        set:
+          usage: '<#A4A4A4>Benutze <red>/ltmodify set [player] [time] [server [server] | world [server] [world]] <#A4A4A4>um die Spielzeit zu setzen.'
+          success: '<#A4A4A4>Die Spielzeit von <#50CBAB>[player] <#A4A4A4>wurde auf <#50CBAB>[time] <#A4A4A4>gesetzt.'
+          negativeTime: '<#A4A4A4>Die gegebene Zeit <#50CBAB>[time] <#A4A4A4>ist negativ, muss aber mindestens Null sein.'
+        modify:
+          usage: '<#A4A4A4>Benutze <red>/ltmodify add [player] [time] [server [server] | world [server] [world]] <#A4A4A4>um die Spielzeit zu modifizieren.'
+          success: '<#A4A4A4>Die Spielzeit von <#50CBAB>[player] <#A4A4A4>wurde um <#50CBAB>[time] geändert.'
+          negativeTimeSum: '<#A4A4A4>Die gegebene Zeit <#50CBAB>[time] <#A4A4A4>würde in negativer Spielzeit resultieren, diese muss aber mindestens Null sein.'
+        reset:
+          usage: '<#A4A4A4>Benutze <red>/ltmodify reset [player] [server [server] | world [server] [world]] <#A4A4A4>um die Spielzeit zurückzusetzen.'
+          success: '<#A4A4A4>Die Spielzeit von <#50CBAB>[player] wurde zurückgesetzt.'
+        deleteUser:
+          usage: '<#A4A4A4>Nutze <red>/onlinetimeadmin delete [player] confirm <#A4A4A4>um einen Spieler komplett zu löschen.'
+          success: '<#A4A4A4>Der Spieler <#50CBAB>[player] <#A4A4A4>wurde <#50CBAB>erfolgreich <#A4A4A4>gelöscht.'
+          issue: '<#FF3232>Es ist ein Fehler beim Löschen der Daten aufgetreten.'
+          userOnline: '<#FF3232>Du kannst den User nicht löschen, so lange dieser online ist.'
+        reload:
+          usage: '<#A4A4A4> Benutze <red>/onlinetimeadmin reload <#A4A4A4>um das Plugin neu zu laden.'
+          success: '<#A4A4A4>Du hast <#1AFA29>erfolgreich <#A4A4A4>das Plugin neu geladen.'
+          issue: '<#FF3232>Es ist ein Fehler beim neuladen des Plugins aufgetreten. Die Zeit wird nicht weiter gezählt!'
+      top:
+        usage: '<#A4A4A4>Benutze <red>/onlinetimetop [page] <#A4A4A4>um dir die Top Onlinezeit der Spieler anzeigen zu lassen.'
+        gatheringData: '<#A4A4A4>Sammle daten zusammen und berechne...'
+        headline: '<#A4A4A4><newline>Top online times <#50CBAB>[dateAndTime] <newline><#A4A4A4>---- Top Times -- Seite <#50CBAB>[pages] <#A4A4A4>----<newline>Server Total: <#50CBAB>[totalTime]'
+        user: '<#A4A4A4>[place]: [player] <#50CBAB>[time]'
+        wrongPage: '<#A4A4A4>Bitte wähle eine Seite zwischen <#FF3232>[pages].'
+        nonumber: '<#FF3232>Der angegebene Wert war keine Zahl.'
+      debug:
+        enabled: '<#A4A4A4>Debugging <#1AFA29>aktiviert.'
+        disabled: '<#A4A4A4>Debugging <#FF3232>deaktiviert.'
+    afk:
+      kick: '<#50CBAB>Du wurdest gekickt, weil du <#FF3232>[time] <#50CBAB>AFK warst.'
+      kickAnnounce: '<#50CBAB>[player] <#A4A4A4>wurde gekickt, weil er <#50CBAB>[time] <#A4A4A4>AFK war.'
+      afkAnnounce: '<#50CBAB>[player] <#A4A4A4>ist jetzt AFK.'
+      resumeAnnounce: '<#50CBAB>[player] <#A4A4A4>ist nicht mehr AFK.'
+      afkSelf: '<#A4A4A4>Du bist jetzt AFK.'
+      afkResume: '<#A4A4A4>Du bist nicht mehr AFK.'
+    updater:
+      startUpdate: '<#A4A4A4>Update Process gestartet. Die Suche nach einer aktuelleren Version wurde gestartet.'
+      available: '<#A4A4A4>Ein neues Update ist verfügbar.<newline>Derzeitige Version: <#50CBAB>[currentVersion]<#A4A4A4> | Neue Version: <#50CBAB>[newVersion]'
+      disabled: '<#FF3232>Der Update-Check ist deaktiviert. Es darf nicht nach Updates gesucht werden'
+      newerVersionFound: '<#FF3232>Update Abgebrochen...<newline><#A4A4A4>Eine neuere Version ist verfügbar. Neue Version: <#50CBAB>[newVersion]<#A4A4A4>.'
+      alreadyDownloaded: '<#FF3232>Das Update wurde bereits heruntergeladen. Bitte starte den Server neu um das Update final durchzuführen.'
+      notFound: '<#FF3232>Es wurde kein Update gefunden.'
+      updateSuccess: '<#1AFA29>Das Update <#50CBAB>[newVersion] <#1AFA29>wurde erfolgreich heruntergeladen. <#A4A4A4>Bitte starte den Server neu um das Update final durchzuführen.'
+    storageMaintenance:
+      unsupported: '<#FF3232>Speicherwartung wird vom aktiven Speicher nicht unterstützt.'
+      preview: '<#A4A4A4>Wartungsvorschau: <#50CBAB>[sessions] <#A4A4A4>Sitzungen, <#50CBAB>[adjustments] <#A4A4A4>Anpassungen, <#50CBAB>[players] <#A4A4A4>Spieler.'
+      confirmationRequired: '<#FF3232>Diese Aktion verändert vorhandene Daten. Bestätige mit Token <#50CBAB>[token]<#FF3232>.'
+      confirmationMismatch: '<#FF3232>Die Bestätigung passt nicht mehr zur aktuellen Wartungsvorschau.'
+      success: '<#1AFA29>Speicherwartung erfolgreich abgeschlossen.'
+      failure: '<#FF3232>Speicherwartung fehlgeschlagen.'

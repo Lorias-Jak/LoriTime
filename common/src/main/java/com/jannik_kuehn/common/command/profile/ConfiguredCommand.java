@@ -1,8 +1,8 @@
 package com.jannik_kuehn.common.command.profile;
 
-import com.jannik_kuehn.common.api.common.CommonCommand;
-import com.jannik_kuehn.common.api.common.CommonSender;
 import com.jannik_kuehn.common.command.config.CommandAlias;
+import com.jannik_kuehn.common.platform.CommonCommand;
+import com.jannik_kuehn.common.platform.CommonSender;
 
 import java.util.List;
 
@@ -25,7 +25,7 @@ public class ConfiguredCommand implements CommonCommand {
      * Creates a configured command wrapper.
      *
      * @param delegate delegate command
-     * @param alias configured metadata
+     * @param alias    configured metadata
      */
     public ConfiguredCommand(final CommonCommand delegate, final CommandAlias alias) {
         this.delegate = delegate;

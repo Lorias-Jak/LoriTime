@@ -1,8 +1,8 @@
 package com.jannik_kuehn.common.storage.database.table;
 
-import com.jannik_kuehn.common.api.storage.TimeEntryReason;
 import com.jannik_kuehn.common.api.storage.TimeRange;
 import com.jannik_kuehn.common.storage.database.SqlDialect;
+import com.jannik_kuehn.common.storage.model.TimeEntryReason;
 import com.jannik_kuehn.common.utils.UuidUtil;
 
 import java.sql.Connection;
@@ -282,8 +282,8 @@ public final class TimeTable {
      * Calculates the ranged total session duration for a player.
      *
      * @param connection database connection
-     * @param uuid player UUID
-     * @param range time range
+     * @param uuid       player UUID
+     * @param range      time range
      * @return optional duration sum
      * @throws SQLException if lookup fails
      */
@@ -303,8 +303,8 @@ public final class TimeTable {
      * Calculates the total session duration for a player on one server.
      *
      * @param connection database connection
-     * @param uuid player UUID
-     * @param server server name
+     * @param uuid       player UUID
+     * @param server     server name
      * @return optional duration sum
      * @throws SQLException if lookup fails
      */
@@ -328,9 +328,9 @@ public final class TimeTable {
      * Calculates the ranged total session duration for a player on one server.
      *
      * @param connection database connection
-     * @param uuid player UUID
-     * @param server server name
-     * @param range time range
+     * @param uuid       player UUID
+     * @param server     server name
+     * @param range      time range
      * @return optional duration sum
      * @throws SQLException if lookup fails
      */
@@ -353,9 +353,9 @@ public final class TimeTable {
      * Calculates the total session duration for a player in one world.
      *
      * @param connection database connection
-     * @param uuid player UUID
-     * @param server server name
-     * @param world world name
+     * @param uuid       player UUID
+     * @param server     server name
+     * @param world      world name
      * @return optional duration sum
      * @throws SQLException if lookup fails
      */
@@ -380,10 +380,10 @@ public final class TimeTable {
      * Calculates the ranged total session duration for a player in one world.
      *
      * @param connection database connection
-     * @param uuid player UUID
-     * @param server server name
-     * @param world world name
-     * @param range time range
+     * @param uuid       player UUID
+     * @param server     server name
+     * @param world      world name
+     * @param range      time range
      * @return optional duration sum
      * @throws SQLException if lookup fails
      */
@@ -461,7 +461,7 @@ public final class TimeTable {
 
     private boolean shouldUpdateLatest(final TimeEntryReason reason) {
         return EnumSet.of(TimeEntryReason.PLAYER_LEAVE, TimeEntryReason.PLAYER_AFK,
-                TimeEntryReason.PLAYER_AFK_KICK, TimeEntryReason.AUTO_FLUSH, TimeEntryReason.SHUTDOWN_FLUSH)
+                        TimeEntryReason.PLAYER_AFK_KICK, TimeEntryReason.AUTO_FLUSH, TimeEntryReason.SHUTDOWN_FLUSH)
                 .contains(reason);
     }
 

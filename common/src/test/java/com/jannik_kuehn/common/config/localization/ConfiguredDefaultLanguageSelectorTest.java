@@ -1,17 +1,15 @@
 package com.jannik_kuehn.common.config.localization;
 
-import com.jannik_kuehn.common.api.common.CommonPlayerSender;
-import com.jannik_kuehn.common.api.common.CommonSender;
 import com.jannik_kuehn.common.command.core.CommandMessages;
+import com.jannik_kuehn.common.platform.CommonPlayerSender;
+import com.jannik_kuehn.common.platform.CommonSender;
 import net.kyori.adventure.text.Component;
 import org.junit.jupiter.api.Test;
 
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 @SuppressWarnings("PMD.UnitTestAssertionsShouldIncludeMessage")
 class ConfiguredDefaultLanguageSelectorTest {

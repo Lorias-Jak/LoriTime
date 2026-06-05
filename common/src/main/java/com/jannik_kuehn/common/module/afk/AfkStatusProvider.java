@@ -2,23 +2,48 @@ package com.jannik_kuehn.common.module.afk;
 
 import com.github.roleplaycauldron.spellbook.core.logger.WrappedLogger;
 import com.jannik_kuehn.common.LoriTimePlugin;
-import com.jannik_kuehn.common.api.scheduler.PluginTask;
 import com.jannik_kuehn.common.player.TrackedLoriTimePlayer;
+import com.jannik_kuehn.common.scheduler.PluginTask;
 
 import java.util.OptionalLong;
 
-@SuppressWarnings({"PMD.CommentRequired", "PMD.TooManyMethods"})
+/**
+ * Tracks AFK timers and delegates AFK state transitions to an {@link AfkHandling}.
+ */
+@SuppressWarnings("PMD.TooManyMethods")
 public class AfkStatusProvider {
+
+    /**
+     * LoriTime plugin runtime.
+     */
     private final LoriTimePlugin loriTimePlugin;
 
+    /**
+     * The {@link WrappedLogger} instance.
+     */
     private final WrappedLogger log;
 
+    /**
+     * The AFK handling implementation.
+     */
     private final AfkHandling afkPlayerHandling;
 
+    /**
+     * The task that periodically checks for players that are AFK.
+     */
     private PluginTask afkCheck;
 
+    /**
+     * The time in milliseconds after which a player is considered AFK.
+     */
     private long afkConfigTime;
 
+    /**
+     * Creates and starts an AFK status provider.
+     *
+     * @param loriTimePlugin LoriTime plugin runtime
+     * @param afkHandling    platform-specific AFK handler
+     */
     public AfkStatusProvider(final LoriTimePlugin loriTimePlugin, final AfkHandling afkHandling) {
         this.loriTimePlugin = loriTimePlugin;
         this.log = loriTimePlugin.getLoggerFactory().create(AfkStatusProvider.class, "AfkStatusProvider");
@@ -28,6 +53,9 @@ public class AfkStatusProvider {
         restartAfkCheck();
     }
 
+    /**
+     * Reloads AFK timing and handler configuration.
+     */
     public final void reloadConfigValues() {
         log.debug("Reloading config values of AfkStatusProvider");
         afkPlayerHandling.reloadConfigValues();
@@ -40,6 +68,9 @@ public class AfkStatusProvider {
         log.debug("Reloaded afkConfigTime. New value: " + afkConfigTime);
     }
 
+    /**
+     * Restarts the periodic AFK check according to the current configuration.
+     */
     public final void restartAfkCheck() {
         log.debug("Restarting afk-check");
         stopAfkCheck();
@@ -92,6 +123,11 @@ public class AfkStatusProvider {
         }
     }
 
+    /**
+     * Resets a player's AFK timer and resumes them if they were AFK.
+     *
+     * @param player tracked player
+     */
     public void resetTimer(final TrackedLoriTimePlayer player) {
         if (player.isAfk()) {
             resumePlayerAFK(player);
@@ -99,10 +135,21 @@ public class AfkStatusProvider {
         player.setLastResumeTime();
     }
 
+    /**
+     * Toggles a player's AFK state without removing time.
+     *
+     * @param player tracked player
+     */
     public void switchPlayerAfk(final TrackedLoriTimePlayer player) {
         switchPlayerAFK(player, 0);
     }
 
+    /**
+     * Toggles a player's AFK state.
+     *
+     * @param player       tracked player
+     * @param timeToRemove seconds to remove when entering AFK
+     */
     public void switchPlayerAFK(final TrackedLoriTimePlayer player, final long timeToRemove) {
         log.debug("Switching player afk status from '" + player.getName() + "'");
         if (player.isAfk()) {
@@ -116,6 +163,12 @@ public class AfkStatusProvider {
         afkPlayerHandling.executePlayerAfk(player, timeToRemove);
     }
 
+    /**
+     * Marks a player as AFK.
+     *
+     * @param player       tracked player
+     * @param timeToRemove seconds to remove when entering AFK
+     */
     public void setPlayerAFK(final TrackedLoriTimePlayer player, final long timeToRemove) {
         log.debug("Setting player '" + player.getName() + "' to afk");
         if (player.isAfk()) {
@@ -126,6 +179,11 @@ public class AfkStatusProvider {
         afkPlayerHandling.executePlayerAfk(player, timeToRemove);
     }
 
+    /**
+     * Resumes a player from AFK.
+     *
+     * @param player tracked player
+     */
     public void resumePlayerAFK(final TrackedLoriTimePlayer player) {
         log.debug("Resuming player '" + player.getName() + "'");
         if (!player.isAfk()) {

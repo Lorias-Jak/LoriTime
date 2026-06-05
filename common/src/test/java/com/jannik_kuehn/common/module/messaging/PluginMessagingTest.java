@@ -2,18 +2,18 @@ package com.jannik_kuehn.common.module.messaging;
 
 import com.github.roleplaycauldron.spellbook.core.logger.LoggerFactory;
 import com.jannik_kuehn.common.LoriTimePlugin;
-import com.jannik_kuehn.common.api.LoriTimePlayerConverter;
-import com.jannik_kuehn.common.api.common.CommonPlayerSender;
-import com.jannik_kuehn.common.api.common.CommonServer;
-import com.jannik_kuehn.common.api.scheduler.PluginScheduler;
-import com.jannik_kuehn.common.api.scheduler.PluginTask;
-import com.jannik_kuehn.common.api.storage.TimeAccumulator;
-import com.jannik_kuehn.common.api.storage.TimeEntryReason;
-import com.jannik_kuehn.common.api.storage.UnifiedStorage;
 import com.jannik_kuehn.common.exception.StorageException;
 import com.jannik_kuehn.common.module.afk.AfkStatusProvider;
 import com.jannik_kuehn.common.module.afk.AfkTransitionType;
+import com.jannik_kuehn.common.platform.CommonPlayerSender;
+import com.jannik_kuehn.common.platform.CommonServer;
+import com.jannik_kuehn.common.player.LoriTimePlayerConverter;
 import com.jannik_kuehn.common.player.TrackedLoriTimePlayer;
+import com.jannik_kuehn.common.scheduler.PluginScheduler;
+import com.jannik_kuehn.common.scheduler.PluginTask;
+import com.jannik_kuehn.common.storage.contract.TimeAccumulator;
+import com.jannik_kuehn.common.storage.contract.UnifiedStorage;
+import com.jannik_kuehn.common.storage.model.TimeEntryReason;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;

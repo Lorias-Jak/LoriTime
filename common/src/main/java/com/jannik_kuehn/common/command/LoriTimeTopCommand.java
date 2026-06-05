@@ -1,12 +1,12 @@
 package com.jannik_kuehn.common.command;
 
 import com.jannik_kuehn.common.LoriTimePlugin;
-import com.jannik_kuehn.common.api.common.CommonCommand;
-import com.jannik_kuehn.common.api.common.CommonSender;
-import com.jannik_kuehn.common.api.storage.UnifiedStorage;
 import com.jannik_kuehn.common.command.core.CommandMessages;
 import com.jannik_kuehn.common.config.localization.Localization;
 import com.jannik_kuehn.common.exception.StorageException;
+import com.jannik_kuehn.common.platform.CommonCommand;
+import com.jannik_kuehn.common.platform.CommonSender;
+import com.jannik_kuehn.common.storage.contract.UnifiedStorage;
 import com.jannik_kuehn.common.utils.TimeUtil;
 
 import java.time.LocalDate;
@@ -20,21 +20,45 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-@SuppressWarnings({"PMD.CommentRequired", "PMD.AvoidLiteralsInIfCondition", "PMD.CognitiveComplexity",
-        "PMD.CyclomaticComplexity", "PMD.AvoidThrowingRawExceptionTypes", "PMD.CloseResource"})
+/**
+ * Command that prints a paged ranking of stored player online time.
+ */
+@SuppressWarnings({"PMD.AvoidLiteralsInIfCondition", "PMD.CognitiveComplexity", "PMD.CyclomaticComplexity",
+        "PMD.AvoidThrowingRawExceptionTypes", "PMD.CloseResource"})
 public class LoriTimeTopCommand implements CommonCommand {
 
+    /**
+     * Amount of players per page.
+     */
     private static final double PLAYER_AMOUNT_PER_PAGE = 8;
 
+    /**
+     * LoriTime plugin instance.
+     */
     private final LoriTimePlugin plugin;
 
+    /**
+     * Localization provider.
+     */
     private final Localization localization;
 
+    /**
+     * Creates the top-list command.
+     *
+     * @param plugin       LoriTime plugin runtime
+     * @param localization localization provider
+     */
     public LoriTimeTopCommand(final LoriTimePlugin plugin, final Localization localization) {
         this.plugin = plugin;
         this.localization = localization;
     }
 
+    /**
+     * Executes a paged top-list lookup.
+     *
+     * @param sender command sender
+     * @param args   command arguments
+     */
     @Override
     public void execute(final CommonSender sender, final String... args) {
         if (!sender.hasPermission("loritime.top")) {
@@ -140,11 +164,23 @@ public class LoriTimeTopCommand implements CommonCommand {
         }
     }
 
+    /**
+     * Completes top-list command arguments.
+     *
+     * @param source command sender
+     * @param args   command arguments
+     * @return completion suggestions
+     */
     @Override
     public List<String> handleTabComplete(final CommonSender source, final String... args) {
         return new ArrayList<>();
     }
 
+    /**
+     * Returns top-list command aliases from configuration.
+     *
+     * @return command aliases
+     */
     @Override
     public List<String> getAliases() {
         return plugin.getConfig().getArrayList("command.LoriTimeTop.alias").stream()
@@ -153,6 +189,11 @@ public class LoriTimeTopCommand implements CommonCommand {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Returns the primary top-list command name.
+     *
+     * @return command name
+     */
     @Override
     public String getCommandName() {
         return "loritimetop";

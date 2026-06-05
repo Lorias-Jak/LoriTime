@@ -2,15 +2,15 @@ package com.jannik_kuehn.common.command;
 
 import com.github.roleplaycauldron.spellbook.core.logger.LoggerFactory;
 import com.jannik_kuehn.common.LoriTimePlugin;
-import com.jannik_kuehn.common.api.LoriTimePlayerConverter;
-import com.jannik_kuehn.common.api.common.CommonPlayerSender;
-import com.jannik_kuehn.common.api.common.CommonServer;
-import com.jannik_kuehn.common.api.storage.RecentPlayerIdentity;
-import com.jannik_kuehn.common.api.storage.UnifiedStorage;
 import com.jannik_kuehn.common.command.completion.RecentPlayerSuggestionCache;
 import com.jannik_kuehn.common.command.completion.ScopeSuggestionCache;
 import com.jannik_kuehn.common.config.localization.Localization;
 import com.jannik_kuehn.common.exception.StorageException;
+import com.jannik_kuehn.common.platform.CommonPlayerSender;
+import com.jannik_kuehn.common.platform.CommonServer;
+import com.jannik_kuehn.common.player.LoriTimePlayerConverter;
+import com.jannik_kuehn.common.storage.contract.UnifiedStorage;
+import com.jannik_kuehn.common.storage.model.RecentPlayerIdentity;
 import com.jannik_kuehn.common.utils.TimeParser;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -24,16 +24,21 @@ import java.util.UUID;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
 class LoriTimeCompletionTest {
 
     private static final UUID PLAYER_ID = UUID.fromString("44174cf6-e76c-4994-899c-3387284ecd62");
+
+    private static Stream<Arguments> longScopePrefixCompletionArguments() {
+        return Stream.of(
+                Arguments.of("s", List.of("server:"), "Expected long server prefix completion"),
+                Arguments.of("w", List.of("world:"), "Expected long world prefix completion"),
+                Arguments.of("s:", List.of(), "Expected short server alias to stay unsuggested")
+        );
+    }
 
     @Test
     void loriTimeTabCompletionUsesCachedAndOnlineNamesWithoutStorageLookup() throws StorageException {
@@ -183,14 +188,6 @@ class LoriTimeCompletionTest {
         verify(storage, never()).getRecentPlayerIdentities(anyLong());
         verify(storage, never()).getKnownServerNames();
         verify(storage, never()).getKnownWorldNames();
-    }
-
-    private static Stream<Arguments> longScopePrefixCompletionArguments() {
-        return Stream.of(
-                Arguments.of("s", List.of("server:"), "Expected long server prefix completion"),
-                Arguments.of("w", List.of("world:"), "Expected long world prefix completion"),
-                Arguments.of("s:", List.of(), "Expected short server alias to stay unsuggested")
-        );
     }
 
     private static final class CompletionContext {

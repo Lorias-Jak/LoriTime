@@ -16,25 +16,54 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Reads and validates localization files from plugin storage.
  */
-@SuppressWarnings("PMD.CommentRequired")
 final class LocalizationLoader {
+    /**
+     * The schema version of the localization file format.
+     */
     private static final int SUPPORTED_SCHEMA_VERSION = 1;
 
+    /**
+     * The key for the prefix field in the localization file.
+     */
     private static final String PREFIX_KEY = "prefix";
 
+    /**
+     * The path to the messages section in the localization file.
+     */
     private static final String MESSAGES_PATH = "messages";
 
+    /**
+     * Prefix for rejected locale file messages.
+     */
     private static final String INVALID_FILE_PREFIX = "Rejected locale file '";
 
+    /**
+     * Logger for localization file diagnostics.
+     */
     private final WrappedLogger log;
 
+    /**
+     * The plugin data folder.
+     */
     private final File dataFolder;
 
+    /**
+     * Creates a localization file loader.
+     *
+     * @param log        logger for rejected locale files
+     * @param dataFolder plugin data folder
+     */
     /* default */ LocalizationLoader(final WrappedLogger log, final File dataFolder) {
         this.log = log;
         this.dataFolder = dataFolder;
     }
 
+    /**
+     * Loads locale data for a language tag.
+     *
+     * @param languageTag language tag to load
+     * @return parsed locale data, or null when the file is missing or invalid
+     */
     /* default */ LocaleData load(final String languageTag) {
         final String normalizedTag = LocalizationTags.normalize(languageTag);
         final File languageFile = new File(languageFolder(), normalizedTag + ".yml");
@@ -84,7 +113,7 @@ final class LocalizationLoader {
         }
 
         final Object messagesSection = config.get(MESSAGES_PATH);
-        if (!(messagesSection instanceof Map<?, ?> messagesMap)) {
+        if (!(messagesSection instanceof final Map<?, ?> messagesMap)) {
             log.error(INVALID_FILE_PREFIX + file.getName() + "': missing '" + MESSAGES_PATH + "' section.");
             return null;
         }
@@ -137,6 +166,7 @@ final class LocalizationLoader {
      * @param tag      the language tag for which the messages are intended.
      * @param messages a map of message keys to their corresponding localized
      *                 strings for the specified language tag.
+     * @param lists    a map of message keys to localized string lists.
      */
     /* default */ record LocaleData(String tag, Map<String, String> messages, Map<String, List<String>> lists) {
     }

@@ -2,8 +2,8 @@ package com.jannik_kuehn.loritimepaper.placeholder;
 
 import com.github.roleplaycauldron.spellbook.core.logger.WrappedLogger;
 import com.jannik_kuehn.common.LoriTimePlugin;
-import com.jannik_kuehn.common.api.storage.UnifiedStorage;
 import com.jannik_kuehn.common.player.TrackedLoriTimePlayer;
+import com.jannik_kuehn.common.storage.contract.UnifiedStorage;
 import com.jannik_kuehn.common.utils.TimeUtil;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
@@ -12,20 +12,43 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.OptionalLong;
 
-@SuppressWarnings("PMD.CommentRequired")
+/**
+ * PlaceholderAPI expansion for LoriTime online-time placeholders.
+ */
 @SuppressFBWarnings("HE_INHERITS_EQUALS_USE_HASHCODE")
 public class LoriTimePlaceholder extends PlaceholderExpansion {
 
+    /**
+     * LoriTime plugin runtime.
+     */
     private final LoriTimePlugin loriTimePlugin;
 
+    /**
+     * Time cache for placeholder lookups.
+     */
     private final PlaceholderTimeCache timeCache;
 
+    /**
+     * Logger instance.
+     */
     private final WrappedLogger log;
 
+    /**
+     * Creates a placeholder expansion backed by storage.
+     *
+     * @param plugin  LoriTime plugin runtime
+     * @param storage storage used for placeholder time lookups
+     */
     public LoriTimePlaceholder(final LoriTimePlugin plugin, final UnifiedStorage storage) {
         this(plugin, new StoragePlaceholderTimeCache(plugin, storage));
     }
 
+    /**
+     * Creates a placeholder expansion with an explicit time cache.
+     *
+     * @param plugin    LoriTime plugin runtime
+     * @param timeCache placeholder time cache
+     */
     public LoriTimePlaceholder(final LoriTimePlugin plugin, final PlaceholderTimeCache timeCache) {
         super();
         this.loriTimePlugin = plugin;
@@ -82,21 +105,41 @@ public class LoriTimePlaceholder extends PlaceholderExpansion {
         return TimeUtil.formatTime(getUnformattedOnlineTime(player), loriTimePlugin.getLocalization());
     }
 
+    /**
+     * Keeps the expansion registered across PlaceholderAPI reloads.
+     *
+     * @return true to persist this expansion
+     */
     @Override
     public boolean persist() {
         return true; // This is required or else PlaceholderAPI will unregister the Expansion on reload
     }
 
+    /**
+     * Returns the PlaceholderAPI identifier.
+     *
+     * @return placeholder identifier
+     */
     @Override
     public @NotNull String getIdentifier() {
         return "LoriTime";
     }
 
+    /**
+     * Returns the PlaceholderAPI author.
+     *
+     * @return author name
+     */
     @Override
     public @NotNull String getAuthor() {
         return "Lorias-Jak";
     }
 
+    /**
+     * Returns the LoriTime version exposed to PlaceholderAPI.
+     *
+     * @return plugin version
+     */
     @Override
     public @NotNull String getVersion() {
         return loriTimePlugin.getServer().getPluginVersion();

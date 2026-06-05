@@ -2,9 +2,9 @@ package com.jannik_kuehn.loritimepaper.listener;
 
 import com.github.roleplaycauldron.spellbook.core.logger.WrappedLogger;
 import com.jannik_kuehn.common.LoriTimePlugin;
-import com.jannik_kuehn.common.api.storage.SessionContextDefaults;
-import com.jannik_kuehn.common.api.storage.TimeEntryReason;
 import com.jannik_kuehn.common.exception.StorageException;
+import com.jannik_kuehn.common.storage.model.SessionContextDefaults;
+import com.jannik_kuehn.common.storage.model.TimeEntryReason;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerChangedWorldEvent;

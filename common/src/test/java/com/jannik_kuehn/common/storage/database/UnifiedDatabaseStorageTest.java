@@ -1,16 +1,6 @@
 package com.jannik_kuehn.common.storage.database;
 
 import com.github.roleplaycauldron.spellbook.core.logger.LoggerFactory;
-import com.jannik_kuehn.common.api.storage.ManualTimeAdjustment;
-import com.jannik_kuehn.common.api.storage.PlayerSessionChunk;
-import com.jannik_kuehn.common.api.storage.RecentPlayerIdentity;
-import com.jannik_kuehn.common.api.storage.StorageDeleteRequest;
-import com.jannik_kuehn.common.api.storage.StorageMaintenanceConfirmation;
-import com.jannik_kuehn.common.api.storage.StorageMaintenancePreview;
-import com.jannik_kuehn.common.api.storage.StorageMaintenanceScope;
-import com.jannik_kuehn.common.api.storage.StorageTransferMapping;
-import com.jannik_kuehn.common.api.storage.StorageTransferRequest;
-import com.jannik_kuehn.common.api.storage.TimeEntryReason;
 import com.jannik_kuehn.common.api.storage.TimeRange;
 import com.jannik_kuehn.common.api.storage.TimeScope;
 import com.jannik_kuehn.common.config.Configuration;
@@ -21,6 +11,16 @@ import com.jannik_kuehn.common.storage.database.table.PlayerTable;
 import com.jannik_kuehn.common.storage.database.table.ServerTable;
 import com.jannik_kuehn.common.storage.database.table.TimeTable;
 import com.jannik_kuehn.common.storage.database.table.WorldTable;
+import com.jannik_kuehn.common.storage.model.ManualTimeAdjustment;
+import com.jannik_kuehn.common.storage.model.PlayerSessionChunk;
+import com.jannik_kuehn.common.storage.model.RecentPlayerIdentity;
+import com.jannik_kuehn.common.storage.model.StorageDeleteRequest;
+import com.jannik_kuehn.common.storage.model.StorageMaintenanceConfirmation;
+import com.jannik_kuehn.common.storage.model.StorageMaintenancePreview;
+import com.jannik_kuehn.common.storage.model.StorageMaintenanceScope;
+import com.jannik_kuehn.common.storage.model.StorageTransferMapping;
+import com.jannik_kuehn.common.storage.model.StorageTransferRequest;
+import com.jannik_kuehn.common.storage.model.TimeEntryReason;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -163,7 +163,7 @@ class UnifiedDatabaseStorageTest {
         try (UnifiedDatabaseStorage storage = storage()) {
 
             storage.setPlayerName(PLAYER, "Lorias_");
-            sessionId = storage.startSession(new com.jannik_kuehn.common.api.storage.PlayerSessionContext(PLAYER,
+            sessionId = storage.startSession(new com.jannik_kuehn.common.storage.model.PlayerSessionContext(PLAYER,
                     "Lorias_", "survival", "global", 1_000L), TimeEntryReason.PLAYER_JOIN);
             storage.updateSessionWorld(sessionId, "survival", "world_nether");
             storage.updateSession(sessionId, 9_000L, TimeEntryReason.PLAYER_LEAVE);
@@ -189,7 +189,7 @@ class UnifiedDatabaseStorageTest {
         try (UnifiedDatabaseStorage storage = storage()) {
 
             storage.setPlayerName(PLAYER, "Lorias_");
-            sessionId = storage.startSession(new com.jannik_kuehn.common.api.storage.PlayerSessionContext(PLAYER,
+            sessionId = storage.startSession(new com.jannik_kuehn.common.storage.model.PlayerSessionContext(PLAYER,
                     "Lorias_", "survival", "global", 1_000L), TimeEntryReason.PLAYER_JOIN);
             storage.updateSession(sessionId, 9_000L, TimeEntryReason.PLAYER_AFK);
         }
@@ -210,7 +210,7 @@ class UnifiedDatabaseStorageTest {
         try (UnifiedDatabaseStorage storage = storage()) {
 
             storage.setPlayerName(PLAYER, "Lorias_");
-            sessionId = storage.startSession(new com.jannik_kuehn.common.api.storage.PlayerSessionContext(PLAYER,
+            sessionId = storage.startSession(new com.jannik_kuehn.common.storage.model.PlayerSessionContext(PLAYER,
                     "Lorias_", "survival", "global", 1_000L), TimeEntryReason.PLAYER_JOIN);
             storage.updateSession(sessionId, 9_000L, TimeEntryReason.PLAYER_AFK_KICK);
         }

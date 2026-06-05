@@ -2,14 +2,14 @@ package com.jannik_kuehn.common.module.updater;
 
 import com.github.roleplaycauldron.spellbook.core.logger.WrappedLogger;
 import com.jannik_kuehn.common.LoriTimePlugin;
-import com.jannik_kuehn.common.api.common.CommonConsoleSender;
-import com.jannik_kuehn.common.api.common.CommonPlayerSender;
-import com.jannik_kuehn.common.api.common.CommonSender;
 import com.jannik_kuehn.common.config.Configuration;
 import com.jannik_kuehn.common.exception.UpdateException;
 import com.jannik_kuehn.common.module.updater.download.Downloader;
 import com.jannik_kuehn.common.module.updater.version.Strategy;
 import com.jannik_kuehn.common.module.updater.version.Version;
+import com.jannik_kuehn.common.platform.CommonConsoleSender;
+import com.jannik_kuehn.common.platform.CommonPlayerSender;
+import com.jannik_kuehn.common.platform.CommonSender;
 import net.kyori.adventure.text.Component;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -177,7 +177,7 @@ public class Updater {
      */
     public void sendPlayerUpdateNotification(final CommonSender sender) {
         if (loriTime.getConfig().getBoolean("updater.inGameNotification", true)
-                && sender instanceof CommonPlayerSender playerSender) {
+                && sender instanceof final CommonPlayerSender playerSender) {
             final Instant current = instantSource.instant();
             if (lastAnnounce.containsKey(playerSender.getUniqueId())
                     && lastAnnounce.get(playerSender.getUniqueId()).plus(ANNOUNCE_PLAYER_DELAY).isAfter(current)) {

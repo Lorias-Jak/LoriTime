@@ -1,8 +1,8 @@
 package com.jannik_kuehn.common.command.core;
 
-import com.jannik_kuehn.common.api.common.CommonSender;
 import com.jannik_kuehn.common.config.localization.LanguageSelector;
 import com.jannik_kuehn.common.config.localization.Localization;
+import com.jannik_kuehn.common.platform.CommonSender;
 
 /**
  * Shared localized command response helpers.
@@ -16,8 +16,8 @@ public final class CommandMessages {
      * Sends a localized message by key.
      *
      * @param localization localization source
-     * @param sender command sender
-     * @param messageKey localization key
+     * @param sender       command sender
+     * @param messageKey   localization key
      */
     public static void send(final Localization localization, final CommonSender sender, final String messageKey) {
         sender.sendMessage(localization.formatTextComponent(localization.getRawMessage(messageKey)));
@@ -26,10 +26,10 @@ public final class CommandMessages {
     /**
      * Sends a localized message by key using sender language selection.
      *
-     * @param localization localization source
+     * @param localization     localization source
      * @param languageSelector language selector
-     * @param sender command sender
-     * @param messageKey localization key
+     * @param sender           command sender
+     * @param messageKey       localization key
      */
     public static void send(final Localization localization, final LanguageSelector languageSelector,
                             final CommonSender sender, final String messageKey) {

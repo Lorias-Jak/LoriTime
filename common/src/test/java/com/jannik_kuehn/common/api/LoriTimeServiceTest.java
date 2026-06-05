@@ -1,14 +1,15 @@
 package com.jannik_kuehn.common.api;
 
 import com.jannik_kuehn.common.LoriTimePlugin;
-import com.jannik_kuehn.common.api.scheduler.PluginScheduler;
-import com.jannik_kuehn.common.api.scheduler.PluginTask;
-import com.jannik_kuehn.common.api.storage.ManualTimeAdjustment;
-import com.jannik_kuehn.common.api.storage.TimeEntryReason;
 import com.jannik_kuehn.common.api.storage.TimeRange;
 import com.jannik_kuehn.common.api.storage.TimeScope;
-import com.jannik_kuehn.common.api.storage.UnifiedStorage;
 import com.jannik_kuehn.common.exception.StorageException;
+import com.jannik_kuehn.common.scheduler.PluginScheduler;
+import com.jannik_kuehn.common.scheduler.PluginTask;
+import com.jannik_kuehn.common.service.LoriTimeServiceImpl;
+import com.jannik_kuehn.common.storage.contract.UnifiedStorage;
+import com.jannik_kuehn.common.storage.model.ManualTimeAdjustment;
+import com.jannik_kuehn.common.storage.model.TimeEntryReason;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -51,7 +52,7 @@ class LoriTimeServiceTest {
             invocation.<Runnable>getArgument(0).run();
             return mock(PluginTask.class);
         }).when(scheduler).runAsyncOnce(any());
-        service = new DefaultLoriTimeService(plugin);
+        service = new LoriTimeServiceImpl(plugin);
     }
 
     @AfterEach

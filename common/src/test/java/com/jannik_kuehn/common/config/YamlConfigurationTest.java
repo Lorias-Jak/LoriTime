@@ -2,11 +2,11 @@ package com.jannik_kuehn.common.config;
 
 import com.github.roleplaycauldron.spellbook.core.logger.LoggerFactory;
 import com.jannik_kuehn.common.LoriTimePlugin;
-import com.jannik_kuehn.common.api.common.CommonServer;
-import com.jannik_kuehn.common.api.scheduler.PluginScheduler;
 import com.jannik_kuehn.common.command.config.CommandAlias;
 import com.jannik_kuehn.common.command.config.CommandAliasConfig;
 import com.jannik_kuehn.common.exception.ConfigurationException;
+import com.jannik_kuehn.common.platform.CommonServer;
+import com.jannik_kuehn.common.scheduler.PluginScheduler;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;

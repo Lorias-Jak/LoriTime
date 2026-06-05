@@ -2,10 +2,10 @@ package com.jannik_kuehn.common.command;
 
 import com.github.roleplaycauldron.spellbook.core.logger.WrappedLogger;
 import com.jannik_kuehn.common.LoriTimePlugin;
-import com.jannik_kuehn.common.api.common.CommonSender;
-import com.jannik_kuehn.common.api.scheduler.PluginTask;
 import com.jannik_kuehn.common.command.core.CommandMessages;
 import com.jannik_kuehn.common.config.localization.Localization;
+import com.jannik_kuehn.common.platform.CommonSender;
+import com.jannik_kuehn.common.scheduler.PluginTask;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 
 import java.util.function.Consumer;
@@ -13,23 +13,50 @@ import java.util.function.Consumer;
 /**
  * Handles runtime administration subcommands.
  */
-@SuppressWarnings("PMD.CommentRequired")
 final class LoriTimeAdminActions {
 
+    /**
+     * Path to the debug configuration option.
+     */
     private static final String DEBUG_CONFIG_PATH = "general.debug";
 
+    /**
+     * LoriTime plugin instance.
+     */
     private final LoriTimePlugin plugin;
 
+    /**
+     * Localization provider.
+     */
     private final Localization localization;
 
+    /**
+     * Usage callback for invalid arguments.
+     */
     private final Consumer<CommonSender> usage;
 
+    /**
+     * Logger for admin subcommand diagnostics.
+     */
     private final WrappedLogger log;
 
+    /**
+     * Whether debug mode is enabled.
+     */
     private boolean isDebugging;
 
+    /**
+     * Task that automatically disables debug mode after a certain time.
+     */
     private PluginTask autoDisableTask;
 
+    /**
+     * Creates admin subcommand actions.
+     *
+     * @param plugin       LoriTime plugin runtime
+     * @param localization localization provider
+     * @param usage        usage callback for invalid arguments
+     */
     /* default */ LoriTimeAdminActions(final LoriTimePlugin plugin, final Localization localization,
                                        final Consumer<CommonSender> usage) {
         this.plugin = plugin;
@@ -40,6 +67,12 @@ final class LoriTimeAdminActions {
         plugin.getScheduler().runAsyncOnce(this::autoDisableCheck);
     }
 
+    /**
+     * Reloads runtime configuration.
+     *
+     * @param sender command sender
+     * @param args   subcommand arguments
+     */
     /* default */ void reload(final CommonSender sender, final String... args) {
         if (hasUnexpectedArgs(sender, args)) {
             return;
@@ -48,6 +81,12 @@ final class LoriTimeAdminActions {
         CommandMessages.send(localization, plugin.getLanguageSelector(), sender, "message.command.loritimeadmin.reload.success");
     }
 
+    /**
+     * Toggles debug mode.
+     *
+     * @param sender command sender
+     * @param args   subcommand arguments
+     */
     /* default */ void debug(final CommonSender sender, final String... args) {
         if (hasUnexpectedArgs(sender, args)) {
             return;
@@ -56,6 +95,12 @@ final class LoriTimeAdminActions {
         autoDisableCheck();
     }
 
+    /**
+     * Sends version information to the command sender.
+     *
+     * @param sender command sender
+     * @param args   subcommand arguments
+     */
     /* default */ void info(final CommonSender sender, final String... args) {
         if (hasUnexpectedArgs(sender, args)) {
             return;
@@ -70,6 +115,12 @@ final class LoriTimeAdminActions {
         sender.sendMessage(miniMessage.deserialize(pluginVersion));
     }
 
+    /**
+     * Runs the updater when an update is available.
+     *
+     * @param sender command sender
+     * @param args   subcommand arguments
+     */
     /* default */ void update(final CommonSender sender, final String... args) {
         if (hasUnexpectedArgs(sender, args)) {
             return;

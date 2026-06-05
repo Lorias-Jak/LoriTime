@@ -2,8 +2,8 @@ package com.jannik_kuehn.loritimepaper.placeholder;
 
 import com.github.roleplaycauldron.spellbook.core.logger.WrappedLogger;
 import com.jannik_kuehn.common.LoriTimePlugin;
-import com.jannik_kuehn.common.api.storage.UnifiedStorage;
 import com.jannik_kuehn.common.exception.StorageException;
+import com.jannik_kuehn.common.storage.contract.UnifiedStorage;
 
 import java.util.Map;
 import java.util.OptionalLong;
@@ -44,7 +44,7 @@ public final class StoragePlaceholderTimeCache implements PlaceholderTimeCache {
     /**
      * Creates a cache backed by asynchronous storage refreshes.
      *
-     * @param plugin the LoriTime plugin
+     * @param plugin  the LoriTime plugin
      * @param storage storage to refresh from
      */
     public StoragePlaceholderTimeCache(final LoriTimePlugin plugin, final UnifiedStorage storage) {

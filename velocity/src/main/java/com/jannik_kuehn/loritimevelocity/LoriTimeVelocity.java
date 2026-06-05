@@ -4,11 +4,11 @@ import com.github.roleplaycauldron.spellbook.core.logger.LoggerFactory;
 import com.github.roleplaycauldron.spellbook.core.logger.WrappedLogger;
 import com.jannik_kuehn.common.LoriTimePlugin;
 import com.jannik_kuehn.common.api.LoriTimeAPI;
-import com.jannik_kuehn.common.api.common.CommonCommand;
-import com.jannik_kuehn.common.api.storage.StorageMode;
 import com.jannik_kuehn.common.command.profile.CommandProfileRegistry;
 import com.jannik_kuehn.common.command.profile.RuntimeCommandProfile;
 import com.jannik_kuehn.common.module.afk.MasteredAfkPlayerHandling;
+import com.jannik_kuehn.common.platform.CommonCommand;
+import com.jannik_kuehn.common.storage.model.StorageMode;
 import com.jannik_kuehn.loritimevelocity.command.VelocityCommand;
 import com.jannik_kuehn.loritimevelocity.listener.LoriTimeUpdateVelocityListener;
 import com.jannik_kuehn.loritimevelocity.listener.PlayerNameVelocityListener;
@@ -32,22 +32,54 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
-@SuppressWarnings({"PMD.CommentRequired"})
+/**
+ * Velocity plugin bootstrap for LoriTime.
+ */
 public class LoriTimeVelocity {
+
+    /**
+     * The plugin data directory.
+     */
     private final Path dataDirectory;
 
+    /**
+     * The Velocity proxy server.
+     */
     private final ProxyServer proxyServer;
 
+    /**
+     * The registered commands.
+     */
     private final List<VelocityCommand> commands;
 
+    /**
+     * The bStats metrics factory.
+     */
     private final Metrics.Factory metricsFactory;
 
+    /**
+     * The logger factory.
+     */
     private final LoggerFactory loggerFactory;
 
+    /**
+     * The shared LoriTime plugin runtime.
+     */
     private LoriTimePlugin loriTimePlugin;
 
+    /**
+     * The {@link WrappedLogger} instance.
+     */
     private WrappedLogger log;
 
+    /**
+     * Creates the Velocity plugin bootstrap.
+     *
+     * @param server         Velocity proxy server
+     * @param logger         platform logger
+     * @param dataDirectory  plugin data directory
+     * @param metricsFactory bStats metrics factory
+     */
     @Inject
     public LoriTimeVelocity(final ProxyServer server, final Logger logger, @DataDirectory final Path dataDirectory, final Metrics.Factory metricsFactory) {
         this.proxyServer = server;
@@ -57,6 +89,11 @@ public class LoriTimeVelocity {
         this.commands = new ArrayList<>();
     }
 
+    /**
+     * Initializes LoriTime when Velocity starts the plugin.
+     *
+     * @param event proxy initialization event
+     */
     @Subscribe
     @SuppressWarnings({"PMD.UseUnderscoresInNumericLiterals", "PMD.AvoidLiteralsInIfCondition"})
     public void onInitialize(final ProxyInitializeEvent event) {
@@ -115,6 +152,11 @@ public class LoriTimeVelocity {
         }
     }
 
+    /**
+     * Shuts down LoriTime and unregisters commands.
+     *
+     * @param event proxy shutdown event
+     */
     @Subscribe
     public void onShutDown(final ProxyShutdownEvent event) {
         for (final VelocityCommand command : commands) {
@@ -124,10 +166,20 @@ public class LoriTimeVelocity {
         loriTimePlugin.disable();
     }
 
+    /**
+     * Returns the Velocity proxy server.
+     *
+     * @return proxy server
+     */
     public ProxyServer getProxyServer() {
         return proxyServer;
     }
 
+    /**
+     * Returns the shared LoriTime plugin runtime.
+     *
+     * @return LoriTime plugin runtime
+     */
     public LoriTimePlugin getPlugin() {
         return loriTimePlugin;
     }

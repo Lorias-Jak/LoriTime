@@ -1,6 +1,6 @@
 package com.jannik_kuehn.loritimepaper.schedule;
 
-import com.jannik_kuehn.common.api.scheduler.PluginTask;
+import com.jannik_kuehn.common.scheduler.PluginTask;
 import io.papermc.paper.threadedregions.scheduler.ScheduledTask;
 
 /**

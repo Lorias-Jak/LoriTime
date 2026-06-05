@@ -110,7 +110,7 @@ class FileStorageProviderTest {
 
         storageProvider.writeAll(data, true);
 
-        verify(mockConfig, times(1)).remove("key1"); // Wert "value1" wurde überschrieben
+        verify(mockConfig, times(1)).remove("key1"); // Wert "value1" wurde Ã¼berschrieben
         verify(mockConfig, times(1)).setValue("key2", "value1");
         verify(mockConfig, times(1)).setValue("key4", "value3");
     }

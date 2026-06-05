@@ -2,10 +2,10 @@ package com.jannik_kuehn.common.module.messaging;
 
 import com.github.roleplaycauldron.spellbook.core.logger.WrappedLogger;
 import com.jannik_kuehn.common.LoriTimePlugin;
-import com.jannik_kuehn.common.api.common.CommonPlayerSender;
 import com.jannik_kuehn.common.exception.PluginMessageException;
 import com.jannik_kuehn.common.exception.StorageException;
 import com.jannik_kuehn.common.module.afk.AfkTransitionType;
+import com.jannik_kuehn.common.platform.CommonPlayerSender;
 import com.jannik_kuehn.common.player.TrackedLoriTimePlayer;
 import com.jannik_kuehn.common.utils.UuidUtil;
 

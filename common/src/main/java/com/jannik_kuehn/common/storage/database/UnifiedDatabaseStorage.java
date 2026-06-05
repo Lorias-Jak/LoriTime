@@ -1,29 +1,29 @@
 package com.jannik_kuehn.common.storage.database;
 
-import com.jannik_kuehn.common.api.storage.AdminStorageMaintenance;
-import com.jannik_kuehn.common.api.storage.ManualTimeAdjustment;
-import com.jannik_kuehn.common.api.storage.PlayerSessionChunk;
-import com.jannik_kuehn.common.api.storage.PlayerSessionContext;
-import com.jannik_kuehn.common.api.storage.RecentPlayerIdentity;
-import com.jannik_kuehn.common.api.storage.StorageDeleteRequest;
-import com.jannik_kuehn.common.api.storage.StorageMaintenanceConfirmation;
-import com.jannik_kuehn.common.api.storage.StorageMaintenanceOperation;
-import com.jannik_kuehn.common.api.storage.StorageMaintenancePreview;
-import com.jannik_kuehn.common.api.storage.StorageMaintenanceResult;
-import com.jannik_kuehn.common.api.storage.StorageMaintenanceScope;
-import com.jannik_kuehn.common.api.storage.StorageTransferMapping;
-import com.jannik_kuehn.common.api.storage.StorageTransferRequest;
-import com.jannik_kuehn.common.api.storage.TimeEntryReason;
 import com.jannik_kuehn.common.api.storage.TimeRange;
 import com.jannik_kuehn.common.api.storage.TimeScope;
-import com.jannik_kuehn.common.api.storage.UnifiedStorage;
 import com.jannik_kuehn.common.exception.StorageException;
+import com.jannik_kuehn.common.storage.contract.AdminStorageMaintenance;
+import com.jannik_kuehn.common.storage.contract.UnifiedStorage;
 import com.jannik_kuehn.common.storage.database.provider.LoriTimeConnectionProvider;
 import com.jannik_kuehn.common.storage.database.table.ManualAdjustmentTable;
 import com.jannik_kuehn.common.storage.database.table.PlayerTable;
 import com.jannik_kuehn.common.storage.database.table.ServerTable;
 import com.jannik_kuehn.common.storage.database.table.TimeTable;
 import com.jannik_kuehn.common.storage.database.table.WorldTable;
+import com.jannik_kuehn.common.storage.model.ManualTimeAdjustment;
+import com.jannik_kuehn.common.storage.model.PlayerSessionChunk;
+import com.jannik_kuehn.common.storage.model.PlayerSessionContext;
+import com.jannik_kuehn.common.storage.model.RecentPlayerIdentity;
+import com.jannik_kuehn.common.storage.model.StorageDeleteRequest;
+import com.jannik_kuehn.common.storage.model.StorageMaintenanceConfirmation;
+import com.jannik_kuehn.common.storage.model.StorageMaintenanceOperation;
+import com.jannik_kuehn.common.storage.model.StorageMaintenancePreview;
+import com.jannik_kuehn.common.storage.model.StorageMaintenanceResult;
+import com.jannik_kuehn.common.storage.model.StorageMaintenanceScope;
+import com.jannik_kuehn.common.storage.model.StorageTransferMapping;
+import com.jannik_kuehn.common.storage.model.StorageTransferRequest;
+import com.jannik_kuehn.common.storage.model.TimeEntryReason;
 
 import java.io.IOException;
 import java.sql.Connection;
@@ -49,7 +49,6 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 @SuppressWarnings({
         "PMD.AvoidCatchingGenericException",
         "PMD.AvoidDuplicateLiterals",
-        "PMD.CommentRequired",
         "PMD.CouplingBetweenObjects",
         "PMD.CyclomaticComplexity",
         "PMD.ExceptionAsFlowControl",
@@ -113,12 +112,24 @@ public class UnifiedDatabaseStorage implements UnifiedStorage, AdminStorageMaint
      */
     private final String playerTableName;
 
+    /**
+     * server table names used by maintenance SQL.
+     */
     private final String serverTableName;
 
+    /**
+     * world table names used by maintenance SQL.
+     */
     private final String worldTableName;
 
+    /**
+     * time table names used by maintenance SQL.
+     */
     private final String timeTableName;
 
+    /**
+     * adjustment table names used by maintenance SQL.
+     */
     private final String adjustmentTableName;
 
     /**
@@ -623,13 +634,10 @@ public class UnifiedDatabaseStorage implements UnifiedStorage, AdminStorageMaint
         return worldTable.findId(connection, scope.server(), scope.world()).map(OptionalLong::of).orElseGet(OptionalLong::empty);
     }
 
-    private record ScopeReferences(OptionalLong serverId, OptionalLong worldId) {
-    }
-
     @Override
     public StorageMaintenancePreview previewStorageTransferTo(final AdminStorageMaintenance target)
             throws StorageException {
-        if (!(target instanceof UnifiedDatabaseStorage targetStorage)) {
+        if (!(target instanceof final UnifiedDatabaseStorage targetStorage)) {
             throw new StorageException("Target storage does not support database storage-type transfer");
         }
         poolLock.readLock().lock();
@@ -651,10 +659,10 @@ public class UnifiedDatabaseStorage implements UnifiedStorage, AdminStorageMaint
 
     @Override
     public StorageMaintenanceResult applyStorageTransferTo(final AdminStorageMaintenance target,
-                                                          final StorageMaintenanceConfirmation confirmation)
+                                                           final StorageMaintenanceConfirmation confirmation)
             throws StorageException {
         Objects.requireNonNull(confirmation, "confirmation");
-        if (!(target instanceof UnifiedDatabaseStorage targetStorage)) {
+        if (!(target instanceof final UnifiedDatabaseStorage targetStorage)) {
             throw new StorageException("Target storage does not support database storage-type transfer");
         }
         poolLock.readLock().lock();
@@ -1112,11 +1120,11 @@ public class UnifiedDatabaseStorage implements UnifiedStorage, AdminStorageMaint
                 || countRows(connection, timeTableName) > 0
                 || countRows(connection, adjustmentTableName) > 0
                 || singleLong(connection,
-                        "SELECT COUNT(*) FROM `" + serverTableName + "` WHERE `server` <> 'default'") > 0
+                "SELECT COUNT(*) FROM `" + serverTableName + "` WHERE `server` <> 'default'") > 0
                 || singleLong(connection,
-                        "SELECT COUNT(*) FROM `" + worldTableName + "` w "
-                                + "JOIN `" + serverTableName + "` s ON s.`id` = w.`server_id` "
-                                + "WHERE s.`server` <> 'default' OR w.`world` <> 'global'") > 0;
+                "SELECT COUNT(*) FROM `" + worldTableName + "` w "
+                        + "JOIN `" + serverTableName + "` s ON s.`id` = w.`server_id` "
+                        + "WHERE s.`server` <> 'default' OR w.`world` <> 'global'") > 0;
     }
 
     private boolean targetWorldExists(final Connection connection, final String server, final String world)
@@ -1294,7 +1302,7 @@ public class UnifiedDatabaseStorage implements UnifiedStorage, AdminStorageMaint
     private long singleLong(final Connection connection, final String sql, final Object... params) throws SQLException {
         try (PreparedStatement select = connection.prepareStatement(sql)) {
             for (int i = 0; i < params.length; i++) {
-                if (params[i] instanceof Long value) {
+                if (params[i] instanceof final Long value) {
                     select.setLong(i + 1, value);
                 } else {
                     select.setString(i + 1, params[i].toString());
@@ -1304,6 +1312,26 @@ public class UnifiedDatabaseStorage implements UnifiedStorage, AdminStorageMaint
                 return result.next() ? result.getLong(1) : 0L;
             }
         }
+    }
+
+    @Override
+    public void close() throws StorageException {
+        if (!provider.isClosed()) {
+            try {
+                provider.close();
+            } catch (final IOException e) {
+                throw new StorageException("The database could not be closed properly.", e);
+            }
+        }
+    }
+
+    private void checkClosed() throws StorageException {
+        if (provider.isClosed()) {
+            throw new StorageException("closed");
+        }
+    }
+
+    private record ScopeReferences(OptionalLong serverId, OptionalLong worldId) {
     }
 
     private record Counts(long sessions, long adjustments, long players) {
@@ -1358,22 +1386,5 @@ public class UnifiedDatabaseStorage implements UnifiedStorage, AdminStorageMaint
                                  byte[] actorUuid,
                                  String actorName,
                                  Object createdAt) {
-    }
-
-    @Override
-    public void close() throws StorageException {
-        if (!provider.isClosed()) {
-            try {
-                provider.close();
-            } catch (final IOException e) {
-                throw new StorageException("The database could not be closed properly.", e);
-            }
-        }
-    }
-
-    private void checkClosed() throws StorageException {
-        if (provider.isClosed()) {
-            throw new StorageException("closed");
-        }
     }
 }

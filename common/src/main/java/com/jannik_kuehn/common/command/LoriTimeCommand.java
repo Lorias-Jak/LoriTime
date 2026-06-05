@@ -3,11 +3,6 @@ package com.jannik_kuehn.common.command;
 import com.github.roleplaycauldron.spellbook.core.logger.WrappedLogger;
 import com.jannik_kuehn.common.LoriTimePlugin;
 import com.jannik_kuehn.common.api.LoriTimePlayer;
-import com.jannik_kuehn.common.api.common.CommonCommand;
-import com.jannik_kuehn.common.api.common.CommonPlayerSender;
-import com.jannik_kuehn.common.api.common.CommonSender;
-import com.jannik_kuehn.common.api.common.CommonServer;
-import com.jannik_kuehn.common.api.storage.SessionContextDefaults;
 import com.jannik_kuehn.common.api.storage.TimeScope;
 import com.jannik_kuehn.common.command.core.CommandMessages;
 import com.jannik_kuehn.common.command.core.CommandScopes;
@@ -15,6 +10,11 @@ import com.jannik_kuehn.common.command.core.CommandScopes.LookupRequest;
 import com.jannik_kuehn.common.command.core.LoriTimeLookupCompletions;
 import com.jannik_kuehn.common.config.localization.Localization;
 import com.jannik_kuehn.common.exception.StorageException;
+import com.jannik_kuehn.common.platform.CommonCommand;
+import com.jannik_kuehn.common.platform.CommonPlayerSender;
+import com.jannik_kuehn.common.platform.CommonSender;
+import com.jannik_kuehn.common.platform.CommonServer;
+import com.jannik_kuehn.common.storage.model.SessionContextDefaults;
 import com.jannik_kuehn.common.utils.TimeUtil;
 
 import java.util.List;
@@ -23,27 +23,60 @@ import java.util.OptionalLong;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-@SuppressWarnings({"PMD.CommentRequired", "PMD.CognitiveComplexity", "PMD.AvoidThrowingRawExceptionTypes"})
+/**
+ * Command that displays stored online time for a player.
+ */
+@SuppressWarnings({"PMD.CognitiveComplexity", "PMD.AvoidThrowingRawExceptionTypes"})
 public class LoriTimeCommand implements CommonCommand {
 
+    /**
+     * Placeholder for player name in messages.
+     */
     private static final String PLAYER_PLACEHOLDER = "[player]";
 
+    /**
+     * Placeholder for time range in messages.
+     */
     private static final String RANGE_PLACEHOLDER = "[range]";
 
+    /**
+     * Placeholder for time scope in messages.
+     */
     private static final String SCOPE_PLACEHOLDER = "[scope]";
 
+    /**
+     * LoriTime plugin instance.
+     */
     private final LoriTimePlugin loriTimePlugin;
 
+    /**
+     * The {@link WrappedLogger} instance.
+     */
     private final WrappedLogger log;
 
+    /**
+     * Localization provider.
+     */
     private final Localization localization;
 
+    /**
+     * Creates the online-time lookup command.
+     *
+     * @param plugin       LoriTime plugin runtime
+     * @param localization localization provider
+     */
     public LoriTimeCommand(final LoriTimePlugin plugin, final Localization localization) {
         this.loriTimePlugin = plugin;
         this.log = plugin.getLoggerFactory().create(LoriTimeCommand.class);
         this.localization = localization;
     }
 
+    /**
+     * Executes an online-time lookup.
+     *
+     * @param sender command sender
+     * @param args   command arguments
+     */
     @Override
     @SuppressWarnings("PMD.AvoidDeeplyNestedIfStmts")
     public void execute(final CommonSender sender, final String... args) {
@@ -67,7 +100,7 @@ public class LoriTimeCommand implements CommonCommand {
                         return;
                     }
                 } else {
-                    if (!(sender instanceof CommonPlayerSender playerSender)) {
+                    if (!(sender instanceof final CommonPlayerSender playerSender)) {
                         sender.sendMessage(localization.formatTextComponent(localization.getRawMessage("message.command.loritime.consoleSelf")));
                         return;
                     }
@@ -81,7 +114,7 @@ public class LoriTimeCommand implements CommonCommand {
                     return;
                 }
                 final TimeScope scope = resolvedScope.get();
-                final boolean isTargetSender = sender instanceof CommonPlayerSender playerSender
+                final boolean isTargetSender = sender instanceof final CommonPlayerSender playerSender
                         && targetPlayer.getUniqueId().equals(playerSender.getUniqueId());
                 if (!CommandScopes.hasPermission(sender, scope, isTargetSender)) {
                     CommandMessages.send(localization, loriTimePlugin.getLanguageSelector(), sender, "message.noPermission");
@@ -126,6 +159,13 @@ public class LoriTimeCommand implements CommonCommand {
         }
     }
 
+    /**
+     * Completes player, scope, and time-range lookup arguments.
+     *
+     * @param source command sender
+     * @param args   command arguments
+     * @return completion suggestions
+     */
     @Override
     public List<String> handleTabComplete(final CommonSender source, final String... args) {
         return new LoriTimeLookupCompletions(loriTimePlugin).suggest(source, args);
@@ -208,6 +248,11 @@ public class LoriTimeCommand implements CommonCommand {
                 .replace(RANGE_PLACEHOLDER, request.timeRangeInput());
     }
 
+    /**
+     * Returns online-time command aliases from configuration.
+     *
+     * @return command aliases
+     */
     @Override
     public List<String> getAliases() {
         return loriTimePlugin.getConfig().getArrayList("command.LoriTime.alias").stream()
@@ -216,6 +261,11 @@ public class LoriTimeCommand implements CommonCommand {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Returns the primary online-time command name.
+     *
+     * @return command name
+     */
     @Override
     public String getCommandName() {
         return "loritime";

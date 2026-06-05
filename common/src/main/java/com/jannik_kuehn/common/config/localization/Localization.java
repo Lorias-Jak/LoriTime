@@ -18,7 +18,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Resolves raw localized messages loaded from versioned language files.
  */
-@SuppressWarnings({"PMD.GodClass", "PMD.TooManyMethods", "PMD.CommentRequired"})
+@SuppressWarnings({"PMD.GodClass", "PMD.TooManyMethods"})
 public class Localization {
     private static final String PREFIX_KEY = "prefix";
 

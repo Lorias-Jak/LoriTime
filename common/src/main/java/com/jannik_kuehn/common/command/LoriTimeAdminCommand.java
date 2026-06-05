@@ -13,7 +13,7 @@ import java.util.List;
 /**
  * Runtime administration command for the current LoriTime instance.
  */
-@SuppressWarnings({"PMD.CommentRequired", "PMD.AvoidLiteralsInIfCondition"})
+@SuppressWarnings("PMD.AvoidLiteralsInIfCondition")
 public class LoriTimeAdminCommand implements CommonCommand {
 
     private final LoriTimePlugin plugin;
@@ -24,6 +24,12 @@ public class LoriTimeAdminCommand implements CommonCommand {
 
     private final LoriTimeAdminActions actions;
 
+    /**
+     * Creates an administration command.
+     *
+     * @param plugin LoriTime plugin runtime
+     * @param localization localization provider
+     */
     public LoriTimeAdminCommand(final LoriTimePlugin plugin, final Localization localization) {
         this.plugin = plugin;
         this.localization = localization;
@@ -35,6 +41,12 @@ public class LoriTimeAdminCommand implements CommonCommand {
         this.actions = new LoriTimeAdminActions(plugin, localization, this::usage);
     }
 
+    /**
+     * Executes the selected admin subcommand.
+     *
+     * @param sender command sender
+     * @param args command arguments
+     */
     @Override
     public void execute(final CommonSender sender, final String... args) {
         if (!sender.hasPermission("loritime.admin")) {
@@ -59,6 +71,13 @@ public class LoriTimeAdminCommand implements CommonCommand {
         }
     }
 
+    /**
+     * Completes available admin subcommands.
+     *
+     * @param source command sender
+     * @param args command arguments
+     * @return completion suggestions
+     */
     @Override
     public List<String> handleTabComplete(final CommonSender source, final String... args) {
         if (!source.hasPermission("loritime.admin")) {
@@ -70,11 +89,21 @@ public class LoriTimeAdminCommand implements CommonCommand {
         return List.of();
     }
 
+    /**
+     * Returns admin command aliases.
+     *
+     * @return command aliases
+     */
     @Override
     public List<String> getAliases() {
         return List.of("lta", "ltadmin", "loritimea");
     }
 
+    /**
+     * Returns the primary admin command name.
+     *
+     * @return command name
+     */
     @Override
     public String getCommandName() {
         return "lta";
@@ -85,9 +114,21 @@ public class LoriTimeAdminCommand implements CommonCommand {
     }
 
     private enum AdminAction {
+        /**
+         * Reloads LoriTime configuration and runtime services.
+         */
         RELOAD,
+        /**
+         * Toggles debug logging.
+         */
         DEBUG,
+        /**
+         * Prints runtime version information.
+         */
         INFO,
+        /**
+         * Starts the configured update flow.
+         */
         UPDATE
     }
 }

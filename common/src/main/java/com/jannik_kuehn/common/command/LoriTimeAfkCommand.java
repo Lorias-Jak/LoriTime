@@ -12,18 +12,33 @@ import com.jannik_kuehn.common.player.TrackedLoriTimePlayer;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@SuppressWarnings({"PMD.CommentRequired", "PMD.AvoidLiteralsInIfCondition"})
+/**
+ * Command that toggles the sender's AFK state.
+ */
+@SuppressWarnings("PMD.AvoidLiteralsInIfCondition")
 public class LoriTimeAfkCommand implements CommonCommand {
 
     private final LoriTimePlugin plugin;
 
     private final Localization localization;
 
+    /**
+     * Creates an AFK command.
+     *
+     * @param plugin LoriTime plugin runtime
+     * @param localization localization provider
+     */
     public LoriTimeAfkCommand(final LoriTimePlugin plugin, final Localization localization) {
         this.plugin = plugin;
         this.localization = localization;
     }
 
+    /**
+     * Toggles the sender's AFK state.
+     *
+     * @param sender command sender
+     * @param arguments command arguments
+     */
     @Override
     public void execute(final CommonSender sender, final String... arguments) {
         if (!sender.hasPermission("loritime.afk")) {
@@ -39,6 +54,13 @@ public class LoriTimeAfkCommand implements CommonCommand {
         });
     }
 
+    /**
+     * Completes online player names for AFK command input.
+     *
+     * @param source command sender
+     * @param args command arguments
+     * @return completion suggestions
+     */
     @Override
     public List<String> handleTabComplete(final CommonSender source, final String... args) {
         if (args.length == 0) {
@@ -50,6 +72,11 @@ public class LoriTimeAfkCommand implements CommonCommand {
         return List.of();
     }
 
+    /**
+     * Returns AFK command aliases from configuration.
+     *
+     * @return command aliases
+     */
     @Override
     public List<String> getAliases() {
         return plugin.getConfig().getArrayList("command.Afk.alias").stream()
@@ -58,6 +85,11 @@ public class LoriTimeAfkCommand implements CommonCommand {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Returns the primary AFK command name.
+     *
+     * @return command name
+     */
     @Override
     public String getCommandName() {
         return "afk";

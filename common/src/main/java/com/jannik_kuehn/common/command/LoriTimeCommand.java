@@ -23,7 +23,10 @@ import java.util.OptionalLong;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-@SuppressWarnings({"PMD.CommentRequired", "PMD.CognitiveComplexity", "PMD.AvoidThrowingRawExceptionTypes"})
+/**
+ * Command that displays stored online time for a player.
+ */
+@SuppressWarnings({"PMD.CognitiveComplexity", "PMD.AvoidThrowingRawExceptionTypes"})
 public class LoriTimeCommand implements CommonCommand {
 
     private static final String PLAYER_PLACEHOLDER = "[player]";
@@ -38,12 +41,24 @@ public class LoriTimeCommand implements CommonCommand {
 
     private final Localization localization;
 
+    /**
+     * Creates the online-time lookup command.
+     *
+     * @param plugin LoriTime plugin runtime
+     * @param localization localization provider
+     */
     public LoriTimeCommand(final LoriTimePlugin plugin, final Localization localization) {
         this.loriTimePlugin = plugin;
         this.log = plugin.getLoggerFactory().create(LoriTimeCommand.class);
         this.localization = localization;
     }
 
+    /**
+     * Executes an online-time lookup.
+     *
+     * @param sender command sender
+     * @param args command arguments
+     */
     @Override
     @SuppressWarnings("PMD.AvoidDeeplyNestedIfStmts")
     public void execute(final CommonSender sender, final String... args) {
@@ -126,6 +141,13 @@ public class LoriTimeCommand implements CommonCommand {
         }
     }
 
+    /**
+     * Completes player, scope, and time-range lookup arguments.
+     *
+     * @param source command sender
+     * @param args command arguments
+     * @return completion suggestions
+     */
     @Override
     public List<String> handleTabComplete(final CommonSender source, final String... args) {
         return new LoriTimeLookupCompletions(loriTimePlugin).suggest(source, args);
@@ -208,6 +230,11 @@ public class LoriTimeCommand implements CommonCommand {
                 .replace(RANGE_PLACEHOLDER, request.timeRangeInput());
     }
 
+    /**
+     * Returns online-time command aliases from configuration.
+     *
+     * @return command aliases
+     */
     @Override
     public List<String> getAliases() {
         return loriTimePlugin.getConfig().getArrayList("command.LoriTime.alias").stream()
@@ -216,6 +243,11 @@ public class LoriTimeCommand implements CommonCommand {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Returns the primary online-time command name.
+     *
+     * @return command name
+     */
     @Override
     public String getCommandName() {
         return "loritime";

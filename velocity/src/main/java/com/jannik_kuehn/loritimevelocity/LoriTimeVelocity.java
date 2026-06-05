@@ -32,7 +32,9 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
-@SuppressWarnings({"PMD.CommentRequired"})
+/**
+ * Velocity plugin bootstrap for LoriTime.
+ */
 public class LoriTimeVelocity {
     private final Path dataDirectory;
 
@@ -48,6 +50,14 @@ public class LoriTimeVelocity {
 
     private WrappedLogger log;
 
+    /**
+     * Creates the Velocity plugin bootstrap.
+     *
+     * @param server Velocity proxy server
+     * @param logger platform logger
+     * @param dataDirectory plugin data directory
+     * @param metricsFactory bStats metrics factory
+     */
     @Inject
     public LoriTimeVelocity(final ProxyServer server, final Logger logger, @DataDirectory final Path dataDirectory, final Metrics.Factory metricsFactory) {
         this.proxyServer = server;
@@ -57,6 +67,11 @@ public class LoriTimeVelocity {
         this.commands = new ArrayList<>();
     }
 
+    /**
+     * Initializes LoriTime when Velocity starts the plugin.
+     *
+     * @param event proxy initialization event
+     */
     @Subscribe
     @SuppressWarnings({"PMD.UseUnderscoresInNumericLiterals", "PMD.AvoidLiteralsInIfCondition"})
     public void onInitialize(final ProxyInitializeEvent event) {
@@ -115,6 +130,11 @@ public class LoriTimeVelocity {
         }
     }
 
+    /**
+     * Shuts down LoriTime and unregisters commands.
+     *
+     * @param event proxy shutdown event
+     */
     @Subscribe
     public void onShutDown(final ProxyShutdownEvent event) {
         for (final VelocityCommand command : commands) {
@@ -124,10 +144,20 @@ public class LoriTimeVelocity {
         loriTimePlugin.disable();
     }
 
+    /**
+     * Returns the Velocity proxy server.
+     *
+     * @return proxy server
+     */
     public ProxyServer getProxyServer() {
         return proxyServer;
     }
 
+    /**
+     * Returns the shared LoriTime plugin runtime.
+     *
+     * @return LoriTime plugin runtime
+     */
     public LoriTimePlugin getPlugin() {
         return loriTimePlugin;
     }

@@ -21,7 +21,9 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
-@SuppressWarnings("PMD.CommentRequired")
+/**
+ * Bukkit command adapter for shared LoriTime commands.
+ */
 public class PaperCommand implements CommandExecutor, TabExecutor {
 
     private final LoriTimePaper paperPlugin;
@@ -30,6 +32,12 @@ public class PaperCommand implements CommandExecutor, TabExecutor {
 
     private final WrappedLogger log;
 
+    /**
+     * Creates and registers a Paper command adapter.
+     *
+     * @param paperPlugin Paper plugin bootstrap
+     * @param command shared command implementation
+     */
     public PaperCommand(final LoriTimePaper paperPlugin, final CommonCommand command) {
         this.paperPlugin = paperPlugin;
         this.command = command;
@@ -38,6 +46,15 @@ public class PaperCommand implements CommandExecutor, TabExecutor {
         register();
     }
 
+    /**
+     * Dispatches a Bukkit command to the shared command implementation.
+     *
+     * @param commandSender Bukkit command sender
+     * @param command Bukkit command
+     * @param label command label
+     * @param args command arguments
+     * @return true when the command was handled
+     */
     @Override
     public boolean onCommand(@NotNull final CommandSender commandSender, @NotNull final Command command, @NotNull final String label, @NotNull final String[] args) {
         final CommonSender commonSender = getSender(commandSender);
@@ -45,6 +62,15 @@ public class PaperCommand implements CommandExecutor, TabExecutor {
         return true;
     }
 
+    /**
+     * Requests tab completions from the shared command implementation.
+     *
+     * @param commandSender Bukkit command sender
+     * @param command Bukkit command
+     * @param label command label
+     * @param args command arguments
+     * @return completion suggestions
+     */
     @Override
     public @Nullable List<String> onTabComplete(@NotNull final CommandSender commandSender, @NotNull final Command command, @NotNull final String label, @NotNull final String[] args) {
         final CommonSender commonSender = getSender(commandSender);

@@ -49,7 +49,6 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 @SuppressWarnings({
         "PMD.AvoidCatchingGenericException",
         "PMD.AvoidDuplicateLiterals",
-        "PMD.CommentRequired",
         "PMD.CouplingBetweenObjects",
         "PMD.CyclomaticComplexity",
         "PMD.ExceptionAsFlowControl",

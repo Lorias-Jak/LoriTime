@@ -1,5 +1,7 @@
 package com.jannik_kuehn.common.api.common;
 
-@SuppressWarnings("PMD.CommentRequired")
+/**
+ * Platform-neutral console sender.
+ */
 public interface CommonConsoleSender extends CommonSender {
 }

@@ -30,8 +30,7 @@ import java.util.UUID;
 /**
  * Canonical player mutation command.
  */
-@SuppressWarnings({"PMD.CommentRequired", "PMD.TooManyMethods", "PMD.AvoidLiteralsInIfCondition",
-        "PMD.AvoidDuplicateLiterals"})
+@SuppressWarnings({"PMD.TooManyMethods", "PMD.AvoidLiteralsInIfCondition", "PMD.AvoidDuplicateLiterals"})
 public class LoriTimeModifyCommand implements CommonCommand {
 
     private final LoriTimePlugin plugin;
@@ -44,6 +43,13 @@ public class LoriTimeModifyCommand implements CommonCommand {
 
     private final SubcommandRouter<ModifyAction> router;
 
+    /**
+     * Creates the player time mutation command.
+     *
+     * @param plugin LoriTime plugin runtime
+     * @param localization localization provider
+     * @param parser configured time parser
+     */
     public LoriTimeModifyCommand(final LoriTimePlugin plugin, final Localization localization, final TimeParser parser) {
         this.plugin = plugin;
         this.log = plugin.getLoggerFactory().create(LoriTimeModifyCommand.class);
@@ -56,6 +62,12 @@ public class LoriTimeModifyCommand implements CommonCommand {
                 .register(ModifyAction.DELETE_USER, "deleteUser", "deleteuser");
     }
 
+    /**
+     * Executes the selected modification subcommand.
+     *
+     * @param sender command sender
+     * @param args command arguments
+     */
     @Override
     public void execute(final CommonSender sender, final String... args) {
         if (!sender.hasPermission("loritime.admin")) {
@@ -84,6 +96,13 @@ public class LoriTimeModifyCommand implements CommonCommand {
         }
     }
 
+    /**
+     * Completes modification subcommands, player names, and scope suffixes.
+     *
+     * @param source command sender
+     * @param args command arguments
+     * @return completion suggestions
+     */
     @Override
     public List<String> handleTabComplete(final CommonSender source, final String... args) {
         if (!source.hasPermission("loritime.admin")) {
@@ -259,10 +278,25 @@ public class LoriTimeModifyCommand implements CommonCommand {
         }
     }
 
+    /**
+     * Adds a signed global time adjustment for a player.
+     *
+     * @param sender command sender used as the adjustment actor
+     * @param uuid target player UUID
+     * @param modifyBy signed seconds to add or remove
+     */
     public void modifyOnlineTime(final CommonSender sender, final UUID uuid, final long modifyBy) {
         modifyOnlineTime(sender, uuid, modifyBy, TimeScope.GLOBAL);
     }
 
+    /**
+     * Adds a signed scoped time adjustment for a player.
+     *
+     * @param sender command sender used as the adjustment actor
+     * @param uuid target player UUID
+     * @param modifyBy signed seconds to add or remove
+     * @param scope adjustment scope
+     */
     public void modifyOnlineTime(final CommonSender sender, final UUID uuid, final long modifyBy, final TimeScope scope) {
         try {
             final UUID actorUuid = sender instanceof CommonPlayerSender playerSender ? playerSender.getUniqueId() : null;
@@ -274,11 +308,21 @@ public class LoriTimeModifyCommand implements CommonCommand {
         }
     }
 
+    /**
+     * Returns modification command aliases.
+     *
+     * @return command aliases
+     */
     @Override
     public List<String> getAliases() {
         return List.of("ltm", "ltmodify");
     }
 
+    /**
+     * Returns the primary modification command name.
+     *
+     * @return command name
+     */
     @Override
     public String getCommandName() {
         return "ltmodify";
@@ -299,9 +343,21 @@ public class LoriTimeModifyCommand implements CommonCommand {
     }
 
     private enum ModifyAction {
+        /**
+         * Adds signed time to the current value.
+         */
         ADD,
+        /**
+         * Sets the current value through a signed adjustment.
+         */
         SET,
+        /**
+         * Resets the current value to zero.
+         */
         RESET,
+        /**
+         * Deletes a player's stored identity and time data.
+         */
         DELETE_USER
     }
 }

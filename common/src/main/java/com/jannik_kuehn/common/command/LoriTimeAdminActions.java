@@ -2,10 +2,10 @@ package com.jannik_kuehn.common.command;
 
 import com.github.roleplaycauldron.spellbook.core.logger.WrappedLogger;
 import com.jannik_kuehn.common.LoriTimePlugin;
-import com.jannik_kuehn.common.api.common.CommonSender;
-import com.jannik_kuehn.common.api.scheduler.PluginTask;
 import com.jannik_kuehn.common.command.core.CommandMessages;
 import com.jannik_kuehn.common.config.localization.Localization;
+import com.jannik_kuehn.common.platform.CommonSender;
+import com.jannik_kuehn.common.scheduler.PluginTask;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 
 import java.util.function.Consumer;
@@ -32,9 +32,9 @@ final class LoriTimeAdminActions {
     /**
      * Creates admin subcommand actions.
      *
-     * @param plugin LoriTime plugin runtime
+     * @param plugin       LoriTime plugin runtime
      * @param localization localization provider
-     * @param usage usage callback for invalid arguments
+     * @param usage        usage callback for invalid arguments
      */
     /* default */ LoriTimeAdminActions(final LoriTimePlugin plugin, final Localization localization,
                                        final Consumer<CommonSender> usage) {
@@ -50,7 +50,7 @@ final class LoriTimeAdminActions {
      * Reloads runtime configuration.
      *
      * @param sender command sender
-     * @param args subcommand arguments
+     * @param args   subcommand arguments
      */
     /* default */ void reload(final CommonSender sender, final String... args) {
         if (hasUnexpectedArgs(sender, args)) {
@@ -64,7 +64,7 @@ final class LoriTimeAdminActions {
      * Toggles debug mode.
      *
      * @param sender command sender
-     * @param args subcommand arguments
+     * @param args   subcommand arguments
      */
     /* default */ void debug(final CommonSender sender, final String... args) {
         if (hasUnexpectedArgs(sender, args)) {
@@ -78,7 +78,7 @@ final class LoriTimeAdminActions {
      * Sends version information to the command sender.
      *
      * @param sender command sender
-     * @param args subcommand arguments
+     * @param args   subcommand arguments
      */
     /* default */ void info(final CommonSender sender, final String... args) {
         if (hasUnexpectedArgs(sender, args)) {
@@ -98,7 +98,7 @@ final class LoriTimeAdminActions {
      * Runs the updater when an update is available.
      *
      * @param sender command sender
-     * @param args subcommand arguments
+     * @param args   subcommand arguments
      */
     /* default */ void update(final CommonSender sender, final String... args) {
         if (hasUnexpectedArgs(sender, args)) {

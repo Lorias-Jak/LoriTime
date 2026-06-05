@@ -1,6 +1,6 @@
 package com.jannik_kuehn.loritimevelocity.util;
 
-import com.jannik_kuehn.common.api.common.CommonConsoleSender;
+import com.jannik_kuehn.common.platform.CommonConsoleSender;
 import com.velocitypowered.api.command.CommandSource;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;

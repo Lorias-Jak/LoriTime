@@ -1,6 +1,7 @@
 package com.jannik_kuehn.common.api;
 
 import com.jannik_kuehn.common.LoriTimePlugin;
+import com.jannik_kuehn.common.service.LoriTimeServiceFactory;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 import java.util.Optional;
@@ -44,6 +45,6 @@ public final class LoriTimeAPI {
      */
     public static Optional<LoriTimeService> service() {
         final LoriTimePlugin plugin = loriTimePlugin;
-        return plugin == null ? Optional.empty() : Optional.of(new DefaultLoriTimeService(plugin));
+        return plugin == null ? Optional.empty() : Optional.of(LoriTimeServiceFactory.create(plugin));
     }
 }

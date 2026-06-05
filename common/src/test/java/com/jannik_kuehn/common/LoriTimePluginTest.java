@@ -1,8 +1,8 @@
 package com.jannik_kuehn.common;
 
 import com.github.roleplaycauldron.spellbook.core.logger.LoggerFactory;
-import com.jannik_kuehn.common.api.common.CommonServer;
-import com.jannik_kuehn.common.api.scheduler.PluginScheduler;
+import com.jannik_kuehn.common.platform.CommonServer;
+import com.jannik_kuehn.common.scheduler.PluginScheduler;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -10,9 +10,8 @@ import java.io.File;
 import java.util.UUID;
 import java.util.logging.Logger;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.mock;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 class LoriTimePluginTest {
 

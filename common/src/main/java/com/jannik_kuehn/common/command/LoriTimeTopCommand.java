@@ -1,12 +1,12 @@
 package com.jannik_kuehn.common.command;
 
 import com.jannik_kuehn.common.LoriTimePlugin;
-import com.jannik_kuehn.common.api.common.CommonCommand;
-import com.jannik_kuehn.common.api.common.CommonSender;
-import com.jannik_kuehn.common.api.storage.UnifiedStorage;
 import com.jannik_kuehn.common.command.core.CommandMessages;
 import com.jannik_kuehn.common.config.localization.Localization;
 import com.jannik_kuehn.common.exception.StorageException;
+import com.jannik_kuehn.common.platform.CommonCommand;
+import com.jannik_kuehn.common.platform.CommonSender;
+import com.jannik_kuehn.common.storage.contract.UnifiedStorage;
 import com.jannik_kuehn.common.utils.TimeUtil;
 
 import java.time.LocalDate;
@@ -36,7 +36,7 @@ public class LoriTimeTopCommand implements CommonCommand {
     /**
      * Creates the top-list command.
      *
-     * @param plugin LoriTime plugin runtime
+     * @param plugin       LoriTime plugin runtime
      * @param localization localization provider
      */
     public LoriTimeTopCommand(final LoriTimePlugin plugin, final Localization localization) {
@@ -48,7 +48,7 @@ public class LoriTimeTopCommand implements CommonCommand {
      * Executes a paged top-list lookup.
      *
      * @param sender command sender
-     * @param args command arguments
+     * @param args   command arguments
      */
     @Override
     public void execute(final CommonSender sender, final String... args) {
@@ -159,7 +159,7 @@ public class LoriTimeTopCommand implements CommonCommand {
      * Completes top-list command arguments.
      *
      * @param source command sender
-     * @param args command arguments
+     * @param args   command arguments
      * @return completion suggestions
      */
     @Override

@@ -1,11 +1,11 @@
 package com.jannik_kuehn.loritimepaper.util;
 
 import com.jannik_kuehn.common.api.LoriTimePlayer;
-import com.jannik_kuehn.common.api.common.CommonConsoleSender;
-import com.jannik_kuehn.common.api.common.CommonPlayerSender;
-import com.jannik_kuehn.common.api.common.CommonSender;
-import com.jannik_kuehn.common.api.common.CommonServer;
-import com.jannik_kuehn.common.api.storage.SessionContextDefaults;
+import com.jannik_kuehn.common.platform.CommonConsoleSender;
+import com.jannik_kuehn.common.platform.CommonPlayerSender;
+import com.jannik_kuehn.common.platform.CommonSender;
+import com.jannik_kuehn.common.platform.CommonServer;
+import com.jannik_kuehn.common.storage.model.SessionContextDefaults;
 import com.jannik_kuehn.loritimepaper.LoriTimePaper;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;

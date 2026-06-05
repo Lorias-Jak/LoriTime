@@ -145,7 +145,7 @@ loriTime.getOnlineTime(uniqueId, TimeScope.server("survival"), lastSevenDays)
         });
 ```
 
-The ranged overload is part of the LoriTime 2 API surface. Storage implementations of `TimeQueryStorage` and `UnifiedStorage` must implement the ranged `getTime(UUID, TimeScope, TimeRange)` contract.
+The ranged overload is part of the LoriTime 2 API surface.
 
 ## Writing Manual Adjustments
 
@@ -230,4 +230,4 @@ In slave mode, facade reads follow the same deterministic fallback behavior as L
 
 `LoriTimeAPI.service()`, the `LoriTimeService` interface, `LoriTimePlayer`, and immutable public player references are the stable public integration surface for normal third-party plugins.
 
-Internal classes such as `LoriTimePlugin`, storage lifecycle managers, accumulators, configuration, localization, and updater state are not part of the public integration API. Storage contracts such as `UnifiedStorage` and `TimeAccumulator` remain internal runtime contracts unless a future change introduces a dedicated advanced extension API.
+Internal classes such as `LoriTimePlugin`, platform adapters, scheduler adapters, storage lifecycle managers, storage contracts, accumulators, configuration, localization, and updater state are not part of the public integration API unless a future change introduces a dedicated advanced extension API.

@@ -1,9 +1,9 @@
 package com.jannik_kuehn.loritimepaper.messenger;
 
 import com.github.roleplaycauldron.spellbook.core.logger.WrappedLogger;
-import com.jannik_kuehn.common.api.scheduler.PluginTask;
 import com.jannik_kuehn.common.module.messaging.PluginMessaging;
 import com.jannik_kuehn.common.module.messaging.StorageMessageType;
+import com.jannik_kuehn.common.scheduler.PluginTask;
 import com.jannik_kuehn.loritimepaper.LoriTimePaper;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -44,9 +44,9 @@ public class SlaveSessionReporter extends PluginMessaging implements Listener, A
     /**
      * Creates a slave session reporter.
      *
-     * @param loriTimePaper the Paper plugin instance.
+     * @param loriTimePaper   the Paper plugin instance.
      * @param pluginMessenger the plugin messenger used for outgoing messages.
-     * @param updateInterval the session flush interval in seconds.
+     * @param updateInterval  the session flush interval in seconds.
      */
     public SlaveSessionReporter(final LoriTimePaper loriTimePaper, final PaperPluginMessenger pluginMessenger, final long updateInterval) {
         super(loriTimePaper.getPlugin());
@@ -128,7 +128,7 @@ public class SlaveSessionReporter extends PluginMessaging implements Listener, A
      * Sends a plugin message through the Paper messenger.
      *
      * @param channelIdentifier the target channel.
-     * @param message the message payload.
+     * @param message           the message payload.
      */
     @Override
     public void sendPluginMessage(final String channelIdentifier, final Object... message) {

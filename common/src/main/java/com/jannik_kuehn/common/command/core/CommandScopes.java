@@ -1,8 +1,8 @@
 package com.jannik_kuehn.common.command.core;
 
-import com.jannik_kuehn.common.api.common.CommonSender;
 import com.jannik_kuehn.common.api.storage.TimeRange;
 import com.jannik_kuehn.common.api.storage.TimeScope;
+import com.jannik_kuehn.common.platform.CommonSender;
 import com.jannik_kuehn.common.utils.TimeParser;
 
 import java.time.Clock;
@@ -14,10 +14,6 @@ import java.util.Locale;
  * Shared parser and permission helpers for scoped time commands.
  */
 public final class CommandScopes {
-    private static final int MIN_TIMED_SCOPE_ARGS = 2;
-
-    private static final int RESET_WITHOUT_SCOPE_ARGS = 1;
-
     /**
      * Prefix for explicit server-scope lookup arguments.
      */
@@ -58,6 +54,10 @@ public final class CommandScopes {
      */
     public static final String WORLD = "world";
 
+    private static final int MIN_TIMED_SCOPE_ARGS = 2;
+
+    private static final int RESET_WITHOUT_SCOPE_ARGS = 1;
+
     private CommandScopes() {
     }
 
@@ -75,8 +75,8 @@ public final class CommandScopes {
      * Parses lookup arguments with explicit time parsing dependencies.
      *
      * @param parser time parser for ranged lookups
-     * @param clock clock used for relative ranges
-     * @param args command arguments
+     * @param clock  clock used for relative ranges
+     * @param args   command arguments
      * @return parsed lookup request
      */
     public static LookupRequest parseLookup(final TimeParser parser, final Clock clock, final String... args) {
@@ -86,7 +86,7 @@ public final class CommandScopes {
     /**
      * Suggests scope argument prefixes allowed for the sender.
      *
-     * @param source command sender
+     * @param source   command sender
      * @param argument partially typed argument
      * @return scope suggestions
      */
@@ -109,8 +109,8 @@ public final class CommandScopes {
      * Checks whether a sender may read a scope.
      *
      * @param sender command sender
-     * @param scope requested time scope
-     * @param self true when the sender queries their own time
+     * @param scope  requested time scope
+     * @param self   true when the sender queries their own time
      * @return true when the sender has permission
      */
     public static boolean hasPermission(final CommonSender sender, final TimeScope scope, final boolean self) {
@@ -173,10 +173,10 @@ public final class CommandScopes {
     /**
      * Parsed lookup command arguments.
      *
-     * @param playerName optional player name
-     * @param serverName optional server name
-     * @param worldName optional world name
-     * @param timeRange optional bounded time range
+     * @param playerName     optional player name
+     * @param serverName     optional server name
+     * @param worldName      optional world name
+     * @param timeRange      optional bounded time range
      * @param timeRangeInput original time range input
      */
     public record LookupRequest(String playerName, String serverName, String worldName,
@@ -186,7 +186,7 @@ public final class CommandScopes {
          *
          * @param playerName optional player name
          * @param serverName optional server name
-         * @param worldName optional world name
+         * @param worldName  optional world name
          */
         public LookupRequest(final String playerName, final String serverName, final String worldName) {
             this(playerName, serverName, worldName, null, null);
@@ -224,7 +224,7 @@ public final class CommandScopes {
      * Parsed time amount arguments with their target scope.
      *
      * @param timeArgs time amount arguments
-     * @param scope target scope
+     * @param scope    target scope
      */
     public record ParsedTimedScope(String[] timeArgs, TimeScope scope) {
     }
@@ -233,7 +233,7 @@ public final class CommandScopes {
      * Parsed player target with scope.
      *
      * @param playerName target player name
-     * @param scope target scope
+     * @param scope      target scope
      */
     public record ParsedScope(String playerName, TimeScope scope) {
     }

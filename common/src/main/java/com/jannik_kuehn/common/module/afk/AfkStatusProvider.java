@@ -2,8 +2,8 @@ package com.jannik_kuehn.common.module.afk;
 
 import com.github.roleplaycauldron.spellbook.core.logger.WrappedLogger;
 import com.jannik_kuehn.common.LoriTimePlugin;
-import com.jannik_kuehn.common.api.scheduler.PluginTask;
 import com.jannik_kuehn.common.player.TrackedLoriTimePlayer;
+import com.jannik_kuehn.common.scheduler.PluginTask;
 
 import java.util.OptionalLong;
 
@@ -26,7 +26,7 @@ public class AfkStatusProvider {
      * Creates and starts an AFK status provider.
      *
      * @param loriTimePlugin LoriTime plugin runtime
-     * @param afkHandling platform-specific AFK handler
+     * @param afkHandling    platform-specific AFK handler
      */
     public AfkStatusProvider(final LoriTimePlugin loriTimePlugin, final AfkHandling afkHandling) {
         this.loriTimePlugin = loriTimePlugin;
@@ -131,7 +131,7 @@ public class AfkStatusProvider {
     /**
      * Toggles a player's AFK state.
      *
-     * @param player tracked player
+     * @param player       tracked player
      * @param timeToRemove seconds to remove when entering AFK
      */
     public void switchPlayerAFK(final TrackedLoriTimePlayer player, final long timeToRemove) {
@@ -150,7 +150,7 @@ public class AfkStatusProvider {
     /**
      * Marks a player as AFK.
      *
-     * @param player tracked player
+     * @param player       tracked player
      * @param timeToRemove seconds to remove when entering AFK
      */
     public void setPlayerAFK(final TrackedLoriTimePlayer player, final long timeToRemove) {

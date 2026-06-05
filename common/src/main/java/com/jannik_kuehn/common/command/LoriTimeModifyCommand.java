@@ -3,11 +3,6 @@ package com.jannik_kuehn.common.command;
 import com.github.roleplaycauldron.spellbook.core.logger.WrappedLogger;
 import com.jannik_kuehn.common.LoriTimePlugin;
 import com.jannik_kuehn.common.api.LoriTimePlayer;
-import com.jannik_kuehn.common.api.common.CommonCommand;
-import com.jannik_kuehn.common.api.common.CommonPlayerSender;
-import com.jannik_kuehn.common.api.common.CommonSender;
-import com.jannik_kuehn.common.api.storage.ManualTimeAdjustment;
-import com.jannik_kuehn.common.api.storage.TimeEntryReason;
 import com.jannik_kuehn.common.api.storage.TimeScope;
 import com.jannik_kuehn.common.command.core.CommandMessages;
 import com.jannik_kuehn.common.command.core.CommandScopes;
@@ -17,6 +12,11 @@ import com.jannik_kuehn.common.command.core.PlayerNameCompletions;
 import com.jannik_kuehn.common.command.core.SubcommandRouter;
 import com.jannik_kuehn.common.config.localization.Localization;
 import com.jannik_kuehn.common.exception.StorageException;
+import com.jannik_kuehn.common.platform.CommonCommand;
+import com.jannik_kuehn.common.platform.CommonPlayerSender;
+import com.jannik_kuehn.common.platform.CommonSender;
+import com.jannik_kuehn.common.storage.model.ManualTimeAdjustment;
+import com.jannik_kuehn.common.storage.model.TimeEntryReason;
 import com.jannik_kuehn.common.utils.TimeParser;
 import com.jannik_kuehn.common.utils.TimeUtil;
 
@@ -46,9 +46,9 @@ public class LoriTimeModifyCommand implements CommonCommand {
     /**
      * Creates the player time mutation command.
      *
-     * @param plugin LoriTime plugin runtime
+     * @param plugin       LoriTime plugin runtime
      * @param localization localization provider
-     * @param parser configured time parser
+     * @param parser       configured time parser
      */
     public LoriTimeModifyCommand(final LoriTimePlugin plugin, final Localization localization, final TimeParser parser) {
         this.plugin = plugin;
@@ -66,7 +66,7 @@ public class LoriTimeModifyCommand implements CommonCommand {
      * Executes the selected modification subcommand.
      *
      * @param sender command sender
-     * @param args command arguments
+     * @param args   command arguments
      */
     @Override
     public void execute(final CommonSender sender, final String... args) {
@@ -100,7 +100,7 @@ public class LoriTimeModifyCommand implements CommonCommand {
      * Completes modification subcommands, player names, and scope suffixes.
      *
      * @param source command sender
-     * @param args command arguments
+     * @param args   command arguments
      * @return completion suggestions
      */
     @Override
@@ -281,8 +281,8 @@ public class LoriTimeModifyCommand implements CommonCommand {
     /**
      * Adds a signed global time adjustment for a player.
      *
-     * @param sender command sender used as the adjustment actor
-     * @param uuid target player UUID
+     * @param sender   command sender used as the adjustment actor
+     * @param uuid     target player UUID
      * @param modifyBy signed seconds to add or remove
      */
     public void modifyOnlineTime(final CommonSender sender, final UUID uuid, final long modifyBy) {
@@ -292,14 +292,14 @@ public class LoriTimeModifyCommand implements CommonCommand {
     /**
      * Adds a signed scoped time adjustment for a player.
      *
-     * @param sender command sender used as the adjustment actor
-     * @param uuid target player UUID
+     * @param sender   command sender used as the adjustment actor
+     * @param uuid     target player UUID
      * @param modifyBy signed seconds to add or remove
-     * @param scope adjustment scope
+     * @param scope    adjustment scope
      */
     public void modifyOnlineTime(final CommonSender sender, final UUID uuid, final long modifyBy, final TimeScope scope) {
         try {
-            final UUID actorUuid = sender instanceof CommonPlayerSender playerSender ? playerSender.getUniqueId() : null;
+            final UUID actorUuid = sender instanceof final CommonPlayerSender playerSender ? playerSender.getUniqueId() : null;
             final String actorName = sender instanceof CommonPlayerSender ? sender.getName() : "CONSOLE";
             plugin.getStorage().addTime(new ManualTimeAdjustment(uuid, modifyBy,
                     TimeEntryReason.MANUAL_ADJUSTMENT, actorUuid, actorName, scope));

@@ -1,9 +1,9 @@
 package com.jannik_kuehn.common.storage.database;
 
-import com.jannik_kuehn.common.api.storage.RecentPlayerIdentity;
 import com.jannik_kuehn.common.exception.StorageException;
 import com.jannik_kuehn.common.storage.database.provider.LoriTimeConnectionProvider;
 import com.jannik_kuehn.common.storage.database.table.PlayerTable;
+import com.jannik_kuehn.common.storage.model.RecentPlayerIdentity;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -37,9 +37,9 @@ public class RecentPlayerIdentityReader {
     /**
      * Creates a recent player identity reader.
      *
-     * @param provider database connection provider
+     * @param provider    database connection provider
      * @param playerTable player table helper
-     * @param dialect SQL dialect
+     * @param dialect     SQL dialect
      */
     public RecentPlayerIdentityReader(final LoriTimeConnectionProvider provider,
                                       final PlayerTable playerTable,

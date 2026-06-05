@@ -2,10 +2,10 @@ package com.jannik_kuehn.common.module.afk;
 
 import com.github.roleplaycauldron.spellbook.core.logger.LoggerFactory;
 import com.jannik_kuehn.common.LoriTimePlugin;
-import com.jannik_kuehn.common.api.common.CommonServer;
-import com.jannik_kuehn.common.api.scheduler.PluginScheduler;
-import com.jannik_kuehn.common.api.scheduler.PluginTask;
 import com.jannik_kuehn.common.config.Configuration;
+import com.jannik_kuehn.common.platform.CommonServer;
+import com.jannik_kuehn.common.scheduler.PluginScheduler;
+import com.jannik_kuehn.common.scheduler.PluginTask;
 import com.jannik_kuehn.common.utils.TimeParser;
 import org.junit.jupiter.api.Test;
 
@@ -15,14 +15,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
 class AfkStatusProviderTest {
 

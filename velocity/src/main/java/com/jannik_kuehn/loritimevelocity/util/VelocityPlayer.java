@@ -1,6 +1,6 @@
 package com.jannik_kuehn.loritimevelocity.util;
 
-import com.jannik_kuehn.common.api.common.CommonPlayerSender;
+import com.jannik_kuehn.common.platform.CommonPlayerSender;
 import com.velocitypowered.api.proxy.Player;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;

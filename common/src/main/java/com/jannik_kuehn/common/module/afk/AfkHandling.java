@@ -3,7 +3,7 @@ package com.jannik_kuehn.common.module.afk;
 import com.github.roleplaycauldron.spellbook.core.logger.WrappedLogger;
 import com.jannik_kuehn.common.LoriTimePlugin;
 import com.jannik_kuehn.common.api.LoriTimePlayer;
-import com.jannik_kuehn.common.api.common.CommonPlayerSender;
+import com.jannik_kuehn.common.platform.CommonPlayerSender;
 import com.jannik_kuehn.common.utils.TimeUtil;
 
 import java.util.Optional;

@@ -1,7 +1,7 @@
 package com.jannik_kuehn.common.command.profile;
 
-import com.jannik_kuehn.common.api.storage.StorageMode;
 import com.jannik_kuehn.common.command.config.CommandAliasConfig;
+import com.jannik_kuehn.common.storage.model.StorageMode;
 
 /**
  * Code-defined command registration profiles.
@@ -34,7 +34,7 @@ public enum RuntimeCommandProfile {
     /**
      * Selects a runtime command profile.
      *
-     * @param proxy true for proxy platforms
+     * @param proxy       true for proxy platforms
      * @param storageMode configured storage mode
      * @return command profile
      */

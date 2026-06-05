@@ -1,7 +1,7 @@
 package com.jannik_kuehn.loritimevelocity.command;
 
-import com.jannik_kuehn.common.api.common.CommonCommand;
-import com.jannik_kuehn.common.api.common.CommonSender;
+import com.jannik_kuehn.common.platform.CommonCommand;
+import com.jannik_kuehn.common.platform.CommonSender;
 import com.jannik_kuehn.loritimevelocity.LoriTimeVelocity;
 import com.jannik_kuehn.loritimevelocity.util.VelocityPlayer;
 import com.jannik_kuehn.loritimevelocity.util.VelocitySender;

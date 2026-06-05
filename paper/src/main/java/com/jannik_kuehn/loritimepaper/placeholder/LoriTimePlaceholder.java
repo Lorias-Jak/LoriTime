@@ -2,8 +2,8 @@ package com.jannik_kuehn.loritimepaper.placeholder;
 
 import com.github.roleplaycauldron.spellbook.core.logger.WrappedLogger;
 import com.jannik_kuehn.common.LoriTimePlugin;
-import com.jannik_kuehn.common.api.storage.UnifiedStorage;
 import com.jannik_kuehn.common.player.TrackedLoriTimePlayer;
+import com.jannik_kuehn.common.storage.contract.UnifiedStorage;
 import com.jannik_kuehn.common.utils.TimeUtil;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
@@ -27,7 +27,7 @@ public class LoriTimePlaceholder extends PlaceholderExpansion {
     /**
      * Creates a placeholder expansion backed by storage.
      *
-     * @param plugin LoriTime plugin runtime
+     * @param plugin  LoriTime plugin runtime
      * @param storage storage used for placeholder time lookups
      */
     public LoriTimePlaceholder(final LoriTimePlugin plugin, final UnifiedStorage storage) {
@@ -37,7 +37,7 @@ public class LoriTimePlaceholder extends PlaceholderExpansion {
     /**
      * Creates a placeholder expansion with an explicit time cache.
      *
-     * @param plugin LoriTime plugin runtime
+     * @param plugin    LoriTime plugin runtime
      * @param timeCache placeholder time cache
      */
     public LoriTimePlaceholder(final LoriTimePlugin plugin, final PlaceholderTimeCache timeCache) {

@@ -1,7 +1,6 @@
 package com.jannik_kuehn.common.command.profile;
 
 import com.jannik_kuehn.common.LoriTimePlugin;
-import com.jannik_kuehn.common.api.common.CommonCommand;
 import com.jannik_kuehn.common.command.LoriTimeAdminCommand;
 import com.jannik_kuehn.common.command.LoriTimeAfkCommand;
 import com.jannik_kuehn.common.command.LoriTimeCommand;
@@ -13,6 +12,7 @@ import com.jannik_kuehn.common.command.core.CommandDefinition;
 import com.jannik_kuehn.common.command.core.CommandDispatcher;
 import com.jannik_kuehn.common.command.core.CommandExecutionPolicy;
 import com.jannik_kuehn.common.config.localization.Localization;
+import com.jannik_kuehn.common.platform.CommonCommand;
 
 import java.util.ArrayList;
 import java.util.List;

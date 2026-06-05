@@ -2,23 +2,23 @@ package com.jannik_kuehn.common.command;
 
 import com.github.roleplaycauldron.spellbook.core.logger.LoggerFactory;
 import com.jannik_kuehn.common.LoriTimePlugin;
-import com.jannik_kuehn.common.api.LoriTimePlayerConverter;
-import com.jannik_kuehn.common.api.common.CommonConsoleSender;
-import com.jannik_kuehn.common.api.common.CommonPlayerSender;
-import com.jannik_kuehn.common.api.common.CommonSender;
-import com.jannik_kuehn.common.api.common.CommonServer;
-import com.jannik_kuehn.common.api.scheduler.PluginScheduler;
-import com.jannik_kuehn.common.api.scheduler.PluginTask;
-import com.jannik_kuehn.common.api.storage.ManualTimeAdjustment;
-import com.jannik_kuehn.common.api.storage.TimeEntryReason;
 import com.jannik_kuehn.common.api.storage.TimeRange;
 import com.jannik_kuehn.common.api.storage.TimeScope;
-import com.jannik_kuehn.common.api.storage.UnifiedStorage;
 import com.jannik_kuehn.common.command.core.CommandScopes;
 import com.jannik_kuehn.common.config.localization.Localization;
 import com.jannik_kuehn.common.exception.StorageException;
 import com.jannik_kuehn.common.module.updater.Updater;
+import com.jannik_kuehn.common.platform.CommonConsoleSender;
+import com.jannik_kuehn.common.platform.CommonPlayerSender;
+import com.jannik_kuehn.common.platform.CommonSender;
+import com.jannik_kuehn.common.platform.CommonServer;
+import com.jannik_kuehn.common.player.LoriTimePlayerConverter;
 import com.jannik_kuehn.common.player.TrackedLoriTimePlayer;
+import com.jannik_kuehn.common.scheduler.PluginScheduler;
+import com.jannik_kuehn.common.scheduler.PluginTask;
+import com.jannik_kuehn.common.storage.contract.UnifiedStorage;
+import com.jannik_kuehn.common.storage.model.ManualTimeAdjustment;
+import com.jannik_kuehn.common.storage.model.TimeEntryReason;
 import com.jannik_kuehn.common.utils.TimeParser;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
@@ -36,20 +36,65 @@ import java.util.UUID;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
 class SenderRoleCommandTest {
 
     private static final UUID PLAYER_ID = UUID.fromString("44174cf6-e76c-4994-899c-3387284ecd62");
+
+    private static Stream<Arguments> validLookupArguments() {
+        return Stream.of(
+                Arguments.of(new CommandScopes.LookupRequest(null, null, null), new String[0],
+                        "Expected empty lookup to target global self time"),
+                Arguments.of(new CommandScopes.LookupRequest("Lorias_", null, null), new String[]{"Lorias_"},
+                        "Expected single non-flag token to target a player"),
+                Arguments.of(new CommandScopes.LookupRequest(null, "survival", null), new String[]{"server:survival"},
+                        "Expected long server flag to parse"),
+                Arguments.of(new CommandScopes.LookupRequest(null, "survival", null), new String[]{"s:survival"},
+                        "Expected short server flag to parse"),
+                Arguments.of(new CommandScopes.LookupRequest("Lorias_", "survival", "world"),
+                        new String[]{"world:world", "Lorias_", "server:survival"},
+                        "Expected mixed-order world, player, and server flags to parse"),
+                Arguments.of(new CommandScopes.LookupRequest(null, null, "world"), new String[]{"w:world"},
+                        "Expected short world-only flag to parse")
+        );
+    }
+
+    private static Stream<Arguments> invalidLookupArguments() {
+        return Stream.of(
+                Arguments.of(new String[]{"server:survival", "s:creative"}, "Expected duplicate server flags to fail"),
+                Arguments.of(new String[]{"world:"}, "Expected empty world value to fail"),
+                Arguments.of(new String[]{"scope:value"}, "Expected unknown flag-like token to fail"),
+                Arguments.of(new String[]{"Lorias_", "OtherPlayer"}, "Expected multiple player tokens to fail"),
+                Arguments.of(new String[]{"server", "survival"}, "Expected legacy server syntax to fail")
+        );
+    }
+
+    private static Stream<Arguments> invalidTimeRangeArguments() {
+        return Stream.of(
+                Arguments.of(new String[]{"time:"}, "Expected empty time range to fail"),
+                Arguments.of(new String[]{"time:nope"}, "Expected unparsable time range to fail"),
+                Arguments.of(new String[]{"time:0d"}, "Expected zero time range to fail"),
+                Arguments.of(new String[]{"time:-3d"}, "Expected negative time range to fail"),
+                Arguments.of(new String[]{"time:4w-3d"}, "Expected reversed time range to fail"),
+                Arguments.of(new String[]{"time:3d", "t:4d"}, "Expected duplicate time range to fail")
+        );
+    }
+
+    private static TimeParser parser() {
+        return new TimeParser.Builder()
+                .addUnit(60, "m")
+                .addUnit(60 * 60 * 24, "d")
+                .addUnit(60 * 60 * 24 * 7, "w")
+                .addUnit(60 * 60 * 24 * 30, "mo")
+                .build();
+    }
+
+    private static Clock fixedClock() {
+        return Clock.fixed(Instant.parse("2026-05-25T00:00:00Z"), ZoneOffset.UTC);
+    }
 
     @ParameterizedTest
     @MethodSource("validLookupArguments")
@@ -229,58 +274,6 @@ class SenderRoleCommandTest {
 
         verify(context.storage(), never()).getTime(any(UUID.class), any(TimeScope.class));
         verify(sender).sendMessage(any(TextComponent.class));
-    }
-
-    private static Stream<Arguments> validLookupArguments() {
-        return Stream.of(
-                Arguments.of(new CommandScopes.LookupRequest(null, null, null), new String[0],
-                        "Expected empty lookup to target global self time"),
-                Arguments.of(new CommandScopes.LookupRequest("Lorias_", null, null), new String[]{"Lorias_"},
-                        "Expected single non-flag token to target a player"),
-                Arguments.of(new CommandScopes.LookupRequest(null, "survival", null), new String[]{"server:survival"},
-                        "Expected long server flag to parse"),
-                Arguments.of(new CommandScopes.LookupRequest(null, "survival", null), new String[]{"s:survival"},
-                        "Expected short server flag to parse"),
-                Arguments.of(new CommandScopes.LookupRequest("Lorias_", "survival", "world"),
-                        new String[]{"world:world", "Lorias_", "server:survival"},
-                        "Expected mixed-order world, player, and server flags to parse"),
-                Arguments.of(new CommandScopes.LookupRequest(null, null, "world"), new String[]{"w:world"},
-                        "Expected short world-only flag to parse")
-        );
-    }
-
-    private static Stream<Arguments> invalidLookupArguments() {
-        return Stream.of(
-                Arguments.of(new String[]{"server:survival", "s:creative"}, "Expected duplicate server flags to fail"),
-                Arguments.of(new String[]{"world:"}, "Expected empty world value to fail"),
-                Arguments.of(new String[]{"scope:value"}, "Expected unknown flag-like token to fail"),
-                Arguments.of(new String[]{"Lorias_", "OtherPlayer"}, "Expected multiple player tokens to fail"),
-                Arguments.of(new String[]{"server", "survival"}, "Expected legacy server syntax to fail")
-        );
-    }
-
-    private static Stream<Arguments> invalidTimeRangeArguments() {
-        return Stream.of(
-                Arguments.of(new String[]{"time:"}, "Expected empty time range to fail"),
-                Arguments.of(new String[]{"time:nope"}, "Expected unparsable time range to fail"),
-                Arguments.of(new String[]{"time:0d"}, "Expected zero time range to fail"),
-                Arguments.of(new String[]{"time:-3d"}, "Expected negative time range to fail"),
-                Arguments.of(new String[]{"time:4w-3d"}, "Expected reversed time range to fail"),
-                Arguments.of(new String[]{"time:3d", "t:4d"}, "Expected duplicate time range to fail")
-        );
-    }
-
-    private static TimeParser parser() {
-        return new TimeParser.Builder()
-                .addUnit(60, "m")
-                .addUnit(60 * 60 * 24, "d")
-                .addUnit(60 * 60 * 24 * 7, "w")
-                .addUnit(60 * 60 * 24 * 30, "mo")
-                .build();
-    }
-
-    private static Clock fixedClock() {
-        return Clock.fixed(Instant.parse("2026-05-25T00:00:00Z"), ZoneOffset.UTC);
     }
 
     @Test

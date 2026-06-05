@@ -1,12 +1,12 @@
 package com.jannik_kuehn.common.command;
 
 import com.jannik_kuehn.common.LoriTimePlugin;
-import com.jannik_kuehn.common.api.common.CommonCommand;
-import com.jannik_kuehn.common.api.common.CommonPlayerSender;
-import com.jannik_kuehn.common.api.common.CommonSender;
 import com.jannik_kuehn.common.command.core.CommandMessages;
 import com.jannik_kuehn.common.command.core.PlayerNameCompletions;
 import com.jannik_kuehn.common.config.localization.Localization;
+import com.jannik_kuehn.common.platform.CommonCommand;
+import com.jannik_kuehn.common.platform.CommonPlayerSender;
+import com.jannik_kuehn.common.platform.CommonSender;
 import com.jannik_kuehn.common.player.TrackedLoriTimePlayer;
 
 import java.util.List;
@@ -25,7 +25,7 @@ public class LoriTimeAfkCommand implements CommonCommand {
     /**
      * Creates an AFK command.
      *
-     * @param plugin LoriTime plugin runtime
+     * @param plugin       LoriTime plugin runtime
      * @param localization localization provider
      */
     public LoriTimeAfkCommand(final LoriTimePlugin plugin, final Localization localization) {
@@ -36,7 +36,7 @@ public class LoriTimeAfkCommand implements CommonCommand {
     /**
      * Toggles the sender's AFK state.
      *
-     * @param sender command sender
+     * @param sender    command sender
      * @param arguments command arguments
      */
     @Override
@@ -45,7 +45,7 @@ public class LoriTimeAfkCommand implements CommonCommand {
             CommandMessages.send(localization, plugin.getLanguageSelector(), sender, "message.noPermission");
             return;
         }
-        if (!(sender instanceof CommonPlayerSender playerSender)) {
+        if (!(sender instanceof final CommonPlayerSender playerSender)) {
             return;
         }
         plugin.getScheduler().runAsyncOnce(() -> {
@@ -58,7 +58,7 @@ public class LoriTimeAfkCommand implements CommonCommand {
      * Completes online player names for AFK command input.
      *
      * @param source command sender
-     * @param args command arguments
+     * @param args   command arguments
      * @return completion suggestions
      */
     @Override

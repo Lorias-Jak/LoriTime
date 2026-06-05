@@ -2,9 +2,6 @@ package com.jannik_kuehn.common.storage;
 
 import com.github.roleplaycauldron.spellbook.core.logger.WrappedLogger;
 import com.jannik_kuehn.common.LoriTimePlugin;
-import com.jannik_kuehn.common.api.storage.PlayerSessionChunk;
-import com.jannik_kuehn.common.api.storage.SessionContextDefaults;
-import com.jannik_kuehn.common.api.storage.TimeEntryReason;
 import com.jannik_kuehn.common.config.Configuration;
 import com.jannik_kuehn.common.config.YamlConfiguration;
 import com.jannik_kuehn.common.exception.StorageException;
@@ -16,6 +13,9 @@ import com.jannik_kuehn.common.storage.database.table.PlayerTable;
 import com.jannik_kuehn.common.storage.database.table.ServerTable;
 import com.jannik_kuehn.common.storage.database.table.TimeTable;
 import com.jannik_kuehn.common.storage.database.table.WorldTable;
+import com.jannik_kuehn.common.storage.model.PlayerSessionChunk;
+import com.jannik_kuehn.common.storage.model.SessionContextDefaults;
+import com.jannik_kuehn.common.storage.model.TimeEntryReason;
 
 import java.io.File;
 import java.io.IOException;

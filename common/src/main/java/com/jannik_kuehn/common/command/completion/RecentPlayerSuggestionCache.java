@@ -1,8 +1,8 @@
 package com.jannik_kuehn.common.command.completion;
 
-import com.jannik_kuehn.common.api.common.CommonPlayerSender;
-import com.jannik_kuehn.common.api.common.CommonServer;
-import com.jannik_kuehn.common.api.storage.RecentPlayerIdentity;
+import com.jannik_kuehn.common.platform.CommonPlayerSender;
+import com.jannik_kuehn.common.platform.CommonServer;
+import com.jannik_kuehn.common.storage.model.RecentPlayerIdentity;
 
 import java.util.ArrayList;
 import java.util.Comparator;

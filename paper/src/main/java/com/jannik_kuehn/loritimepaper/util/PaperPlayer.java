@@ -1,6 +1,6 @@
 package com.jannik_kuehn.loritimepaper.util;
 
-import com.jannik_kuehn.common.api.common.CommonPlayerSender;
+import com.jannik_kuehn.common.platform.CommonPlayerSender;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.entity.Player;

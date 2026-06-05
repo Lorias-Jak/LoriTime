@@ -1,7 +1,7 @@
 package com.jannik_kuehn.loritimepaper.listener;
 
 import com.jannik_kuehn.common.LoriTimePlugin;
-import com.jannik_kuehn.common.api.common.CommonSender;
+import com.jannik_kuehn.common.platform.CommonSender;
 import com.jannik_kuehn.loritimepaper.util.PaperPlayer;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;

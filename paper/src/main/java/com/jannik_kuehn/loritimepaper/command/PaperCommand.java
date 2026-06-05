@@ -1,8 +1,8 @@
 package com.jannik_kuehn.loritimepaper.command;
 
 import com.github.roleplaycauldron.spellbook.core.logger.WrappedLogger;
-import com.jannik_kuehn.common.api.common.CommonCommand;
-import com.jannik_kuehn.common.api.common.CommonSender;
+import com.jannik_kuehn.common.platform.CommonCommand;
+import com.jannik_kuehn.common.platform.CommonSender;
 import com.jannik_kuehn.loritimepaper.LoriTimePaper;
 import com.jannik_kuehn.loritimepaper.util.PaperPlayer;
 import com.jannik_kuehn.loritimepaper.util.PaperSender;

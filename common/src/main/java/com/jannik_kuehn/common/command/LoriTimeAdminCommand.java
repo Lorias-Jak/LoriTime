@@ -1,11 +1,11 @@
 package com.jannik_kuehn.common.command;
 
 import com.jannik_kuehn.common.LoriTimePlugin;
-import com.jannik_kuehn.common.api.common.CommonCommand;
-import com.jannik_kuehn.common.api.common.CommonSender;
 import com.jannik_kuehn.common.command.core.CommandMessages;
 import com.jannik_kuehn.common.command.core.SubcommandRouter;
 import com.jannik_kuehn.common.config.localization.Localization;
+import com.jannik_kuehn.common.platform.CommonCommand;
+import com.jannik_kuehn.common.platform.CommonSender;
 
 import java.util.Arrays;
 import java.util.List;
@@ -27,7 +27,7 @@ public class LoriTimeAdminCommand implements CommonCommand {
     /**
      * Creates an administration command.
      *
-     * @param plugin LoriTime plugin runtime
+     * @param plugin       LoriTime plugin runtime
      * @param localization localization provider
      */
     public LoriTimeAdminCommand(final LoriTimePlugin plugin, final Localization localization) {
@@ -45,7 +45,7 @@ public class LoriTimeAdminCommand implements CommonCommand {
      * Executes the selected admin subcommand.
      *
      * @param sender command sender
-     * @param args command arguments
+     * @param args   command arguments
      */
     @Override
     public void execute(final CommonSender sender, final String... args) {
@@ -75,7 +75,7 @@ public class LoriTimeAdminCommand implements CommonCommand {
      * Completes available admin subcommands.
      *
      * @param source command sender
-     * @param args command arguments
+     * @param args   command arguments
      * @return completion suggestions
      */
     @Override

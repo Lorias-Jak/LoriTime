@@ -1,9 +1,9 @@
 package com.jannik_kuehn.common.command.core;
 
 import com.jannik_kuehn.common.LoriTimePlugin;
-import com.jannik_kuehn.common.api.common.CommonCommand;
-import com.jannik_kuehn.common.api.common.CommonSender;
 import com.jannik_kuehn.common.config.localization.Localization;
+import com.jannik_kuehn.common.platform.CommonCommand;
+import com.jannik_kuehn.common.platform.CommonSender;
 
 import java.util.List;
 
@@ -30,8 +30,8 @@ public class CommandDispatcher implements CommonCommand {
     /**
      * Creates a command dispatcher.
      *
-     * @param plugin LoriTime plugin
-     * @param definition command definition
+     * @param plugin       LoriTime plugin
+     * @param definition   command definition
      * @param localization localization
      */
     public CommandDispatcher(final LoriTimePlugin plugin, final CommandDefinition definition, final Localization localization) {

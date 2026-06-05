@@ -3,13 +3,12 @@ package com.jannik_kuehn.common.storage;
 import com.github.roleplaycauldron.spellbook.core.logger.LoggerFactory;
 import com.github.roleplaycauldron.spellbook.core.logger.WrappedLogger;
 import com.jannik_kuehn.common.LoriTimePlugin;
-import com.jannik_kuehn.common.api.scheduler.PluginTask;
-import com.jannik_kuehn.common.api.storage.AccumulatingTimeStorage;
-import com.jannik_kuehn.common.api.storage.AdminStorageMaintenance;
-import com.jannik_kuehn.common.api.storage.StorageMode;
-import com.jannik_kuehn.common.api.storage.TimeAccumulator;
-import com.jannik_kuehn.common.api.storage.UnifiedStorage;
 import com.jannik_kuehn.common.exception.StorageException;
+import com.jannik_kuehn.common.scheduler.PluginTask;
+import com.jannik_kuehn.common.storage.contract.AccumulatingTimeStorage;
+import com.jannik_kuehn.common.storage.contract.AdminStorageMaintenance;
+import com.jannik_kuehn.common.storage.contract.TimeAccumulator;
+import com.jannik_kuehn.common.storage.contract.UnifiedStorage;
 import com.jannik_kuehn.common.storage.database.DatabaseStorage;
 import com.jannik_kuehn.common.storage.database.UnifiedDatabaseStorage;
 import com.jannik_kuehn.common.storage.database.table.ManualAdjustmentTable;
@@ -17,6 +16,7 @@ import com.jannik_kuehn.common.storage.database.table.PlayerTable;
 import com.jannik_kuehn.common.storage.database.table.ServerTable;
 import com.jannik_kuehn.common.storage.database.table.TimeTable;
 import com.jannik_kuehn.common.storage.database.table.WorldTable;
+import com.jannik_kuehn.common.storage.model.StorageMode;
 
 import java.io.File;
 import java.util.Locale;
@@ -277,7 +277,7 @@ public class DataStorageManager {
      * @return maintenance contract when the active canonical storage supports it
      */
     public Optional<AdminStorageMaintenance> getAdminStorageMaintenance() {
-        if (!ownsCanonicalStorage() || !(storage instanceof AdminStorageMaintenance maintenance)) {
+        if (!ownsCanonicalStorage() || !(storage instanceof final AdminStorageMaintenance maintenance)) {
             return Optional.empty();
         }
         return Optional.of(maintenance);

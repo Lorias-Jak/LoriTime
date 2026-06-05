@@ -1,6 +1,6 @@
 package com.jannik_kuehn.common.config.localization;
 
-import com.jannik_kuehn.common.api.common.CommonSender;
+import com.jannik_kuehn.common.platform.CommonSender;
 
 /**
  * Resolves the language tag used for sender-facing messages.

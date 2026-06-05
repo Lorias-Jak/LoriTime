@@ -1,6 +1,6 @@
 package com.jannik_kuehn.common.storage.database.table;
 
-import com.jannik_kuehn.common.api.storage.ManualTimeAdjustment;
+import com.jannik_kuehn.common.storage.model.ManualTimeAdjustment;
 import com.jannik_kuehn.common.utils.UuidUtil;
 
 import java.sql.Connection;

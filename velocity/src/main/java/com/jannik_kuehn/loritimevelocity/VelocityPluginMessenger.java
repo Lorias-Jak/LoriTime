@@ -1,8 +1,8 @@
 package com.jannik_kuehn.loritimevelocity;
 
 import com.github.roleplaycauldron.spellbook.core.logger.WrappedLogger;
-import com.jannik_kuehn.common.api.common.CommonPlayerSender;
 import com.jannik_kuehn.common.module.messaging.PluginMessaging;
+import com.jannik_kuehn.common.platform.CommonPlayerSender;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.connection.PluginMessageEvent;
 import com.velocitypowered.api.proxy.Player;

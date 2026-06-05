@@ -3,11 +3,11 @@ package com.jannik_kuehn.common.module.afk;
 import com.github.roleplaycauldron.spellbook.core.logger.WrappedLogger;
 import com.jannik_kuehn.common.LoriTimePlugin;
 import com.jannik_kuehn.common.api.LoriTimePlayer;
-import com.jannik_kuehn.common.api.storage.ManualTimeAdjustment;
-import com.jannik_kuehn.common.api.storage.SessionContextDefaults;
-import com.jannik_kuehn.common.api.storage.TimeEntryReason;
 import com.jannik_kuehn.common.api.storage.TimeScope;
 import com.jannik_kuehn.common.exception.StorageException;
+import com.jannik_kuehn.common.storage.model.ManualTimeAdjustment;
+import com.jannik_kuehn.common.storage.model.SessionContextDefaults;
+import com.jannik_kuehn.common.storage.model.TimeEntryReason;
 import com.jannik_kuehn.common.utils.TimeUtil;
 
 import java.util.Set;
@@ -43,7 +43,7 @@ public class MasteredAfkPlayerHandling extends AfkHandling {
      * Applies AFK side effects for a player, including optional time removal and kick handling.
      *
      * @param loriTimePlayer the player that became AFK.
-     * @param timeToRemove the AFK time to remove in seconds.
+     * @param timeToRemove   the AFK time to remove in seconds.
      */
     @Override
     @SuppressWarnings("PMD.AvoidCatchingGenericException")

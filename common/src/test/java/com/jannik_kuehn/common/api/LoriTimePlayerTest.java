@@ -1,7 +1,7 @@
 package com.jannik_kuehn.common.api;
 
-import com.jannik_kuehn.common.api.common.CommonPlayerSender;
-import com.jannik_kuehn.common.api.common.CommonSender;
+import com.jannik_kuehn.common.platform.CommonPlayerSender;
+import com.jannik_kuehn.common.platform.CommonSender;
 import com.jannik_kuehn.common.player.TrackedLoriTimePlayer;
 import org.junit.jupiter.api.Test;
 

@@ -1,8 +1,8 @@
 package com.jannik_kuehn.common.storage;
 
-import com.jannik_kuehn.common.api.storage.FileStorage;
 import com.jannik_kuehn.common.config.Configuration;
 import com.jannik_kuehn.common.exception.StorageException;
+import com.jannik_kuehn.common.storage.contract.FileStorage;
 
 import java.util.HashMap;
 import java.util.Map;

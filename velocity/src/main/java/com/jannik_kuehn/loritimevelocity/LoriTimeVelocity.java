@@ -4,11 +4,11 @@ import com.github.roleplaycauldron.spellbook.core.logger.LoggerFactory;
 import com.github.roleplaycauldron.spellbook.core.logger.WrappedLogger;
 import com.jannik_kuehn.common.LoriTimePlugin;
 import com.jannik_kuehn.common.api.LoriTimeAPI;
-import com.jannik_kuehn.common.api.common.CommonCommand;
-import com.jannik_kuehn.common.api.storage.StorageMode;
 import com.jannik_kuehn.common.command.profile.CommandProfileRegistry;
 import com.jannik_kuehn.common.command.profile.RuntimeCommandProfile;
 import com.jannik_kuehn.common.module.afk.MasteredAfkPlayerHandling;
+import com.jannik_kuehn.common.platform.CommonCommand;
+import com.jannik_kuehn.common.storage.model.StorageMode;
 import com.jannik_kuehn.loritimevelocity.command.VelocityCommand;
 import com.jannik_kuehn.loritimevelocity.listener.LoriTimeUpdateVelocityListener;
 import com.jannik_kuehn.loritimevelocity.listener.PlayerNameVelocityListener;
@@ -53,9 +53,9 @@ public class LoriTimeVelocity {
     /**
      * Creates the Velocity plugin bootstrap.
      *
-     * @param server Velocity proxy server
-     * @param logger platform logger
-     * @param dataDirectory plugin data directory
+     * @param server         Velocity proxy server
+     * @param logger         platform logger
+     * @param dataDirectory  plugin data directory
      * @param metricsFactory bStats metrics factory
      */
     @Inject

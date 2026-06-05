@@ -1,6 +1,6 @@
 package com.jannik_kuehn.loritimepaper.util;
 
-import com.jannik_kuehn.common.api.common.CommonConsoleSender;
+import com.jannik_kuehn.common.platform.CommonConsoleSender;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.command.CommandSender;

@@ -16,12 +16,24 @@ import java.util.List;
 @SuppressWarnings("PMD.AvoidLiteralsInIfCondition")
 public class LoriTimeAdminCommand implements CommonCommand {
 
+    /**
+     * LoriTime plugin runtime.
+     */
     private final LoriTimePlugin plugin;
 
+    /**
+     * Localization provider.
+     */
     private final Localization localization;
 
+    /**
+     * Router for subcommands.
+     */
     private final SubcommandRouter<AdminAction> router;
 
+    /**
+     * Administrative actions.
+     */
     private final LoriTimeAdminActions actions;
 
     /**
@@ -113,6 +125,9 @@ public class LoriTimeAdminCommand implements CommonCommand {
         CommandMessages.send(localization, plugin.getLanguageSelector(), sender, "message.command.loritimeadmin.usage");
     }
 
+    /**
+     * Administrative subcommands.
+     */
     private enum AdminAction {
         /**
          * Reloads LoriTime configuration and runtime services.

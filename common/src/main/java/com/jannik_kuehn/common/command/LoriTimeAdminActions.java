@@ -15,18 +15,39 @@ import java.util.function.Consumer;
  */
 final class LoriTimeAdminActions {
 
+    /**
+     * Path to the debug configuration option.
+     */
     private static final String DEBUG_CONFIG_PATH = "general.debug";
 
+    /**
+     * LoriTime plugin instance.
+     */
     private final LoriTimePlugin plugin;
 
+    /**
+     * Localization provider.
+     */
     private final Localization localization;
 
+    /**
+     * Usage callback for invalid arguments.
+     */
     private final Consumer<CommonSender> usage;
 
+    /**
+     * Logger for admin subcommand diagnostics.
+     */
     private final WrappedLogger log;
 
+    /**
+     * Whether debug mode is enabled.
+     */
     private boolean isDebugging;
 
+    /**
+     * Task that automatically disables debug mode after a certain time.
+     */
     private PluginTask autoDisableTask;
 
     /**

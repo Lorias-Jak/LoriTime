@@ -17,17 +17,26 @@ import java.util.List;
  */
 public class VelocityCommand implements SimpleCommand {
 
+    /**
+     * The Velocity plugin bootstrap.
+     */
     private final LoriTimeVelocity velocityPlugin;
 
+    /**
+     * The shared command implementation.
+     */
     private final CommonCommand command;
 
+    /**
+     * The Velocity command metadata.
+     */
     private CommandMeta meta;
 
     /**
      * Creates and registers a Velocity command adapter.
      *
      * @param velocityPlugin Velocity plugin bootstrap
-     * @param command shared command implementation
+     * @param command        shared command implementation
      */
     public VelocityCommand(final LoriTimeVelocity velocityPlugin, final CommonCommand command) {
         this.velocityPlugin = velocityPlugin;
@@ -60,6 +69,7 @@ public class VelocityCommand implements SimpleCommand {
     public List<String> suggest(final Invocation invocation) {
         final CommonSender commandSource = getSender(invocation.source());
         final String[] args = invocation.arguments();
+
         return this.command.handleTabComplete(commandSource, args);
     }
 
@@ -73,7 +83,9 @@ public class VelocityCommand implements SimpleCommand {
 
     private void register() {
         final List<String> aliases = command.getAliases();
-        meta = velocityPlugin.getProxyServer().getCommandManager().metaBuilder(command.getCommandName())
+
+        meta = velocityPlugin.getProxyServer().getCommandManager()
+                .metaBuilder(command.getCommandName())
                 .aliases(aliases.toArray(new String[0]))
                 .build();
 
@@ -83,8 +95,8 @@ public class VelocityCommand implements SimpleCommand {
     private CommonSender getSender(final CommandSource source) {
         if (source instanceof Player) {
             return new VelocityPlayer((Player) source);
-        } else {
-            return new VelocitySender(source);
         }
+
+        return new VelocitySender(source);
     }
 }

@@ -54,8 +54,14 @@ public final class CommandScopes {
      */
     public static final String WORLD = "world";
 
+    /**
+     * Command token for time scope suffixes.
+     */
     private static final int MIN_TIMED_SCOPE_ARGS = 2;
 
+    /**
+     * Command token for reset scope suffixes.
+     */
     private static final int RESET_WITHOUT_SCOPE_ARGS = 1;
 
     private CommandScopes() {

@@ -19,10 +19,19 @@ import java.util.UUID;
  */
 public class VelocityServer implements CommonServer {
 
+    /**
+     * The Velocity proxy server.
+     */
     private ProxyServer server;
 
+    /**
+     * The LoriTime plugin version.
+     */
     private String version;
 
+    /**
+     * The configured LoriTime server mode.
+     */
     private String serverMode;
 
     /**
@@ -35,7 +44,7 @@ public class VelocityServer implements CommonServer {
     /**
      * Attaches the Velocity proxy runtime to this adapter.
      *
-     * @param server Velocity proxy server
+     * @param server  Velocity proxy server
      * @param version LoriTime plugin version
      */
     public void enable(final ProxyServer server, final String version) {
@@ -108,7 +117,7 @@ public class VelocityServer implements CommonServer {
     /**
      * Dispatches a command through Velocity.
      *
-     * @param sender shared sender
+     * @param sender  shared sender
      * @param command command line
      * @return true when dispatch was attempted
      */
@@ -117,7 +126,7 @@ public class VelocityServer implements CommonServer {
         final CommandSource commandSource;
         if (sender instanceof CommonConsoleSender) {
             commandSource = server.getConsoleCommandSource();
-        } else if (sender instanceof CommonPlayerSender playerSender) {
+        } else if (sender instanceof final CommonPlayerSender playerSender) {
             final Optional<Player> optionalPlayer = server.getPlayer(playerSender.getUniqueId());
             if (optionalPlayer.isEmpty()) {
                 return false;
@@ -174,7 +183,7 @@ public class VelocityServer implements CommonServer {
      * Disconnects an online Velocity player.
      *
      * @param loriTimePlayer player identity
-     * @param message disconnect message
+     * @param message        disconnect message
      */
     @Override
     public void kickPlayer(final LoriTimePlayer loriTimePlayer, final Component message) {

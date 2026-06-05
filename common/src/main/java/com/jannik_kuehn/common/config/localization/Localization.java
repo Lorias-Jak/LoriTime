@@ -20,26 +20,60 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 @SuppressWarnings({"PMD.GodClass", "PMD.TooManyMethods"})
 public class Localization {
+
+    /**
+     * Key for the configured default prefix.
+     */
     private static final String PREFIX_KEY = "prefix";
 
+    /**
+     * MiniMessage instance used for parsing and rendering messages.
+     */
     private final MiniMessage miniMessage;
 
+    /**
+     * Logger for localization diagnostics.
+     */
     private final WrappedLogger log;
 
+    /**
+     * Localization file loader.
+     */
     private final LocalizationLoader loader;
 
-    private String configuredDefaultTag;
-
+    /**
+     * Map of language tags to their respective message map.
+     */
     private final Map<String, Map<String, String>> messagesByTag;
 
+    /**
+     * Map of language tags to their respective list map.
+     */
     private final Map<String, Map<String, List<String>>> listsByTag;
 
+    /**
+     * Set of known language tags.
+     */
     private final Set<String> knownTags;
 
+    /**
+     * Set of language tags that failed to load.
+     */
     private final Set<String> failedTags;
 
+    /**
+     * Set of language tags that are incomplete.
+     */
     private final Set<String> incompleteTags;
 
+    /**
+     * configured default language tag for non-player contexts.
+     */
+    private String configuredDefaultTag;
+
+    /**
+     * Health indicator for runtime localization usage.
+     */
     private HealthState state;
 
     /**

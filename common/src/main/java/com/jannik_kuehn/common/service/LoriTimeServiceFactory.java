@@ -19,6 +19,6 @@ public final class LoriTimeServiceFactory {
      * @return service facade
      */
     public static LoriTimeService create(final LoriTimePlugin plugin) {
-        return new DefaultLoriTimeService(plugin);
+        return new LoriTimeServiceImpl(plugin);
     }
 }

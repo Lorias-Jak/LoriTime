@@ -33,14 +33,29 @@ import java.util.UUID;
 @SuppressWarnings({"PMD.TooManyMethods", "PMD.AvoidLiteralsInIfCondition", "PMD.AvoidDuplicateLiterals"})
 public class LoriTimeModifyCommand implements CommonCommand {
 
+    /**
+     * LoriTime plugin instance.
+     */
     private final LoriTimePlugin plugin;
 
+    /**
+     * The {@link WrappedLogger} instance.
+     */
     private final WrappedLogger log;
 
+    /**
+     * Localization provider.
+     */
     private final Localization localization;
 
+    /**
+     * Time parser.
+     */
     private final TimeParser parser;
 
+    /**
+     * Router for subcommands.
+     */
     private final SubcommandRouter<ModifyAction> router;
 
     /**
@@ -342,6 +357,9 @@ public class LoriTimeModifyCommand implements CommonCommand {
         CommandMessages.send(localization, plugin.getLanguageSelector(), sender, "message.command.loritimeadmin.usage");
     }
 
+    /**
+     * Modification subcommands.
+     */
     private enum ModifyAction {
         /**
          * Adds signed time to the current value.

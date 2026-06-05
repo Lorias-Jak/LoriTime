@@ -19,6 +19,9 @@ public abstract class AfkHandling {
      */
     protected final LoriTimePlugin loriTimePlugin;
 
+    /**
+     * The {@link WrappedLogger} instance.
+     */
     private final WrappedLogger log;
 
     /**
@@ -52,7 +55,7 @@ public abstract class AfkHandling {
      * Applies platform-specific effects when a player becomes AFK.
      *
      * @param loriTimePlayer player becoming AFK
-     * @param timeToRemove seconds to remove from online time, when configured
+     * @param timeToRemove   seconds to remove from online time, when configured
      */
     public abstract void executePlayerAfk(LoriTimePlayer loriTimePlayer, long timeToRemove);
 
@@ -77,7 +80,7 @@ public abstract class AfkHandling {
      * Checks whether an online player has a permission.
      *
      * @param loriTimePlayer player identity
-     * @param permission permission node
+     * @param permission     permission node
      * @return true when the online player has the permission
      */
     protected boolean hasPermission(final LoriTimePlayer loriTimePlayer, final String permission) {
@@ -94,9 +97,9 @@ public abstract class AfkHandling {
     /**
      * Announces an AFK kick to players with a permission.
      *
-     * @param player AFK player
+     * @param player       AFK player
      * @param timeToRemove seconds removed from the player's online time
-     * @param permission permission required to receive the announcement
+     * @param permission   permission required to receive the announcement
      */
     protected void sendKickAnnounce(final LoriTimePlayer player, final long timeToRemove, final String permission) {
         for (final CommonPlayerSender onlinePlayer : loriTimePlugin.getServer().getOnlinePlayers()) {
@@ -116,8 +119,8 @@ public abstract class AfkHandling {
     /**
      * Sends a localized chat announcement to players with a permission.
      *
-     * @param player player named in the announcement
-     * @param message localization message key
+     * @param player     player named in the announcement
+     * @param message    localization message key
      * @param permission permission required to receive the announcement
      */
     protected void chatAnnounce(final LoriTimePlayer player, final String message, final String permission) {
@@ -137,7 +140,7 @@ public abstract class AfkHandling {
     /**
      * Sends a localized AFK message to the affected player.
      *
-     * @param player target player
+     * @param player  target player
      * @param message localization message key
      */
     protected void selfAfkMessage(final LoriTimePlayer player, final String message) {

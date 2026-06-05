@@ -12,8 +12,14 @@ import java.util.UUID;
  */
 public class PaperPlayer implements CommonPlayerSender {
 
+    /**
+     * Bukkit player.
+     */
     private final Player player;
 
+    /**
+     * Player UUID.
+     */
     private final UUID uuid;
 
     /**

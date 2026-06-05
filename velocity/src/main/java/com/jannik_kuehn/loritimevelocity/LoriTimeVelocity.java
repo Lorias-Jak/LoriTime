@@ -36,18 +36,40 @@ import java.util.List;
  * Velocity plugin bootstrap for LoriTime.
  */
 public class LoriTimeVelocity {
+
+    /**
+     * The plugin data directory.
+     */
     private final Path dataDirectory;
 
+    /**
+     * The Velocity proxy server.
+     */
     private final ProxyServer proxyServer;
 
+    /**
+     * The registered commands.
+     */
     private final List<VelocityCommand> commands;
 
+    /**
+     * The bStats metrics factory.
+     */
     private final Metrics.Factory metricsFactory;
 
+    /**
+     * The logger factory.
+     */
     private final LoggerFactory loggerFactory;
 
+    /**
+     * The shared LoriTime plugin runtime.
+     */
     private LoriTimePlugin loriTimePlugin;
 
+    /**
+     * The {@link WrappedLogger} instance.
+     */
     private WrappedLogger log;
 
     /**

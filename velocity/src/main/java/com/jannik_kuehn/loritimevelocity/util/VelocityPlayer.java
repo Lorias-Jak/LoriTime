@@ -11,8 +11,14 @@ import java.util.UUID;
  * Velocity player adapter for shared LoriTime code.
  */
 public class VelocityPlayer implements CommonPlayerSender {
+    /**
+     * The Velocity player.
+     */
     private final Player player;
 
+    /**
+     * The player's UUID.
+     */
     private final UUID uuid;
 
     /**

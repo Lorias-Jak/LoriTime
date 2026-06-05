@@ -112,12 +112,24 @@ public class UnifiedDatabaseStorage implements UnifiedStorage, AdminStorageMaint
      */
     private final String playerTableName;
 
+    /**
+     * server table names used by maintenance SQL.
+     */
     private final String serverTableName;
 
+    /**
+     * world table names used by maintenance SQL.
+     */
     private final String worldTableName;
 
+    /**
+     * time table names used by maintenance SQL.
+     */
     private final String timeTableName;
 
+    /**
+     * adjustment table names used by maintenance SQL.
+     */
     private final String adjustmentTableName;
 
     /**

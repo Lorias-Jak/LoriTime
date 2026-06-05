@@ -9,6 +9,10 @@ import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
  * Velocity console sender adapter.
  */
 public class VelocitySender implements CommonConsoleSender {
+
+    /**
+     * The Velocity command source.
+     */
     private final CommandSource source;
 
     /**

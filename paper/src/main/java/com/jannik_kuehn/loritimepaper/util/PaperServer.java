@@ -22,19 +22,32 @@ import java.util.UUID;
  * Paper implementation of the shared server abstraction.
  */
 public class PaperServer implements CommonServer {
+
+    /**
+     * The {@link LoriTimePaper} instance.
+     */
     private final LoriTimePaper loriTimePaper;
 
+    /**
+     * The LoriTime plugin version.
+     */
     private final String version;
 
+    /**
+     * The Bukkit server instance.
+     */
     private final Server server;
 
+    /**
+     * The configured LoriTime server mode.
+     */
     private String serverMode;
 
     /**
      * Creates a Paper server adapter.
      *
      * @param loriTimePaper Paper plugin bootstrap
-     * @param version LoriTime plugin version
+     * @param version       LoriTime plugin version
      */
     public PaperServer(final LoriTimePaper loriTimePaper, final String version) {
         this.loriTimePaper = loriTimePaper;
@@ -114,7 +127,7 @@ public class PaperServer implements CommonServer {
      * Returns live world names from the Paper server.
      *
      * @param serverName optional server filter
-     * @param uniqueId optional player UUID filter
+     * @param uniqueId   optional player UUID filter
      * @return live world names
      */
     @Override
@@ -133,7 +146,7 @@ public class PaperServer implements CommonServer {
      * Dispatches a command through Bukkit.
      *
      * @param consoleSender shared sender
-     * @param command command line
+     * @param command       command line
      * @return true when dispatch was attempted
      */
     @Override
@@ -141,7 +154,7 @@ public class PaperServer implements CommonServer {
         final CommandSender commandSource;
         if (consoleSender instanceof CommonConsoleSender) {
             commandSource = server.getConsoleSender();
-        } else if (consoleSender instanceof CommonPlayerSender playerSender) {
+        } else if (consoleSender instanceof final CommonPlayerSender playerSender) {
             commandSource = server.getPlayer(playerSender.getUniqueId());
         } else {
             return false;
@@ -197,7 +210,7 @@ public class PaperServer implements CommonServer {
      * Kicks an online Paper player.
      *
      * @param loriTimePlayer player identity
-     * @param message kick message
+     * @param message        kick message
      */
     @Override
     public void kickPlayer(final LoriTimePlayer loriTimePlayer, final Component message) {

@@ -21,7 +21,7 @@ import java.util.concurrent.CompletableFuture;
  * Default public facade implementation.
  */
 @SuppressWarnings("PMD.TooManyMethods")
-final class DefaultLoriTimeService implements LoriTimeService {
+public final class LoriTimeServiceImpl implements LoriTimeService {
     /**
      * Parameter name used for player identity validation.
      */
@@ -42,7 +42,7 @@ final class DefaultLoriTimeService implements LoriTimeService {
      *
      * @param plugin the backing LoriTime plugin.
      */
-    /* default */ DefaultLoriTimeService(final LoriTimePlugin plugin) {
+    public LoriTimeServiceImpl(final LoriTimePlugin plugin) {
         this.plugin = Objects.requireNonNull(plugin, "plugin");
     }
 

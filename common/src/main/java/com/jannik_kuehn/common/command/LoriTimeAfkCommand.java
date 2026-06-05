@@ -18,8 +18,14 @@ import java.util.stream.Collectors;
 @SuppressWarnings("PMD.AvoidLiteralsInIfCondition")
 public class LoriTimeAfkCommand implements CommonCommand {
 
+    /**
+     * LoriTime plugin runtime.
+     */
     private final LoriTimePlugin plugin;
 
+    /**
+     * Localization provider.
+     */
     private final Localization localization;
 
     /**

@@ -9,6 +9,10 @@ import org.bukkit.command.CommandSender;
  * Paper console sender adapter.
  */
 public class PaperSender implements CommonConsoleSender {
+
+    /**
+     * The Bukkit command sender.
+     */
     private final CommandSender source;
 
     /**

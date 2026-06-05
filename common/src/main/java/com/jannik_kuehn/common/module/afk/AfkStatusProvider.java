@@ -12,14 +12,30 @@ import java.util.OptionalLong;
  */
 @SuppressWarnings("PMD.TooManyMethods")
 public class AfkStatusProvider {
+
+    /**
+     * LoriTime plugin runtime.
+     */
     private final LoriTimePlugin loriTimePlugin;
 
+    /**
+     * The {@link WrappedLogger} instance.
+     */
     private final WrappedLogger log;
 
+    /**
+     * The AFK handling implementation.
+     */
     private final AfkHandling afkPlayerHandling;
 
+    /**
+     * The task that periodically checks for players that are AFK.
+     */
     private PluginTask afkCheck;
 
+    /**
+     * The time in milliseconds after which a player is considered AFK.
+     */
     private long afkConfigTime;
 
     /**

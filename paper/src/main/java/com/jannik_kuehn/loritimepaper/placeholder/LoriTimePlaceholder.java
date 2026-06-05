@@ -18,10 +18,19 @@ import java.util.OptionalLong;
 @SuppressFBWarnings("HE_INHERITS_EQUALS_USE_HASHCODE")
 public class LoriTimePlaceholder extends PlaceholderExpansion {
 
+    /**
+     * LoriTime plugin runtime.
+     */
     private final LoriTimePlugin loriTimePlugin;
 
+    /**
+     * Time cache for placeholder lookups.
+     */
     private final PlaceholderTimeCache timeCache;
 
+    /**
+     * Logger instance.
+     */
     private final WrappedLogger log;
 
     /**

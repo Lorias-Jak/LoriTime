@@ -29,16 +29,34 @@ import java.util.stream.Collectors;
 @SuppressWarnings({"PMD.CognitiveComplexity", "PMD.AvoidThrowingRawExceptionTypes"})
 public class LoriTimeCommand implements CommonCommand {
 
+    /**
+     * Placeholder for player name in messages.
+     */
     private static final String PLAYER_PLACEHOLDER = "[player]";
 
+    /**
+     * Placeholder for time range in messages.
+     */
     private static final String RANGE_PLACEHOLDER = "[range]";
 
+    /**
+     * Placeholder for time scope in messages.
+     */
     private static final String SCOPE_PLACEHOLDER = "[scope]";
 
+    /**
+     * LoriTime plugin instance.
+     */
     private final LoriTimePlugin loriTimePlugin;
 
+    /**
+     * The {@link WrappedLogger} instance.
+     */
     private final WrappedLogger log;
 
+    /**
+     * Localization provider.
+     */
     private final Localization localization;
 
     /**

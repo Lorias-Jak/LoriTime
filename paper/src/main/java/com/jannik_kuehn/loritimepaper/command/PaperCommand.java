@@ -26,17 +26,26 @@ import java.util.List;
  */
 public class PaperCommand implements CommandExecutor, TabExecutor {
 
+    /**
+     * The Paper plugin bootstrap.
+     */
     private final LoriTimePaper paperPlugin;
 
+    /**
+     * The shared command implementation.
+     */
     private final CommonCommand command;
 
+    /**
+     * The logger instance.
+     */
     private final WrappedLogger log;
 
     /**
      * Creates and registers a Paper command adapter.
      *
      * @param paperPlugin Paper plugin bootstrap
-     * @param command shared command implementation
+     * @param command     shared command implementation
      */
     public PaperCommand(final LoriTimePaper paperPlugin, final CommonCommand command) {
         this.paperPlugin = paperPlugin;
@@ -50,9 +59,9 @@ public class PaperCommand implements CommandExecutor, TabExecutor {
      * Dispatches a Bukkit command to the shared command implementation.
      *
      * @param commandSender Bukkit command sender
-     * @param command Bukkit command
-     * @param label command label
-     * @param args command arguments
+     * @param command       Bukkit command
+     * @param label         command label
+     * @param args          command arguments
      * @return true when the command was handled
      */
     @Override
@@ -66,9 +75,9 @@ public class PaperCommand implements CommandExecutor, TabExecutor {
      * Requests tab completions from the shared command implementation.
      *
      * @param commandSender Bukkit command sender
-     * @param command Bukkit command
-     * @param label command label
-     * @param args command arguments
+     * @param command       Bukkit command
+     * @param label         command label
+     * @param args          command arguments
      * @return completion suggestions
      */
     @Override

@@ -6,6 +6,7 @@ import com.jannik_kuehn.common.api.storage.TimeScope;
 import com.jannik_kuehn.common.exception.StorageException;
 import com.jannik_kuehn.common.scheduler.PluginScheduler;
 import com.jannik_kuehn.common.scheduler.PluginTask;
+import com.jannik_kuehn.common.service.LoriTimeServiceImpl;
 import com.jannik_kuehn.common.storage.contract.UnifiedStorage;
 import com.jannik_kuehn.common.storage.model.ManualTimeAdjustment;
 import com.jannik_kuehn.common.storage.model.TimeEntryReason;
@@ -51,7 +52,7 @@ class LoriTimeServiceTest {
             invocation.<Runnable>getArgument(0).run();
             return mock(PluginTask.class);
         }).when(scheduler).runAsyncOnce(any());
-        service = new DefaultLoriTimeService(plugin);
+        service = new LoriTimeServiceImpl(plugin);
     }
 
     @AfterEach

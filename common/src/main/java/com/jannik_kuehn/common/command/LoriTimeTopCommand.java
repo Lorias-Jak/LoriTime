@@ -27,10 +27,19 @@ import java.util.stream.Collectors;
         "PMD.AvoidThrowingRawExceptionTypes", "PMD.CloseResource"})
 public class LoriTimeTopCommand implements CommonCommand {
 
+    /**
+     * Amount of players per page.
+     */
     private static final double PLAYER_AMOUNT_PER_PAGE = 8;
 
+    /**
+     * LoriTime plugin instance.
+     */
     private final LoriTimePlugin plugin;
 
+    /**
+     * Localization provider.
+     */
     private final Localization localization;
 
     /**

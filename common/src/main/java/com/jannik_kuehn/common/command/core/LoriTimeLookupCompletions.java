@@ -21,12 +21,40 @@ public final class LoriTimeLookupCompletions {
     private final LoriTimePlugin plugin;
 
     /**
+     * True when time range flags should be suggested.
+     */
+    private final boolean includeTimeRange;
+
+    /**
+     * True when read scope permissions should gate scope suggestions.
+     */
+    private final boolean requireScopePermissions;
+
+    /**
      * Creates a completion source.
      *
      * @param plugin plugin context
      */
     public LoriTimeLookupCompletions(final LoriTimePlugin plugin) {
+        this(plugin, true, true);
+    }
+
+    /**
+     * Creates a completion source.
+     *
+     * @param plugin           plugin context
+     * @param includeTimeRange true when time range flags should be suggested
+     */
+    public LoriTimeLookupCompletions(final LoriTimePlugin plugin, final boolean includeTimeRange) {
+        this(plugin, includeTimeRange, false);
+    }
+
+    private LoriTimeLookupCompletions(final LoriTimePlugin plugin,
+                                      final boolean includeTimeRange,
+                                      final boolean requireScopePermissions) {
         this.plugin = plugin;
+        this.includeTimeRange = includeTimeRange;
+        this.requireScopePermissions = requireScopePermissions;
     }
 
     /**
@@ -54,7 +82,9 @@ public final class LoriTimeLookupCompletions {
         if (lowerArgument.startsWith(CommandScopes.SHORT_WORLD_PREFIX)) {
             return suggestWorldValues(source, CommandScopes.SHORT_WORLD_PREFIX, argument, args);
         }
-        if (lowerArgument.startsWith(CommandScopes.TIME_PREFIX) || lowerArgument.startsWith(CommandScopes.SHORT_TIME_PREFIX)) {
+        if (includeTimeRange
+                && (lowerArgument.startsWith(CommandScopes.TIME_PREFIX)
+                || lowerArgument.startsWith(CommandScopes.SHORT_TIME_PREFIX))) {
             return List.of();
         }
         return suggestArgument(source, argument, args);
@@ -62,14 +92,16 @@ public final class LoriTimeLookupCompletions {
 
     private List<String> suggestArgument(final CommonSender source, final String argument, final String... args) {
         final String[] previousArgs = args.length == 0 ? args : Arrays.copyOf(args, args.length - 1);
-        final List<String> suggestions = CommandScopes.suggestScopes(source, argument);
+        final List<String> suggestions = CommandScopes.suggestScopes(source, argument,
+                includeTimeRange, requireScopePermissions);
         if (findFlagValue(previousArgs, CommandScopes.SERVER_PREFIX, CommandScopes.SHORT_SERVER_PREFIX).isPresent()) {
             suggestions.remove(CommandScopes.SERVER_PREFIX);
         }
         if (findFlagValue(previousArgs, CommandScopes.WORLD_PREFIX, CommandScopes.SHORT_WORLD_PREFIX).isPresent()) {
             suggestions.remove(CommandScopes.WORLD_PREFIX);
         }
-        if (findFlagValue(previousArgs, CommandScopes.TIME_PREFIX, CommandScopes.SHORT_TIME_PREFIX).isPresent()) {
+        if (includeTimeRange
+                && findFlagValue(previousArgs, CommandScopes.TIME_PREFIX, CommandScopes.SHORT_TIME_PREFIX).isPresent()) {
             suggestions.remove(CommandScopes.TIME_PREFIX);
         }
         if (!hasPlayerToken(previousArgs) && source.hasPermission("loritime.see.other")) {

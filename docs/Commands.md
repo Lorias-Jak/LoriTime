@@ -65,17 +65,17 @@ LoriTime provides a number of different commands that you can use. This page lis
       <td class="tg-9wq8">Enable or disable the debugger.</td>
   </tr>
   <tr>
-    <td class="tg-9wq8">/ltmodify [set] [player] [TimeString*] [server &lt;server&gt; | world &lt;server&gt; &lt;world&gt;]</td>
+    <td class="tg-9wq8">/ltmodify [set] [player] [TimeString*] [server:&lt;server&gt; | s:&lt;server&gt;] [world:&lt;world&gt; | w:&lt;world&gt;]</td>
     <td class="tg-9wq8" rowspan="4">ltm, ltmod</td>
     <td class="tg-9wq8">Set the time to the given time string</td>
     <td class="tg-9wq8" rowspan="4">loritime.admin</td>
   </tr>
   <tr>
-    <td class="tg-9wq8">/ltmodify [modify] [player] [TimeString*] [server &lt;server&gt; | world &lt;server&gt; &lt;world&gt;]</td>
+    <td class="tg-9wq8">/ltmodify [modify] [player] [TimeString*] [server:&lt;server&gt; | s:&lt;server&gt;] [world:&lt;world&gt; | w:&lt;world&gt;]</td>
     <td class="tg-9wq8">Adds or removes the time given in the time string</td>
   </tr>
   <tr>
-    <td class="tg-9wq8">/ltmodify [reset] [player] [server &lt;server&gt; | world &lt;server&gt; &lt;world&gt;]</td>
+    <td class="tg-9wq8">/ltmodify [reset] [player] [server:&lt;server&gt; | s:&lt;server&gt;] [world:&lt;world&gt; | w:&lt;world&gt;]</td>
     <td class="tg-9wq8">Resets all the time stored on a player</td>
   </tr>
   <tr>

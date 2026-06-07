@@ -50,19 +50,19 @@ messages:
           self: '<#A4A4A4>Du hast <#50CBAB>[time] [scope][range] <#A4A4A4>gespielt.'
           other: '<#A4A4A4>Der Spieler <#50CBAB>[player] <#A4A4A4>hat <#50CBAB>[time] [scope][range] <#A4A4A4>gespielt.'
       loritimeadmin:
-        usage: '<#A4A4A4>Benutze <red>/ltmodify [add | set | reset] [player] [time] [server [server] | world [server] [world]] <#A4A4A4>um die Spielzeit zu ändern.<newline>Weitere Commands: <red>/loritimeadmin [reload | update | deleteUser]'
+        usage: '<#A4A4A4>Benutze <red>/ltmodify [add | set | reset] [player] [time] [server:<server>|s:<server>] [world:<world>|w:<world>] <#A4A4A4>um die Spielzeit zu ändern.<newline>Weitere Commands: <red>/loritimeadmin [reload | update | deleteUser]'
         missingUuid: '<#A4A4A4>Der Spieler <#50CBAB>[player] <#A4A4A4>ist unbekannt.'
         notTime: '<#A4A4A4>Das gegebene Zeitargument <#50CBAB>[argument] <#FF3232>hat ein ungültiges Format.'
         set:
-          usage: '<#A4A4A4>Benutze <red>/ltmodify set [player] [time] [server [server] | world [server] [world]] <#A4A4A4>um die Spielzeit zu setzen.'
+          usage: '<#A4A4A4>Benutze <red>/ltmodify set [player] [time] [server:<server>|s:<server>] [world:<world>|w:<world>] <#A4A4A4>um die Spielzeit zu setzen.'
           success: '<#A4A4A4>Die Spielzeit von <#50CBAB>[player] <#A4A4A4>wurde auf <#50CBAB>[time] <#A4A4A4>gesetzt.'
           negativeTime: '<#A4A4A4>Die gegebene Zeit <#50CBAB>[time] <#A4A4A4>ist negativ, muss aber mindestens Null sein.'
         modify:
-          usage: '<#A4A4A4>Benutze <red>/ltmodify add [player] [time] [server [server] | world [server] [world]] <#A4A4A4>um die Spielzeit zu modifizieren.'
+          usage: '<#A4A4A4>Benutze <red>/ltmodify add [player] [time] [server:<server>|s:<server>] [world:<world>|w:<world>] <#A4A4A4>um die Spielzeit zu modifizieren.'
           success: '<#A4A4A4>Die Spielzeit von <#50CBAB>[player] <#A4A4A4>wurde um <#50CBAB>[time] geändert.'
           negativeTimeSum: '<#A4A4A4>Die gegebene Zeit <#50CBAB>[time] <#A4A4A4>würde in negativer Spielzeit resultieren, diese muss aber mindestens Null sein.'
         reset:
-          usage: '<#A4A4A4>Benutze <red>/ltmodify reset [player] [server [server] | world [server] [world]] <#A4A4A4>um die Spielzeit zurückzusetzen.'
+          usage: '<#A4A4A4>Benutze <red>/ltmodify reset [player] [server:<server>|s:<server>] [world:<world>|w:<world>] <#A4A4A4>um die Spielzeit zurückzusetzen.'
           success: '<#A4A4A4>Die Spielzeit von <#50CBAB>[player] wurde zurückgesetzt.'
         deleteUser:
           usage: '<#A4A4A4>Nutze <red>/onlinetimeadmin delete [player] confirm <#A4A4A4>um einen Spieler komplett zu löschen.'

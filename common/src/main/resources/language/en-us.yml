@@ -50,19 +50,19 @@ messages:
           self: '<#A4A4A4>You have played for <#50CBAB>[time] [scope][range]<#A4A4A4>.'
           other: '<#A4A4A4>The player <#50CBAB>[player] <#A4A4A4>has already played for <#50CBAB>[time] [scope][range]<#A4A4A4>.'
       loritimeadmin:
-        usage: '<#A4A4A4>Use <red>/ltmodify [add | set | reset] [player] [time] [server [server] | world [server] [world]] <#A4A4A4>to edit a player''s online time.<newline>Other commands: <red>/loritimeadmin [reload | update | deleteUser]'
+        usage: '<#A4A4A4>Use <red>/ltmodify [add | set | reset] [player] [time] [server:<server>|s:<server>] [world:<world>|w:<world>] <#A4A4A4>to edit a player''s online time.<newline>Other commands: <red>/loritimeadmin [reload | update | deleteUser]'
         missingUuid: '<#A4A4A4>The player <#50CBAB>[player] <#A4A4A4>is unknown.'
         notTime: '<#A4A4A4>The given time argument <red>[argument] <#FF3232>is not valid.'
         set:
-          usage: '<#A4A4A4>Use <red>/ltmodify set [player] [time] [server [server] | world [server] [world]] <#A4A4A4>to set a player''s online time.'
+          usage: '<#A4A4A4>Use <red>/ltmodify set [player] [time] [server:<server>|s:<server>] [world:<world>|w:<world>] <#A4A4A4>to set a player''s online time.'
           success: '<#A4A4A4>The online time of player <#50CBAB>[player] <#A4A4A4>got successfully set to <#50CBAB>[time].'
           negativeTime: '<red>The given time <#50CBAB>[time] <red>is negative, but must at least be zero.'
         modify:
-          usage: '<#A4A4A4>Use <red>/ltmodify add [player] [time] [server [server] | world [server] [world]] <#A4A4A4>to modify a player''s online time.'
+          usage: '<#A4A4A4>Use <red>/ltmodify add [player] [time] [server:<server>|s:<server>] [world:<world>|w:<world>] <#A4A4A4>to modify a player''s online time.'
           success: '<#A4A4A4>The online time of player <#50CBAB>[player] <#A4A4A4>got successfully modified by <#50CBAB>[time].'
           negativeTimeSum: '<red>The given time <#50CBAB>[time] <red>would cause a negative online time, but must at least be zero.'
         reset:
-          usage: '<#A4A4A4>Use <red>/ltmodify reset [player] [server [server] | world [server] [world]] <#A4A4A4>to reset a player''s online time.'
+          usage: '<#A4A4A4>Use <red>/ltmodify reset [player] [server:<server>|s:<server>] [world:<world>|w:<world>] <#A4A4A4>to reset a player''s online time.'
           success: '<#A4A4A4>The online time of player <#50CBAB>[player] <#A4A4A4>got successfully reset.'
         deleteUser:
           usage: '<#A4A4A4>Use <red>/onlinetimeadmin delete [player] confirm <#A4A4A4>to delete a user entirely from the plugin.'

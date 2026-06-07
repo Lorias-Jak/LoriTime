@@ -7,12 +7,14 @@ import com.jannik_kuehn.common.utils.TimeParser;
 
 import java.time.Clock;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
 /**
  * Shared parser and permission helpers for scoped time commands.
  */
+@SuppressWarnings("PMD.TooManyMethods")
 public final class CommandScopes {
     /**
      * Prefix for explicit server-scope lookup arguments.
@@ -45,22 +47,22 @@ public final class CommandScopes {
     public static final String SHORT_TIME_PREFIX = "t:";
 
     /**
-     * Command token for server scope suffixes.
+     * Command token for legacy server scope suffixes.
      */
     public static final String SERVER = "server";
 
     /**
-     * Command token for world scope suffixes.
+     * Command token for legacy world scope suffixes.
      */
     public static final String WORLD = "world";
 
     /**
-     * Command token for time scope suffixes.
+     * Minimum number of arguments for timed modify operations.
      */
     private static final int MIN_TIMED_SCOPE_ARGS = 2;
 
     /**
-     * Command token for reset scope suffixes.
+     * Number of arguments before reset scope flags.
      */
     private static final int RESET_WITHOUT_SCOPE_ARGS = 1;
 
@@ -90,6 +92,54 @@ public final class CommandScopes {
     }
 
     /**
+     * Parses one server or world scope flag argument.
+     *
+     * @param argument command argument
+     * @return parsed argument, or null when the argument is not a valid scope flag
+     */
+    /* default */ static ParsedScopeFlag parseScopeFlag(final String argument) {
+        final String lowerArgument = argument.toLowerCase(Locale.ROOT);
+        if (lowerArgument.startsWith(SERVER_PREFIX)) {
+            return parseFlagArgument(ScopeFlagType.SERVER, argument, SERVER_PREFIX.length());
+        }
+        if (lowerArgument.startsWith(SHORT_SERVER_PREFIX)) {
+            return parseFlagArgument(ScopeFlagType.SERVER, argument, SHORT_SERVER_PREFIX.length());
+        }
+        if (lowerArgument.startsWith(WORLD_PREFIX)) {
+            return parseFlagArgument(ScopeFlagType.WORLD, argument, WORLD_PREFIX.length());
+        }
+        if (lowerArgument.startsWith(SHORT_WORLD_PREFIX)) {
+            return parseFlagArgument(ScopeFlagType.WORLD, argument, SHORT_WORLD_PREFIX.length());
+        }
+        return null;
+    }
+
+    private static ParsedScopeFlag parseFlagArgument(final ScopeFlagType type,
+                                                     final String argument, final int prefixLength) {
+        if (argument.length() == prefixLength) {
+            return null;
+        }
+        return new ParsedScopeFlag(type, argument.substring(prefixLength));
+    }
+
+    /**
+     * Parses only server/world scope flags.
+     *
+     * @param args scope flag arguments
+     * @return parsed scope flags, or null for invalid or duplicate flags
+     */
+    public static ParsedScopeFlags parseScopeFlags(final String... args) {
+        final ScopeFlagState state = new ScopeFlagState();
+        for (final String argument : args) {
+            final ParsedScopeFlag parsedFlag = parseScopeFlag(argument);
+            if (parsedFlag == null || !state.accept(parsedFlag)) {
+                return null;
+            }
+        }
+        return new ParsedScopeFlags(state.serverName, state.worldName);
+    }
+
+    /**
      * Suggests scope argument prefixes allowed for the sender.
      *
      * @param source   command sender
@@ -97,15 +147,31 @@ public final class CommandScopes {
      * @return scope suggestions
      */
     public static List<String> suggestScopes(final CommonSender source, final String argument) {
+        return suggestScopes(source, argument, true, true);
+    }
+
+    /**
+     * Suggests scope argument prefixes.
+     *
+     * @param source                  command sender
+     * @param argument                partially typed argument
+     * @param includeTimeRange        true when time range flags should be suggested
+     * @param requireScopePermissions true when read scope permissions should gate suggestions
+     * @return scope suggestions
+     */
+    public static List<String> suggestScopes(final CommonSender source, final String argument,
+                                             final boolean includeTimeRange, final boolean requireScopePermissions) {
         final String lowerArgument = argument.toLowerCase(Locale.ROOT);
         final List<String> suggestions = new ArrayList<>();
-        if (source.hasPermission("loritime.see.server") && SERVER_PREFIX.startsWith(lowerArgument)) {
+        if ((!requireScopePermissions || source.hasPermission("loritime.see.server"))
+                && SERVER_PREFIX.startsWith(lowerArgument)) {
             suggestions.add(SERVER_PREFIX);
         }
-        if (source.hasPermission("loritime.see.world") && WORLD_PREFIX.startsWith(lowerArgument)) {
+        if ((!requireScopePermissions || source.hasPermission("loritime.see.world"))
+                && WORLD_PREFIX.startsWith(lowerArgument)) {
             suggestions.add(WORLD_PREFIX);
         }
-        if (TIME_PREFIX.startsWith(lowerArgument)) {
+        if (includeTimeRange && TIME_PREFIX.startsWith(lowerArgument)) {
             suggestions.add(TIME_PREFIX);
         }
         return suggestions;
@@ -137,10 +203,15 @@ public final class CommandScopes {
         if (args.length < MIN_TIMED_SCOPE_ARGS) {
             return null;
         }
-        final int scopeStart = findScopeStart(args, 1);
-        final String[] timeArgs = java.util.Arrays.copyOfRange(args, 1, scopeStart < 0 ? args.length : scopeStart);
-        final TimeScope scope = scopeStart < 0 ? TimeScope.GLOBAL : parseScopeSuffix(args, scopeStart);
-        return scope == null || timeArgs.length == 0 ? null : new ParsedTimedScope(timeArgs, scope);
+        final int scopeStart = findFlagScopeStart(args, 1);
+        final String[] timeArgs = Arrays.copyOfRange(args, 1, scopeStart < 0 ? args.length : scopeStart);
+        if (timeArgs.length == 0 || containsInvalidModifyToken(timeArgs)) {
+            return null;
+        }
+        final ParsedScopeFlags scopeFlags = scopeStart < 0
+                ? ParsedScopeFlags.GLOBAL
+                : parseScopeFlags(Arrays.copyOfRange(args, scopeStart, args.length));
+        return scopeFlags == null ? null : new ParsedTimedScope(timeArgs, scopeFlags);
     }
 
     /**
@@ -151,29 +222,27 @@ public final class CommandScopes {
      */
     public static ParsedScope parseResetScope(final String... args) {
         if (args.length == RESET_WITHOUT_SCOPE_ARGS) {
-            return new ParsedScope(args[0], TimeScope.GLOBAL);
+            return new ParsedScope(args[0], ParsedScopeFlags.GLOBAL);
         }
-        final TimeScope scope = parseScopeSuffix(args, 1);
-        return scope == null ? null : new ParsedScope(args[0], scope);
+        final String[] scopeArgs = Arrays.copyOfRange(args, 1, args.length);
+        final ParsedScopeFlags scopeFlags = parseScopeFlags(scopeArgs);
+        return scopeFlags == null ? null : new ParsedScope(args[0], scopeFlags);
     }
 
-    private static int findScopeStart(final String[] args, final int start) {
+    private static int findFlagScopeStart(final String[] args, final int start) {
         for (int index = start; index < args.length; index++) {
-            if (SERVER.equalsIgnoreCase(args[index]) || WORLD.equalsIgnoreCase(args[index])) {
+            if (parseScopeFlag(args[index]) != null) {
                 return index;
             }
         }
         return -1;
     }
 
-    private static TimeScope parseScopeSuffix(final String[] args, final int start) {
-        if (SERVER.equalsIgnoreCase(args[start]) && args.length == start + 2) {
-            return TimeScope.server(args[start + 1]);
-        }
-        if (WORLD.equalsIgnoreCase(args[start]) && args.length == start + 3) {
-            return TimeScope.world(args[start + 1], args[start + 2]);
-        }
-        return null;
+    private static boolean containsInvalidModifyToken(final String... timeArgs) {
+        return Arrays.stream(timeArgs)
+                .anyMatch(argument -> argument.contains(":")
+                        || SERVER.equalsIgnoreCase(argument)
+                        || WORLD.equalsIgnoreCase(argument));
     }
 
     /**
@@ -230,17 +299,103 @@ public final class CommandScopes {
      * Parsed time amount arguments with their target scope.
      *
      * @param timeArgs time amount arguments
-     * @param scope    target scope
+     * @param scopeFlags target scope flags
      */
-    public record ParsedTimedScope(String[] timeArgs, TimeScope scope) {
+    public record ParsedTimedScope(String[] timeArgs, ParsedScopeFlags scopeFlags) {
     }
 
     /**
      * Parsed player target with scope.
      *
      * @param playerName target player name
-     * @param scope      target scope
+     * @param scopeFlags target scope flags
      */
-    public record ParsedScope(String playerName, TimeScope scope) {
+    public record ParsedScope(String playerName, ParsedScopeFlags scopeFlags) {
+    }
+
+    /**
+     * Parsed server/world scope flags.
+     *
+     * @param serverName optional server name
+     * @param worldName  optional world name
+     */
+    public record ParsedScopeFlags(String serverName, String worldName) {
+        /**
+         * Empty scope flag set for global operations.
+         */
+        public static final ParsedScopeFlags GLOBAL = new ParsedScopeFlags(null, null);
+
+        /**
+         * Returns whether a server flag was supplied.
+         *
+         * @return true when a server name is present
+         */
+        public boolean hasServer() {
+            return serverName != null;
+        }
+
+        /**
+         * Returns whether a world flag was supplied.
+         *
+         * @return true when a world name is present
+         */
+        public boolean hasWorld() {
+            return worldName != null;
+        }
+    }
+
+    /* default */ record ParsedScopeFlag(ScopeFlagType type, String value) {
+    }
+
+    /**
+     * Supported server/world scope flag types.
+     */
+    /* default */ enum ScopeFlagType {
+        /**
+         * Server scope flag.
+         */
+        SERVER,
+        /**
+         * World scope flag.
+         */
+        WORLD
+    }
+
+    /**
+     * Mutable parse state for server/world scope flags.
+     */
+    private static final class ScopeFlagState {
+        /**
+         * Optional parsed server name.
+         */
+        private String serverName;
+
+        /**
+         * Optional parsed world name.
+         */
+        private String worldName;
+
+        private boolean accept(final ParsedScopeFlag flag) {
+            return switch (flag.type()) {
+                case SERVER -> assignServer(flag.value());
+                case WORLD -> assignWorld(flag.value());
+            };
+        }
+
+        private boolean assignServer(final String value) {
+            if (serverName != null) {
+                return false;
+            }
+            serverName = value;
+            return true;
+        }
+
+        private boolean assignWorld(final String value) {
+            if (worldName != null) {
+                return false;
+            }
+            worldName = value;
+            return true;
+        }
     }
 }

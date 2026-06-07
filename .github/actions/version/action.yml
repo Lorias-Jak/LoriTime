@@ -44,7 +44,6 @@ runs:
       with:
         repository: ${{ inputs.ROOT_REPOSITORY }}
         token: ${{ inputs.GITHUB_TOKEN }}
-        submodules: true
         fetch-depth: 0
 
     - name: Setup Java

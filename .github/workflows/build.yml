@@ -24,8 +24,6 @@ jobs:
     steps:
       - name: Checkout source code
         uses: actions/checkout@v6
-        with:
-          submodules: true
 
       - name: Setup version context
         id: version_context
@@ -45,8 +43,6 @@ jobs:
     steps:
       - name: Checkout source code
         uses: actions/checkout@v6
-        with:
-          submodules: true
 
       - name: Setup JDK 25
         uses: actions/setup-java@v5

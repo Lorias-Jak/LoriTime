@@ -1,6 +1,7 @@
 package com.jannik_kuehn.common.storage.database.provider;
 
 import com.github.roleplaycauldron.spellbook.core.logger.WrappedLogger;
+import org.sqlite.JDBC;
 
 import java.io.File;
 import java.sql.Connection;
@@ -62,7 +63,7 @@ public class SQLite implements LoriTimeConnectionProvider {
             }
 
             try {
-                Class.forName("org.sqlite.JDBC");
+                Class.forName(JDBC.class.getName());
             } catch (final ClassNotFoundException e) {
                 log.error("SQLite JDBC Driver was not loaded!", e);
                 return;

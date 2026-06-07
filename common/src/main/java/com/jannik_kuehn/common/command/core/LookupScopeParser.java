@@ -1,6 +1,8 @@
 package com.jannik_kuehn.common.command.core;
 
 import com.jannik_kuehn.common.api.storage.TimeRange;
+import com.jannik_kuehn.common.command.core.CommandScopes.ParsedScopeFlag;
+import com.jannik_kuehn.common.command.core.CommandScopes.ScopeFlagType;
 import com.jannik_kuehn.common.utils.TimeParser;
 
 import java.time.Clock;
@@ -47,19 +49,13 @@ final class LookupScopeParser {
     }
 
     private static ParsedLookupArgument parseArgument(final String argument) {
+        final ParsedScopeFlag scopeFlag = CommandScopes.parseScopeFlag(argument);
+        if (scopeFlag != null) {
+            return new ParsedLookupArgument(scopeFlag.type() == ScopeFlagType.SERVER
+                    ? LookupArgumentType.SERVER
+                    : LookupArgumentType.WORLD, scopeFlag.value());
+        }
         final String lowerArgument = argument.toLowerCase(Locale.ROOT);
-        if (lowerArgument.startsWith(CommandScopes.SERVER_PREFIX)) {
-            return parseFlagArgument(LookupArgumentType.SERVER, argument, CommandScopes.SERVER_PREFIX.length());
-        }
-        if (lowerArgument.startsWith(CommandScopes.SHORT_SERVER_PREFIX)) {
-            return parseFlagArgument(LookupArgumentType.SERVER, argument, CommandScopes.SHORT_SERVER_PREFIX.length());
-        }
-        if (lowerArgument.startsWith(CommandScopes.WORLD_PREFIX)) {
-            return parseFlagArgument(LookupArgumentType.WORLD, argument, CommandScopes.WORLD_PREFIX.length());
-        }
-        if (lowerArgument.startsWith(CommandScopes.SHORT_WORLD_PREFIX)) {
-            return parseFlagArgument(LookupArgumentType.WORLD, argument, CommandScopes.SHORT_WORLD_PREFIX.length());
-        }
         if (lowerArgument.startsWith(CommandScopes.TIME_PREFIX)) {
             return parseFlagArgument(LookupArgumentType.TIME, argument, CommandScopes.TIME_PREFIX.length());
         }

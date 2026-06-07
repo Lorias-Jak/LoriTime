@@ -400,7 +400,7 @@ class SenderRoleCommandTest {
         when(parser.parseToSeconds("12")).thenReturn(OptionalLong.of(12L));
 
         new LoriTimeModifyCommand(context.plugin(), context.localization(), parser)
-                .execute(sender, "add", "Lorias_", "12", "server", "survival");
+                .execute(sender, "add", "Lorias_", "12", "server:survival");
 
         verify(context.storage()).addTime(new ManualTimeAdjustment(PLAYER_ID, 12L,
                 TimeEntryReason.MANUAL_ADJUSTMENT, (UUID) null, "CONSOLE", TimeScope.server("survival")));
@@ -416,7 +416,7 @@ class SenderRoleCommandTest {
         when(parser.parseToSeconds("20")).thenReturn(OptionalLong.of(20L));
 
         new LoriTimeModifyCommand(context.plugin(), context.localization(), parser)
-                .execute(sender, "set", "Lorias_", "20", "world", "survival", "world");
+                .execute(sender, "set", "Lorias_", "20", "world:world", "server:survival");
 
         verify(context.storage()).addTime(new ManualTimeAdjustment(PLAYER_ID, 15L,
                 TimeEntryReason.MANUAL_ADJUSTMENT, (UUID) null, "CONSOLE", TimeScope.world("survival", "world")));
@@ -429,10 +429,73 @@ class SenderRoleCommandTest {
         prepareMutation(context, sender);
         when(context.storage().getTime(PLAYER_ID, TimeScope.server("survival"))).thenReturn(OptionalLong.of(5L));
 
-        modifyCommand(context).execute(sender, "reset", "Lorias_", "server", "survival");
+        modifyCommand(context).execute(sender, "reset", "Lorias_", "server:survival");
 
         verify(context.storage()).addTime(new ManualTimeAdjustment(PLAYER_ID, -5L,
                 TimeEntryReason.MANUAL_ADJUSTMENT, (UUID) null, "CONSOLE", TimeScope.server("survival")));
+    }
+
+    @Test
+    void modifyCommandRoutesBackendWorldOnlyAddMutation() throws StorageException {
+        final CommandContext context = new CommandContext();
+        final CommonConsoleSender sender = mock(CommonConsoleSender.class);
+        final TimeParser parser = mock(TimeParser.class);
+        prepareMutation(context, sender);
+        when(context.server().getLocalServerName()).thenReturn(Optional.of("standalone-one"));
+        when(context.storage().getTime(PLAYER_ID, TimeScope.world("standalone-one", "arena"))).thenReturn(OptionalLong.of(5L));
+        when(parser.parseToSeconds("12")).thenReturn(OptionalLong.of(12L));
+
+        new LoriTimeModifyCommand(context.plugin(), context.localization(), parser)
+                .execute(sender, "add", "Lorias_", "12", "world:arena");
+
+        verify(context.storage()).addTime(new ManualTimeAdjustment(PLAYER_ID, 12L,
+                TimeEntryReason.MANUAL_ADJUSTMENT, (UUID) null, "CONSOLE", TimeScope.world("standalone-one", "arena")));
+    }
+
+    @Test
+    void modifyCommandRoutesProxyWorldOnlyResetMutation() throws StorageException {
+        final CommandContext context = new CommandContext();
+        final CommonConsoleSender sender = mock(CommonConsoleSender.class);
+        prepareMutation(context, sender);
+        when(context.server().isProxy()).thenReturn(true);
+        when(context.server().getCurrentServer(PLAYER_ID)).thenReturn(Optional.of("minigames"));
+        when(context.storage().getTime(PLAYER_ID, TimeScope.world("minigames", "arena"))).thenReturn(OptionalLong.of(5L));
+
+        modifyCommand(context).execute(sender, "reset", "Lorias_", "world:arena");
+
+        verify(context.storage()).addTime(new ManualTimeAdjustment(PLAYER_ID, -5L,
+                TimeEntryReason.MANUAL_ADJUSTMENT, (UUID) null, "CONSOLE", TimeScope.world("minigames", "arena")));
+    }
+
+    @Test
+    void modifyCommandRejectsUnresolvedProxyWorldOnlyScope() throws StorageException {
+        final CommandContext context = new CommandContext();
+        final CommonConsoleSender sender = mock(CommonConsoleSender.class);
+        final TimeParser parser = mock(TimeParser.class);
+        prepareMutation(context, sender);
+        when(context.server().isProxy()).thenReturn(true);
+        when(context.server().getCurrentServer(PLAYER_ID)).thenReturn(Optional.empty());
+
+        new LoriTimeModifyCommand(context.plugin(), context.localization(), parser)
+                .execute(sender, "add", "Lorias_", "12", "world:arena");
+
+        verify(context.storage(), never()).getTime(any(UUID.class), any(TimeScope.class));
+        verify(context.storage(), never()).addTime(any(ManualTimeAdjustment.class));
+    }
+
+    @Test
+    void modifyCommandRejectsLegacyPositionalScopeSyntax() throws StorageException {
+        final CommandContext context = new CommandContext();
+        final CommonConsoleSender sender = mock(CommonConsoleSender.class);
+        final TimeParser parser = mock(TimeParser.class);
+        prepareMutation(context, sender);
+
+        new LoriTimeModifyCommand(context.plugin(), context.localization(), parser)
+                .execute(sender, "add", "Lorias_", "12", "server", "survival");
+        modifyCommand(context).execute(sender, "reset", "Lorias_", "world", "survival", "world");
+
+        verify(context.storage(), never()).getTime(any(UUID.class), any(TimeScope.class));
+        verify(context.storage(), never()).addTime(any(ManualTimeAdjustment.class));
     }
 
     @Test

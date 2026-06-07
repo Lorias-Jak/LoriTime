@@ -72,6 +72,97 @@ class LoriTimeCompletionTest {
     }
 
     @Test
+    void modifyTabCompletionSuggestsLongScopePrefixes() throws StorageException {
+        final CompletionContext context = new CompletionContext();
+        when(context.plugin.getKnownPlayerNames()).thenReturn(Set.of());
+        when(context.plugin.getRecentPlayerSuggestionCache()).thenReturn(null);
+        when(context.server.getOnlinePlayers()).thenReturn(new CommonPlayerSender[0]);
+        when(context.source.hasPermission("loritime.admin")).thenReturn(true);
+
+        final List<String> completions = new LoriTimeModifyCommand(context.plugin, context.localization,
+                mock(TimeParser.class)).handleTabComplete(context.source, "add", "Lorias_", "12", "s");
+
+        assertEquals(List.of("server:"), completions, "Expected modify tab completion to suggest long server prefix");
+        verifyNoSuggestionStorageLookup(context.storage);
+    }
+
+    @Test
+    void modifyTabCompletionUsesLiveServerCandidatesWithoutStorageLookup() throws StorageException {
+        final CompletionContext context = new CompletionContext();
+        when(context.source.hasPermission("loritime.admin")).thenReturn(true);
+        when(context.server.getLiveServerNames()).thenReturn(List.of("survival", "creative"));
+
+        final List<String> completions = new LoriTimeModifyCommand(context.plugin, context.localization,
+                mock(TimeParser.class)).handleTabComplete(context.source, "set", "Lorias_", "12", "server:su");
+
+        assertEquals(List.of("server:survival"), completions,
+                "Expected modify server flag value completion from live runtime context");
+        verifyNoSuggestionStorageLookup(context.storage);
+    }
+
+    @Test
+    void modifyTabCompletionUsesLiveWorldCandidatesWithoutStorageLookup() throws StorageException {
+        final CompletionContext context = new CompletionContext();
+        when(context.source.hasPermission("loritime.admin")).thenReturn(true);
+        when(context.server.getLiveWorldNames(Optional.of("survival"), Optional.empty()))
+                .thenReturn(List.of("world", "world_nether"));
+
+        final List<String> completions = new LoriTimeModifyCommand(context.plugin, context.localization,
+                mock(TimeParser.class)).handleTabComplete(context.source, "set", "Lorias_", "12",
+                "server:survival", "world:wo");
+
+        assertEquals(List.of("world:world", "world:world_nether"), completions,
+                "Expected modify world flag value completion from live runtime context");
+        verifyNoSuggestionStorageLookup(context.storage);
+    }
+
+    @Test
+    void modifyTabCompletionUsesCachedServerCandidatesForShortFlagsWithoutStorageLookup() throws StorageException {
+        final CompletionContext context = new CompletionContext();
+        context.scopeCache.replaceStoredNames(Set.of("survival", "creative"), Set.of("world", "world_nether"));
+        when(context.source.hasPermission("loritime.admin")).thenReturn(true);
+        when(context.server.getLiveServerNames()).thenReturn(List.of());
+
+        final LoriTimeModifyCommand command = new LoriTimeModifyCommand(context.plugin, context.localization,
+                mock(TimeParser.class));
+
+        assertEquals(List.of("s:survival"),
+                command.handleTabComplete(context.source, "add", "Lorias_", "12", "s:su"),
+                "Expected modify short server flag values from the cached scope names");
+        verifyNoSuggestionStorageLookup(context.storage);
+    }
+
+    @Test
+    void modifyTabCompletionUsesCachedWorldCandidatesForShortFlagsWithoutStorageLookup() throws StorageException {
+        final CompletionContext context = new CompletionContext();
+        context.scopeCache.replaceStoredNames(Set.of("survival", "creative"), Set.of("world", "world_nether"));
+        when(context.source.hasPermission("loritime.admin")).thenReturn(true);
+        when(context.server.getLiveWorldNames(Optional.of("survival"), Optional.empty())).thenReturn(List.of());
+
+        final LoriTimeModifyCommand command = new LoriTimeModifyCommand(context.plugin, context.localization,
+                mock(TimeParser.class));
+
+        assertEquals(List.of("w:world", "w:world_nether"),
+                command.handleTabComplete(context.source, "add", "Lorias_", "12", "s:survival", "w:wo"),
+                "Expected modify short world flag values from the cached scope names");
+        verifyNoSuggestionStorageLookup(context.storage);
+    }
+
+    @Test
+    void modifyTabCompletionDoesNotSuggestDuplicateScopeFlags() {
+        final CompletionContext context = new CompletionContext();
+        when(context.source.hasPermission("loritime.admin")).thenReturn(true);
+        when(context.plugin.getKnownPlayerNames()).thenReturn(Set.of());
+        when(context.plugin.getRecentPlayerSuggestionCache()).thenReturn(null);
+        when(context.server.getOnlinePlayers()).thenReturn(new CommonPlayerSender[0]);
+
+        final List<String> completions = new LoriTimeModifyCommand(context.plugin, context.localization,
+                mock(TimeParser.class)).handleTabComplete(context.source, "reset", "Lorias_", "s:survival", "s");
+
+        assertEquals(List.of(), completions, "Expected duplicate modify server flag to stay unsuggested");
+    }
+
+    @Test
     void loriTimeTabCompletionUsesRecentPlayerSuggestionCache() throws StorageException {
         final CompletionContext context = new CompletionContext();
         final RecentPlayerSuggestionCache cache = new RecentPlayerSuggestionCache();

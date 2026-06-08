@@ -6,9 +6,7 @@ import com.jannik_kuehn.common.platform.CommonSender;
 import com.jannik_kuehn.common.utils.TimeParser;
 
 import java.time.Clock;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Locale;
 
 /**
@@ -137,47 +135,6 @@ public final class CommandScopes {
             }
         }
         return new ParsedScopeFlags(state.serverName, state.worldName);
-    }
-
-    /**
-     * Suggests scope argument prefixes allowed for the sender.
-     *
-     * @param source   command sender
-     * @param argument partially typed argument
-     * @return scope suggestions
-     */
-    public static List<String> suggestScopes(final CommonSender source, final String argument) {
-        return suggestScopes(source, argument, true, true);
-    }
-
-    /**
-     * Suggests scope argument prefixes.
-     *
-     * @param source                  command sender
-     * @param argument                partially typed argument
-     * @param includeTimeRange        true when time range flags should be suggested
-     * @param requireScopePermissions true when read scope permissions should gate suggestions
-     * @return scope suggestions
-     */
-    public static List<String> suggestScopes(final CommonSender source, final String argument,
-                                             final boolean includeTimeRange, final boolean requireScopePermissions) {
-        final String lowerArgument = argument.toLowerCase(Locale.ROOT);
-        final List<String> suggestions = new ArrayList<>();
-        if ((!requireScopePermissions || source.hasPermission("loritime.see.server"))
-                && SERVER_PREFIX.startsWith(lowerArgument)) {
-            suggestions.add(SERVER_PREFIX);
-        }
-        if ((!requireScopePermissions || source.hasPermission("loritime.see.world"))
-                && WORLD_PREFIX.startsWith(lowerArgument)) {
-            suggestions.add(WORLD_PREFIX);
-        }
-        if (includeTimeRange
-                && (!requireScopePermissions || source.hasPermission("loritime.see.timerange")
-                || source.hasPermission("loritime.see.timerange.other"))
-                && TIME_PREFIX.startsWith(lowerArgument)) {
-            suggestions.add(TIME_PREFIX);
-        }
-        return suggestions;
     }
 
     /**

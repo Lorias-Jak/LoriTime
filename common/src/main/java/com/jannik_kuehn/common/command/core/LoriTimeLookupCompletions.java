@@ -92,7 +92,7 @@ public final class LoriTimeLookupCompletions {
 
     private List<String> suggestArgument(final CommonSender source, final String argument, final String... args) {
         final String[] previousArgs = args.length == 0 ? args : Arrays.copyOf(args, args.length - 1);
-        final List<String> suggestions = CommandScopes.suggestScopes(source, argument,
+        final List<String> suggestions = LookupScopeSuggestions.suggest(source, argument,
                 includeTimeRange, requireScopePermissions);
         if (findFlagValue(previousArgs, CommandScopes.SERVER_PREFIX, CommandScopes.SHORT_SERVER_PREFIX).isPresent()) {
             suggestions.remove(CommandScopes.SERVER_PREFIX);

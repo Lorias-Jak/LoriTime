@@ -120,6 +120,10 @@ public class LoriTimeCommand implements CommonCommand {
                     CommandMessages.send(localization, loriTimePlugin.getLanguageSelector(), sender, "message.noPermission");
                     return;
                 }
+                if (request.hasTimeRange() && !CommandScopes.hasTimeRangePermission(sender, isTargetSender)) {
+                    CommandMessages.send(localization, loriTimePlugin.getLanguageSelector(), sender, "message.noPermission");
+                    return;
+                }
 
                 final long time;
                 try {

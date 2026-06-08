@@ -252,11 +252,25 @@ class LoriTimeCompletionTest {
         when(context.plugin.getKnownPlayerNames()).thenReturn(Set.of());
         when(context.plugin.getRecentPlayerSuggestionCache()).thenReturn(null);
         when(context.server.getOnlinePlayers()).thenReturn(new CommonPlayerSender[0]);
+        when(context.source.hasPermission("loritime.see.timerange")).thenReturn(true);
 
         final LoriTimeCommand command = new LoriTimeCommand(context.plugin, context.localization);
 
         assertEquals(List.of("time:"), command.handleTabComplete(context.source, "t"),
                 "Expected long time prefix completion");
+    }
+
+    @Test
+    void loriTimeTabCompletionDoesNotSuggestTimePrefixWithoutTimeRangePermission() {
+        final CompletionContext context = new CompletionContext();
+        when(context.plugin.getKnownPlayerNames()).thenReturn(Set.of());
+        when(context.plugin.getRecentPlayerSuggestionCache()).thenReturn(null);
+        when(context.server.getOnlinePlayers()).thenReturn(new CommonPlayerSender[0]);
+
+        final LoriTimeCommand command = new LoriTimeCommand(context.plugin, context.localization);
+
+        assertEquals(List.of(), command.handleTabComplete(context.source, "t"),
+                "Expected time prefix to require ranged lookup permission");
     }
 
     @Test

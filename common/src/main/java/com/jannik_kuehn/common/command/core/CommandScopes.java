@@ -171,7 +171,10 @@ public final class CommandScopes {
                 && WORLD_PREFIX.startsWith(lowerArgument)) {
             suggestions.add(WORLD_PREFIX);
         }
-        if (includeTimeRange && TIME_PREFIX.startsWith(lowerArgument)) {
+        if (includeTimeRange
+                && (!requireScopePermissions || source.hasPermission("loritime.see.timerange")
+                || source.hasPermission("loritime.see.timerange.other"))
+                && TIME_PREFIX.startsWith(lowerArgument)) {
             suggestions.add(TIME_PREFIX);
         }
         return suggestions;
@@ -191,6 +194,17 @@ public final class CommandScopes {
             case SERVER -> sender.hasPermission(self ? "loritime.see.server" : "loritime.see.server.other");
             case WORLD -> sender.hasPermission(self ? "loritime.see.world" : "loritime.see.world.other");
         };
+    }
+
+    /**
+     * Checks whether a sender may read a bounded time range.
+     *
+     * @param sender command sender
+     * @param self   true when the sender queries their own time
+     * @return true when the sender has permission
+     */
+    public static boolean hasTimeRangePermission(final CommonSender sender, final boolean self) {
+        return sender.hasPermission(self ? "loritime.see.timerange" : "loritime.see.timerange.other");
     }
 
     /**

@@ -38,7 +38,7 @@ LoriTime provides a number of different commands that you can use. This page lis
     <td class="tg-9wq8">/loritime [&lt;player&gt;] [time:&lt;range&gt; | t:&lt;range&gt;] [server:&lt;server&gt; | s:&lt;server&gt;] [world:&lt;world&gt; | w:&lt;world&gt;]</td>
     <td class="tg-9wq8">lt,lorit, ltime</td>
     <td class="tg-9wq8">To view online time inside a history window. Single values such as time:8mo query from now back to the parsed duration. Ranges such as time:3d-4w query from four weeks ago up to three days ago.</td>
-    <td class="tg-9wq8">Same as the selected global, server, or world lookup</td>
+    <td class="tg-9wq8">Same as the selected global, server, or world lookup plus loritime.see.timerange / loritime.see.timerange.other</td>
   </tr>
   <tr>
     <td class="tg-9wq8">/loritimetop &lt;page&gt;</td>

@@ -182,6 +182,7 @@ class SenderRoleCommandTest {
         final CommandContext context = new CommandContext();
         final CommonPlayerSender sender = mock(CommonPlayerSender.class);
         when(sender.hasPermission("loritime.see.server")).thenReturn(true);
+        when(sender.hasPermission("loritime.see.timerange")).thenReturn(true);
         when(sender.getUniqueId()).thenReturn(PLAYER_ID);
         when(context.storage().getTime(eq(PLAYER_ID), eq(TimeScope.server("survival")), any(TimeRange.class)))
                 .thenReturn(OptionalLong.of(45L));
@@ -191,6 +192,54 @@ class SenderRoleCommandTest {
         new LoriTimeCommand(context.plugin(), context.localization()).execute(sender, "server:survival", "time:3d-4w");
 
         verify(context.storage()).getTime(eq(PLAYER_ID), eq(TimeScope.server("survival")), any(TimeRange.class));
+        verify(sender).sendMessage(any(TextComponent.class));
+    }
+
+    @Test
+    void playerSenderCannotQueryOwnRangedTimeWithoutTimeRangePermission() throws StorageException {
+        final CommandContext context = new CommandContext();
+        final CommonPlayerSender sender = mock(CommonPlayerSender.class);
+        when(sender.hasPermission("loritime.see")).thenReturn(true);
+        when(sender.getUniqueId()).thenReturn(PLAYER_ID);
+        when(context.playerConverter().getOnlinePlayer(PLAYER_ID))
+                .thenReturn(new TrackedLoriTimePlayer(PLAYER_ID, "Lorias_"));
+
+        new LoriTimeCommand(context.plugin(), context.localization()).execute(sender, "time:3d");
+
+        verify(context.storage(), never()).getTime(eq(PLAYER_ID), eq(TimeScope.GLOBAL), any(TimeRange.class));
+        verify(sender).sendMessage(any(TextComponent.class));
+    }
+
+    @Test
+    void otherRangedLookupRequiresOtherTimeRangePermission() throws StorageException {
+        final CommandContext context = new CommandContext();
+        final CommonConsoleSender sender = mock(CommonConsoleSender.class);
+        when(sender.hasPermission("loritime.see.other")).thenReturn(true);
+        when(sender.hasPermission("loritime.see.timerange.other")).thenReturn(true);
+        when(context.storage().getUuid("Lorias_")).thenReturn(Optional.of(PLAYER_ID));
+        when(context.storage().getTime(eq(PLAYER_ID), eq(TimeScope.GLOBAL), any(TimeRange.class)))
+                .thenReturn(OptionalLong.of(45L));
+        when(context.playerConverter().getOnlinePlayer(PLAYER_ID))
+                .thenReturn(new TrackedLoriTimePlayer(PLAYER_ID, "Lorias_"));
+
+        new LoriTimeCommand(context.plugin(), context.localization()).execute(sender, "Lorias_", "time:3d");
+
+        verify(context.storage()).getTime(eq(PLAYER_ID), eq(TimeScope.GLOBAL), any(TimeRange.class));
+        verify(sender).sendMessage(any(TextComponent.class));
+    }
+
+    @Test
+    void otherRangedLookupDeniesWithoutOtherTimeRangePermission() throws StorageException {
+        final CommandContext context = new CommandContext();
+        final CommonConsoleSender sender = mock(CommonConsoleSender.class);
+        when(sender.hasPermission("loritime.see.other")).thenReturn(true);
+        when(context.storage().getUuid("Lorias_")).thenReturn(Optional.of(PLAYER_ID));
+        when(context.playerConverter().getOnlinePlayer(PLAYER_ID))
+                .thenReturn(new TrackedLoriTimePlayer(PLAYER_ID, "Lorias_"));
+
+        new LoriTimeCommand(context.plugin(), context.localization()).execute(sender, "Lorias_", "time:3d");
+
+        verify(context.storage(), never()).getTime(eq(PLAYER_ID), eq(TimeScope.GLOBAL), any(TimeRange.class));
         verify(sender).sendMessage(any(TextComponent.class));
     }
 

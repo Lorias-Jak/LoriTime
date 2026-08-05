@@ -149,7 +149,7 @@ class YamlConfigurationTest {
         final Configuration migrated = fileManager.getConfiguration(
                 fileManager.getOrCreateFile(bootstrapFolder.toString(), "config.yml", true));
 
-        assertEquals(2, migrated.getInt("configSchemaVersion"));
+        assertEquals(3, migrated.getInt("configSchemaVersion"));
         assertEquals("sqlite", migrated.getString("storageMethod"));
         assertTrue(migrated.getBoolean("storageMigration.legacyFlatFileImport"));
         assertFalse(migrated.getBoolean("updater.checkForUpdates"));
@@ -179,12 +179,13 @@ class YamlConfigurationTest {
         final Configuration migrated = fileManager.getConfiguration(
                 fileManager.getOrCreateLanguageFile("en-us"));
 
-        assertEquals(2, migrated.getInt("schema_version"));
+        assertEquals(3, migrated.getInt("schema_version"));
         assertEquals("custom no permission", migrated.getString("messages.message.noPermission"));
         assertEquals("custom second", migrated.getString("messages.unit.second.singular"));
         assertTrue(migrated.containsKey("messages.message.command.loritime.usage"));
         assertTrue(migrated.containsKey("messages.message.command.loritimeadmin.transfer.warning"));
         assertTrue(migrated.containsKey("messages.message.command.loritimeadmin.deleteHistory.warning"));
+        assertTrue(migrated.containsKey("messages.message.command.stats.overview"));
     }
 
     @Test
@@ -196,12 +197,59 @@ class YamlConfigurationTest {
                 fileManager.getOrCreateFile(commandFolder.toString(), "commands.yml", true));
 
         assertTrue(new File(commandFolder, "commands.yml").exists());
+        assertEquals(1, commands.getInt("commandSchemaVersion"));
         assertEquals("plta", commands.getString("profiles.proxy.admin.name"));
         assertEquals("lta", commands.getString("profiles.backend.canonical.admin.name"));
         assertEquals("lta", commands.getString("profiles.backend.slave.admin.name"));
         assertFalse(commands.containsKey("profiles.backend.slave.modify.name"));
         assertFalse(commands.containsKey("profiles.backend.slave.local.name"));
         assertFalse(commands.containsKey("profiles.paper.canonical.admin.name"));
+        assertFalse(commands.containsKey("profiles.backend.slave.stats.name"));
+    }
+
+    @Test
+    void fileManagerMigratesLegacyCommandsAndPreservesCustomValues() throws IOException, ConfigurationException {
+        final File commandFolder = new File(dataFolder, "migrate-commands");
+        Files.createDirectories(commandFolder.toPath());
+        final File commandsFile = new File(commandFolder, "commands.yml");
+        Files.writeString(commandsFile.toPath(), """
+                profiles:
+                  proxy:
+                    admin:
+                      name: 'customadmin'
+                      aliases: ['custom-admin']
+                    stats:
+                      name: 'networkstats'
+                      aliases: ['network-statistics']
+                  backend:
+                    canonical:
+                      admin:
+                        name: 'backendadmin'
+                        aliases: []
+                    slave:
+                      admin:
+                        name: 'slaveadmin'
+                        aliases: []
+                customCommands:
+                  retained: true
+                """);
+        final FileManager fileManager = new FileManager(loggerFactory, commandFolder);
+
+        final Configuration migrated = fileManager.getConfiguration(
+                fileManager.getOrCreateFile(commandFolder.toString(), "commands.yml", true));
+        final String firstMigration = Files.readString(commandsFile.toPath());
+        fileManager.getOrCreateFile(commandFolder.toString(), "commands.yml", true);
+
+        assertEquals(1, migrated.getInt("commandSchemaVersion"));
+        assertEquals("customadmin", migrated.getString("profiles.proxy.admin.name"));
+        assertEquals("networkstats", migrated.getString("profiles.proxy.stats.name"));
+        assertEquals(List.of("network-statistics"), migrated.getArrayList("profiles.proxy.stats.aliases"));
+        assertEquals("ltstats", migrated.getString("profiles.backend.canonical.stats.name"));
+        assertEquals(List.of("stats", "loritimestats"),
+                migrated.getArrayList("profiles.backend.canonical.stats.aliases"));
+        assertTrue(migrated.getBoolean("customCommands.retained"));
+        assertFalse(migrated.containsKey("profiles.backend.slave.stats.name"));
+        assertEquals(firstMigration, Files.readString(commandsFile.toPath()));
     }
 
     @Test
@@ -256,6 +304,8 @@ class YamlConfigurationTest {
                 fileManager.getOrCreateFile(configFolder.toString(), "config.yml", true));
 
         assertEquals(30, config.getInt("command.completion.recentPlayersDays"));
+        assertEquals("system", config.getString("stats.calendar-time-zone"));
+        assertEquals("calendar:today", config.getString("stats.default-range"));
     }
 
     private static final class SetFactory {

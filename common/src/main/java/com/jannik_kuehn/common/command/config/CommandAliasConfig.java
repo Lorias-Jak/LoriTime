@@ -113,6 +113,9 @@ public class CommandAliasConfig {
          */
         TOP,
 
+        /** Network statistics command. */
+        STATS,
+
         /**
          * AFK command.
          */

@@ -4,15 +4,20 @@ import com.github.roleplaycauldron.spellbook.core.logger.WrappedLogger;
 import com.jannik_kuehn.common.api.storage.TimeRange;
 import com.jannik_kuehn.common.api.storage.TimeScope;
 import com.jannik_kuehn.common.exception.StorageException;
+import com.jannik_kuehn.common.storage.model.AfkPeriod;
+import com.jannik_kuehn.common.storage.model.AfkPeriodEndReason;
 import com.jannik_kuehn.common.storage.model.ManualTimeAdjustment;
 import com.jannik_kuehn.common.storage.model.PlayerSessionChunk;
 import com.jannik_kuehn.common.storage.model.PlayerSessionContext;
 import com.jannik_kuehn.common.storage.model.RecentPlayerIdentity;
 import com.jannik_kuehn.common.storage.model.SessionContextDefaults;
+import com.jannik_kuehn.common.storage.model.StatisticsRequest;
+import com.jannik_kuehn.common.storage.model.StatisticsSnapshot;
 import com.jannik_kuehn.common.storage.model.TimeEntryReason;
 import org.junit.jupiter.api.Test;
 
 import java.sql.SQLException;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -22,14 +27,20 @@ import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-@SuppressWarnings({"PMD.CloseResource", "PMD.UnitTestContainsTooManyAsserts"})
+@SuppressWarnings({"PMD.CloseResource", "PMD.UnitTestContainsTooManyAsserts",
+        "PMD.UnitTestAssertionsShouldIncludeMessage", "PMD.CouplingBetweenObjects", "PMD.DoNotUseThreads"})
 class AccumulatingTimeStorageTest {
 
     private static final UUID PLAYER = UUID.fromString("44174cf6-e76c-4994-899c-3387284ecd62");
+
+    private static final UUID OTHER_PLAYER = UUID.fromString("a44f7fed-d003-4de6-b620-191c0fc22bb7");
 
     @Test
     void stopPersistsSingleSessionChunkWithContext() throws StorageException {
@@ -303,19 +314,96 @@ class AccumulatingTimeStorageTest {
                 "Expected non-overlapping active time to be excluded");
     }
 
+    @Test
+    void statisticsCheckpointAdvancesActiveSessionAndLaterLeave() throws StorageException {
+        final FakeUnifiedStorage storage = new FakeUnifiedStorage();
+        final AccumulatingTimeStorage accumulator = accumulator(storage);
+        final Instant observedAt = Instant.ofEpochMilli(9_000L);
+        final StatisticsRequest request = new StatisticsRequest(
+                TimeRange.between(Instant.EPOCH, Instant.ofEpochMilli(5_000L)), TimeScope.GLOBAL,
+                Duration.ofMinutes(3), observedAt);
+
+        accumulator.startAccumulating(PLAYER, "Lorias_", "survival", "world", 1_000L);
+        accumulator.getStatistics(request);
+
+        assertEquals(9_000L, storage.sessions.getFirst().stoppedAtMs(),
+                "Expected checkpoint at observation time, not historical range end");
+        assertEquals(TimeEntryReason.AUTO_FLUSH, storage.sessions.getFirst().reason());
+        assertEquals(request, storage.statisticsRequest);
+
+        accumulator.stopAccumulatingAndSaveOnlineTime(PLAYER, 12_000L, TimeEntryReason.PLAYER_LEAVE);
+        assertEquals(12_000L, storage.sessions.getFirst().stoppedAtMs());
+        assertEquals(TimeEntryReason.PLAYER_LEAVE, storage.sessions.getFirst().reason());
+    }
+
+    @Test
+    void checkpointCannotOverwriteSamePlayerLeaveAndDoesNotBlockAnotherPlayer() throws Exception {
+        final BlockingUnifiedStorage storage = new BlockingUnifiedStorage();
+        final AccumulatingTimeStorage accumulator = accumulator(storage);
+        final StatisticsRequest request = new StatisticsRequest(TimeRange.between(Instant.EPOCH, Instant.MAX),
+                TimeScope.GLOBAL, Duration.ofMinutes(3), Instant.ofEpochMilli(9_000L));
+        final AtomicReference<Throwable> failure = new AtomicReference<>();
+
+        accumulator.startAccumulating(PLAYER, "Lorias_", "survival", "world", 1_000L);
+        final Thread checkpoint = startThread(() -> accumulator.getStatistics(request), failure);
+        assertTrue(storage.autoFlushStarted.await(1, TimeUnit.SECONDS));
+
+        final CountDownLatch otherPlayerStarted = new CountDownLatch(1);
+        final Thread otherPlayer = startThread(() -> {
+            accumulator.startAccumulating(OTHER_PLAYER, "Other", "creative", "plots", 1_000L);
+            otherPlayerStarted.countDown();
+        }, failure);
+        assertTrue(otherPlayerStarted.await(1, TimeUnit.SECONDS), "Expected unrelated player not to wait for checkpoint");
+
+        final CountDownLatch samePlayerStopped = new CountDownLatch(1);
+        final Thread samePlayer = startThread(() -> {
+            accumulator.stopAccumulatingAndSaveOnlineTime(PLAYER, 12_000L, TimeEntryReason.PLAYER_LEAVE);
+            samePlayerStopped.countDown();
+        }, failure);
+        assertFalse(samePlayerStopped.await(100, TimeUnit.MILLISECONDS), "Expected same player to wait for checkpoint");
+
+        storage.releaseAutoFlush.countDown();
+        checkpoint.join(1_000L);
+        otherPlayer.join(1_000L);
+        samePlayer.join(1_000L);
+
+        assertNull(failure.get());
+        assertEquals(TimeEntryReason.PLAYER_LEAVE, storage.sessions.getFirst().reason());
+        assertEquals(12_000L, storage.sessions.getFirst().stoppedAtMs());
+    }
+
+    private Thread startThread(final ThrowingAction action, final AtomicReference<Throwable> failure) {
+        final Thread thread = new Thread(() -> {
+            try {
+                action.run();
+            } catch (final StorageException ex) {
+                failure.compareAndSet(null, ex);
+            }
+        });
+        thread.start();
+        return thread;
+    }
+
     private AccumulatingTimeStorage accumulator(final FakeUnifiedStorage storage) {
         return new AccumulatingTimeStorage(mock(WrappedLogger.class), storage);
     }
 
-    private static final class FakeUnifiedStorage implements UnifiedStorage {
+    @FunctionalInterface
+    private interface ThrowingAction {
+        void run() throws StorageException;
+    }
 
-        private final List<PlayerSessionChunk> sessions = new ArrayList<>();
+    private static class FakeUnifiedStorage implements UnifiedStorage, StatisticsStorage {
+
+        protected final List<PlayerSessionChunk> sessions = new ArrayList<>();
 
         private final Map<UUID, Long> adjustments = new java.util.HashMap<>();
 
         private final List<TimeEntryReason> directWriteReasons = new ArrayList<>();
 
         private boolean closed;
+
+        private StatisticsRequest statisticsRequest;
 
         @Override
         public Optional<UUID> getUuid(final String playerName) {
@@ -410,6 +498,34 @@ class AccumulatingTimeStorageTest {
         }
 
         @Override
+        public void openAfkPeriod(final UUID playerId, final String playerName, final String server,
+                                  final String world, final Instant startedAt) {
+            // Empty
+        }
+
+        @Override
+        public void closeAfkPeriod(final UUID playerId, final Instant endedAt, final AfkPeriodEndReason reason) {
+            // Empty
+        }
+
+        @Override
+        public int recoverOpenAfkPeriods(final Instant endedAt) {
+            return 0;
+        }
+
+        @Override
+        public List<AfkPeriod> getAfkPeriods(final TimeRange range, final TimeScope scope) {
+            return List.of();
+        }
+
+        @Override
+        public StatisticsSnapshot getStatistics(final StatisticsRequest request) {
+            statisticsRequest = request;
+            return new StatisticsSnapshot(0, 0, 0, Duration.ZERO, Duration.ZERO, Duration.ZERO, 0.0D,
+                    0, 0.0D, 0, 0, 0, Duration.ZERO, 0, 0.0D, Map.of(), Map.of(), List.of());
+        }
+
+        @Override
         public long startSession(final PlayerSessionContext context, final TimeEntryReason reason) {
             final PlayerSessionChunk session = new PlayerSessionChunk(context.uuid(), context.name(), context.server(), context.world(),
                     context.startedAtMs(), context.startedAtMs(), reason);
@@ -418,7 +534,8 @@ class AccumulatingTimeStorageTest {
         }
 
         @Override
-        public void updateSession(final long sessionId, final long stoppedAtMs, final TimeEntryReason reason) {
+        public void updateSession(final long sessionId, final long stoppedAtMs, final TimeEntryReason reason)
+                throws StorageException {
             final int index = Math.toIntExact(sessionId);
             final PlayerSessionChunk previous = sessions.get(index);
             sessions.set(index, new PlayerSessionChunk(previous.uuid(), previous.name(), previous.server(), previous.world(),
@@ -456,6 +573,29 @@ class AccumulatingTimeStorageTest {
         @Override
         public void close() {
             closed = true;
+        }
+    }
+
+    private static final class BlockingUnifiedStorage extends FakeUnifiedStorage {
+        private final CountDownLatch autoFlushStarted = new CountDownLatch(1);
+
+        private final CountDownLatch releaseAutoFlush = new CountDownLatch(1);
+
+        @Override
+        public void updateSession(final long sessionId, final long stoppedAtMs, final TimeEntryReason reason)
+                throws StorageException {
+            if (reason == TimeEntryReason.AUTO_FLUSH) {
+                autoFlushStarted.countDown();
+                try {
+                    if (!releaseAutoFlush.await(1, TimeUnit.SECONDS)) {
+                        throw new StorageException("Timed out waiting to release checkpoint");
+                    }
+                } catch (final InterruptedException ex) {
+                    Thread.currentThread().interrupt();
+                    throw new StorageException(ex);
+                }
+            }
+            super.updateSession(sessionId, stoppedAtMs, reason);
         }
     }
 }

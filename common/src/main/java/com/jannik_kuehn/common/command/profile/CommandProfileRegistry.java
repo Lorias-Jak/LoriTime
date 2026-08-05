@@ -5,6 +5,7 @@ import com.jannik_kuehn.common.command.LoriTimeAdminCommand;
 import com.jannik_kuehn.common.command.LoriTimeAfkCommand;
 import com.jannik_kuehn.common.command.LoriTimeCommand;
 import com.jannik_kuehn.common.command.LoriTimeModifyCommand;
+import com.jannik_kuehn.common.command.LoriTimeStatsCommand;
 import com.jannik_kuehn.common.command.LoriTimeTopCommand;
 import com.jannik_kuehn.common.command.config.CommandAlias;
 import com.jannik_kuehn.common.command.config.CommandAliasConfig;
@@ -57,6 +58,8 @@ public class CommandProfileRegistry {
                     new LoriTimeCommand(plugin, localization)));
             commands.add(configured(profile, CommandAliasConfig.CommandNode.TOP,
                     new LoriTimeTopCommand(plugin, localization)));
+            commands.add(configured(profile, CommandAliasConfig.CommandNode.STATS,
+                    new LoriTimeStatsCommand(plugin, localization)));
             commands.add(configured(profile, CommandAliasConfig.CommandNode.MODIFY,
                     new LoriTimeModifyCommand(plugin, localization, plugin.getParser())));
         }
@@ -73,7 +76,8 @@ public class CommandProfileRegistry {
         final CommandAlias alias = plugin.getCommandAliasConfig().resolve(profile.aliases(), node,
                 command.getCommandName(), command.getAliases());
         return new CommandDispatcher(plugin, new CommandDefinition(alias.name(), alias.aliases(),
-                permission(node), CommandExecutionPolicy.SYNC,
+                permission(node), node == CommandAliasConfig.CommandNode.STATS
+                        ? CommandExecutionPolicy.ASYNC : CommandExecutionPolicy.SYNC,
                 context -> command.execute(context.sender(), context.args()),
                 context -> command.handleTabComplete(context.sender(), context.args())),
                 localization);
@@ -84,6 +88,7 @@ public class CommandProfileRegistry {
             case ADMIN, MODIFY -> "loritime.admin";
             case TIME -> "loritime.see";
             case TOP -> "loritime.top";
+            case STATS -> "loritime.stats";
             case AFK -> "loritime.afk";
         };
     }

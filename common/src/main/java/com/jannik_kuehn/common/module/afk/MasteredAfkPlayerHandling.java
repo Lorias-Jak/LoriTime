@@ -5,11 +5,14 @@ import com.jannik_kuehn.common.LoriTimePlugin;
 import com.jannik_kuehn.common.api.LoriTimePlayer;
 import com.jannik_kuehn.common.api.storage.TimeScope;
 import com.jannik_kuehn.common.exception.StorageException;
+import com.jannik_kuehn.common.storage.model.AfkPeriodEndReason;
 import com.jannik_kuehn.common.storage.model.ManualTimeAdjustment;
+import com.jannik_kuehn.common.storage.model.PlayerSessionContext;
 import com.jannik_kuehn.common.storage.model.SessionContextDefaults;
 import com.jannik_kuehn.common.storage.model.TimeEntryReason;
 import com.jannik_kuehn.common.utils.TimeUtil;
 
+import java.time.Instant;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -55,6 +58,7 @@ public class MasteredAfkPlayerHandling extends AfkHandling {
         }
 
         final AfkTransition transition = determineAfkStartTransition(loriTimePlayer, timeToRemove);
+        persistAfkStart(loriTimePlayer, timeToRemove);
         if (removeTimeEnabled && !hasPermission(loriTimePlayer, "loritime.afk.bypass.timeRemove")) {
             try {
                 log.debug("Removing online time for player " + loriTimePlayer.getUniqueId()
@@ -79,6 +83,7 @@ public class MasteredAfkPlayerHandling extends AfkHandling {
                             .replace("[time]", TimeUtil.formatTime(transition.timeToRemove(), loriTimePlugin.getLocalization()))
                     ));
             sendKickAnnounce(loriTimePlayer, transition.timeToRemove(), "loritime.afk.announce.kick");
+            persistAfkEnd(loriTimePlayer.getUniqueId(), AfkPeriodEndReason.KICKED);
             return;
         }
 
@@ -104,9 +109,36 @@ public class MasteredAfkPlayerHandling extends AfkHandling {
         final AfkTransition transition = new AfkTransition(loriTimePlayer, AfkTransitionType.RESUME, 0L);
         chatAnnounce(loriTimePlayer, "message.afk.resumeAnnounce", "loritime.afk.announce.afkAnnounce");
         selfAfkMessage(loriTimePlayer, "message.afk.afkResume");
+        persistAfkEnd(loriTimePlayer.getUniqueId(), AfkPeriodEndReason.RESUMED);
         if (transition.type() == AfkTransitionType.RESUME && playersStoppedForAfk.remove(loriTimePlayer.getUniqueId())) {
             startAccumulatingOnlineTime(transition.player());
         }
+    }
+
+    private void persistAfkStart(final LoriTimePlayer player, final long secondsAfk) {
+        final long now = System.currentTimeMillis();
+        final java.util.Optional<PlayerSessionContext> context = loriTimePlugin.getAccumulator()
+                .getActiveSessionContext(player.getUniqueId());
+        final String server = context.map(PlayerSessionContext::server).orElse(SessionContextDefaults.SERVER);
+        final String world = context.map(PlayerSessionContext::world).orElse(SessionContextDefaults.WORLD);
+        loriTimePlugin.getStatisticsStorage().ifPresent(storage -> {
+            try {
+                storage.openAfkPeriod(player.getUniqueId(), player.getName(), server, world,
+                        Instant.ofEpochMilli(now).minusSeconds(Math.max(0L, secondsAfk)));
+            } catch (final StorageException ex) {
+                log.error("Could not open AFK period for " + player.getUniqueId(), ex);
+            }
+        });
+    }
+
+    private void persistAfkEnd(final UUID playerId, final AfkPeriodEndReason reason) {
+        loriTimePlugin.getStatisticsStorage().ifPresent(storage -> {
+            try {
+                storage.closeAfkPeriod(playerId, Instant.now(), reason);
+            } catch (final StorageException ex) {
+                log.error("Could not close AFK period for " + playerId + " as " + reason, ex);
+            }
+        });
     }
 
     private AfkTransition determineAfkStartTransition(final LoriTimePlayer loriTimePlayer, final long timeToRemove) {

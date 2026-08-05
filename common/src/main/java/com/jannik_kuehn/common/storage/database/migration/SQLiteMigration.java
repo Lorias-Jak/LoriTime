@@ -33,8 +33,31 @@ public final class SQLiteMigration {
         final VersionListBuilder builder = new VersionListBuilder();
         addMigrationOne(builder, tablePrefix);
         addMigrationTwo(builder, tablePrefix);
+        addMigrationThree(builder, tablePrefix);
 
         return builder.finish();
+    }
+
+    private static void addMigrationThree(final VersionListBuilder builder, final String tablePrefix) {
+        builder.version(3)
+                .addUnconditionalQuery("CREATE TABLE IF NOT EXISTS `" + tablePrefix + "_afk_period` ("
+                        + "`id` INTEGER PRIMARY KEY AUTOINCREMENT,"
+                        + "`player_id` INTEGER NOT NULL,"
+                        + "`world_id` INTEGER NOT NULL,"
+                        + "`started_at` TEXT NOT NULL,"
+                        + "`ended_at` TEXT NULL,"
+                        + "`end_reason` TEXT NULL,"
+                        + "FOREIGN KEY (`player_id`) REFERENCES `" + tablePrefix + "_player`(`id`) ON DELETE CASCADE,"
+                        + "FOREIGN KEY (`world_id`) REFERENCES `" + tablePrefix + "_world`(`id`) ON DELETE CASCADE)")
+                .addUnconditionalQuery("CREATE INDEX IF NOT EXISTS `idx_" + tablePrefix + "_afk_player_open` "
+                        + "ON `" + tablePrefix + "_afk_period` (`player_id`, `ended_at`)")
+                .addUnconditionalQuery("CREATE INDEX IF NOT EXISTS `idx_" + tablePrefix + "_afk_range` "
+                        + "ON `" + tablePrefix + "_afk_period` (`started_at`, `ended_at`)")
+                .addUnconditionalQuery("CREATE INDEX IF NOT EXISTS `idx_" + tablePrefix + "_afk_world` "
+                        + "ON `" + tablePrefix + "_afk_period` (`world_id`)")
+                .addUnconditionalQuery("CREATE INDEX IF NOT EXISTS `idx_" + tablePrefix + "_time_range` "
+                        + "ON `" + tablePrefix + "_time` (`join_time`, `leave_time`)")
+                .finishVersion();
     }
 
     private static void addMigrationOne(final VersionListBuilder builder, final String tablePrefix) {

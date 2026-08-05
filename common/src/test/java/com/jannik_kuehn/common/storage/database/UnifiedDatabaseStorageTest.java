@@ -5,16 +5,19 @@ import com.jannik_kuehn.common.api.storage.TimeRange;
 import com.jannik_kuehn.common.api.storage.TimeScope;
 import com.jannik_kuehn.common.config.Configuration;
 import com.jannik_kuehn.common.exception.StorageException;
+import com.jannik_kuehn.common.storage.contract.AccumulatingTimeStorage;
 import com.jannik_kuehn.common.storage.database.migration.DatabaseMigrationPreflight;
 import com.jannik_kuehn.common.storage.database.table.ManualAdjustmentTable;
 import com.jannik_kuehn.common.storage.database.table.PlayerTable;
 import com.jannik_kuehn.common.storage.database.table.ServerTable;
 import com.jannik_kuehn.common.storage.database.table.TimeTable;
 import com.jannik_kuehn.common.storage.database.table.WorldTable;
+import com.jannik_kuehn.common.storage.model.AfkPeriodEndReason;
 import com.jannik_kuehn.common.storage.model.ManualTimeAdjustment;
 import com.jannik_kuehn.common.storage.model.PlayerSessionChunk;
 import com.jannik_kuehn.common.storage.model.PlayerStorageTransferRequest;
 import com.jannik_kuehn.common.storage.model.RecentPlayerIdentity;
+import com.jannik_kuehn.common.storage.model.StatisticsRequest;
 import com.jannik_kuehn.common.storage.model.StorageDeleteRequest;
 import com.jannik_kuehn.common.storage.model.StorageMaintenanceConfirmation;
 import com.jannik_kuehn.common.storage.model.StorageMaintenancePreview;
@@ -33,6 +36,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
@@ -43,7 +47,8 @@ import java.util.logging.Logger;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-@SuppressWarnings({"PMD.CouplingBetweenObjects", "PMD.UnitTestContainsTooManyAsserts"})
+@SuppressWarnings({"PMD.CouplingBetweenObjects", "PMD.UnitTestContainsTooManyAsserts", "PMD.UseExplicitTypes",
+        "PMD.UnitTestAssertionsShouldIncludeMessage", "PMD.AvoidLiteralsInIfCondition"})
 class UnifiedDatabaseStorageTest {
 
     private static final String TABLE_PREFIX = "loritime";
@@ -353,6 +358,9 @@ class UnifiedDatabaseStorageTest {
                     1_000L, 11_000L, TimeEntryReason.PLAYER_LEAVE));
             storage.addTime(new ManualTimeAdjustment(PLAYER, 5L, TimeEntryReason.MANUAL_ADJUSTMENT, "CONSOLE",
                     TimeScope.server("survival")));
+            final Instant afkStart = Instant.parse("2026-07-15T10:00:00Z");
+            storage.openAfkPeriod(PLAYER, "Lorias_", "survival", "world", afkStart);
+            storage.closeAfkPeriod(PLAYER, afkStart.plusSeconds(30), AfkPeriodEndReason.RESUMED);
             final StorageTransferRequest request = StorageTransferRequest.serverTransfer(List.of(
                     new StorageTransferMapping(StorageMaintenanceScope.server("survival"),
                             StorageMaintenanceScope.server("target"))));
@@ -364,6 +372,8 @@ class UnifiedDatabaseStorageTest {
                     "Expected source server to have no remaining time");
             assertEquals(OptionalLong.of(15L), storage.getTime(PLAYER, TimeScope.server("target")),
                     "Expected target server to include moved data");
+            assertEquals(1, storage.getAfkPeriods(TimeRange.between(afkStart, afkStart.plusSeconds(31)),
+                    TimeScope.server("target")).size(), "Expected AFK period to move to target server");
             assertEquals(OptionalLong.of(15L), storage.getTime(PLAYER), "Expected global total to remain unchanged");
         }
     }
@@ -377,6 +387,9 @@ class UnifiedDatabaseStorageTest {
                     1_000L, 11_000L, TimeEntryReason.PLAYER_LEAVE));
             storage.addTime(new ManualTimeAdjustment(PLAYER, 5L, TimeEntryReason.MANUAL_ADJUSTMENT, "CONSOLE",
                     TimeScope.world("survival", "world")));
+            final Instant afkStart = Instant.parse("2026-07-15T10:00:00Z");
+            storage.openAfkPeriod(PLAYER, "Lorias_", "survival", "world", afkStart);
+            storage.closeAfkPeriod(PLAYER, afkStart.plusSeconds(30), AfkPeriodEndReason.RESUMED);
             final StorageTransferRequest request = StorageTransferRequest.worldTransfer(List.of(
                     new StorageTransferMapping(StorageMaintenanceScope.world("survival", "world"),
                             StorageMaintenanceScope.world("target", "spawn"))));
@@ -388,6 +401,8 @@ class UnifiedDatabaseStorageTest {
                     "Expected source world to have no remaining time");
             assertEquals(OptionalLong.of(15L), storage.getTime(PLAYER, TimeScope.world("target", "spawn")),
                     "Expected target world to include moved data");
+            assertEquals(1, storage.getAfkPeriods(TimeRange.between(afkStart, afkStart.plusSeconds(31)),
+                    TimeScope.world("target", "spawn")).size(), "Expected AFK period to move to target world");
             assertEquals(OptionalLong.of(15L), storage.getTime(PLAYER), "Expected global total to remain unchanged");
         }
     }
@@ -769,6 +784,9 @@ class UnifiedDatabaseStorageTest {
                     TimeScope.server("survival")));
             source.addTime(new ManualTimeAdjustment(PLAYER, 3L, TimeEntryReason.MANUAL_ADJUSTMENT, "CONSOLE",
                     TimeScope.world("survival", "world")));
+            final Instant afkStart = Instant.parse("2026-07-15T10:00:00Z");
+            source.openAfkPeriod(PLAYER, "Lorias_", "survival", "world", afkStart);
+            source.closeAfkPeriod(PLAYER, afkStart.plusSeconds(30), AfkPeriodEndReason.RESUMED);
 
             final StorageMaintenancePreview preview = source.previewStorageTransferTo(target);
             source.applyStorageTransferTo(target, preview.confirmation());
@@ -779,6 +797,13 @@ class UnifiedDatabaseStorageTest {
                     "Expected copied server total");
             assertEquals(OptionalLong.of(13L), target.getTime(PLAYER, TimeScope.world("survival", "world")),
                     "Expected copied world total");
+            final var period = target.getAfkPeriods(TimeRange.between(afkStart, afkStart.plusSeconds(31)),
+                    TimeScope.world("survival", "world")).getFirst();
+            assertEquals(afkStart, period.startedAt(), "Expected copied AFK-period start");
+            assertEquals(afkStart.plusSeconds(30), period.endedAt().orElseThrow(),
+                    "Expected copied AFK-period end");
+            assertEquals(AfkPeriodEndReason.RESUMED, period.endReason().orElseThrow(),
+                    "Expected copied AFK-period reason");
             assertEquals(OptionalLong.of(18L), source.getTime(PLAYER), "Expected source data to remain");
         }
     }
@@ -824,6 +849,141 @@ class UnifiedDatabaseStorageTest {
         }
     }
 
+    @Test
+    void afkPeriodsAreUniqueScopedAndRecoveredAsShutdown() throws Exception {
+        final Instant start = Instant.parse("2026-07-10T10:00:00Z");
+        final TimeRange range = TimeRange.between(start.minusSeconds(1), start.plusSeconds(301));
+        try (UnifiedDatabaseStorage storage = storage()) {
+            storage.openAfkPeriod(PLAYER, "Lorias_", "survival", "world", start);
+            storage.openAfkPeriod(PLAYER, "Lorias_", "survival", "world", start.plusSeconds(10));
+            assertEquals(1, storage.getAfkPeriods(range, TimeScope.GLOBAL).size(), "Expected one open period");
+            assertTrue(storage.getAfkPeriods(range, TimeScope.server("creative")).isEmpty(),
+                    "Expected scope filtering");
+
+            assertEquals(1, storage.recoverOpenAfkPeriods(start.plusSeconds(300)), "Expected stale recovery");
+            final var recovered = storage.getAfkPeriods(range, TimeScope.world("survival", "world")).getFirst();
+            assertEquals(AfkPeriodEndReason.SHUTDOWN, recovered.endReason().orElseThrow());
+            assertEquals(start.plusSeconds(300), recovered.endedAt().orElseThrow());
+        }
+    }
+
+    @Test
+    void afkPeriodClosesWithExplicitReason() throws Exception {
+        final Instant start = Instant.parse("2026-07-10T10:00:00Z");
+        try (UnifiedDatabaseStorage storage = storage()) {
+            storage.openAfkPeriod(PLAYER, "Lorias_", "survival", "world", start);
+            storage.closeAfkPeriod(PLAYER, start.plusSeconds(60), AfkPeriodEndReason.RESUMED);
+            final var period = storage.getAfkPeriods(TimeRange.between(start, start.plusSeconds(61)), TimeScope.GLOBAL)
+                    .getFirst();
+            assertEquals(AfkPeriodEndReason.RESUMED, period.endReason().orElseThrow());
+        }
+    }
+
+    @Test
+    void statisticsMigrationsCreateBoundedHistoryIndexes() throws Exception {
+        try (UnifiedDatabaseStorage ignored = storage(); Connection connection = openSqlite();
+             Statement statement = connection.createStatement()) {
+            assertTrue(hasIndex(statement, TABLE_PREFIX + "_time", "idx_" + TABLE_PREFIX + "_time_range"));
+            assertTrue(hasIndex(statement, TABLE_PREFIX + "_afk_period", "idx_" + TABLE_PREFIX + "_afk_range"));
+        }
+    }
+
+    @Test
+    void sqliteStatisticsIncludeEpochMillisecondTextSessions() throws Exception {
+        final Instant start = Instant.parse("2026-07-10T10:00:00Z");
+        try (UnifiedDatabaseStorage storage = storage()) {
+            storage.persistSession(new PlayerSessionChunk(PLAYER, Optional.of("Lorias_"), "survival", "world",
+                    start.toEpochMilli(), start.plusSeconds(60).toEpochMilli(), TimeEntryReason.PLAYER_LEAVE));
+
+            final var result = storage.getStatistics(new StatisticsRequest(
+                    TimeRange.between(start.minusSeconds(1), start.plusSeconds(120)), TimeScope.GLOBAL,
+                    Duration.ofMinutes(3), start.plusSeconds(120)));
+
+            assertEquals(1, result.uniqueUsers());
+            assertEquals(1, result.sessions());
+            assertEquals(Duration.ofSeconds(60), result.totalPlayTime());
+        }
+    }
+
+    @Test
+    void sqliteStatisticsIncludeNewlyJoinedActiveSessionAtObservationTime() throws Exception {
+        final Instant observedAt = Instant.parse("2026-07-10T10:02:00Z");
+        final LoggerFactory loggerFactory = new LoggerFactory(Logger.getLogger("test"));
+        try (AccumulatingTimeStorage accumulator = new AccumulatingTimeStorage(
+                loggerFactory.create(AccumulatingTimeStorage.class), storage())) {
+            accumulator.startAccumulating(PLAYER, "Lorias_", "survival", "world",
+                    observedAt.minusSeconds(90).toEpochMilli());
+
+            final var result = accumulator.getStatistics(new StatisticsRequest(
+                    TimeRange.between(observedAt.minusSeconds(300), observedAt), TimeScope.GLOBAL,
+                    Duration.ofMinutes(3), observedAt));
+
+            assertEquals(1, result.uniqueUsers());
+            assertEquals(1, result.sessions());
+            assertEquals(Duration.ofSeconds(90), result.totalPlayTime());
+            assertEquals(Duration.ofSeconds(90), result.medianSession());
+            assertEquals(0, result.bounces());
+            assertEquals(1, result.peakConcurrent());
+        }
+    }
+
+    @Test
+    void sqliteStatisticsIncludeFormattedHistoricalTimestampsAndExcludeOutsideRows() throws Exception {
+        final Instant start = Instant.parse("2026-07-10T10:00:00Z");
+        try (UnifiedDatabaseStorage storage = storage()) {
+            storage.persistSession(new PlayerSessionChunk(PLAYER, Optional.of("Lorias_"), "survival", "world",
+                    start.toEpochMilli(), start.plusSeconds(60).toEpochMilli(), TimeEntryReason.PLAYER_LEAVE));
+            storage.persistSession(new PlayerSessionChunk(OTHER_PLAYER, Optional.of("Other"), "survival", "world",
+                    start.minusSeconds(600).toEpochMilli(), start.minusSeconds(540).toEpochMilli(),
+                    TimeEntryReason.PLAYER_LEAVE));
+            try (Connection connection = openSqlite(); PreparedStatement update = connection.prepareStatement(
+                    "UPDATE `" + TABLE_PREFIX + "_time` SET `join_time` = ?, `leave_time` = ? "
+                            + "WHERE `player_id` = (SELECT `id` FROM `" + TABLE_PREFIX + "_player` WHERE `uuid` = ?)")) {
+                update.setString(1, Timestamp.from(start).toString());
+                update.setString(2, Timestamp.from(start.plusSeconds(60)).toString());
+                update.setBytes(3, com.jannik_kuehn.common.utils.UuidUtil.toBytes(PLAYER));
+                update.executeUpdate();
+            }
+
+            final var result = storage.getStatistics(new StatisticsRequest(
+                    TimeRange.between(start.minusSeconds(1), start.plusSeconds(120)), TimeScope.GLOBAL,
+                    Duration.ofMinutes(3), start.plusSeconds(120)));
+
+            assertEquals(1, result.uniqueUsers(), "Expected formatted in-range row and excluded older row");
+            assertEquals(Duration.ofSeconds(60), result.totalPlayTime());
+        }
+    }
+
+    @Test
+    void sqliteStatisticsCompatibilityDoesNotChangeSessionSchema() throws Exception {
+        try (UnifiedDatabaseStorage storage = storage()) {
+            storage.getStatistics(new StatisticsRequest(
+                    TimeRange.between(Instant.EPOCH, Instant.EPOCH.plusSeconds(1)), TimeScope.GLOBAL,
+                    Duration.ofMinutes(3), Instant.EPOCH.plusSeconds(1)));
+        }
+        try (Connection connection = openSqlite(); Statement statement = connection.createStatement();
+             ResultSet result = statement.executeQuery("PRAGMA table_info('" + TABLE_PREFIX + "_time')")) {
+            String joinType = null;
+            while (result.next()) {
+                if ("join_time".equals(result.getString("name"))) {
+                    joinType = result.getString("type");
+                }
+            }
+            assertEquals("TEXT", joinType, "Expected query-only compatibility without a schema migration");
+        }
+    }
+
+    private boolean hasIndex(final Statement statement, final String table, final String index) throws SQLException {
+        try (ResultSet result = statement.executeQuery("PRAGMA index_list('" + table + "')")) {
+            while (result.next()) {
+                if (index.equals(result.getString("name"))) {
+                    return true;
+                }
+            }
+            return false;
+        }
+    }
+
     private UnifiedDatabaseStorage storage() throws StorageException {
         return storage(dataFolder);
     }
@@ -837,7 +997,7 @@ class UnifiedDatabaseStorageTest {
         final WorldTable worldTable = new WorldTable(TABLE_PREFIX + "_world", serverTable);
         final TimeTable timeTable = new TimeTable(TABLE_PREFIX + "_time", playerTable, databaseStorage.getDialect());
         final ManualAdjustmentTable adjustmentTable = new ManualAdjustmentTable(TABLE_PREFIX + "_time_adjustment", playerTable);
-        return new UnifiedDatabaseStorage(databaseStorage.getProvider(), playerTable, serverTable, worldTable,
+        return new UnifiedDatabaseStorage(databaseStorage.getProvider(), databaseStorage.getTablePrefix(), playerTable, serverTable, worldTable,
                 timeTable, adjustmentTable, databaseStorage.getDialect());
     }
 

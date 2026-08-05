@@ -1,4 +1,4 @@
-schema_version: 2
+schema_version: 3
 locale: 'en-us'
 prefix: '<#A4A4A4>[<#50CBAB>LoriTime<#A4A4A4>] '
 messages:
@@ -100,6 +100,17 @@ messages:
           none: '<#FF3232>There is no pending admin action to confirm.'
           expired: '<#FF3232>The pending admin action expired. Run the preview command again.'
           failure: '<#FF3232>The confirmed admin action failed.'
+      stats:
+        commandUsage: '<#A4A4A4>Use <red>/ltstats [users|sessions|usage|top|afk|retention] [time:<range>|calendar:<period>] [server:<server>] [world:<world>].'
+        unsupported: '<#FF3232>Statistics are not supported by the active storage.'
+        error: '<#FF3232>Statistics could not be calculated.'
+        overview: '<#A4A4A4><newline>Network statistics — <#50CBAB>[range] <#A4A4A4>([scope])<newline>Unique users: <#50CBAB>[unique]<#A4A4A4> | New users: <#50CBAB>[new]<newline><#A4A4A4>Sessions: <#50CBAB>[sessions]<#A4A4A4> | Playtime: <#50CBAB>[playtime]<newline><#A4A4A4>Median: <#50CBAB>[median]<#A4A4A4> | Longest: <#50CBAB>[longest]<#A4A4A4> | Sessions/user: <#50CBAB>[peruser]<newline><#A4A4A4>Bounces: <#50CBAB>[bounces] ([bounce])<#A4A4A4> | Peak: <#50CBAB>[peak]<newline><#A4A4A4>AFK players: <#50CBAB>[afkplayers]<#A4A4A4> | AFK kicks: <#50CBAB>[afkkicks]'
+        users: '<#A4A4A4>Users — [range] ([scope])<newline>Unique: <#50CBAB>[unique]<#A4A4A4> | New: <#50CBAB>[new]<#A4A4A4> | 7-day retention: <#50CBAB>[retention]'
+        sessions: '<#A4A4A4>Sessions — [range] ([scope])<newline>Total: <#50CBAB>[sessions]<#A4A4A4> | Median: <#50CBAB>[median]<#A4A4A4> | Longest: <#50CBAB>[longest]<newline><#A4A4A4>Per user: <#50CBAB>[peruser]<#A4A4A4> | Bounces: <#50CBAB>[bounces] ([bounce])<#A4A4A4> | Peak: <#50CBAB>[peak]'
+        usage: '<#A4A4A4>Usage — [range] ([scope])<newline>[usage]'
+        top: '<#A4A4A4>Top playtime — [range] ([scope])<newline>[top]'
+        afk: '<#A4A4A4>AFK — [range] ([scope])<newline>Players: <#50CBAB>[afkplayers]<#A4A4A4> | Periods: <#50CBAB>[afkperiods]<#A4A4A4> | Duration: <#50CBAB>[afktime]<#A4A4A4> | Kicks: <#50CBAB>[afkkicks]'
+        retention: '<#A4A4A4>Retention — [range] ([scope])<newline>New users: <#50CBAB>[new]<#A4A4A4> | Matured 7-day retention: <#50CBAB>[retention]'
       top:
         usage: '<#A4A4A4>Use <red>/onlinetimetop [page] <#A4A4A4>to see the top online time of the players.'
         gatheringData: '<#A4A4A4>Gather data and start calculate...'

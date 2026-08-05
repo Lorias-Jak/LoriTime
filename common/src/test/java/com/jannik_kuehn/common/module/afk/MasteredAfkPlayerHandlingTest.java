@@ -8,8 +8,10 @@ import com.jannik_kuehn.common.config.localization.Localization;
 import com.jannik_kuehn.common.platform.CommonPlayerSender;
 import com.jannik_kuehn.common.platform.CommonServer;
 import com.jannik_kuehn.common.player.TrackedLoriTimePlayer;
+import com.jannik_kuehn.common.storage.contract.StatisticsStorage;
 import com.jannik_kuehn.common.storage.contract.TimeAccumulator;
 import com.jannik_kuehn.common.storage.contract.UnifiedStorage;
+import com.jannik_kuehn.common.storage.model.AfkPeriodEndReason;
 import com.jannik_kuehn.common.storage.model.ManualTimeAdjustment;
 import com.jannik_kuehn.common.storage.model.PlayerSessionContext;
 import com.jannik_kuehn.common.storage.model.SessionContextDefaults;
@@ -18,6 +20,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import org.junit.jupiter.api.Test;
 
+import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.logging.Logger;
@@ -79,6 +82,8 @@ class MasteredAfkPlayerHandlingTest {
         verify(context.accumulator()).startAccumulating(eq(PLAYER_ID), eq("Lorias_"), eq(SessionContextDefaults.SERVER),
                 eq(SessionContextDefaults.WORLD), anyLong());
         verify(context.sender()).sendMessage(any(TextComponent.class));
+        verify(context.statistics()).openAfkPeriod(eq(PLAYER_ID), eq("Lorias_"), anyString(), anyString(), any(Instant.class));
+        verify(context.statistics()).closeAfkPeriod(eq(PLAYER_ID), any(Instant.class), eq(AfkPeriodEndReason.RESUMED));
     }
 
     @Test
@@ -107,6 +112,7 @@ class MasteredAfkPlayerHandlingTest {
 
         verify(context.plugin()).markAfkKick(PLAYER_ID);
         verify(context.server()).kickPlayer(eq(player), any(TextComponent.class));
+        verify(context.statistics()).closeAfkPeriod(eq(PLAYER_ID), any(Instant.class), eq(AfkPeriodEndReason.KICKED));
         verify(context.sender(), never()).sendMessage(any(TextComponent.class));
     }
 
@@ -124,11 +130,11 @@ class MasteredAfkPlayerHandlingTest {
     }
 
     private record TestContext(LoriTimePlugin plugin, CommonServer server, CommonPlayerSender sender,
-                               TimeAccumulator accumulator, UnifiedStorage storage) {
+                               TimeAccumulator accumulator, UnifiedStorage storage, StatisticsStorage statistics) {
 
         private TestContext(final boolean removeTime, final boolean autoKick) {
             this(mock(LoriTimePlugin.class), mock(CommonServer.class), mock(CommonPlayerSender.class),
-                    mock(TimeAccumulator.class), mock(UnifiedStorage.class));
+                    mock(TimeAccumulator.class), mock(UnifiedStorage.class), mock(StatisticsStorage.class));
             final Configuration config = mock(Configuration.class);
             final Localization localization = mock(Localization.class);
             when(plugin().getLoggerFactory()).thenReturn(new LoggerFactory(Logger.getLogger("test")));
@@ -136,6 +142,7 @@ class MasteredAfkPlayerHandlingTest {
             when(plugin().getServer()).thenReturn(server());
             when(plugin().getAccumulator()).thenReturn(accumulator());
             when(plugin().getStorage()).thenReturn(storage());
+            when(plugin().getStatisticsStorage()).thenReturn(Optional.of(statistics()));
             when(plugin().getLocalization()).thenReturn(localization);
             when(server().getPlayer(PLAYER_ID)).thenReturn(Optional.of(sender()));
             when(server().getOnlinePlayers()).thenReturn(new CommonPlayerSender[]{sender()});

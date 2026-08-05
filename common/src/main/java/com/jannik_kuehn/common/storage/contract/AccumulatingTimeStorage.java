@@ -4,13 +4,18 @@ import com.github.roleplaycauldron.spellbook.core.logger.WrappedLogger;
 import com.jannik_kuehn.common.api.storage.TimeRange;
 import com.jannik_kuehn.common.api.storage.TimeScope;
 import com.jannik_kuehn.common.exception.StorageException;
+import com.jannik_kuehn.common.storage.model.AfkPeriod;
+import com.jannik_kuehn.common.storage.model.AfkPeriodEndReason;
 import com.jannik_kuehn.common.storage.model.ManualTimeAdjustment;
 import com.jannik_kuehn.common.storage.model.PersistedPlayerSession;
 import com.jannik_kuehn.common.storage.model.PlayerSessionChunk;
 import com.jannik_kuehn.common.storage.model.PlayerSessionContext;
 import com.jannik_kuehn.common.storage.model.RecentPlayerIdentity;
+import com.jannik_kuehn.common.storage.model.StatisticsRequest;
+import com.jannik_kuehn.common.storage.model.StatisticsSnapshot;
 import com.jannik_kuehn.common.storage.model.TimeEntryReason;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -20,12 +25,17 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Unified storage decorator that keeps active sessions in memory while persisting session rows.
  */
 @SuppressWarnings({"PMD.TooManyMethods", "PMD.CouplingBetweenObjects"})
-public class AccumulatingTimeStorage implements UnifiedStorage, TimeAccumulator {
+public class AccumulatingTimeStorage implements UnifiedStorage, TimeAccumulator, StatisticsStorage {
+    /**
+     * Number of bounded per-player lock stripes.
+     */
+    private static final int SESSION_LOCK_STRIPES = 64;
 
     /**
      * Logger for accumulator operations.
@@ -41,6 +51,11 @@ public class AccumulatingTimeStorage implements UnifiedStorage, TimeAccumulator 
      * Active persisted sessions keyed by player UUID.
      */
     private final ConcurrentMap<UUID, PersistedPlayerSession> onlineSessions = new ConcurrentHashMap<>();
+
+    /**
+     * Bounded locks that serialize persistence for a single player.
+     */
+    private final ReentrantLock[] sessionLocks = createSessionLocks();
 
     /**
      * Creates a new accumulating storage wrapper.
@@ -154,6 +169,41 @@ public class AccumulatingTimeStorage implements UnifiedStorage, TimeAccumulator 
     }
 
     @Override
+    public void openAfkPeriod(final UUID playerId, final String playerName, final String server, final String world,
+                              final Instant startedAt) throws StorageException {
+        statisticsStorage().openAfkPeriod(playerId, playerName, server, world, startedAt);
+    }
+
+    @Override
+    public void closeAfkPeriod(final UUID playerId, final Instant endedAt, final AfkPeriodEndReason reason)
+            throws StorageException {
+        statisticsStorage().closeAfkPeriod(playerId, endedAt, reason);
+    }
+
+    @Override
+    public int recoverOpenAfkPeriods(final Instant endedAt) throws StorageException {
+        return statisticsStorage().recoverOpenAfkPeriods(endedAt);
+    }
+
+    @Override
+    public List<AfkPeriod> getAfkPeriods(final TimeRange range, final TimeScope scope) throws StorageException {
+        return statisticsStorage().getAfkPeriods(range, scope);
+    }
+
+    @Override
+    public StatisticsSnapshot getStatistics(final StatisticsRequest request) throws StorageException {
+        checkpointActiveSessions(request.observedAt().toEpochMilli());
+        return statisticsStorage().getStatistics(request);
+    }
+
+    private StatisticsStorage statisticsStorage() throws StorageException {
+        if (storage instanceof final StatisticsStorage statistics) {
+            return statistics;
+        }
+        throw new StorageException("Statistics are not supported by the active storage");
+    }
+
+    @Override
     public Map<String, ?> getAllTimeEntries() throws StorageException {
         return storage.getAllTimeEntries();
     }
@@ -194,69 +244,85 @@ public class AccumulatingTimeStorage implements UnifiedStorage, TimeAccumulator 
     }
 
     @Override
-    public void startAccumulating(final UUID uuid, final String name, final String server, final String world, final long when)
+    public void startAccumulating(final UUID uuid, final String name, final String server,
+                                  final String world, final long when)
             throws StorageException {
-        final PlayerSessionContext context = new PlayerSessionContext(uuid, name, server, world, when);
-        final long sessionId = storage.startSession(context, TimeEntryReason.PLAYER_JOIN);
-        final PersistedPlayerSession previous = onlineSessions.put(uuid, new PersistedPlayerSession(sessionId, context, when));
-        if (previous != null) {
-            storage.updateSession(previous.sessionId(), when, switchReason(previous.context(), context));
-        }
+        withSessionLock(uuid, () -> {
+            final PlayerSessionContext context = new PlayerSessionContext(uuid, name, server, world, when);
+            final long sessionId = storage.startSession(context, TimeEntryReason.PLAYER_JOIN);
+            final PersistedPlayerSession previous = onlineSessions.put(uuid, new PersistedPlayerSession(sessionId, context, when));
+            if (previous != null) {
+                storage.updateSession(previous.sessionId(), when, switchReason(previous.context(), context));
+            }
+        });
     }
 
     @Override
-    public void stopAccumulatingAndSaveOnlineTime(final UUID uuid, final long when, final TimeEntryReason reason)
+    public void stopAccumulatingAndSaveOnlineTime(final UUID uuid, final long when,
+                                                  final TimeEntryReason reason)
             throws StorageException {
-        final PersistedPlayerSession session = onlineSessions.remove(uuid);
-        if (session != null) {
-            storage.updateSession(session.sessionId(), when, reason);
-        }
+        withSessionLock(uuid, () -> {
+            final PersistedPlayerSession session = onlineSessions.remove(uuid);
+            if (session != null) {
+                storage.updateSession(session.sessionId(), when, reason);
+            }
+        });
     }
 
     @Override
-    public void switchContext(final UUID uuid, final String name, final String server, final String world, final long when)
+    public void switchContext(final UUID uuid, final String name, final String server,
+                              final String world, final long when)
             throws StorageException {
-        final PlayerSessionContext next = new PlayerSessionContext(uuid, name, server, world, when);
-        final PersistedPlayerSession current = onlineSessions.get(uuid);
-        if (current != null
-                && current.context().server().equals(server)
-                && current.context().world().equals(world)) {
-            return;
-        }
-        final long sessionId = storage.startSession(next, TimeEntryReason.PLAYER_JOIN);
-        final PersistedPlayerSession previous = onlineSessions.put(uuid, new PersistedPlayerSession(sessionId, next, when));
-        if (previous != null) {
-            storage.updateSession(previous.sessionId(), when, switchReason(previous.context(), next));
-        }
+        withSessionLock(uuid, () -> {
+            final PlayerSessionContext next = new PlayerSessionContext(uuid, name, server, world, when);
+            final PersistedPlayerSession current = onlineSessions.get(uuid);
+            if (current != null
+                    && current.context().server().equals(server)
+                    && current.context().world().equals(world)) {
+                return;
+            }
+            final long sessionId = storage.startSession(next, TimeEntryReason.PLAYER_JOIN);
+            final PersistedPlayerSession previous = onlineSessions.put(uuid, new PersistedPlayerSession(sessionId, next, when));
+            if (previous != null) {
+                storage.updateSession(previous.sessionId(), when, switchReason(previous.context(), next));
+            }
+        });
     }
 
     @Override
-    public void updateWorldContext(final UUID uuid, final String world, final long observedAtMs) throws StorageException {
-        final PersistedPlayerSession current = onlineSessions.get(uuid);
-        if (current == null || current.context().world().equals(world) || observedAtMs < current.context().startedAtMs()) {
-            return;
-        }
-        final PlayerSessionContext previous = current.context();
-        final PlayerSessionContext updated = new PlayerSessionContext(previous.uuid(), previous.name(),
-                previous.server(), world, previous.startedAtMs());
-        if (onlineSessions.replace(uuid, current, new PersistedPlayerSession(current.sessionId(), updated, current.lastPersistedAtMs()))) {
-            storage.updateSessionWorld(current.sessionId(), updated.server(), updated.world());
-        }
+    public void updateWorldContext(final UUID uuid, final String world, final long observedAtMs)
+            throws StorageException {
+        withSessionLock(uuid, () -> {
+            final PersistedPlayerSession current = onlineSessions.get(uuid);
+            if (current == null || current.context().world().equals(world) || observedAtMs < current.context().startedAtMs()) {
+                return;
+            }
+            final PlayerSessionContext previous = current.context();
+            final PlayerSessionContext updated = new PlayerSessionContext(previous.uuid(), previous.name(),
+                    previous.server(), world, previous.startedAtMs());
+            if (onlineSessions.replace(uuid, current,
+                    new PersistedPlayerSession(current.sessionId(), updated, current.lastPersistedAtMs()))) {
+                storage.updateSessionWorld(current.sessionId(), updated.server(), updated.world());
+            }
+        });
     }
 
     @Override
-    public void switchWorldContext(final UUID uuid, final String world, final long observedAtMs) throws StorageException {
-        final PersistedPlayerSession current = onlineSessions.get(uuid);
-        if (current == null || current.context().world().equals(world) || observedAtMs < current.context().startedAtMs()) {
-            return;
-        }
-        final PlayerSessionContext previous = current.context();
-        final PlayerSessionContext next = new PlayerSessionContext(previous.uuid(), previous.name(),
-                previous.server(), world, observedAtMs);
-        final long sessionId = storage.startSession(next, TimeEntryReason.PLAYER_JOIN);
-        if (onlineSessions.replace(uuid, current, new PersistedPlayerSession(sessionId, next, observedAtMs))) {
-            storage.updateSession(current.sessionId(), observedAtMs, TimeEntryReason.WORLD_SWITCH);
-        }
+    public void switchWorldContext(final UUID uuid, final String world, final long observedAtMs)
+            throws StorageException {
+        withSessionLock(uuid, () -> {
+            final PersistedPlayerSession current = onlineSessions.get(uuid);
+            if (current == null || current.context().world().equals(world) || observedAtMs < current.context().startedAtMs()) {
+                return;
+            }
+            final PlayerSessionContext previous = current.context();
+            final PlayerSessionContext next = new PlayerSessionContext(previous.uuid(), previous.name(),
+                    previous.server(), world, observedAtMs);
+            final long sessionId = storage.startSession(next, TimeEntryReason.PLAYER_JOIN);
+            if (onlineSessions.replace(uuid, current, new PersistedPlayerSession(sessionId, next, observedAtMs))) {
+                storage.updateSession(current.sessionId(), observedAtMs, TimeEntryReason.WORLD_SWITCH);
+            }
+        });
     }
 
     @Override
@@ -265,14 +331,13 @@ public class AccumulatingTimeStorage implements UnifiedStorage, TimeAccumulator 
             return;
         }
         log.debug("Flushing online time cache");
-        final long now = System.currentTimeMillis();
+        checkpointActiveSessions(System.currentTimeMillis());
+    }
+
+    private void checkpointActiveSessions(final long observedAtMs) throws StorageException {
         for (final Map.Entry<UUID, PersistedPlayerSession> entry : onlineSessions.entrySet()) {
             final UUID uuid = entry.getKey();
-            final PersistedPlayerSession current = entry.getValue();
-            if (current != null && onlineSessions.replace(uuid, current,
-                    new PersistedPlayerSession(current.sessionId(), current.context(), now))) {
-                storage.updateSession(current.sessionId(), now, TimeEntryReason.AUTO_FLUSH);
-            }
+            withSessionLock(uuid, () -> checkpointActiveSession(uuid, observedAtMs));
         }
     }
 
@@ -289,10 +354,12 @@ public class AccumulatingTimeStorage implements UnifiedStorage, TimeAccumulator 
             if (!onlineSessions.isEmpty()) {
                 final long now = System.currentTimeMillis();
                 for (final UUID uuid : List.copyOf(onlineSessions.keySet())) {
-                    final PersistedPlayerSession session = onlineSessions.remove(uuid);
-                    if (session != null) {
-                        storage.updateSession(session.sessionId(), now, TimeEntryReason.SHUTDOWN_FLUSH);
-                    }
+                    withSessionLock(uuid, () -> {
+                        final PersistedPlayerSession session = onlineSessions.remove(uuid);
+                        if (session != null) {
+                            storage.updateSession(session.sessionId(), now, TimeEntryReason.SHUTDOWN_FLUSH);
+                        }
+                    });
                 }
             }
         } finally {
@@ -305,5 +372,43 @@ public class AccumulatingTimeStorage implements UnifiedStorage, TimeAccumulator 
             return TimeEntryReason.SERVER_SWITCH;
         }
         return TimeEntryReason.WORLD_SWITCH;
+    }
+
+    private void checkpointActiveSession(final UUID uuid, final long observedAtMs) throws StorageException {
+        final PersistedPlayerSession current = onlineSessions.get(uuid);
+        if (current != null && observedAtMs > current.lastPersistedAtMs()
+                && onlineSessions.replace(uuid, current,
+                new PersistedPlayerSession(current.sessionId(), current.context(), observedAtMs))) {
+            storage.updateSession(current.sessionId(), observedAtMs, TimeEntryReason.AUTO_FLUSH);
+        }
+    }
+
+    private void withSessionLock(final UUID uuid, final StorageAction action) throws StorageException {
+        final ReentrantLock lock = sessionLocks[(uuid.hashCode() & Integer.MAX_VALUE) % SESSION_LOCK_STRIPES];
+        lock.lock();
+        try {
+            action.run();
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    private ReentrantLock[] createSessionLocks() {
+        final ReentrantLock[] locks = new ReentrantLock[SESSION_LOCK_STRIPES];
+        for (int index = 0; index < locks.length; index++) {
+            locks[index] = new ReentrantLock();
+        }
+        return locks;
+    }
+
+    /**
+     * Action that may perform a storage operation while holding a session lock.
+     */
+    @FunctionalInterface
+    private interface StorageAction {
+        /**
+         * Performs the storage operation.
+         */
+        void run() throws StorageException;
     }
 }

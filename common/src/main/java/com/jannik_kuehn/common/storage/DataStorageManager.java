@@ -7,6 +7,7 @@ import com.jannik_kuehn.common.exception.StorageException;
 import com.jannik_kuehn.common.scheduler.PluginTask;
 import com.jannik_kuehn.common.storage.contract.AccumulatingTimeStorage;
 import com.jannik_kuehn.common.storage.contract.AdminStorageMaintenance;
+import com.jannik_kuehn.common.storage.contract.StatisticsStorage;
 import com.jannik_kuehn.common.storage.contract.TimeAccumulator;
 import com.jannik_kuehn.common.storage.contract.UnifiedStorage;
 import com.jannik_kuehn.common.storage.database.DatabaseStorage;
@@ -20,6 +21,7 @@ import com.jannik_kuehn.common.storage.database.table.WorldTable;
 import com.jannik_kuehn.common.storage.model.StorageMode;
 
 import java.io.File;
+import java.time.Instant;
 import java.util.Locale;
 import java.util.Optional;
 
@@ -188,6 +190,13 @@ public class DataStorageManager {
      * If you want to load the custom storages again, you have to inject them again.
      */
     public void closeStorages() {
+        getStatisticsStorage().ifPresent(statistics -> {
+            try {
+                statistics.recoverOpenAfkPeriods(Instant.now());
+            } catch (final StorageException e) {
+                log.error("Could not close open AFK periods during shutdown", e);
+            }
+        });
         if (accumulator != null) {
             try {
                 accumulator.close();
@@ -229,6 +238,11 @@ public class DataStorageManager {
         this.storage = nameAndTimeStorage;
         this.runtimeStorage = accumulatingStorage;
         this.accumulator = accumulatingStorage;
+        try {
+            nameAndTimeStorage.recoverOpenAfkPeriods(Instant.now());
+        } catch (final StorageException ex) {
+            log.error("Could not recover stale AFK periods as SHUTDOWN", ex);
+        }
         runStorageCleanupIfEnabled();
     }
 
@@ -262,6 +276,11 @@ public class DataStorageManager {
      */
     public TimeAccumulator getAccumulator() {
         return accumulator;
+    }
+
+    /** Returns canonical statistics/AFK storage when supported. */
+    public Optional<StatisticsStorage> getStatisticsStorage() {
+        return getStorage() instanceof final StatisticsStorage statistics ? Optional.of(statistics) : Optional.empty();
     }
 
     /**
@@ -314,7 +333,7 @@ public class DataStorageManager {
         final WorldTable worldTable = new WorldTable(dbStorage.getTablePrefix() + "_world", serverTable);
         final TimeTable timeTable = new TimeTable(dbStorage.getTablePrefix() + "_time", playerTable, dbStorage.getDialect());
         final ManualAdjustmentTable adjustmentTable = new ManualAdjustmentTable(dbStorage.getTablePrefix() + "_time_adjustment", playerTable);
-        return new UnifiedDatabaseStorage(dbStorage.getProvider(), playerTable,
+        return new UnifiedDatabaseStorage(dbStorage.getProvider(), dbStorage.getTablePrefix(), playerTable,
                 serverTable, worldTable, timeTable, adjustmentTable, dbStorage.getDialect());
     }
 

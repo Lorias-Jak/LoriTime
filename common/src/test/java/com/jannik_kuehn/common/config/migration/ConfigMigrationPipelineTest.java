@@ -90,7 +90,7 @@ class ConfigMigrationPipelineTest {
                         "message.nopermission", "legacy permission",
                         "message.customPlugin.custom_key", "custom value")));
         final StructuredConfigurationDocument template = new StructuredConfigurationDocument(Map.of(
-                "schema_version", 2,
+                "schema_version", 3,
                 "messages", Map.of(
                         "message.noPermission", "default permission")));
 
@@ -101,11 +101,11 @@ class ConfigMigrationPipelineTest {
 
         assertEquals("legacy permission", resultMessages.get("message.nopermission"));
         assertEquals("custom value", resultMessages.get("message.customPlugin.custom_key"));
-        assertEquals(2, result.document().get("schema_version"));
+        assertEquals(3, result.document().get("schema_version"));
         assertNotNull(result.document().get("messages.message.command.loritimeadmin.transfer.warning"));
         assertNotNull(result.document().get("messages.message.command.loritimeadmin.deleteHistory.warning"));
         assertEquals("default permission", mergedMessages.get("message.noPermission"));
-        assertEquals(2, merged.get("schema_version"));
+        assertEquals(3, merged.get("schema_version"));
     }
 
     @Test
@@ -124,7 +124,7 @@ class ConfigMigrationPipelineTest {
     }
 
     @Test
-    void loriTimeConfigMigrationMovesLegacyV1ValuesToV2PathsAndStandardizesTablePrefix() {
+    void loriTimeConfigMigrationMovesLegacyV1ValuesToCurrentPathsAndStandardizesTablePrefix() {
         final StructuredConfigurationDocument document = new StructuredConfigurationDocument(Map.of(
                 "general", Map.of(
                         "storage", "yml",
@@ -149,7 +149,7 @@ class ConfigMigrationPipelineTest {
         final ConfigMigrationResult result = new ConfigMigrationPipeline(ConfigSchema.loriTimeConfig()).migrate(document);
 
         assertTrue(result.changed());
-        assertEquals(2, document.get(ConfigSchema.VERSION_PATH));
+        assertEquals(3, document.get(ConfigSchema.VERSION_PATH));
         assertEquals("sqlite", document.get("storageMethod"));
         assertEquals(true, document.get("storageMigration.legacyFlatFileImport"));
         assertEquals(false, document.get("updater.checkForUpdates"));
@@ -166,5 +166,80 @@ class ConfigMigrationPipelineTest {
         assertNull(document.get("general.storage"));
         assertNull(document.get("general.checkForUpdates"));
         assertNull(document.get("mysql"));
+    }
+
+    @Test
+    void versionTwoConfigMigrationAddsStatisticsDefaultsWithoutReplacingCustomValues() {
+        final StructuredConfigurationDocument document = new StructuredConfigurationDocument(Map.of(
+                ConfigSchema.VERSION_PATH, 2,
+                "stats", Map.of("default-range", "14d")));
+
+        final ConfigMigrationResult result = new ConfigMigrationPipeline(ConfigSchema.loriTimeConfig()).migrate(document);
+
+        assertTrue(result.changed());
+        assertEquals(3, document.get(ConfigSchema.VERSION_PATH));
+        assertEquals("14d", document.get("stats.default-range"));
+        assertEquals("3m", document.get("stats.bounce-threshold"));
+        assertEquals("system", document.get("stats.calendar-time-zone"));
+    }
+
+    @Test
+    void versionThreeConfigTemplateAddsCalendarTimezoneWithoutReplacingCustomValue() {
+        final StructuredConfigurationDocument template = new StructuredConfigurationDocument(Map.of(
+                ConfigSchema.VERSION_PATH, 3, "stats", Map.of("calendar-time-zone", "system")));
+        final StructuredConfigurationDocument defaults = new StructuredConfigurationDocument(Map.of(
+                ConfigSchema.VERSION_PATH, 3));
+        final StructuredConfigurationDocument custom = new StructuredConfigurationDocument(Map.of(
+                ConfigSchema.VERSION_PATH, 3, "stats", Map.of("calendar-time-zone", "Europe/Berlin")));
+
+        final StructuredConfigurationDocument mergedDefaults = new ConfigTemplateMerger().merge(template, defaults);
+        final StructuredConfigurationDocument mergedCustom = new ConfigTemplateMerger().merge(template, custom);
+
+        assertEquals("system", mergedDefaults.get("stats.calendar-time-zone"));
+        assertEquals("Europe/Berlin", mergedCustom.get("stats.calendar-time-zone"));
+        assertEquals(3, mergedDefaults.get(ConfigSchema.VERSION_PATH));
+        assertEquals(3, mergedCustom.get(ConfigSchema.VERSION_PATH));
+    }
+
+    @Test
+    void versionTwoLocalizationMigrationAddsStatisticsMessagesWithoutReplacingCustomValues() {
+        final StructuredConfigurationDocument document = new StructuredConfigurationDocument(Map.of(
+                "schema_version", 2,
+                "locale", "de-de",
+                "messages", Map.of("message", Map.of("command", Map.of("stats", Map.of(
+                        "error", "custom statistics error"))))));
+
+        final ConfigMigrationResult result = new ConfigMigrationPipeline(ConfigSchema.localization()).migrate(document);
+
+        assertTrue(result.changed());
+        assertEquals(3, document.get("schema_version"));
+        assertEquals("custom statistics error", document.get("messages.message.command.stats.error"));
+        assertNotNull(document.get("messages.message.command.stats.commandUsage"));
+        assertNotNull(document.get("messages.message.command.stats.overview"));
+        assertNotNull(document.get("messages.message.command.stats.users"));
+        assertNotNull(document.get("messages.message.command.stats.sessions"));
+        assertNotNull(document.get("messages.message.command.stats.usage"));
+        assertNotNull(document.get("messages.message.command.stats.top"));
+        assertNotNull(document.get("messages.message.command.stats.afk"));
+        assertNotNull(document.get("messages.message.command.stats.retention"));
+        assertNotNull(document.get("messages.message.command.stats.unsupported"));
+    }
+
+    @Test
+    void versionTwoChineseLocalizationUsesEnglishStatisticsMessages() {
+        final StructuredConfigurationDocument english = new StructuredConfigurationDocument(Map.of(
+                "schema_version", 2, "locale", "en-us"));
+        final StructuredConfigurationDocument chinese = new StructuredConfigurationDocument(Map.of(
+                "schema_version", 2, "locale", "zh-cn"));
+
+        new ConfigMigrationPipeline(ConfigSchema.localization()).migrate(english);
+        new ConfigMigrationPipeline(ConfigSchema.localization()).migrate(chinese);
+
+        assertEquals(3, chinese.get("schema_version"));
+        for (final String key : List.of("commandUsage", "unsupported", "error", "overview", "users", "sessions",
+                "usage", "top", "afk", "retention")) {
+            assertEquals(english.get("messages.message.command.stats." + key),
+                    chinese.get("messages.message.command.stats." + key));
+        }
     }
 }

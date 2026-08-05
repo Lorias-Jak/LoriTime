@@ -3,6 +3,7 @@ package com.jannik_kuehn.loritimevelocity.listener;
 import com.github.roleplaycauldron.spellbook.core.logger.WrappedLogger;
 import com.jannik_kuehn.common.LoriTimePlugin;
 import com.jannik_kuehn.common.exception.StorageException;
+import com.jannik_kuehn.common.storage.model.AfkPeriodEndReason;
 import com.jannik_kuehn.common.storage.model.SessionContextDefaults;
 import com.jannik_kuehn.common.storage.model.TimeEntryReason;
 import com.velocitypowered.api.event.Subscribe;
@@ -70,6 +71,8 @@ public class TimeAccumulatorVelocityListener {
             try {
                 final TimeEntryReason reason = loriTimePlugin.consumeAfkKick(uuid)
                         ? TimeEntryReason.PLAYER_AFK_KICK : TimeEntryReason.PLAYER_LEAVE;
+                loriTimePlugin.closeAfkPeriod(uuid, reason == TimeEntryReason.PLAYER_AFK_KICK
+                        ? AfkPeriodEndReason.KICKED : AfkPeriodEndReason.DISCONNECTED);
                 loriTimePlugin.getAccumulator().stopAccumulatingAndSaveOnlineTime(uuid, now, reason);
                 loriTimePlugin.getPlayerConverter().removePlayerFromCache(uuid);
             } catch (final StorageException ex) {

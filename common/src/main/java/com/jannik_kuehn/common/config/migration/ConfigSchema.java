@@ -69,7 +69,9 @@ public final class ConfigSchema {
      * @return LoriTime config schema
      */
     public static ConfigSchema loriTimeConfig() {
-        return new ConfigSchema(1, 2, List.of(ConfigSchemaConfigMigrations.legacySectionedConfig()));
+        return new ConfigSchema(1, 3, List.of(
+                ConfigSchemaConfigMigrations.legacySectionedConfig(),
+                ConfigSchemaConfigMigrations.statisticsDefaults()));
     }
 
     /**
@@ -78,8 +80,19 @@ public final class ConfigSchema {
      * @return localization schema
      */
     public static ConfigSchema localization() {
-        return new ConfigSchema(0, 2, "schema_version", List.of(
-                ConfigSchemaLocalizationMigrations.transferWarning()));
+        return new ConfigSchema(0, 3, "schema_version", List.of(
+                ConfigSchemaLocalizationMigrations.transferWarning(),
+                ConfigSchemaLocalizationMigrations.statisticsMessages()));
+    }
+
+    /**
+     * Returns the schema for bundled command aliases.
+     *
+     * @return commands schema
+     */
+    public static ConfigSchema commands() {
+        return new ConfigSchema(0, 1, "commandSchemaVersion", List.of(
+                ConfigSchemaCommandMigrations.statisticsCommandAliases()));
     }
 
     /**

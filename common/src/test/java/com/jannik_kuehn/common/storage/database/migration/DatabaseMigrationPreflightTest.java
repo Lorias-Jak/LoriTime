@@ -43,7 +43,7 @@ class DatabaseMigrationPreflightTest {
         migrate();
 
         try (Connection connection = openSqlite()) {
-            final DatabaseSnapshot expected = new DatabaseSnapshot(2, false, true, true, true, true, true,
+            final DatabaseSnapshot expected = new DatabaseSnapshot(3, false, true, true, true, true, true,
                     0, 0, 0, null, null, "global");
             assertEquals(expected, snapshot(connection), "versioned databases should use the update path");
         }
@@ -54,7 +54,7 @@ class DatabaseMigrationPreflightTest {
         migrate();
 
         try (Connection connection = openSqlite()) {
-            final DatabaseSnapshot expected = new DatabaseSnapshot(2, false, true, true, true, true, true,
+            final DatabaseSnapshot expected = new DatabaseSnapshot(3, false, true, true, true, true, true,
                     0, 0, 0, null, null, "global");
             assertEquals(expected, snapshot(connection), "fresh databases should run first startup schema creation");
         }
@@ -83,7 +83,7 @@ class DatabaseMigrationPreflightTest {
         migrate();
 
         try (Connection connection = openSqlite()) {
-            final DatabaseSnapshot expected = new DatabaseSnapshot(2, false, true, true, true, true, true,
+            final DatabaseSnapshot expected = new DatabaseSnapshot(3, false, true, true, true, true, true,
                     1, 0, 1, "LEGACY_IMPORT", "WORLD", "global");
             assertEquals(expected, snapshot(connection), "legacy v1 aggregate data should be imported into scoped storage");
         }

@@ -28,12 +28,15 @@ import com.jannik_kuehn.common.scheduler.PluginScheduler;
 import com.jannik_kuehn.common.storage.DataStorageManager;
 import com.jannik_kuehn.common.storage.StorageMigrationService;
 import com.jannik_kuehn.common.storage.contract.AdminStorageMaintenance;
+import com.jannik_kuehn.common.storage.contract.StatisticsStorage;
 import com.jannik_kuehn.common.storage.contract.TimeAccumulator;
 import com.jannik_kuehn.common.storage.contract.UnifiedStorage;
+import com.jannik_kuehn.common.storage.model.AfkPeriodEndReason;
 import com.jannik_kuehn.common.storage.model.StorageMode;
 import com.jannik_kuehn.common.utils.TimeParser;
 
 import java.io.File;
+import java.time.Instant;
 import java.time.InstantSource;
 import java.util.Collections;
 import java.util.HashSet;
@@ -574,6 +577,22 @@ public class LoriTimePlugin {
      */
     public TimeAccumulator getAccumulator() {
         return dataStorageManager.getAccumulator();
+    }
+
+    /** Returns statistics and AFK-history storage on canonical runtimes. */
+    public Optional<StatisticsStorage> getStatisticsStorage() {
+        return dataStorageManager.getStatisticsStorage();
+    }
+
+    /** Closes a canonical AFK period if one is open. */
+    public void closeAfkPeriod(final UUID playerId, final AfkPeriodEndReason reason) {
+        getStatisticsStorage().ifPresent(storage -> {
+            try {
+                storage.closeAfkPeriod(playerId, Instant.now(), reason);
+            } catch (final StorageException ex) {
+                log.error("Could not close AFK period for " + playerId + " as " + reason, ex);
+            }
+        });
     }
 
     /**

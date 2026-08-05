@@ -32,6 +32,20 @@ server:
   # Proxy platforms derive their server context from the connected backend server.
   name: 'default'
 
+##########
+# Stats  #
+##########
+stats:
+  # Range used by /ltstats when neither time:<range> nor calendar:<period> is supplied.
+  # Supports rolling values such as time:1d and calendar values such as calendar:today.
+  default-range: 'calendar:today'
+  # A completed network session shorter than this counts as a bounce.
+  bounce-threshold: '3m'
+  # Timezone used for all calendar ranges, including completed slices such as calendar:2d-3d.
+  # Use 'system' for the canonical storage owner's JVM/OS timezone.
+  # For predictable international or multi-node setups, use an IANA id such as Europe/Berlin, America/New_York, or UTC.
+  calendar-time-zone: 'system'
+
 ###########
 # Updater #
 ###########
@@ -214,5 +228,5 @@ integrations:
 ################
 # DO NOT TOUCH #
 ################
-configSchemaVersion: 2
+configSchemaVersion: 3
 

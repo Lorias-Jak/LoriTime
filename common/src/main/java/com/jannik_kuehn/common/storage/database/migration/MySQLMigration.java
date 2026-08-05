@@ -30,8 +30,30 @@ public final class MySQLMigration {
         final VersionListBuilder builder = new VersionListBuilder();
         addMigrationOne(builder, tablePrefix);
         addMigrationTwo(builder, tablePrefix);
+        addMigrationThree(builder, tablePrefix);
 
         return builder.finish();
+    }
+
+    private static void addMigrationThree(final VersionListBuilder builder, final String tablePrefix) {
+        builder.version(3)
+                .addUnconditionalQuery("CREATE TABLE IF NOT EXISTS `" + tablePrefix + "_afk_period` ("
+                        + "`id` BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,"
+                        + "`player_id` BIGINT NOT NULL,"
+                        + "`world_id` BIGINT NOT NULL,"
+                        + "`started_at` DATETIME(3) NOT NULL,"
+                        + "`ended_at` DATETIME(3) NULL,"
+                        + "`end_reason` VARCHAR(32) NULL,"
+                        + "INDEX `idx_afk_player_open` (`player_id`, `ended_at`),"
+                        + "INDEX `idx_afk_range` (`started_at`, `ended_at`),"
+                        + "INDEX `idx_afk_world` (`world_id`),"
+                        + "CONSTRAINT `fk_afk_player` FOREIGN KEY (`player_id`) REFERENCES `"
+                        + tablePrefix + "_player`(`id`) ON DELETE CASCADE,"
+                        + "CONSTRAINT `fk_afk_world` FOREIGN KEY (`world_id`) REFERENCES `"
+                        + tablePrefix + "_world`(`id`) ON DELETE CASCADE) ENGINE InnoDB")
+                .addUnconditionalQuery("CREATE INDEX `idx_time_range` ON `" + tablePrefix
+                        + "_time` (`join_time`, `leave_time`)")
+                .finishVersion();
     }
 
     private static void addMigrationOne(final VersionListBuilder builder, final String tablePrefix) {

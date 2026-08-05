@@ -8,7 +8,7 @@ import java.io.File;
 import java.nio.file.Files;
 import java.util.logging.Logger;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 @SuppressWarnings({"PMD.UnitTestAssertionsShouldIncludeMessage", "PMD.UnitTestContainsTooManyAsserts",
         "PMD.SignatureDeclareThrowsException"})
@@ -113,7 +113,7 @@ class LocalizationTest {
         final File languageFolder = new File(dataFolder, "language");
         Files.createDirectories(languageFolder.toPath());
         Files.writeString(new File(languageFolder, locale + ".yml").toPath(), """
-                schema_version: 2
+                schema_version: 3
                 locale: '%s'
                 prefix: '<gray>LoriTime '
                 messages:
@@ -127,7 +127,7 @@ class LocalizationTest {
         final File languageFolder = new File(dataFolder, "language");
         Files.createDirectories(languageFolder.toPath());
         Files.writeString(new File(languageFolder, locale + ".yml").toPath(), """
-                schema_version: 2
+                schema_version: 3
                 locale: '%s'
                 prefix: '<gray>LoriTime '
                 messages:

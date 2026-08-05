@@ -46,7 +46,8 @@ final class ConfigSchemaConfigMigrations {
     private ConfigSchemaConfigMigrations() {
     }
 
-    /* default */ static ConfigMigration legacySectionedConfig() {
+    /* default */
+    static ConfigMigration legacySectionedConfig() {
         return ConfigMigration.from(1)
                 .operation(ConfigSchemaConfigMigrations::moveLegacyStorageMethod)
                 .move("general.checkForUpdates", "updater.checkForUpdates")
@@ -58,6 +59,15 @@ final class ConfigSchemaConfigMigrations {
                 .operation(ConfigSchemaConfigMigrations::standardizeTablePrefix)
                 .operation(ConfigSchemaConfigMigrations::moveLegacyMultiSetupMode)
                 .delete("mysql")
+                .build();
+    }
+
+    /* default */
+    static ConfigMigration statisticsDefaults() {
+        return ConfigMigration.from(2)
+                .add("stats.default-range", "calendar:today")
+                .add("stats.bounce-threshold", "3m")
+                .add("stats.calendar-time-zone", "system")
                 .build();
     }
 

@@ -195,8 +195,9 @@ public class StorageMigrationService {
         final WorldTable worldTable = new WorldTable(databaseStorage.getTablePrefix() + "_world", serverTable);
         final TimeTable timeTable = new TimeTable(databaseStorage.getTablePrefix() + "_time", playerTable, databaseStorage.getDialect());
         final ManualAdjustmentTable adjustmentTable = new ManualAdjustmentTable(databaseStorage.getTablePrefix() + "_time_adjustment", playerTable);
-        final UnifiedDatabaseStorage storage = new UnifiedDatabaseStorage(
-                databaseStorage.getProvider(), playerTable, serverTable, worldTable, timeTable, adjustmentTable, databaseStorage.getDialect());
+        final UnifiedDatabaseStorage storage = new UnifiedDatabaseStorage(databaseStorage.getProvider(),
+                databaseStorage.getTablePrefix(), playerTable, serverTable, worldTable, timeTable, adjustmentTable,
+                databaseStorage.getDialect());
 
         importNames(storage, namesFile);
         importTimes(storage, timeFile);

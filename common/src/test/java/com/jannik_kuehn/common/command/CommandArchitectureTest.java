@@ -86,7 +86,7 @@ class CommandArchitectureTest {
                 .map(CommonCommand::getCommandName)
                 .toList();
 
-        assertEquals(List.of("admin", "time", "top", "modify"), commandNames,
+        assertEquals(List.of("admin", "time", "top", "stats", "modify"), commandNames,
                 "Expected backend canonical commands");
     }
 
@@ -98,7 +98,7 @@ class CommandArchitectureTest {
                 .map(CommonCommand::getCommandName)
                 .toList();
 
-        assertEquals(List.of("admin", "time", "top", "modify"), commandNames, "Expected proxy commands");
+        assertEquals(List.of("admin", "time", "top", "stats", "modify"), commandNames, "Expected proxy commands");
     }
 
     @Test

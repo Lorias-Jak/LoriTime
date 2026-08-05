@@ -35,6 +35,11 @@ public class FileManager {
     private static final String CONFIG_FILE_NAME = "config.yml";
 
     /**
+     * Name of the command aliases resource.
+     */
+    private static final String COMMANDS_FILE_NAME = "commands.yml";
+
+    /**
      * Folder for localization files.
      */
     private static final String LANGUAGE_FOLDER = "language";
@@ -275,6 +280,9 @@ public class FileManager {
     private ConfigSchema schemaForResource(final String resourceFileName) {
         if (CONFIG_FILE_NAME.equals(resourceFileName)) {
             return ConfigSchema.loriTimeConfig();
+        }
+        if (COMMANDS_FILE_NAME.equals(resourceFileName)) {
+            return ConfigSchema.commands();
         }
         if (resourceFileName.startsWith(LANGUAGE_FOLDER + "/") && resourceFileName.endsWith(".yml")) {
             return ConfigSchema.localization();

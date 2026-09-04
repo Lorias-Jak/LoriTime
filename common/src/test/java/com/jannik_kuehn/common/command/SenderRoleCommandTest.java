@@ -1066,7 +1066,6 @@ class SenderRoleCommandTest {
         return maintenance;
     }
 
-    @SuppressWarnings("PMD.CloseResource")
     private AdminStorageMaintenance prepareStorageTypeTransfer(final CommandContext context,
                                                                final CommonSender sender,
                                                                final String sourceMethod) {

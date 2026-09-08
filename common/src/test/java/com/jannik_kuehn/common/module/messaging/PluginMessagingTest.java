@@ -27,7 +27,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
-@SuppressWarnings({"PMD.CloseResource", "PMD.UnitTestContainsTooManyAsserts"})
+@SuppressWarnings({"PMD.UnitTestContainsTooManyAsserts"})
 class PluginMessagingTest {
 
     private static final UUID PLAYER = UUID.fromString("44174cf6-e76c-4994-899c-3387284ecd62");

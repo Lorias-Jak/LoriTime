@@ -24,6 +24,7 @@ import java.util.List;
 /**
  * Bukkit command adapter for shared LoriTime commands.
  */
+@SuppressWarnings("PMD.UnnecessaryInterfaceDeclaration")
 public class PaperCommand implements CommandExecutor, TabExecutor {
 
     /**
